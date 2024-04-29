@@ -1,0 +1,27 @@
+[project]
+name = "Cashd"
+authors = [
+    {name = "Vitor F. Lins", email = "vflins@live.com"},
+]
+description = "Manage a simple cash flow operations on different accounts locally."
+requires-python = ">=3.8"
+keywords = ["download", "ftp"]
+license = {file = "LICENSE"}
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+version = "0.1.0"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "--cov=ftp_download"
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["app"]
+namespaces = false
