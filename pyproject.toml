@@ -1,11 +1,11 @@
 [project]
-name = "Cashd"
+name = "cashd"
 authors = [
     {name = "Vitor F. Lins", email = "vflins@live.com"},
 ]
 description = "Manage a simple cash flow operations on different accounts locally."
 requires-python = ">=3.8"
-keywords = ["download", "ftp"]
+keywords = ["cash-flow", "ftp"]
 license = {file = "LICENSE"}
 readme = "README.md"
 classifiers = [
@@ -13,10 +13,20 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 version = "0.1.0"
+dependencies = [
+    "taipy==3.1.0",
+    "SQLAlchemy==2.0.25",
+    "pywebview==5.0.5",
+    "phonenumbers==8.13.31",
+    "pandas==2.2.0"
+]
 
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project.scripts]
+cashd = "app.scripts.startup:run"
 
 [tool.pytest.ini_options]
 addopts = "--cov=ftp_download"
