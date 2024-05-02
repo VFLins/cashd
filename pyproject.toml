@@ -26,13 +26,12 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-cashd-window = "startup:window"
-cashd-serve = "startup:browser"
+cashd-window = "cashd.startup:window"
 
 [tool.pytest.ini_options]
 addopts = "--cov=app"
 testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
-where = ["app"]
+where = ["src"]
 namespaces = true
