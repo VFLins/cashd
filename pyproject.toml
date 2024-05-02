@@ -26,10 +26,9 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-cashd-window = "cashd.startup:window"
+cashd = "cashd.startup:window"
 
 [tool.pytest.ini_options]
-addopts = "--cov=app"
 testpaths = ["tests"]
 
 [tool.setuptools.packages.find]

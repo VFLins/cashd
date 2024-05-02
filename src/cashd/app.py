@@ -315,6 +315,7 @@ dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
 dial_transac_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_TRANSAC)
 dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
+
 def start_cashd(with_webview: bool = False):
     port = 5000
 
@@ -327,7 +328,7 @@ def start_cashd(with_webview: bool = False):
         if not porta_esta_ocupada():
             app.run(
                 title="Cashd",
-                run_browser=False,
+                run_browser=not with_webview,
                 dark_mode=False,
                 stylekit={
                     "color_primary": "#478eff",
@@ -354,4 +355,3 @@ def start_cashd(with_webview: bool = False):
     else:
         run_taipy_gui()
 
-start_cashd(with_webview=True)
