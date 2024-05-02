@@ -1,5 +1,4 @@
-from data import db
-import backup
+from cashd import db, backup
 from cashd.pages import transac, contas, analise, configs, dialogo 
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder
@@ -291,69 +290,68 @@ RAIZ = """
 """
 
 
-if __name__ == "__main__":
-    paginas = {
-        "/": RAIZ,
-        "adicionar_transacao": transac.PG_ADICIONAR_TRANSAC,
-        "registro_de_contas": contas.PG_REGISTRO_CONTAS,
-        "historico_transacoes": transac.PG_HIST_TRANSAC,
-        "criar_uma_conta": contas.PG_CRIAR_CONTA,
-        "analise": analise.GRAFICO_ENTRADAS_ABAT,
-        "controles_do_programa": configs.CONTROLES
-        }
+paginas = {
+    "/": RAIZ,
+    "adicionar_transacao": transac.PG_ADICIONAR_TRANSAC,
+    "registro_de_contas": contas.PG_REGISTRO_CONTAS,
+    "historico_transacoes": transac.PG_HIST_TRANSAC,
+    "criar_uma_conta": contas.PG_CRIAR_CONTA,
+    "analise": analise.GRAFICO_ENTRADAS_ABAT,
+    "controles_do_programa": configs.CONTROLES
+    }
 
-    app = Gui(pages=paginas, css_file="__main__.css")
+app = Gui(pages=paginas, css_file="__main__.css")
 
-    elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
-    elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
-    elem_transac_hist = Gui.add_partial(app, transac.ELEMENTO_HIST)
+elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
+elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
+elem_transac_hist = Gui.add_partial(app, transac.ELEMENTO_HIST)
 
-    elem_conta_form = Gui.add_partial(app, contas.ELEMENTO_FORM)
-    elem_conta_regs = Gui.add_partial(app, contas.ELEMENTO_REGS)
+elem_conta_form = Gui.add_partial(app, contas.ELEMENTO_FORM)
+elem_conta_regs = Gui.add_partial(app, contas.ELEMENTO_REGS)
 
-    dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
-    dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
-    dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
-    dial_transac_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_TRANSAC)
-    dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
+dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
+dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
+dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
+dial_transac_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_TRANSAC)
+dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
-    def start_cashd(with_webview: bool = False):
-        port = 5000
+def start_cashd(with_webview: bool = False):
+    port = 5000
 
-        # https://stackoverflow.com/questions/2470971/fast-way-to-test-if-a-port-is-in-use-using-python
-        def porta_esta_ocupada() -> bool:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                return s.connect_ex(('localhost', port)) == 0
+    # https://stackoverflow.com/questions/2470971/fast-way-to-test-if-a-port-is-in-use-using-python
+    def porta_esta_ocupada() -> bool:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(('localhost', port)) == 0
 
-        def run_taipy_gui():
-            if not porta_esta_ocupada():
-                app.run(
-                    title="Cashd",
-                    run_browser=False,
-                    dark_mode=False,
-                    stylekit={
-                        "color_primary": "#478eff",
-                        "color_background_light": "#ffffff"},
-                    run_server=True,
-                    port=port
-                )
+    def run_taipy_gui():
+        if not porta_esta_ocupada():
+            app.run(
+                title="Cashd",
+                run_browser=False,
+                dark_mode=False,
+                stylekit={
+                    "color_primary": "#478eff",
+                    "color_background_light": "#ffffff"},
+                run_server=True,
+                port=port
+            )
 
-        if with_webview:
-            taipy_thread = threading.Thread(target=run_taipy_gui)
-            taipy_thread.start()
+    if with_webview:
+        taipy_thread = threading.Thread(target=run_taipy_gui)
+        taipy_thread.start()
 
-            global window
-            window = webview.create_window(
-                title="Cashd", 
-                url=f"http://localhost:{port}", 
-                frameless=True,
-                maximized=maximizado,
-                easy_drag=False,
-                min_size=(900, 600))
+        global window
+        window = webview.create_window(
+            title="Cashd", 
+            url=f"http://localhost:{port}", 
+            frameless=True,
+            maximized=maximizado,
+            easy_drag=False,
+            min_size=(900, 600))
 
-            webview.start()
-        
-        else:
-            run_taipy_gui()
+        webview.start()
     
-    start_cashd(with_webview=True)
+    else:
+        run_taipy_gui()
+
+start_cashd(with_webview=True)
