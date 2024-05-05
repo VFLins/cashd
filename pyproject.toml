@@ -10,7 +10,7 @@ license = {file = "LICENSE"}
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
+    "Operating System :: Windows",
 ]
 version = "0.1.0"
 dependencies = [
