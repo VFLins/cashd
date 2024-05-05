@@ -21,6 +21,11 @@ dependencies = [
     "pandas==2.2.0"
 ]
 
+[project.optional-dependencies]
+dev=[
+    "pytest-cov>=5.0.0"
+]
+
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -29,8 +34,10 @@ build-backend = "setuptools.build_meta"
 cashd = "cashd.startup:window"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = "tests"
+pythonpath = "src"
+addopts = "--cov=src --cov-report html"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-namespaces = true
+namespaces = false
