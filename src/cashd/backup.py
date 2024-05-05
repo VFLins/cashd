@@ -28,7 +28,7 @@ logging.basicConfig(
 logging.getLogger().propagate = False
 
 
-def get_db_size(file_path: str = DB_FILE):
+def get_db_size(file_path: str = DB_FILE) -> int:
     try:
         size = path.getsize(file_path)
         return size
