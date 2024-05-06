@@ -89,17 +89,22 @@ def run(
     config.read(config_file)
 
     check_size = config["default"].getboolean("check_file_size", fallback=None)
-    if check_size:
-        current_size = get_db_size()
-        previous_size = read_last_recorded_size()
-    else:
-        current_size, previous_size = 1, 0
+    #if check_size:
+    #    current_size = get_db_size()
+    #    previous_size = read_last_recorded_size()
+    #else:
+    current_size, previous_size = 1, 0
     
     if current_size > previous_size:
         try:
-            backup_places = backup_places + [BACKUP_PATH]
+            backup_places = [BACKUP_PATH] + backup_places
+            print(backup_places)
             for place in backup_places:
-                copy_file(db_path, place)
+                try:
+                    copy_file(db_path, place)
+                except Exception as xpt:
+                    logging.error(f"Não foi possível salvar cópia em {place}")
+
 
             # Atualize o tamanho anterior e salve no arquivo de configuração
             write_current_size(current_size=current_size)
