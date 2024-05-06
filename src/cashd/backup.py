@@ -1,4 +1,4 @@
-from os import path, makedirs
+from os import path, makedirs, remove
 import shutil
 import configparser
 import logging
@@ -28,7 +28,7 @@ logging.basicConfig(
 logging.getLogger().propagate = False
 
 
-def get_db_size(file_path: str = DB_FILE):
+def get_db_size(file_path: str = DB_FILE) -> int:
     try:
         size = path.getsize(file_path)
         return size
@@ -49,11 +49,11 @@ def parse_list_config(string: str) -> list[str]:
 
 def copy_file(source_path, target_dir):
     try:
-        shutil.copy(source_path, target_dir)
+        shutil.copyfile(source_path, path.join(target_dir, "database.db"))
         logging.info(f"Cópia de '{source_path}' criada em '{target_dir}'")
 
-    except FileNotFoundError:
-        logging.error(f"Arquivo '{source_path}' não encontrado.")
+    except FileNotFoundError as err:
+        logging.error(f"Erro realizando backup: {err}.")
 
 def read_last_recorded_size(config_file: str = CONFIG_FILE):
     config = configparser.ConfigParser()
@@ -92,10 +92,8 @@ def run(
     if check_size:
         current_size = get_db_size()
         previous_size = read_last_recorded_size()
-
     else:
-        current_size = 1
-        previous_size = 0
+        current_size, previous_size = 1, 0
     
     if current_size > previous_size:
         try:

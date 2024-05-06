@@ -10,7 +10,7 @@ license = {file = "LICENSE"}
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
+    "Operating System :: Windows",
 ]
 version = "0.1.0"
 dependencies = [
@@ -21,17 +21,23 @@ dependencies = [
     "pandas==2.2.0"
 ]
 
+[project.optional-dependencies]
+dev=[
+    "pytest-cov>=5.0.0"
+]
+
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-cashd-window = "cashd.startup:window"
+cashd = "cashd.startup:window"
 
 [tool.pytest.ini_options]
-addopts = "--cov=app"
-testpaths = ["tests"]
+testpaths = "tests"
+pythonpath = "src"
+addopts = "--cov=src --cov-report html"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-namespaces = true
+namespaces = false

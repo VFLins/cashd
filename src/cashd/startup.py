@@ -1,12 +1,12 @@
 from cashd.app import start_cashd
+import sys
 
 
 def window():
-    start_cashd(with_webview=True)
+    if "window" in sys.argv:
+        start_cashd(with_webview=True)
+        return
 
-
-""" import runpy
-
-
-def window():
-    runpy._run_module_as_main("cashd") """
+    if "browser" in sys.argv:
+        start_cashd(with_webview=False)
+        return
