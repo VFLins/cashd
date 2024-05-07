@@ -12,7 +12,7 @@ LOG_FILE = path.join(SCRIPT_PATH, "logs", "backup.log")
 DB_FILE = path.join(SCRIPT_PATH, "data", "database.db")
 
 conf = configparser.ConfigParser()
-conf.read(CONFIG_FILE)
+conf.read(CONFIG_FILE, "utf-8")
 
 makedirs(BACKUP_PATH, exist_ok = True)
 for file in [CONFIG_FILE, LOG_FILE]:
@@ -21,21 +21,16 @@ for file in [CONFIG_FILE, LOG_FILE]:
         with open(file=file, mode="a"):
             pass
 
-logging.basicConfig(
-    filename=LOG_FILE,
-    level=logging.INFO,
-    format="%(asctime)s :: %(message)s")
-logging.getLogger().propagate = False
+logger = logging.getLogger("cashd.backup")
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
 
+log_fmt = logging.Formatter("%(asctime)s :: %(message)s")
+log_handler = logging.FileHandler(LOG_FILE)
+log_handler.setLevel(logging.DEBUG)
+log_handler.setFormatter(log_fmt)
 
-def get_db_size(file_path: str = DB_FILE) -> int:
-    try:
-        size = path.getsize(file_path)
-        return size
-
-    except FileNotFoundError:
-        logging.error(f"Arquivo '{file_path}' não encontrado.")
-        return None
+logger.addHandler(log_handler)
 
 
 def parse_list_config(string: str) -> list[str]:
@@ -50,10 +45,25 @@ def parse_list_config(string: str) -> list[str]:
 def copy_file(source_path, target_dir):
     try:
         shutil.copyfile(source_path, path.join(target_dir, "database.db"))
-        logging.info(f"Cópia de '{source_path}' criada em '{target_dir}'")
+        logger.info(f"Copia de '{source_path}' criada em '{target_dir}'")
 
     except FileNotFoundError as err:
-        logging.error(f"Erro realizando backup: {err}.")
+        logger.error(f"Erro realizando copia: {err}.")
+
+
+####################
+# LEITURAS
+####################
+
+def read_db_size(file_path: str = DB_FILE) -> int:
+    try:
+        size = path.getsize(file_path)
+        return size
+
+    except FileNotFoundError:
+        logger.error(f"Arquivo '{file_path}' não encontrado.")
+        return None
+
 
 def read_last_recorded_size(config_file: str = CONFIG_FILE):
     config = configparser.ConfigParser()
@@ -65,32 +75,43 @@ def read_last_recorded_size(config_file: str = CONFIG_FILE):
     return 0
 
 
+####################
+# ESCRITAS
+####################
+
 def write_current_size(
         config_file: str = CONFIG_FILE,
-        current_size: int = get_db_size()
+        current_size: int = read_db_size()
     ) -> None:
     """Writes current database size to `backup.ini`"""
-    config = configparser.ConfigParser()
-    config.read(config_file)
+    conf.read(config_file)
 
-    if "file_sizes" not in config:
-        config["file_sizes"] = {}
+    try:
+        conf.add_section("file_sizes")
+    except configparser.DuplicateSectionError:
+        pass
+    except Exception as xpt:
+        logger.error(f"Erro inesperado criando a seção `file_sizes`: {xpt}")
 
-    config["file_sizes"]["dbsize"] = str(current_size)
+    conf["file_sizes"]["dbsize"] = str(current_size)
     with open(config_file, "w") as config_writer:
-        config.write(config_writer)
+        conf.write(config_writer)
+
+
+def write_backup_place():
+    pass
+
 
 def run(
         backup_places: list[str] = parse_list_config(conf['default']['backup_places']),
         config_file: str = CONFIG_FILE,
         db_path: str = DB_FILE
     ) -> None:
-    config = configparser.ConfigParser()
-    config.read(config_file)
+    conf.read(config_file, "utf-8")
 
-    check_size = config["default"].getboolean("check_file_size", fallback=None)
+    check_size = conf["default"].getboolean("check_file_size", fallback=None)
     #if check_size:
-    #    current_size = get_db_size()
+    #    current_size = read_db_size()
     #    previous_size = read_last_recorded_size()
     #else:
     current_size, previous_size = 1, 0
@@ -103,7 +124,7 @@ def run(
                 try:
                     copy_file(db_path, place)
                 except Exception as xpt:
-                    logging.error(f"Não foi possível salvar cópia em {place}")
+                    logger.error(f"Nao foi possivel salvar copia em {place}")
 
 
             # Atualize o tamanho anterior e salve no arquivo de configuração
@@ -111,5 +132,5 @@ def run(
             print("Backups criados com sucesso!")
 
         except Exception:
-            logging.error("Não foi possível obter o tamanho do arquivo.")
+            logger.error("Nao foi possível obter o tamanho do arquivo.")
     
