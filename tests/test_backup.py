@@ -1,8 +1,10 @@
 from configparser import ConfigParser
 from tempfile import TemporaryFile
+import pytest
 from cashd.backup import (
     get_db_size,
-    write_current_size
+    write_current_size,
+    parse_list_config
 )
 
 
@@ -19,3 +21,18 @@ def test_dbsize_read():
         read_dbsize = int(config["file_sizes"]["dbsize"])
 
         assert  read_dbsize == get_db_size(file_path=data_file.name)
+
+
+@pytest.mark.parametrize("string, expected_list", [
+    (
+        r"[c:\user\path\to\folder, c:\path\to\file.ext]",
+        ["c:\\user\\path\\to\\folder", "c:\\path\\to\\file.ext"]
+    ),
+    (
+        "[\n\tc:/some/path,\n\tc:\\some\\other\\path]",
+        [r"c:/some/path", r"c:\some\other\path"]
+    )
+])
+def test_list_parse(string, expected_list):
+    parsed_list = parse_list_config(string)
+    assert parsed_list == expected_list
