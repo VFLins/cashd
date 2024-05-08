@@ -25,7 +25,7 @@ logger = logging.getLogger("cashd.backup")
 logger.setLevel(logging.DEBUG)
 logger.propagate = False
 
-log_fmt = logging.Formatter("%(asctime)s :: %(message)s")
+log_fmt = logging.Formatter("%(asctime)s :: %(levelname)s %(message)s")
 log_handler = logging.FileHandler(LOG_FILE)
 log_handler.setLevel(logging.DEBUG)
 log_handler.setFormatter(log_fmt)
@@ -33,13 +33,21 @@ log_handler.setFormatter(log_fmt)
 logger.addHandler(log_handler)
 
 
-def parse_list_config(string: str) -> list[str]:
-    """Transforms a config with multiple items in a python list"""
+def parse_list_from_config(string: str) -> list[str]:
+    """Transforms a config with multiple items in a python list of strings."""
     string = string\
         .replace("[", "")\
         .replace("]", "")
     list_of_items = string.split(",")
     return [i.strip() for i in list_of_items]
+
+
+def parse_list_to_config(list_: list) -> str:
+    string_list = str(list_)\
+        .replace("[", "[\n\t")\
+        .replace(", ", ",\n\t")\
+        .replace("'", "")
+    return string_list.replace("\\\\", "\\")
 
 
 def copy_file(source_path, target_dir):
@@ -98,16 +106,32 @@ def write_current_size(
         conf.write(config_writer)
 
 
-def write_backup_place():
-    pass
+def write_backup_place(path: str):
+    conf.read(CONFIG_FILE, "utf-8")
+
+    current_list_of_paths = parse_list_from_config(
+        conf["default"]["backup_places"])
+
+    if path in current_list_of_paths:
+        logger.warn(
+            f"'{path}' nao adicionado em 'backup_places', ja esta na lista")
+        return
+    
+    new_list_of_paths = current_list_of_paths + [path]
+
+    conf.set(
+        "default",
+        "backup_places",
+        parse_list_to_config(new_list_of_paths))
+    with open(CONFIG_FILE, "w") as newconfig:
+        conf.write(newconfig)
 
 
 def run(
-        backup_places: list[str] = parse_list_config(conf['default']['backup_places']),
-        config_file: str = CONFIG_FILE,
+        backup_places: list[str] = parse_list_from_config(conf['default']['backup_places']),
         db_path: str = DB_FILE
     ) -> None:
-    conf.read(config_file, "utf-8")
+    conf.read(CONFIG_FILE, "utf-8")
 
     check_size = conf["default"].getboolean("check_file_size", fallback=None)
     #if check_size:
