@@ -38,7 +38,7 @@ def btn_atualizar_listagem(state: State):
 
 
 def btn_inserir_transac(state: State):
-    carregar_lista_transac(state=state)
+    carregar_lista_transac(state)
     try:
         nova_transac: dict = state.form_transac.despejar(IdCliente = SLC_USUARIO[0])
 
@@ -49,7 +49,6 @@ def btn_inserir_transac(state: State):
         state.assign("SLC_USUARIO", state.NOMES_USUARIOS[id_selecionado-1])
         state.assign("display_tr_valor", "0,00")
         state.refresh("form_transac")
-
     except Exception as msg_erro:
         notify(state, "error", str(msg_erro))
 
@@ -63,14 +62,12 @@ def btn_inserir_cliente(state: State):
         notify(state, "success", message=f"Novo cliente adicionado!\n{nome_completo}")
         state.refresh("form_contas")
         state.NOMES_USUARIOS = sel_listar_clientes()
-
     except Exception as msg_erro:
         notify(state, "error", str(msg_erro))
 
 
 def btn_encerrar():
     window.destroy()
-    backup.run()
     raise KeyboardInterrupt("Encerrando...")
 
 
@@ -148,7 +145,6 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
                     )
                 state.NOMES_USUARIOS = sel_listar_clientes()
                 notify(s, "success", "Cadastro atualizado com sucesso!")
-
             except Exception as xpt:
                 notify(s, "error", f"Erro ao atualizar cadastro: {str(xpt)}")
                 s.assign("mostra_confirma_conta", False)
