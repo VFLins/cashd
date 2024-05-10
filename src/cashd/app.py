@@ -3,6 +3,8 @@ from cashd.pages import transac, contas, analise, configs, dialogo
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder
 from datetime import datetime
+import tkinter as tk
+from tkinter import filedialog
 from os import path
 import pandas as pd
 import threading
@@ -35,6 +37,38 @@ def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
 def btn_atualizar_listagem(state: State):
     with db.DB_ENGINE.connect() as conn, conn.begin():
         state.df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
+
+
+def btn_atualizar_locais_de_backup(state: State | None = None):
+    """
+    Se `state=None` retorna um `pd.DataFrame`, caso contrario, atualiza o valor
+    de `'df_locais_de_backup'`."""
+    locais_de_backup = backup.parse_list_from_config(
+    backup.conf["default"]["backup_places"])
+    df = pd.DataFrame(
+        {"Id": range(len(locais_de_backup)),
+        "Locais de backup": locais_de_backup})
+
+    if state:
+        state.assign("df_locais_de_backup", df)
+        state.refresh("df_locais_de_backup")
+        return
+    return df
+
+
+def btn_add_local_de_backup(state: State):
+    root = tk.Tk()
+    root.withdraw()
+    folder = filedialog.askdirectory()
+
+    backup.write_add_backup_place(folder)
+    btn_atualizar_locais_de_backup(state)
+
+
+def btn_rm_local_de_backup(state: State, var_name, payload):
+    idx = payload['index']
+    backup.write_rm_backup_place(idx)
+    btn_atualizar_locais_de_backup(state)
 
 
 def btn_inserir_transac(state: State):
@@ -224,6 +258,9 @@ mostra_form_editar_cliente = False
 mostra_confirma_conta = False
 mostra_confirma_transac = False
 
+# menus expansiveis
+expand_backup_ctrl = False
+
 # listagem de clientes
 with db.DB_ENGINE.connect() as conn, conn.begin():
     df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
@@ -263,6 +300,9 @@ df_transac = db.listar_transac_cliente(SLC_USUARIO[0])["df"]
 
 # valor inicial do saldo do usuario selecionado em SLC_USUARIO
 SLC_USUARIO_SALDO = db.listar_transac_cliente(SLC_USUARIO[0])["saldo"]
+
+# valor inicial da lista de locais de backup
+df_locais_de_backup = btn_atualizar_locais_de_backup()
 
 # dados de entradas e abatimentos
 df_entradas_abatimentos = db.saldos_transac_periodo()
@@ -305,6 +345,8 @@ elem_transac_hist = Gui.add_partial(app, transac.ELEMENTO_HIST)
 elem_conta_form = Gui.add_partial(app, contas.ELEMENTO_FORM)
 elem_conta_regs = Gui.add_partial(app, contas.ELEMENTO_REGS)
 
+elem_config_backup = Gui.add_partial(app, configs.ELEMENTO_BACKUP)
+
 dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
 dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
 dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
@@ -313,7 +355,7 @@ dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
 
 def start_cashd(with_webview: bool = False):
-    port = 5000
+    port = 5001
 
     # https://stackoverflow.com/questions/2470971/fast-way-to-test-if-a-port-is-in-use-using-python
     def porta_esta_ocupada() -> bool:

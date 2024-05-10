@@ -50,7 +50,7 @@ def parse_list_from_config(string: str) -> list[str]:
         .replace("[", "")\
         .replace("]", "")
     list_of_items = string.split(",")
-    return [i.strip() for i in list_of_items if i != ""]
+    return [i.strip() for i in list_of_items if i.strip() != ""]
 
 
 def parse_list_to_config(list_: list) -> str:
