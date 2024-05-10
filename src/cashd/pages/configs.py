@@ -22,5 +22,8 @@ CONTROLES = """
 ELEMENTO_BACKUP = """
 Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
 
-<|{df_locais_de_backup}|table|page_size=5|page_size_options=[3,5,10,15]|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|>
+<|{df_locais_de_backup}|table|page_size=5|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|>
+
+<|Fazer backup|button|on_action={btn_fazer_backups}|>
+*Backups serão salvos nos **Locais de backup**
 """

@@ -1,4 +1,5 @@
 from os import path, makedirs, remove
+from datetime import datetime
 import shutil
 import configparser
 import logging
@@ -65,14 +66,17 @@ def parse_list_to_config(list_: list) -> str:
     return string_list.replace("\\\\", "\\")
 
 
-def copy_file(source_path, target_dir):
+def copy_file(source_path, target_dir, _raise: bool = False):
     logger.debug("function call: copy_file")
+    now = datetime.now()
     try:
-        shutil.copyfile(source_path, path.join(target_dir, "database.db"))
+        filename = f"backup_{now}.db".replace(":", "-")
+        shutil.copyfile(source_path, path.join(target_dir, filename))
         logger.info(f"Copia de '{source_path}' criada em '{target_dir}'")
 
-    except FileNotFoundError as err:
-        logger.error(f"Erro realizando copia: {err}.")
+    except FileNotFoundError as xpt:
+        logger.error(f"Erro realizando copia: {xpt}.")
+        if _raise: raise xpt
 
 
 ####################
@@ -174,7 +178,7 @@ def write_rm_backup_place(idx: int):
         conf.write(newconfig)
 
 
-def run(force: bool = False) -> None:
+def run(force: bool = False, _raise: bool = False) -> None:
     """
     Vai fazer a copia do arquivo de banco de dados para a pasta local de backup
     e para as pastas listadas na opcao 'backup_places' em `backup.ini`.
@@ -184,6 +188,7 @@ def run(force: bool = False) -> None:
     """
     conf.read(CONFIG_FILE, "utf-8")
     backup_places = parse_list_from_config(conf['default']['backup_places'])
+    error_was_raised = False
 
     if not force:
         current_size = read_db_size()
@@ -197,9 +202,13 @@ def run(force: bool = False) -> None:
         backup_places = [i for i in [BACKUP_PATH] + backup_places if i != ""]
         for place in backup_places:
             try:
-                copy_file(DB_FILE, place)
+                copy_file(DB_FILE, place, _raise=True)
             except Exception as xpt:
                 logger.error(f"Nao foi possivel salvar em '{place}': {xpt}")
+                if _raise: error_was_raised = True
+        if error_was_raised:
+            raise NotADirectoryError(
+                f"Erro em alguma etapa do backup, verifique o log: {LOG_FILE}")
     except Exception as xpt:
-        logger.error("Erro inesperado durante o backup: {xpt}")
+        logger.error(f"Erro inesperado durante o backup: {xpt}")
     

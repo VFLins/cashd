@@ -56,6 +56,14 @@ def btn_atualizar_locais_de_backup(state: State | None = None):
     return df
 
 
+def btn_fazer_backups(state: State):
+    try:
+        backup.run(force=True, _raise=True)
+        notify(state, "success", "Backup concluído!")
+    except Exception as xpt:
+        notify(state, "error", str(xpt))
+
+
 def btn_add_local_de_backup(state: State):
     root = tk.Tk()
     root.withdraw()

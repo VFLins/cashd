@@ -36,3 +36,7 @@ def test_dbsize_read():
 def test_list_parse(string, expected_list):
     parsed_list = parse_list_config(string)
     assert parsed_list == expected_list
+
+
+def test_write_list():
+    pass
