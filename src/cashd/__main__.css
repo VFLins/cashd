@@ -13,10 +13,6 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
     line-height: 0
 }
 
-.taipy-expandable .MuiAccordionSummary-content{
-    font-size: x-large;
-}
-
 .taipy-layout{
     display: grid;
     justify-items: center;
@@ -92,4 +88,18 @@ html {
 }
 .css-cszb8q {
     max-width: 24rem;
+}
+
+/*expandable sections: expanded*/
+.css-2e6htv.Mui-expanded:last-of-type {
+    background-color: rgb(202 223 231 / 25%);
+}
+
+.taipy-expandable .MuiAccordionSummary-content{
+    font-size: large;
+}
+
+/*expandable sections: collapsed*/
+.taipy-expandable.MuiPaper-rounded{
+    background-color: rgb(202 223 231 / 25%);
 }
