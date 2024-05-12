@@ -18,7 +18,8 @@ dependencies = [
     "SQLAlchemy==2.0.25",
     "pywebview==5.0.5",
     "phonenumbers==8.13.31",
-    "pandas==2.2.0"
+    "pandas==2.2.0",
+    "pyshortcuts==1.9.0"
 ]
 
 [project.optional-dependencies]
