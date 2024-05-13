@@ -5,6 +5,7 @@ from taipy.gui import Gui, notify, State, navigate, Icon, builder
 from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
+from tkinter.filedialog import askopenfilename
 from os import path
 import pandas as pd
 import threading
@@ -68,7 +69,6 @@ def btn_add_local_de_backup(state: State):
     root = tk.Tk()
     root.withdraw()
     folder = filedialog.askdirectory()
-
     backup.write_add_backup_place(folder)
     btn_atualizar_locais_de_backup(state)
 
@@ -77,6 +77,17 @@ def btn_rm_local_de_backup(state: State, var_name, payload):
     idx = payload['index']
     backup.write_rm_backup_place(idx)
     btn_atualizar_locais_de_backup(state)
+
+
+def btn_carregar_backup(state: State):
+    filename = askopenfilename()
+    try:
+        backup.load(file=filename, _raise = True)
+        notify(state, "success", "Dados carregados com sucesso")
+    except OSError:
+        notify(state, "error", "Arquivo selecionado não é um banco de dados SQLite")
+    except Exception as xpt:
+        notify(state, "error", f"Erro inesperado carregando arquivo: {xpt}")
 
 
 def btn_inserir_transac(state: State):
