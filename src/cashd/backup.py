@@ -92,13 +92,15 @@ def rename_on_db_folder(current: str, new: str, _raise: bool = False):
     try:
         rename(path_to_current, path_to_new)
         logger.info(f"{path_to_current} renomeado como {path_to_new}")
+    except WindowsError:
+        shutil.copy(path_to_current, path_to_new)
     except Exception as xpt:
         logger.error(f"Erro renomeando {path_to_current}: {xpt}", exc_info=1)
         if _raise: raise xpt
 
 
 def check_sqlite(file: str, _raise: bool = False):
-    """Checa se o full path `file` representa um banco de dados."""
+    """Checa se o full path para o arquivo `file` representa um banco de dados."""
     logger.debug("function call: check_sqlite")
 
     if not path.isfile(file):
@@ -219,13 +221,30 @@ def write_rm_backup_place(idx: int):
 
 def load(file: str, _raise: bool = False) -> None:
     """
-    Checa se `file` se trata de um banco de dados SQLite valido, e entao vai
-    traze-lo para a pasta local do banco de dados do Cashd.
+    Checa se `file` se trata de um banco de dados SQLite valido, e entao o
+    carrega como o banco de dados atual no Cashd.
     
     Se um banco de dados ja estiver presente, vai renomea-lo para um nome
     nao usado pelo Cashd nem por outros arquivos na pasta e o mantera no
     diretorio.
     """
+    logger.debug("function call: load")
+    db_is_present = path.isfile(DB_FILE)
+    file_is_valid = check_sqlite(file)
+
+    if not file_is_valid:
+        msg = f"Impossivel carregar arquivo nao SQLite {file}"
+        logger.error(msg)
+        if _raise: raise OSError(msg)
+    
+    if db_is_present:
+        now = datetime.now()
+        dbfilename = path.split(DB_FILE)[1]
+        stashfilename = f"stashed{now}.db".replace(":", "-")
+        rename_on_db_folder(dbfilename, stashfilename)
+
+    shutil.copyfile(file, DB_FILE)
+
 
 
 def run(force: bool = False, _raise: bool = False) -> None:
