@@ -1,11 +1,14 @@
 from configparser import ConfigParser
-from tempfile import TemporaryFile
+from tempfile import TemporaryFile, TemporaryDirectory
 import pytest
+import os
+
 from cashd.backup import (
     read_db_size,
     write_current_size,
     parse_list_from_config,
-    parse_list_to_config
+    parse_list_to_config,
+    copy_file
 )
 
 
@@ -32,4 +35,15 @@ def test_list_parse():
 
 
 def test_copy_file():
-    pass
+    tempfile = TemporaryFile(delete_on_close=False)
+    tempfile.close()
+    with TemporaryDirectory() as tempdir:
+        # test success
+        copy_file(tempfile.name, tempdir)
+        assert len(os.listdir(tempdir)) == 1
+        # test fail
+        try:
+            copy_file("thisisnotevenapath", tempdir, True)
+        except FileNotFoundError:
+            assert 1 == 1
+    os.unlink(tempfile.name)
