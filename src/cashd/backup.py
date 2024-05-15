@@ -121,6 +121,7 @@ def check_sqlite(file: str, _raise: bool = False):
     stmt = f"PRAGMA integrity_check;"
     try:
         _ = cursor.execute(stmt).fetchone()
+        con.close()
         return True
     except sqlite3.DatabaseError:
         return False
@@ -189,7 +190,7 @@ def write_add_backup_place(path: str):
         logger.warn(
             f"'{path}' nao adicionado em 'backup_places', ja esta na lista")
         return
-    
+
     new_list_of_paths = current_list_of_paths + [path]
 
     conf.set(
