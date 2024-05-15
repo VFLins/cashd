@@ -82,6 +82,13 @@ def copy_file(source_path, target_dir, _raise: bool = False):
 
 
 def rename_on_db_folder(current: str, new: str, _raise: bool = False):
+    """
+    Renomeia um arquivo na mesma pasta em que `DB_FILE` se encontra, se a
+    operacao falhar porque o arquivo esta em uso, faz uma copia com o novo
+    nome em vez de renomear.
+    
+    Levanta o erro que recebeu se ambas as operacoes falharem.
+    """
     logger.debug("function call: rename_on_db_folder")
     current, new = str(current), str(new)
 
