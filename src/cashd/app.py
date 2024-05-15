@@ -6,12 +6,17 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
+from pyshortcuts import make_shortcut
+from typing import Literal
 from os import path
 import pandas as pd
 import threading
 import webview
 import socket
 
+
+EXE_DIR = ""
+ASSETS_DIR = ""
 
 ####################
 # BOTOES
@@ -88,6 +93,15 @@ def btn_carregar_backup(state: State):
         notify(state, "error", "Arquivo selecionado não é um banco de dados SQLite")
     except Exception as xpt:
         notify(state, "error", f"Erro inesperado carregando arquivo: {xpt}")
+
+
+def btn_criar_atalho_desktop(state: State):
+    make_shortcut(
+        script="cashd",
+        name="Cashd",
+        description="Registre seu fluxo de caixa rapidamente e tenha total controle dos seus dados!",
+        icon=path.join(ASSETS_DIR, "ICO_LogoIcone.ico"),
+        desktop=True, startmenu=False)
 
 
 def btn_inserir_transac(state: State):
