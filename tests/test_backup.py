@@ -8,7 +8,9 @@ from cashd.backup import (
     write_current_size,
     parse_list_from_config,
     parse_list_to_config,
-    copy_file
+    copy_file,
+    rename_on_db_folder,
+    DB_FILE
 )
 
 
@@ -47,3 +49,25 @@ def test_copy_file():
         except FileNotFoundError:
             assert 1 == 1
     os.unlink(tempfile.name)
+
+
+def test_rename_on_db_folder():
+    db_folder = os.path.split(DB_FILE)[0]
+    
+    # test closed file
+    file = TemporaryFile(delete_on_close=False, dir=db_folder)
+    file.close()
+    old_filename = os.path.split(file.name)[1]
+    new_filename = "renamed.file"
+    rename_on_db_folder(old_filename, new_filename)
+    new_filepath = os.path.join(db_folder, new_filename)
+    assert os.path.isfile(new_filepath)
+    os.unlink(new_filepath)
+
+    # test open file
+    with TemporaryFile(dir=db_folder) as file:
+        old_filename = os.path.split(file.name)[1]
+        new_filename = "renamed.file"
+        rename_on_db_folder(old_filename, new_filename)
+        new_filepath = os.path.join(db_folder, new_filename)
+        assert os.path.isfile(new_filepath)
