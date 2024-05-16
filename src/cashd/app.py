@@ -13,10 +13,10 @@ import pandas as pd
 import threading
 import webview
 import socket
+import sys
 
 
-EXE_DIR = ""
-ASSETS_DIR = ""
+PYTHON_PATH = path.dirname(sys.executable)
 
 ####################
 # BOTOES
@@ -96,12 +96,19 @@ def btn_carregar_backup(state: State):
 
 
 def btn_criar_atalho_desktop(state: State):
+    ico_file = path.join(backup.SCRIPT_PATH, "assets", "ICO_LogoIcone.ico")
+    startup_script = path.join(backup.SCRIPT_PATH, "startup.pyw")
+    exec_from = path.join(PYTHON_PATH, "pythonw.exe")
+    
     make_shortcut(
-        script="cashd",
-        name="Cashd",
+        script=startup_script,
+        icon=ico_file,
+        name="Cashd2",
         description="Registre seu fluxo de caixa rapidamente e tenha total controle dos seus dados!",
-        icon=path.join(ASSETS_DIR, "ICO_LogoIcone.ico"),
+        terminal=False,
+        executable=exec_from,
         desktop=True, startmenu=False)
+    notify(state, "success", "Atalho criado com sucesso!")
 
 
 def btn_inserir_transac(state: State):
