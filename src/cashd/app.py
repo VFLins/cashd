@@ -106,7 +106,7 @@ def btn_criar_atalho(state: State):
         description="Registre seu fluxo de caixa rapidamente e tenha total controle dos seus dados!",
         terminal=False,
         desktop=True, startmenu=True)
-    # notify(state, "success", "Atalho criado com sucesso!")
+    notify(state, "success", "Atalho criado com sucesso!")
 
 
 def btn_inserir_transac(state: State):
@@ -298,6 +298,7 @@ mostra_confirma_transac = False
 
 # menus expansiveis
 expand_backup_ctrl = False
+expand_atalho_ctrl = False
 
 # listagem de clientes
 with db.DB_ENGINE.connect() as conn, conn.begin():
@@ -384,6 +385,7 @@ elem_conta_form = Gui.add_partial(app, contas.ELEMENTO_FORM)
 elem_conta_regs = Gui.add_partial(app, contas.ELEMENTO_REGS)
 
 elem_config_backup = Gui.add_partial(app, configs.ELEMENTO_BACKUP)
+elem_config_atalho = Gui.add_partial(app, configs.ELEMENTO_ATALHO)
 
 dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
 dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
