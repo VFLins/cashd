@@ -95,20 +95,18 @@ def btn_carregar_backup(state: State):
         notify(state, "error", f"Erro inesperado carregando arquivo: {xpt}")
 
 
-def btn_criar_atalho_desktop(state: State):
+def btn_criar_atalho(state: State):
     ico_file = path.join(backup.SCRIPT_PATH, "assets", "ICO_LogoIcone.ico")
-    startup_script = path.join(backup.SCRIPT_PATH, "startup.pyw")
-    exec_from = path.join(PYTHON_PATH, "pythonw.exe")
+    startup_script = path.join(PYTHON_PATH, "cashd.exe")
     
     make_shortcut(
         script=startup_script,
         icon=ico_file,
-        name="Cashd2",
+        name="Cashd",
         description="Registre seu fluxo de caixa rapidamente e tenha total controle dos seus dados!",
         terminal=False,
-        executable=exec_from,
-        desktop=True, startmenu=False)
-    notify(state, "success", "Atalho criado com sucesso!")
+        desktop=True, startmenu=True)
+    # notify(state, "success", "Atalho criado com sucesso!")
 
 
 def btn_inserir_transac(state: State):
