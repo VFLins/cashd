@@ -14,3 +14,7 @@ def window():
     if "browser" in sys.argv:
         start_cashd(with_webview=False)
         return
+
+
+if __name__ == "__main__":
+    start_cashd(with_webview=True)
