@@ -21,10 +21,14 @@ CONTROLES = """
 
 <|Criar atalho|expandable|expand={expand_atalho_ctrl}|partial={elem_config_atalho}|>
 
+<br />
+<br />
 """
 
 ELEMENTO_BACKUP = """
 Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
+
+<br />
 
 <|{df_locais_de_backup}|table|page_size=5|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|>
 
@@ -37,6 +41,8 @@ Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
 
 ELEMENTO_ATALHO = """
 Clique no botão abaixo para adicionar atalhos à sua área de trabalho e ao menu iniciar:
+
+<br />
 
 <|Adicionar atalho|button|on_action={btn_criar_atalho}|class_name=plain|>
 """
