@@ -1,5 +1,5 @@
 from cashd import db, backup
-from cashd.pages import transac, contas, analise, configs, dialogo 
+from cashd.pages import transac, contas, analise, configs, dialogo
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder
 from datetime import datetime
@@ -22,19 +22,22 @@ PYTHON_PATH = path.dirname(sys.executable)
 # BOTOES
 ####################
 
+
 def btn_mostrar_dialogo(state: State, id: str, payload: dict, show: str):
     show_dialogs = {
         "confirma_conta": "mostra_confirma_conta",
         "confirma_transac": "mostra_confirma_transac",
         "selec_cliente": "mostra_selec_cliente",
-        "edita_cliente": "mostra_form_editar_cliente"
+        "edita_cliente": "mostra_form_editar_cliente",
     }
     for dialog in show_dialogs.values():
         state.assign(dialog, False)
     state.assign(show_dialogs[show], True)
 
+
 def btn_mostrar_dialogo_selec_cliente(state: State, id: str, payload: dict):
     btn_mostrar_dialogo(state, id, payload, show="selec_cliente")
+
 
 def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
     btn_mostrar_dialogo(state, id, payload, show="edita_cliente")
@@ -50,10 +53,11 @@ def btn_atualizar_locais_de_backup(state: State | None = None):
     Se `state=None` retorna um `pd.DataFrame`, caso contrario, atualiza o valor
     de `'df_locais_de_backup'`."""
     locais_de_backup = backup.parse_list_from_config(
-    backup.conf["default"]["backup_places"])
+        backup.conf["default"]["backup_places"]
+    )
     df = pd.DataFrame(
-        {"Id": range(len(locais_de_backup)),
-        "Locais de backup": locais_de_backup})
+        {"Id": range(len(locais_de_backup)), "Locais de backup": locais_de_backup}
+    )
 
     if state:
         state.assign("df_locais_de_backup", df)
@@ -79,7 +83,7 @@ def btn_add_local_de_backup(state: State):
 
 
 def btn_rm_local_de_backup(state: State, var_name, payload):
-    idx = payload['index']
+    idx = payload["index"]
     backup.write_rm_backup_place(idx)
     btn_atualizar_locais_de_backup(state)
 
@@ -87,7 +91,7 @@ def btn_rm_local_de_backup(state: State, var_name, payload):
 def btn_carregar_backup(state: State):
     filename = askopenfilename()
     try:
-        backup.load(file=filename, _raise = True)
+        backup.load(file=filename, _raise=True)
         notify(state, "success", "Dados carregados com sucesso")
     except OSError:
         notify(state, "error", "Arquivo selecionado não é um banco de dados SQLite")
@@ -98,27 +102,31 @@ def btn_carregar_backup(state: State):
 def btn_criar_atalho(state: State):
     ico_file = path.join(backup.SCRIPT_PATH, "assets", "ICO_LogoIcone.ico")
     startup_script = path.join(PYTHON_PATH, "cashd.exe")
-    
+
     make_shortcut(
         script=startup_script,
         icon=ico_file,
         name="Cashd",
         description="Registre seu fluxo de caixa rapidamente e tenha total controle dos seus dados!",
         terminal=False,
-        desktop=True, startmenu=True)
+        desktop=True,
+        startmenu=True,
+    )
     notify(state, "success", "Atalho criado com sucesso!")
 
 
 def btn_inserir_transac(state: State):
     carregar_lista_transac(state)
     try:
-        nova_transac: dict = state.form_transac.despejar(IdCliente = SLC_USUARIO[0])
+        nova_transac: dict = state.form_transac.despejar(IdCliente=SLC_USUARIO[0])
 
-        db.adicionar_transac(db.tbl_transacoes(CarimboTempo=datetime.now(), **nova_transac))
+        db.adicionar_transac(
+            db.tbl_transacoes(CarimboTempo=datetime.now(), **nova_transac)
+        )
         notify(state, "success", f"Nova transação adicionada!")
 
         id_selecionado = int(nova_transac["IdCliente"])
-        state.assign("SLC_USUARIO", state.NOMES_USUARIOS[id_selecionado-1])
+        state.assign("SLC_USUARIO", state.NOMES_USUARIOS[id_selecionado - 1])
         state.assign("display_tr_valor", "0,00")
         state.refresh("form_transac")
     except Exception as msg_erro:
@@ -144,7 +152,7 @@ def btn_encerrar():
 
 
 def btn_mudar_maximizado():
-        window.toggle_fullscreen()
+    window.toggle_fullscreen()
 
 
 def btn_mudar_minimizado():
@@ -154,6 +162,7 @@ def btn_mudar_minimizado():
 ####################
 # UTILS
 ####################
+
 
 def carregar_lista_transac(state: State):
     elems = db.listar_transac_cliente(state.SLC_USUARIO[0])
@@ -177,6 +186,7 @@ def menu_lateral(state, action, info):
 # ON ACTION
 ####################
 
+
 def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
     with state as s:
         if payload["args"][0] < 1:
@@ -197,7 +207,7 @@ def chg_dialog_editar_cliente(state: State, id: str, payload: dict):
     with state as s:
         if payload["args"][0] == -1:
             s.assign("mostra_selec_cliente", False)
-        
+
         if payload["args"][0] == 0:
             s.assign("mostra_form_editar_cliente", False)
             s.assign("mostra_selec_cliente", True)
@@ -211,10 +221,7 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
     with state as s:
         if payload["args"][0] == 1:
             try:
-                db.atualizar_cliente(
-                    state.SLC_USUARIO[0],
-                    state.form_conta_selec
-                    )
+                db.atualizar_cliente(state.SLC_USUARIO[0], state.form_conta_selec)
                 state.NOMES_USUARIOS = sel_listar_clientes()
                 notify(s, "success", "Cadastro atualizado com sucesso!")
             except Exception as xpt:
@@ -228,7 +235,7 @@ def chg_dialog_selec_cliente_transac(state: State, id: str, payload: dict):
     with state as s:
         if payload["args"][0] < 1:
             s.assign("mostra_selec_cliente", False)
-        
+
         if payload["args"][0] == 1:
             if s.SLC_USUARIO == "0":
                 notify(s, "error", "Nenhum usuário foi selecionado")
@@ -246,7 +253,9 @@ def chg_dialog_selec_transac(state: State, id: str, payload: dict):
         if payload["args"][0] == 1:
             if s.SLC_TRANSAC == "0":
                 notify(s, "error", "Nenhuma transação foi selecionada")
-            elif not db.id_transac_pertence_a_cliente(s.SLC_TRANSAC[0], s.SLC_USUARIO[0]):
+            elif not db.id_transac_pertence_a_cliente(
+                s.SLC_TRANSAC[0], s.SLC_USUARIO[0]
+            ):
                 notify(s, "error", "Selecione uma transação antes de continuar")
                 return
             else:
@@ -260,7 +269,7 @@ def chg_dialog_selec_transac(state: State, id: str, payload: dict):
 def chg_dialog_confirma_transac(state: State, id: str, payload: dict):
     with state as s:
         s.assign("mostra_confirma_transac", False)
-        
+
         if payload["args"][0] == 0:
             s.assign("mostra_selec_transac", True)
 
@@ -268,12 +277,10 @@ def chg_dialog_confirma_transac(state: State, id: str, payload: dict):
             db.remover_transac(s.SLC_TRANSAC[0])
             notify(s, "success", "Transação removida.")
             s.assign("SLC_TRANSAC", "0")
-            
+
 
 def chg_transac_valor(state: State) -> None:
-    state.display_tr_valor = db.fmt_moeda(
-        state.form_transac.Valor,
-        para_mostrar=True)
+    state.display_tr_valor = db.fmt_moeda(state.form_transac.Valor, para_mostrar=True)
     state.refresh("form_transac")
     return
 
@@ -346,18 +353,17 @@ df_locais_de_backup = btn_atualizar_locais_de_backup()
 # dados de entradas e abatimentos
 df_entradas_abatimentos = db.saldos_transac_periodo()
 layout_df_entradas_abatimentos = {
-    "x":"Data",
+    "x": "Data",
     "y[1]": "Somas",
     "y[2]": "Abatimentos",
     "layout": {
         "barmode": "overlay",
         "barcornerradius": "20%",
         "hovermode": "x unified",
-        "hovertemplate": "<b>Total</b>: R$ %{y:.2f}"
-    }}
-config_df_entradas_abatimentos = {
-    "displaymodebar": False
+        "hovertemplate": "<b>Total</b>: R$ %{y:.2f}",
+    },
 }
+config_df_entradas_abatimentos = {"displaymodebar": False}
 
 
 RAIZ = """
@@ -372,8 +378,8 @@ paginas = {
     "historico_transacoes": transac.PG_HIST_TRANSAC,
     "criar_uma_conta": contas.PG_CRIAR_CONTA,
     "analise": analise.GRAFICO_ENTRADAS_ABAT,
-    "controles_do_programa": configs.CONTROLES
-    }
+    "controles_do_programa": configs.CONTROLES,
+}
 
 app = Gui(pages=paginas, css_file="__main__.css")
 
@@ -400,7 +406,7 @@ def start_cashd(with_webview: bool = False):
     # https://stackoverflow.com/questions/2470971/fast-way-to-test-if-a-port-is-in-use-using-python
     def porta_esta_ocupada() -> bool:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            return s.connect_ex(('localhost', port)) == 0
+            return s.connect_ex(("localhost", port)) == 0
 
     def run_taipy_gui():
         if not porta_esta_ocupada():
@@ -410,9 +416,10 @@ def start_cashd(with_webview: bool = False):
                 dark_mode=False,
                 stylekit={
                     "color_primary": "#478eff",
-                    "color_background_light": "#ffffff"},
+                    "color_background_light": "#ffffff",
+                },
                 run_server=True,
-                port=port
+                port=port,
             )
 
     if with_webview:
@@ -421,15 +428,15 @@ def start_cashd(with_webview: bool = False):
 
         global window
         window = webview.create_window(
-            title="Cashd", 
-            url=f"http://localhost:{port}", 
+            title="Cashd",
+            url=f"http://localhost:{port}",
             frameless=True,
             maximized=maximizado,
             easy_drag=False,
-            min_size=(900, 600))
+            min_size=(900, 600),
+        )
 
         webview.start()
-    
+
     else:
         run_taipy_gui()
-

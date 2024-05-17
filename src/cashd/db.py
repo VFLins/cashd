@@ -11,7 +11,7 @@ from sqlalchemy import (
     select,
     delete,
     case,
-    text
+    text,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -19,7 +19,7 @@ from sqlalchemy.orm import (
     DeclarativeBase,
     relationship,
     Session,
-    Query
+    Query,
 )
 from copy import deepcopy
 from typing import List, Literal
@@ -40,7 +40,7 @@ os.makedirs(DATA_FOLDER, exist_ok=True)
 DB_ENGINE = create_engine(f"sqlite:///{DATA_FOLDER}\\database.db", echo=False)
 
 
-class dec_base(DeclarativeBase): 
+class dec_base(DeclarativeBase):
     pass
 
 
@@ -63,11 +63,11 @@ class tbl_transacoes(dec_base):
     __tablename__ = "transacoes"
     NomeCliente: Mapped["tbl_clientes"] = relationship(back_populates="SaldoTransacoes")
 
-    Id: Mapped[int] = mapped_column(primary_key = True)
+    Id: Mapped[int] = mapped_column(primary_key=True)
     IdCliente: Mapped[int] = mapped_column(ForeignKey("clientes.Id"))
     CarimboTempo: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     DataTransac: Mapped[date] = mapped_column(Date())
-    Valor: Mapped[int] = mapped_column() # valor em centavos
+    Valor: Mapped[int] = mapped_column()  # valor em centavos
 
 
 dec_base.metadata.create_all(DB_ENGINE)
@@ -82,7 +82,7 @@ try:
 
     else:
         WORK_DIR = path.expanduser("~/.local/Share/Cashd")
-    
+
     os.makedirs(WORK_DIR, exist_ok=True)
     os.chdir(WORK_DIR)
 
@@ -97,6 +97,7 @@ except Exception as manage_dir_error:
 # FORMATACAO
 ####################
 
+
 class ErroCampoVazio(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
@@ -107,10 +108,7 @@ class ErroDeFormatacao(Exception):
         super().__init__(*args)
 
 
-def fmt_moeda(
-        inp: str,
-        para_mostrar: bool = False
-    ) -> str:
+def fmt_moeda(inp: str, para_mostrar: bool = False) -> str:
     """Formata números inteiros (em centavos) para R$.
 
     `para_mostrar == False`:
@@ -134,7 +132,7 @@ def fmt_moeda(
 
         except ValueError:
             return "0,00"
-    
+
     else:
         try:
             out = int(inp)
@@ -143,19 +141,17 @@ def fmt_moeda(
 
         except ValueError:
             raise ErroDeFormatacao("Valor deve conter apenas números")
-    
+
     return out
 
 
-def fmt_telefone(
-        inp: str,
-        para_mostrar: bool = False
-    ) -> str:
+def fmt_telefone(inp: str, para_mostrar: bool = False) -> str:
     """"""
     try:
         return phonenumbers.format_number(
-            numobj = phonenumbers.parse(inp, "BR"),
-            num_format = phonenumbers.PhoneNumberFormat.NATIONAL)
+            numobj=phonenumbers.parse(inp, "BR"),
+            num_format=phonenumbers.PhoneNumberFormat.NATIONAL,
+        )
 
     except phonenumbers.NumberParseException:
         if para_mostrar:
@@ -165,19 +161,20 @@ def fmt_telefone(
 
 
 def fmt_nome_proprio(
-        inp: str,
-        permitido_vazio: bool = False,
-    ) -> str:
+    inp: str,
+    permitido_vazio: bool = False,
+) -> str:
 
     if not permitido_vazio and len(inp) == 0:
         raise ErroCampoVazio("Nome obrigatório não pode ficar vazio")
-    
+
     return inp.title()
 
 
 ####################
 # FORMULARIOS
 ####################
+
 
 class NomeObrigatorio(str):
     def __init__(self) -> None:
@@ -228,19 +225,18 @@ class FormObj:
                     setattr(self, var, fmt_telefone(value))
                 except Exception as msg_erro:
                     raise ErroDeFormatacao(f"Erro em '{var}':\n{str(msg_erro)}")
-            
+
             elif _types[var] == NumeroMoeda:
                 try:
                     setattr(self, var, fmt_moeda(value))
                 except Exception as msg_erro:
                     raise ErroDeFormatacao(f"Erro em '{var}':\n{str(msg_erro)}")
-            
+
             elif _types[var] == NomeObrigatorioMaiusculo:
                 try:
                     setattr(self, var, fmt_nome_proprio(value, False).upper())
                 except Exception as msg_erro:
                     raise ErroDeFormatacao(f"Erro em '{var}':\n{str(msg_erro)}")
-
 
     def despejar(self, **kwargs):
         try:
@@ -252,17 +248,17 @@ class FormObj:
 
 class FormContas(FormObj):
     def __init__(
-            self,
-            PrimeiroNome: NomeObrigatorio = "",
-            Sobrenome: NomeObrigatorio = "",
-            Apelido: NomeOpcional = "",
-            Telefone: NumeroTelefone = "81900000000",
-            Cidade: NomeObrigatorio = "Palmares",
-            Bairro: NomeOpcional = "",
-            Endereco: NomeOpcional = "",
-            Estado: NomeObrigatorioMaiusculo = "PE"
-        ):
-        
+        self,
+        PrimeiroNome: NomeObrigatorio = "",
+        Sobrenome: NomeObrigatorio = "",
+        Apelido: NomeOpcional = "",
+        Telefone: NumeroTelefone = "81900000000",
+        Cidade: NomeObrigatorio = "Palmares",
+        Bairro: NomeOpcional = "",
+        Endereco: NomeOpcional = "",
+        Estado: NomeObrigatorioMaiusculo = "PE",
+    ):
+
         self.PrimeiroNome = PrimeiroNome
         self.Sobrenome = Sobrenome
         self.Apelido = Apelido
@@ -281,27 +277,24 @@ class FormContas(FormObj):
         self.Bairro = tbl.Bairro
         self.Endereco = tbl.Endereco
         self.Estado = tbl.Estado
-    
+
     def __repr__(self):
         return (
-            f"{self.PrimeiroNome=}\n" +
-            f"{self.Sobrenome=}\n" +
-            f"{self.Apelido=}\n" +
-            f"{self.Telefone=}\n" +
-            f"{self.Cidade=}\n" +
-            f"{self.Bairro=}\n" +
-            f"{self.Endereco=}\n" +
-            f"{self.Estado=}\n"
+            f"{self.PrimeiroNome=}\n"
+            + f"{self.Sobrenome=}\n"
+            + f"{self.Apelido=}\n"
+            + f"{self.Telefone=}\n"
+            + f"{self.Cidade=}\n"
+            + f"{self.Bairro=}\n"
+            + f"{self.Endereco=}\n"
+            + f"{self.Estado=}\n"
         )
 
 
 class FormTransac(FormObj):
     def __init__(
-            self,
-            IdCliente,
-            DataTransac: date = date.today(),
-            Valor: NumeroMoeda = ""
-        ):
+        self, IdCliente, DataTransac: date = date.today(), Valor: NumeroMoeda = ""
+    ):
 
         self.IdCliente = IdCliente
         self.DataTransac = DataTransac
@@ -313,16 +306,13 @@ class FormTransac(FormObj):
         self.Valor = fmt_moeda(tbl.Valor, True)
 
     def __repr__(self):
-        return (
-            f"{self.IdCliente=}\n" +
-            f"{self.DataTransac=}\n" +
-            f"{self.Valor=}"
-        )
+        return f"{self.IdCliente=}\n" + f"{self.DataTransac=}\n" + f"{self.Valor=}"
 
 
 ####################
 # QUERRIES
 ####################
+
 
 def listar_clientes() -> None:
     with Session(DB_ENGINE) as ses:
@@ -331,30 +321,24 @@ def listar_clientes() -> None:
 
         output = []
         for r in res:
-            linha = {
-                "id": r.Id,
-                "nome": f"{r.PrimeiroNome} {r.Sobrenome}"}
+            linha = {"id": r.Id, "nome": f"{r.PrimeiroNome} {r.Sobrenome}"}
 
             if r.Apelido != "":
                 linha["nome"] = linha["nome"] + f" ({r.Apelido})"
             elif r.Apelido == "" and r.Bairro != "":
                 linha["nome"] = linha["nome"] + f", {r.Bairro}"
-            
+
             output.append(linha)
 
     return output
 
 
-def listar_transac_cliente(Id: int, para_mostrar: bool = True) -> dict|list:
+def listar_transac_cliente(Id: int, para_mostrar: bool = True) -> dict | list:
     Id = int(Id)
 
     stmt = select(
-        tbl_transacoes.Id,
-        tbl_transacoes.DataTransac,
-        tbl_transacoes.Valor
-    ).where(
-        tbl_transacoes.IdCliente == Id
-    )
+        tbl_transacoes.Id, tbl_transacoes.DataTransac, tbl_transacoes.Valor
+    ).where(tbl_transacoes.IdCliente == Id)
 
     with Session(DB_ENGINE) as ses:
         res = ses.execute(stmt).all()
@@ -362,13 +346,16 @@ def listar_transac_cliente(Id: int, para_mostrar: bool = True) -> dict|list:
         if para_mostrar:
             df = pd.DataFrame([row[1:] for row in res], columns=["Data", "Valor R$"])
             df.drop
-            df["Valor R$"] = df["Valor R$"].apply(lambda x: x/100)
+            df["Valor R$"] = df["Valor R$"].apply(lambda x: x / 100)
             df.sort_values(by="Data", ascending=False, inplace=True)
 
             saldo = fmt_moeda(sum(r.Valor for r in res), para_mostrar=True)
             return {"df": df, "saldo": saldo}
 
-        return [(row[0], f"{row[1].strftime('%d/%m/%Y')} | {fmt_moeda(row[2], True)}") for row in res]
+        return [
+            (row[0], f"{row[1].strftime('%d/%m/%Y')} | {fmt_moeda(row[2], True)}")
+            for row in res
+        ]
 
 
 def adicionar_cliente(cliente: tbl_clientes) -> None:
@@ -382,9 +369,7 @@ def atualizar_cliente(Id: int, form: FormContas) -> None:
     table_values = form.despejar()
 
     with Session(DB_ENGINE) as ses:
-        stmt = update(tbl_clientes)\
-            .where(tbl_clientes.Id == Id)\
-            .values(**table_values)
+        stmt = update(tbl_clientes).where(tbl_clientes.Id == Id).values(**table_values)
         ses.execute(stmt)
         ses.commit()
 
@@ -421,12 +406,7 @@ def transac_por_id(Id: int) -> tbl_transacoes:
 def id_transac_pertence_a_cliente(IdTransac: int, IdCliente: int) -> bool:
     """Retorna `True` se a transacao pertence ao cliente, `False` em qualquer outro caso."""
     IdTransac, IdCliente = int(IdTransac), int(IdCliente)
-    stmt = select(
-        tbl_transacoes
-    ).filter_by(
-        Id = IdTransac,
-        IdCliente = IdCliente
-    )
+    stmt = select(tbl_transacoes).filter_by(Id=IdTransac, IdCliente=IdCliente)
     with Session(DB_ENGINE) as ses:
         if ses.execute(stmt).first() is None:
             return False
@@ -435,8 +415,10 @@ def id_transac_pertence_a_cliente(IdTransac: int, IdCliente: int) -> bool:
 
 def saldos_transac_periodo(periodo: Literal["mes", "sem", "dia"] = "mes") -> dict:
     formato = "%Y-%m"
-    if periodo == "sem": formato = "%Y-%W"
-    if periodo == "dia": formato = "%Y-%m-%d"
+    if periodo == "sem":
+        formato = "%Y-%W"
+    if periodo == "dia":
+        formato = "%Y-%m-%d"
 
     stmt = f"""
     select
@@ -449,4 +431,6 @@ def saldos_transac_periodo(periodo: Literal["mes", "sem", "dia"] = "mes") -> dic
 
     with Session(DB_ENGINE) as ses:
         result = ses.execute(text(stmt)).all()
-        return pd.DataFrame([res for res in result][10:], columns=["Data", "Somas", "Abatimentos"])
+        return pd.DataFrame(
+            [res for res in result][10:], columns=["Data", "Somas", "Abatimentos"]
+        )
