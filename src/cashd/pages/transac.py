@@ -19,6 +19,8 @@ PG_ADICIONAR_TRANSAC = """
 
 <br />
 
+<|{nav_transac_val}|toggle|lov={nav_transac_lov}|on_change={lambda s: s.elem_transac_form.update_content(s, nav_transac_val[0])}|>
+
 <|layout|columns=1 1|columns[mobile]=1
 
 <|part|partial={elem_transac_sel}|>
