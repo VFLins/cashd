@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'EurostileExtendedBlack';
+    src: url('assets/EurostileExtendedBlack.ttf') format('truetype');
+    font-weight: bolder;
+    font-style: normal
+}
+
 :root .taipy-layout > .md-para:has(.taipy-navbar){
     display: flex;
     justify-content: flex-end;
@@ -59,6 +66,7 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
 /*header-bar: logo*/
 .taipy-part.header_logo.MuiBox-root.css-0 {
     justify-self: left;
+    font-family: 'EurostileExtendedBlack';
 }
 
 div.taipy-part.header_logo.MuiBox-root.css-0 span.MuiTypography-root.MuiTypography-body1.taipy-text.css-lpnwt2{
