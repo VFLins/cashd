@@ -2,10 +2,6 @@
 #   contas.ELEMENTO_REGS
 SELECIONAR_CLIENTE_ETAPA = """
 <center>
-    <|Atualizar nomes|button|on_action=btn_atualizar_clientes|>
-</center>
-
-<center>
     <|{SLC_USUARIO}|selector|lov={NOMES_USUARIOS}|filter|propagate|height=520px|width=650px|on_change=chg_cliente_selecionado|>
 </center>
 """
