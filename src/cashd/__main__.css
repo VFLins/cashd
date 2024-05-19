@@ -1,9 +1,4 @@
-@font-face {
-    font-family: 'EurostileExtendedBlack';
-    src: url('assets/EurostileExtendedBlack.ttf') format('truetype');
-    font-weight: bolder;
-    font-style: normal
-}
+@import url('https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root .taipy-layout > .md-para:has(.taipy-navbar){
     display: flex;
@@ -66,14 +61,35 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
 /*header-bar: logo*/
 .taipy-part.header_logo.MuiBox-root.css-0 {
     justify-self: left;
-    font-family: 'EurostileExtendedBlack';
+    font-family: 'Saira';
 }
 
-div.taipy-part.header_logo.MuiBox-root.css-0 span.MuiTypography-root.MuiTypography-body1.taipy-text.css-lpnwt2{
-    font-size: larger;
+
+/*toggle de texto: texto*/
+.css-13vtit{
+    background-color: #f1f1f1;
+}
+.css-vnhwe0{
+    font-weight: 600;
+
+}
+.css-4jd6qr{
+    border: 0px;
+    padding: 6px 16px;
+    text-transform: none;
+}
+.css-4jd6qr.Mui-selected{
     color: #478eff;
-    font-weight: bold;
-    text-transform: uppercase;
+    background-color: rgb(71 142 255 / 23%);
+}
+
+/*toggle de texto: elem*/
+
+div.taipy-part.header_logo.MuiBox-root.css-0 span.MuiTypography-root.MuiTypography-body1.taipy-text.css-lpnwt2{
+    font-family: 'Saira';
+    font-weight: 600;
+    font-size: 1.45rem;
+    color: #478eff;
 }
 
 .css-etkd7z {
@@ -95,7 +111,7 @@ html {
     line-height: 1.15;
 }
 .css-cszb8q {
-    max-width: 24rem;
+    max-width: 21rem;
 }
 
 /*expandable sections: expanded*/

@@ -408,26 +408,28 @@ nav_transac_lov = [
 nav_transac_val = nav_transac_lov[0]
 
 def start_cashd(with_webview: bool = False):
-    port = 5001
-
-    # https://stackoverflow.com/questions/2470971/fast-way-to-test-if-a-port-is-in-use-using-python
-    def porta_esta_ocupada() -> bool:
+    def porta_aberta() -> int:
+        port = 5000
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            return s.connect_ex(("localhost", port)) == 0
+            for i in range(51):
+                if s.connect_ex(("localhost", port + 1)) != 0:
+                    return port + i
+                
+    port = porta_aberta()
 
     def run_taipy_gui():
-        if not porta_esta_ocupada():
-            app.run(
-                title="Cashd",
-                run_browser=not with_webview,
-                dark_mode=False,
-                stylekit={
-                    "color_primary": "#478eff",
-                    "color_background_light": "#ffffff",
-                },
-                run_server=True,
-                port=port,
-            )
+        app.run(
+            title="Cashd",
+            run_browser=not with_webview,
+            dark_mode=False,
+            stylekit={
+                "color_primary": "#478eff",
+                "color_background_light": "#ffffff",
+            },
+            run_server=True,
+            port=port,
+            watermark="",
+        )
 
     if with_webview:
         taipy_thread = threading.Thread(target=run_taipy_gui)
