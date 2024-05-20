@@ -1,12 +1,12 @@
 PG_ADICIONAR_TRANSAC = """
-<|layout|columns=1fr auto 1fr|class_name=header_container|
+<|layout|columns=.65fr auto 1fr|class_name=header_container|
 
 <|part|class_name=header_logo|
 <|Cashd|text|height=30px|width=30px|>
 |>
 
 <|part|class_name=align_item_stretch|
-<|navbar|lov={[("/adicionar_transacao", "Adicionar Transação"), ("/historico_transacoes", "Ver Histórico")]}|>
+<|{nav_transac_val}|toggle|lov={nav_transac_lov}|on_change={lambda s: s.elem_transac_form.update_content(s, nav_transac_val[0])}|>
 |>
 
 <|part|class_name=text_right|class_name=header_top_right_corner|
@@ -17,7 +17,7 @@ PG_ADICIONAR_TRANSAC = """
 
 |>
 
-<br />
+<br /><br /><br />
 
 <|layout|columns=1 1|columns[mobile]=1
 

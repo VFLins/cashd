@@ -307,6 +307,7 @@ mostra_confirma_transac = False
 expand_backup_ctrl = False
 expand_atalho_ctrl = False
 
+
 # listagem de clientes
 with db.DB_ENGINE.connect() as conn, conn.begin():
     df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
@@ -399,16 +400,22 @@ dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
 dial_transac_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_TRANSAC)
 dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
+# menus de navegacao
+nav_transac_lov = [
+    (transac.ELEMENTO_FORM, "Adicionar Transação"), 
+    (transac.ELEMENTO_HIST, "Ver Histórico")
+    ]
+nav_transac_val = nav_transac_lov[0]
 
 def start_cashd(with_webview: bool = False):
-    def porta_livre() -> int:
+    def porta_aberta() -> int:
+        port = 5000
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            port = 5000
             for i in range(51):
-                if s.connect_ex(("localhost", port + i)) != 0:
+                if s.connect_ex(("localhost", port + 1)) != 0:
                     return port + i
-
-    port = porta_livre()
+                
+    port = porta_aberta()
 
     def run_taipy_gui():
         app.run(
