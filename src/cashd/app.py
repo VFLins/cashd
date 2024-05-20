@@ -1,13 +1,12 @@
 from cashd import db, backup
 from cashd.pages import transac, contas, analise, configs, dialogo
 
-from taipy.gui import Gui, notify, State, navigate, Icon, builder
+from taipy.gui import Gui, notify, State, navigate
 from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
 from pyshortcuts import make_shortcut
-from typing import Literal
 from os import path
 import pandas as pd
 import threading
