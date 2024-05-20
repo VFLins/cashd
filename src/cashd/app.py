@@ -118,10 +118,12 @@ def btn_criar_atalho(state: State):
 def btn_inserir_transac(state: State):
     carregar_lista_transac(state)
     try:
-        nova_transac: dict = state.form_transac.despejar(IdCliente=SLC_USUARIO[0])
+        nova_transac: dict = state.form_transac.despejar()
+        state.form_transac.Valor = ""
+        agora = datetime.now()
 
         db.adicionar_transac(
-            db.tbl_transacoes(CarimboTempo=datetime.now(), **nova_transac)
+            db.tbl_transacoes(CarimboTempo=agora, **nova_transac)
         )
         notify(state, "success", f"Nova transação adicionada!")
 
@@ -136,6 +138,7 @@ def btn_inserir_transac(state: State):
 def btn_inserir_cliente(state: State):
     try:
         novo_cliente: db.FormContas = state.form_contas.despejar()
+        state.form_contas.__init__()
         db.adicionar_cliente(db.tbl_clientes(**novo_cliente))
 
         nome_completo = f"{novo_cliente['PrimeiroNome']} {novo_cliente['Sobrenome']}"

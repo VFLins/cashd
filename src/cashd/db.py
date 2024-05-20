@@ -238,12 +238,9 @@ class FormObj:
                 except Exception as msg_erro:
                     raise ErroDeFormatacao(f"Erro em '{var}':\n{str(msg_erro)}")
 
-    def despejar(self, **kwargs):
-        try:
-            self.format_vars()
-            return deepcopy(vars(self))
-        finally:
-            self.__init__(**kwargs)
+    def despejar(self):
+        self.format_vars()
+        return deepcopy(vars(self))
 
 
 class FormContas(FormObj):
@@ -306,7 +303,7 @@ class FormTransac(FormObj):
         self.Valor = fmt_moeda(tbl.Valor, True)
 
     def __repr__(self):
-        return f"{self.IdCliente=}\n" + f"{self.DataTransac=}\n" + f"{self.Valor=}"
+        return f"{self.IdCliente=}\n" + f"{self.DataTransac=}\n" + f"{self.Valor=}\n"
 
 
 ####################
