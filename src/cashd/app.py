@@ -401,26 +401,29 @@ dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
 
 def start_cashd(with_webview: bool = False):
-    port = 5001
-
-    # https://stackoverflow.com/questions/2470971/fast-way-to-test-if-a-port-is-in-use-using-python
-    def porta_esta_ocupada() -> bool:
+    def porta_livre() -> int:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            return s.connect_ex(("localhost", port)) == 0
+            port = 5000
+            for i in range(51):
+                if s.connect_ex(("localhost", port + i)) != 0:
+                    return port + i
+
+    port = porta_livre()
 
     def run_taipy_gui():
-        if not porta_esta_ocupada():
-            app.run(
-                title="Cashd",
-                run_browser=not with_webview,
-                dark_mode=False,
-                stylekit={
-                    "color_primary": "#478eff",
-                    "color_background_light": "#ffffff",
-                },
-                run_server=True,
-                port=port,
-            )
+        app.run(
+            title="Cashd",
+            run_browser=not with_webview,
+            dark_mode=False,
+            stylekit={
+                "color_primary": "#478eff",
+                "color_background_light": "#ffffff",
+            },
+            run_server=True,
+            port=port,
+            favicon="assets/PNG_LogoFavicon.png",
+            watermark="",
+        )
 
     if with_webview:
         taipy_thread = threading.Thread(target=run_taipy_gui)
@@ -430,7 +433,7 @@ def start_cashd(with_webview: bool = False):
         window = webview.create_window(
             title="Cashd",
             url=f"http://localhost:{port}",
-            frameless=True,
+            frameless=False,
             maximized=maximizado,
             easy_drag=False,
             min_size=(900, 600),
