@@ -368,16 +368,14 @@ config_df_entradas_abatimentos = {"displaymodebar": False}
 
 
 RAIZ = """
-<|menu|label=Menu|width=200px|lov={("adicionar_transacao", Icon("assets/SVG_TransacaoBranco.svg", "Transações")), ("criar_uma_conta", Icon("assets/SVG_ContasBranco.svg", "Clientes")), ("analise", Icon("assets/SVG_DadosBranco.svg", "Estatísticas")), ("controles_do_programa", Icon("assets/SVG_ConfiguracaoBranco.svg", "Configurações"))}|on_action=menu_lateral|>
+<|menu|label=Menu|width=200px|lov={("transacoes", Icon("assets/SVG_TransacaoBranco.svg", "Transações")), ("clientes", Icon("assets/SVG_ContasBranco.svg", "Clientes")), ("analise", Icon("assets/SVG_DadosBranco.svg", "Estatísticas")), ("controles_do_programa", Icon("assets/SVG_ConfiguracaoBranco.svg", "Configurações"))}|on_action=menu_lateral|>
 """
 
 
 paginas = {
     "/": RAIZ,
-    "adicionar_transacao": transac.PG_ADICIONAR_TRANSAC,
-    "registro_de_contas": contas.PG_REGISTRO_CONTAS,
-    "historico_transacoes": transac.PG_HIST_TRANSAC,
-    "criar_uma_conta": contas.PG_CRIAR_CONTA,
+    "transacoes": transac.PG_ADICIONAR_TRANSAC,
+    "clientes": contas.PG_CONTAS,
     "analise": analise.GRAFICO_ENTRADAS_ABAT,
     "controles_do_programa": configs.CONTROLES,
 }
@@ -386,10 +384,8 @@ app = Gui(pages=paginas, css_file="__main__.css")
 
 elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
 elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
-elem_transac_hist = Gui.add_partial(app, transac.ELEMENTO_HIST)
 
-elem_conta_form = Gui.add_partial(app, contas.ELEMENTO_FORM)
-elem_conta_regs = Gui.add_partial(app, contas.ELEMENTO_REGS)
+elem_conta = Gui.add_partial(app, contas.ELEMENTO_FORM)
 
 elem_config_backup = Gui.add_partial(app, configs.ELEMENTO_BACKUP)
 elem_config_atalho = Gui.add_partial(app, configs.ELEMENTO_ATALHO)
@@ -402,10 +398,16 @@ dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
 # menus de navegacao
 nav_transac_lov = [
-    (transac.ELEMENTO_FORM, "Adicionar Transação"), 
-    (transac.ELEMENTO_HIST, "Ver Histórico")
-    ]
+    (transac.ELEMENTO_FORM, "Adicionar transação"), 
+    (transac.ELEMENTO_HIST, "Ver histórico")
+]
 nav_transac_val = nav_transac_lov[0]
+
+nav_conta_lov = [
+    (contas.ELEMENTO_FORM, "Criar conta"),
+    (contas.ELEMENTO_REGS, "Contas registradas")
+]
+nav_conta_val = nav_conta_lov[0]
 
 def start_cashd(with_webview: bool = False):
     def porta_aberta() -> int:

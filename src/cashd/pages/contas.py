@@ -1,12 +1,12 @@
-PG_REGISTRO_CONTAS = """
-<|layout|columns=1fr auto 1fr|class_name=header_container|
+PG_CONTAS = """
+<|layout|columns=.65fr auto 1fr|class_name=header_container|
 
 <|part|class_name=header_logo|
 <|Cashd|text|height=30px|width=30px|>
 |>
 
 <|part|class_name=align_item_stretch|
-<|navbar|lov={[("/criar_uma_conta", "Criar Conta"), ("/registro_de_contas", "Contas Registradas")]}|>
+<|{nav_conta_val}|toggle|lov={nav_conta_lov}|on_change={lambda s: s.elem_conta.update_content(s, nav_conta_val[0])}|>
 |>
 
 <|part|class_name=text_right|class_name=header_top_right_corner|
@@ -19,33 +19,7 @@ PG_REGISTRO_CONTAS = """
 
 <br />
 
-<|part|partial={elem_conta_regs}|class_name=container|>
-"""
-
-
-PG_CRIAR_CONTA = """
-<|layout|columns=1fr auto 1fr|class_name=header_container|
-
-<|part|class_name=header_logo|
-<|Cashd|text|height=30px|width=30px|>
-|>
-
-<|part|class_name=align_item_stretch|
-<|navbar|lov={[("/criar_uma_conta", "Criar Conta"), ("/registro_de_contas", "Contas Registradas")]}|>
-|>
-
-<|part|class_name=text_right|class_name=header_top_right_corner|
-<|🗕|button|on_action=btn_mudar_minimizado|>
-<|🗖|button|on_action=btn_mudar_maximizado|>
-<|✖|button|on_action=btn_encerrar|>
-|>
-
-|>
-
-<br />
-
-<|part|partial={elem_conta_form}|class_name=container|>
-
+<|part|partial={elem_conta}|class_name=container|>
 """
 
 
