@@ -412,8 +412,9 @@ def start_cashd(with_webview: bool = False):
         port = 5000
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             for i in range(51):
-                if s.connect_ex(("localhost", port + 1)) != 0:
+                if s.connect_ex(("localhost", port + i)) != 0:
                     return port + i
+                return port + 50
                 
     port = porta_aberta()
 
@@ -440,7 +441,7 @@ def start_cashd(with_webview: bool = False):
         window = webview.create_window(
             title="Cashd",
             url=f"http://localhost:{port}",
-            frameless=False,
+            frameless=True,
             maximized=maximizado,
             easy_drag=False,
             min_size=(900, 600),
