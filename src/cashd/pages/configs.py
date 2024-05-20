@@ -14,13 +14,16 @@ CONTROLES = """
 |>
 
 <br />
+<br />
 
 <|Backup|expandable|expand={expand_backup_ctrl}|partial={elem_config_backup}|>
 
 <br />
+<br />
 
 <|Criar atalho|expandable|expand={expand_atalho_ctrl}|partial={elem_config_atalho}|>
 
+<br />
 <br />
 <br />
 """
