@@ -1,6 +1,7 @@
 from configparser import ConfigParser
 from tempfile import TemporaryFile, TemporaryDirectory
 import pytest
+import sqlite3
 import os
 
 from cashd.backup import (
@@ -10,6 +11,7 @@ from cashd.backup import (
     parse_list_to_config,
     copy_file,
     rename_on_db_folder,
+    check_sqlite,
     DB_FILE
 )
 
@@ -31,9 +33,9 @@ def test_list_parse():
     expected_list = [r"c:/some/path", r"c:\some\other\path"]
 
     parsed_from = parse_list_from_config(string)
-    parset_to = parse_list_to_config(expected_list)
+    parsed_to = parse_list_to_config(expected_list)
     assert parsed_from == expected_list
-    assert parset_to == string
+    assert parsed_to == string
 
 
 def test_copy_file():
@@ -71,3 +73,35 @@ def test_rename_on_db_folder():
         rename_on_db_folder(old_filename, new_filename)
         new_filepath = os.path.join(db_folder, new_filename)
         assert os.path.isfile(new_filepath)
+
+
+def test_check_sqlite():
+    tempdir = TemporaryDirectory()
+    with TemporaryDirectory() as tempdir:
+        # Create a valid SQLite database file
+        valid_db_file = os.path.join(tempdir, "valid_database.db")
+        con = sqlite3.connect(valid_db_file)
+        cursor = con.cursor()
+        cursor.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)")
+        con.commit()
+        con.close()
+
+        # Test valid database
+        assert check_sqlite(valid_db_file) is True
+
+        # Create an empty file (invalid database)
+        invalid_db_file = os.path.join(tempdir, "invalid_database.txt")
+        open(invalid_db_file, "wt").close()
+
+        # Test invalid database
+        assert check_sqlite(invalid_db_file) is False
+
+        # Test exception when _raise=True
+        with open(os.path.join(tempdir, "non_existent.db"), "w"):
+            pass
+        try:
+            check_sqlite(invalid_db_file, _raise=True)
+        except FileExistsError:
+            pass
+        else:
+            raise AssertionError("Expected FileExistsError, but no exception was raised")
