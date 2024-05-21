@@ -1,7 +1,7 @@
 from cashd import db, backup
 from cashd.pages import transac, contas, analise, configs, dialogo
 
-from taipy.gui import Gui, notify, State, navigate
+from taipy.gui import Gui, notify, State, navigate, Icon
 from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
@@ -370,27 +370,24 @@ config_df_entradas_abatimentos = {"displaymodebar": False}
 
 
 RAIZ = """
-<|menu|label=Menu|width=200px|lov={("transacoes", Icon("assets/SVG_TransacaoBranco.svg", "Transações")), ("clientes", Icon("assets/SVG_ContasBranco.svg", "Clientes")), ("analise", Icon("assets/SVG_DadosBranco.svg", "Estatísticas")), ("controles_do_programa", Icon("assets/SVG_ConfiguracaoBranco.svg", "Configurações"))}|on_action=menu_lateral|>
+<|menu|label=Menu|width=200px|lov={("transacoes", Icon("assets/SVG_TransacaoBranco.svg", "Transações")), ("clientes", Icon("assets/SVG_ContasBranco.svg", "Clientes")), ("analise", Icon("assets/SVG_DadosBranco.svg", "Estatísticas")), ("configs", Icon("assets/SVG_ConfiguracaoBranco.svg", "Configurações"))}|on_action=menu_lateral|>
 """
 
 
 paginas = {
     "/": RAIZ,
-    "transacoes": transac.PG_ADICIONAR_TRANSAC,
+    "transacoes": transac.PG_TRANSAC,
     "clientes": contas.PG_CONTAS,
-    "analise": analise.GRAFICO_ENTRADAS_ABAT,
-    "controles_do_programa": configs.CONTROLES,
+    "analise": analise.PG_ANALISE,
+    "configs": configs.PG_CONFIG,
 }
 
 app = Gui(pages=paginas, css_file="__main__.css")
 
 elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
 elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
-
 elem_conta = Gui.add_partial(app, contas.ELEMENTO_FORM)
-
-elem_config_backup = Gui.add_partial(app, configs.ELEMENTO_BACKUP)
-elem_config_atalho = Gui.add_partial(app, configs.ELEMENTO_ATALHO)
+elem_config = Gui.add_partial(app, configs.ELEMENTO_BACKUP)
 
 dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
 dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
@@ -398,18 +395,26 @@ dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
 dial_transac_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_TRANSAC)
 dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
-# menus de navegacao
+### menus de navegacao ###
+# transacoes
 nav_transac_lov = [
     (transac.ELEMENTO_FORM, "Adicionar transação"), 
     (transac.ELEMENTO_HIST, "Ver histórico")
 ]
 nav_transac_val = nav_transac_lov[0]
-
+# contas
 nav_conta_lov = [
     (contas.ELEMENTO_FORM, "Criar conta"),
     (contas.ELEMENTO_REGS, "Contas registradas")
 ]
 nav_conta_val = nav_conta_lov[0]
+# configs
+nav_config_lov =[
+    (configs.ELEMENTO_BACKUP, "Backup"),
+    (configs.ELEMENTO_ATALHO, "Outros")
+]
+nav_config_val = nav_config_lov[0]
+
 
 def start_cashd(with_webview: bool = False):
     def porta_aberta() -> int:

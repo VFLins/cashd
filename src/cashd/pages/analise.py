@@ -1,4 +1,4 @@
-GRAFICO_ENTRADAS_ABAT = """
+PG_ANALISE = """
 <|layout|columns=1fr 1fr|class_name=header_container|
 
 <|part|class_name=header_logo|

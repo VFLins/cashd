@@ -1,5 +1,5 @@
-PG_ADICIONAR_TRANSAC = """
-<|layout|columns=.65fr auto 1fr|class_name=header_container|
+PG_TRANSAC = """
+<|layout|columns=.68fr auto 1fr|class_name=header_container|
 
 <|part|class_name=header_logo|
 <|Cashd|text|height=30px|width=30px|>

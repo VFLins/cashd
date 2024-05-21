@@ -1,8 +1,12 @@
-CONTROLES = """
-<|layout|columns=1fr 1fr|class_name=header_container|
+PG_CONFIG = """
+<|layout|columns=.68fr auto 1fr|class_name=header_container|
 
 <|part|class_name=header_logo|
 <|Cashd|text|height=30px|width=30px|>
+|>
+
+<|part|class_name=align_item_stretch|
+<|{nav_config_val}|toggle|lov={nav_config_lov}|on_change={lambda s: s.elem_config.update_content(s, nav_config_val[0])}|>
 |>
 
 <|part|class_name=text_right|class_name=header_top_right_corner|
@@ -14,38 +18,42 @@ CONTROLES = """
 |>
 
 <br />
-<br />
 
-<|Backup|expandable|expand={expand_backup_ctrl}|partial={elem_config_backup}|>
+<|part|partial={elem_config}|class_name=narrow_element|>
 
-<br />
-<br />
-
-<|Criar atalho|expandable|expand={expand_atalho_ctrl}|partial={elem_config_atalho}|>
-
-<br />
-<br />
 <br />
 """
 
 ELEMENTO_BACKUP = """
+# Locais de backup
+
 Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
 
 <br />
 
 <|{df_locais_de_backup}|table|page_size=5|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|>
 
+<br />
+
+# Ações
+
 <|Fazer backup|button|on_action={btn_fazer_backups}|>
-* _Backups serão salvos nos Locais de backup._
 
-<|Carregar backup|button|on_action={btn_carregar_backup}|class_name=plain|>
-* _Não se preocupe, esta operação é reversível. Consulte a documentação._
-"""
-
-ELEMENTO_ATALHO = """
-Clique no botão abaixo para adicionar atalhos à sua área de trabalho e ao menu iniciar:
+*_Backups serão salvos nos Locais de backup._
 
 <br />
 
+<|Carregar backup|button|on_action={btn_carregar_backup}|class_name=plain|>
+
+*_Não se preocupe, esta operação é reversível. Consulte a documentação._
+"""
+
+ELEMENTO_ATALHO = """
+<br />
+
+# Atalhos
+
 <|Adicionar atalho|button|on_action={btn_criar_atalho}|class_name=plain|>
+
+*_Atalhos serão adicionados ao menu iniciar e à área de trabalho._
 """

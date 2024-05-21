@@ -11,8 +11,10 @@
     --container-max-width: 100%
 }
 
-h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-    line-height: 0
+h1, .h1{
+    color: #478eff;
+    font-size: 1.4rem;
+    border-bottom: .5px #478eff solid;
 }
 
 .taipy-layout{
@@ -129,4 +131,9 @@ html {
 /*expandable sections: collapsed*/
 .taipy-expandable.MuiPaper-rounded{
     background-color: rgb(202 223 231 / 25%);
+}
+
+.taipy-part.narrow_element{
+    width: 90%;
+    padding: 0% 0% 0% 10%;
 }
