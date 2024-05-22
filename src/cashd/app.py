@@ -1,7 +1,7 @@
 from cashd import db, backup
 from cashd.pages import transac, contas, analise, configs, dialogo
 
-from taipy.gui import Gui, notify, State, navigate, Icon
+from taipy.gui import Gui, notify, State, navigate, Icon, builder
 from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
@@ -101,6 +101,8 @@ def btn_carregar_backup(state: State):
 def btn_criar_atalho(state: State):
     ico_file = path.join(backup.SCRIPT_PATH, "assets", "ICO_LogoIcone.ico")
     startup_script = path.join(PYTHON_PATH, "cashd.exe")
+    if not path.isfile(startup_script):
+        startup_script = path.join(PYTHON_PATH, "Scripts", "cashd.exe")
 
     make_shortcut(
         script=startup_script,

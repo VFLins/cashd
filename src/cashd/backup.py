@@ -28,6 +28,11 @@ for file in [CONFIG_FILE, LOG_FILE]:
         with open(file=file, mode="a"):
             pass
 
+if not conf.has_section("default"):
+    conf.add_section("default")
+if not conf.has_option("default", "backup_places"):
+    conf.set("default", "backup_places", "[]")
+
 logger = logging.getLogger("cashd.backup")
 logger.setLevel(logging.DEBUG)
 logger.propagate = False
