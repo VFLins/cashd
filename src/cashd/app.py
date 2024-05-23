@@ -418,17 +418,17 @@ nav_config_lov =[
 nav_config_val = nav_config_lov[0]
 
 
-def start_cashd(with_webview: bool = False):
-    def porta_aberta() -> int:
+def porta_aberta() -> int:
         port = 5000
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             for i in range(51):
-                if s.connect_ex(("localhost", port + i)) != 0:
+                if s.connect_ex(("localhost", port + i)) == 0:
                     return port + i
                 return port + 50
-                
-    port = porta_aberta()
 
+port = porta_aberta()
+
+def start_cashd(with_webview: bool = False):
     def run_taipy_gui():
         app.run(
             title="Cashd",
