@@ -56,4 +56,10 @@ ELEMENTO_ATALHO = """
 <|Adicionar atalho|button|on_action={btn_criar_atalho}|class_name=plain|>
 
 *_Atalhos serão adicionados ao menu iniciar e à área de trabalho._
+
+<br />
+
+# Sessão
+
+Executando em http://127.0.0.1:<|{port}|text|>
 """
