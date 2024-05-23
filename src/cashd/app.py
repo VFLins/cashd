@@ -422,9 +422,9 @@ def porta_aberta() -> int:
         port = 5000
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             for i in range(51):
-                if s.connect_ex(("localhost", port + i)) == 0:
+                if s.connect_ex(("localhost", port + i)) != 0:
                     return port + i
-                return port + 50
+            return port + 50
 
 port = porta_aberta()
 
