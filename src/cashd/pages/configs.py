@@ -1,5 +1,5 @@
 PG_CONFIG = """
-<|layout|columns=.68fr auto 1fr|class_name=header_container|
+<|layout|columns=.68fr auto 1fr|persistent|class_name=header_container|
 
 <|part|class_name=header_logo|
 <|Cashd|text|height=30px|width=30px|>
@@ -33,8 +33,6 @@ Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
 
 <|{df_locais_de_backup}|table|page_size=5|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|>
 
-<br />
-
 # Ações
 
 <|Fazer backup|button|on_action={btn_fazer_backups}|>
@@ -49,8 +47,6 @@ Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
 """
 
 ELEMENTO_ATALHO = """
-<br />
-
 # Atalhos
 
 <|Adicionar atalho|button|on_action={btn_criar_atalho}|class_name=plain|>
