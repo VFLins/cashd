@@ -51,6 +51,13 @@ h1, .h1{
 }
 
 /*header-bar: elemento*/
+.taipy-layout.header_container.MuiBox-root {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 99;
+}
+
 .taipy-layout.header_container.MuiBox-root.css-1we2j1x {
     align-items: center;
 }
@@ -105,7 +112,7 @@ div.taipy-part.header_logo.MuiBox-root.css-0 span.MuiTypography-root.MuiTypograp
 html {
     border: solid;
     border-width: thin;
-    border-color: #d3d7d9;
+    border-color: #e1edff;
 }
 
 /*menu and selector: spacing and sizing*/
