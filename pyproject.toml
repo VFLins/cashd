@@ -19,7 +19,8 @@ dependencies = [
     "pywebview==5.0.5",
     "phonenumbers==8.13.31",
     "pandas==2.2.0",
-    "pyshortcuts==1.9.0"
+    "pyshortcuts==1.9.0",
+    "plotly==5.22.0"
 ]
 
 [project.optional-dependencies]
