@@ -410,7 +410,7 @@ def id_transac_pertence_a_cliente(IdTransac: int, IdCliente: int) -> bool:
         return True
 
 
-def saldos_transac_periodo(periodo: Literal["mes", "sem", "dia"] = "mes") -> dict:
+def saldos_transac_periodo(periodo: Literal["mes", "sem", "dia"] = "mes", n: int = 10) -> dict:
     formato = "%Y-%m"
     if periodo == "sem":
         formato = "%Y-%W"
@@ -429,5 +429,5 @@ def saldos_transac_periodo(periodo: Literal["mes", "sem", "dia"] = "mes") -> dic
     with Session(DB_ENGINE) as ses:
         result = ses.execute(text(stmt)).all()
         return pd.DataFrame(
-            [res for res in result][10:], columns=["Data", "Somas", "Abatimentos"]
+            [res for res in result][-n:], columns=["Data", "Somas", "Abatimentos"]
         )

@@ -1,4 +1,4 @@
-from cashd import db, backup
+from cashd import db, backup, plot
 from cashd.pages import transac, contas, analise, configs, dialogo
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder
