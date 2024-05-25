@@ -47,6 +47,30 @@ def btn_atualizar_listagem(state: State):
         state.df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
 
 
+def btn_gerar_main_plot(state: State | None = None):
+    """
+    Se `state=None` retorna um `plotly.graph_objects.Figure`, caso contrario, atualiza o valor
+    de `'main_plot'`."""
+
+    if state:
+        p = state.dropdown_periodo_val[0]
+        n = state.slider_val[0]
+    else:
+        p = dropdown_periodo_val[0]
+        n = slider_val[0]
+
+    if dropdown_tipo_val == "Saldo":
+        fig = plot.saldos_por_periodo(periodo=p, n=n)
+    else:
+        fig = plot.balancos_por_periodo(periodo=p, n=n)
+    
+    if state:
+        state.assign("main_plot", fig)
+        state.refresh("main_plot")
+        return
+    return fig
+
+
 def btn_atualizar_locais_de_backup(state: State | None = None):
     """
     Se `state=None` retorna um `pd.DataFrame`, caso contrario, atualiza o valor
@@ -123,9 +147,7 @@ def btn_inserir_transac(state: State):
         state.form_transac.Valor = ""
         agora = datetime.now()
 
-        db.adicionar_transac(
-            db.tbl_transacoes(CarimboTempo=agora, **nova_transac)
-        )
+        db.adicionar_transac(db.tbl_transacoes(CarimboTempo=agora, **nova_transac))
         notify(state, "success", f"Nova transação adicionada!")
 
         id_selecionado = int(nova_transac["IdCliente"])
@@ -307,10 +329,18 @@ mostra_form_editar_cliente = False
 mostra_confirma_conta = False
 mostra_confirma_transac = False
 
-# menus expansiveis
-expand_backup_ctrl = False
-expand_atalho_ctrl = False
+# controles dos graficos
+slider_elems = list(range(10, 51)) + [None]
+slider_lov = [(i, str(i)) if i is not None else (i, "Tudo") for i in slider_elems]
+slider_val = slider_lov[0]
 
+dropdown_periodo_lov = [("mes", "Mensal"), ("sem", "Semanal"), ("dia", "Diário")]
+dropdown_periodo_val = dropdown_periodo_lov[0]
+
+dropdown_tipo_lov = ["Saldo", "Balanço"]
+dropdown_tipo_val = dropdown_tipo_lov[0]
+
+main_plot = btn_gerar_main_plot()
 
 # listagem de clientes
 with db.DB_ENGINE.connect() as conn, conn.begin():
@@ -390,6 +420,7 @@ elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
 elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
 elem_conta = Gui.add_partial(app, contas.ELEMENTO_FORM)
 elem_config = Gui.add_partial(app, configs.ELEMENTO_BACKUP)
+elem_analise = Gui.add_partial(app, analise.ELEM_MAIN)
 
 dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
 dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
@@ -400,33 +431,35 @@ dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 ### menus de navegacao ###
 # transacoes
 nav_transac_lov = [
-    (transac.ELEMENTO_FORM, "Adicionar transação"), 
-    (transac.ELEMENTO_HIST, "Ver histórico")
+    (transac.ELEMENTO_FORM, "Adicionar transação"),
+    (transac.ELEMENTO_HIST, "Ver histórico"),
 ]
 nav_transac_val = nav_transac_lov[0]
 # contas
 nav_conta_lov = [
     (contas.ELEMENTO_FORM, "Criar conta"),
-    (contas.ELEMENTO_REGS, "Contas registradas")
+    (contas.ELEMENTO_REGS, "Contas registradas"),
 ]
 nav_conta_val = nav_conta_lov[0]
 # configs
-nav_config_lov =[
+nav_config_lov = [
     (configs.ELEMENTO_BACKUP, "Backup"),
-    (configs.ELEMENTO_ATALHO, "Outros")
+    (configs.ELEMENTO_ATALHO, "Outros"),
 ]
 nav_config_val = nav_config_lov[0]
 
 
 def porta_aberta() -> int:
-        port = 5000
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            for i in range(51):
-                if s.connect_ex(("localhost", port + i)) != 0:
-                    return port + i
-            return port + 50
+    port = 5000
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        for i in range(51):
+            if s.connect_ex(("localhost", port + i)) != 0:
+                return port + i
+        return port + 50
+
 
 port = porta_aberta()
+
 
 def start_cashd(with_webview: bool = False):
     def run_taipy_gui():

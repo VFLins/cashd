@@ -410,7 +410,18 @@ def id_transac_pertence_a_cliente(IdTransac: int, IdCliente: int) -> bool:
         return True
 
 
-def saldos_transac_periodo(periodo: Literal["mes", "sem", "dia"] = "mes", n: int = 10) -> dict:
+def saldos_transac_periodo(
+    periodo: Literal["mes", "sem", "dia"] = "mes", n: int | None = None
+) -> pd.DataFrame:
+    """
+    Retorna um `pandas.DataFrame` com três colunas:
+    - Data
+    - Somas
+    - Abatimentos
+
+    `n` indica a quantidade de linhas que devem ser retornadas, começando pela
+    última, se `n=None`, retornará todas as linhas.
+    """
     formato = "%Y-%m"
     if periodo == "sem":
         formato = "%Y-%W"
@@ -428,6 +439,9 @@ def saldos_transac_periodo(periodo: Literal["mes", "sem", "dia"] = "mes", n: int
 
     with Session(DB_ENGINE) as ses:
         result = ses.execute(text(stmt)).all()
-        return pd.DataFrame(
-            [res for res in result][-n:], columns=["Data", "Somas", "Abatimentos"]
+        tbl = pd.DataFrame(
+            [res for res in result], columns=["Data", "Somas", "Abatimentos"]
         )
+        if n:
+            tbl = tbl.tail(n)
+        return tbl
