@@ -1,45 +1,119 @@
 import plotly.graph_objects as pg
 import pandas as pd
+from datetime import datetime
+from typing import Literal
 
 from cashd import db
 
 
 CORES = ["#478eff", "gray"]
 
-def balancos_por_periodo():
-    data = db.saldos_transac_periodo()
-    data["Data"] = pd.to_datetime(data.Data)
-    data["SomasDisplay"] = data["Somas"]\
-        .apply(lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " "))
-    data["AbatDisplay"] = data["Abatimentos"]\
-        .apply(lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " "))
 
-    layout = pg.Layout(
+def _preprocessar_data(
+    tbl: pd.DataFrame,
+    periodo: Literal["mes", "sem", "dia"],
+    date_col: str = "Data",
+) -> pd.DataFrame:
+    """
+    Retorna `tbl` com a coluna de data `date_col` formatada corretamente
+    de acordo com a periodicidade em `periodo`
+    """
+    if periodo == "sem":
+        tbl[date_col] = tbl[date_col].apply(
+            lambda x: datetime.strptime(x + "-0", "%Y-%W-%w")
+        )
+    tbl[date_col] = pd.to_datetime(tbl.Data)
+    return tbl
+
+
+def _gerar_layout(
+    tbl: pd.DataFrame, periodo: Literal["mes", "sem", "dia"], date_col: str = "Data"
+) -> pg.Layout:
+    """
+    Retorna um `plotly.graph_objects.Layout` gerado para o conjunto de dados `tbl`
+    """
+    datestr = "%B de %Y"
+    if periodo == "dia":
+        datestr = "%d de %B de %Y"
+    elif periodo == "sem":
+        datestr = "%Y, semana %W"
+
+    return pg.Layout(
         margin=dict(l=0, r=0, t=0, b=0),
         template="none",
         showlegend=False,
         hovermode="x unified",
         xaxis=dict(
             tickmode="array",
-            tickvals=[i for i in data["Data"]],
-            ticktext=[i.strftime("%B de %Y") for i in data["Data"]]
-        )
+            tickvals=[i for i in tbl[date_col]],
+            ticktext=[i.strftime(datestr) for i in tbl[date_col]],
+        ),
     )
 
-    fig = pg.Figure(layout=layout)
-    fig.add_trace(pg.Bar(
-        x=data["Data"], y=data["Somas"], name="Somas",
-        customdata=data[["SomasDisplay"]],
-        hovertemplate="<b>R$ %{customdata[0]}</b>",
-        offsetgroup=0,
-        marker=dict(color=CORES[0])
-    ))
-    fig.add_trace(pg.Bar(
-        x=data["Data"], y=data["Abatimentos"], name="Abatimentos",
-        customdata=data[["AbatDisplay"]],
-        hovertemplate="<b>R$ %{customdata[0]}</b>",
-        offsetgroup=0,
-        marker=dict(color=CORES[1])
-    ))
 
+def balancos_por_periodo(periodo, n):
+    tbl = _preprocessar_data(
+        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo
+    )
+    tbl["SomasDisplay"] = tbl["Somas"].apply(
+        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
+    )
+    tbl["AbatDisplay"] = tbl["Abatimentos"].apply(
+        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
+    )
+
+    layout = _gerar_layout(tbl, periodo)
+
+    fig = pg.Figure(layout=layout)
+    fig.add_trace(
+        pg.Bar(
+            x=tbl["Data"],
+            y=tbl["Somas"],
+            name="Somas",
+            customdata=tbl[["SomasDisplay"]],
+            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            offsetgroup=0,
+            marker=dict(color=CORES[1]),
+        )
+    )
+    fig.add_trace(
+        pg.Bar(
+            x=tbl["Data"],
+            y=tbl["Abatimentos"],
+            name="Abatimentos",
+            customdata=tbl[["AbatDisplay"]],
+            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            offsetgroup=0,
+            marker=dict(color=CORES[0]),
+        )
+    )
+    return fig
+
+
+def saldos_por_periodo(periodo, n):
+    tbl = _preprocessar_data(
+        tbl=db.saldos_transac_periodo(periodo=periodo, n=n),
+        periodo=periodo
+    )
+    tbl["SaldoAcum"] = (tbl["Somas"] + tbl["Abatimentos"]).cumsum()
+    tbl["SaldoAcumDisplay"] = tbl["SaldoAcum"].apply(
+        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
+    )
+
+    layout = _gerar_layout(tbl, periodo)
+
+    fig = pg.Figure(layout=layout)
+    fig.add_trace(
+        pg.Scatter(
+            x=tbl["Data"],
+            y=tbl["SaldoAcum"],
+            name="Saldo",
+            mode="lines+markers",
+            customdata=tbl[["SaldoAcumDisplay"]],
+            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            offsetgroup=0,
+            marker=dict(color=CORES[0]),
+        )
+    )
+    fig.update_xaxes(showgrid=False)
     return fig

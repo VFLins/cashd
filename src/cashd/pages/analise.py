@@ -13,5 +13,10 @@ PG_ANALISE = """
 
 |>
 
-<|{df_entradas_abatimentos}|chart|type=bar|properties={layout_df_entradas_abatimentos}|plot_config={config_df_entradas_abatimentos}|>
+<|part|partial={elem_analise}|class_name=container|>
+"""
+
+
+ELEM_MAIN = """
+<|chart|{main_plot}|config={dict(displayModeBar=False)}|>
 """
