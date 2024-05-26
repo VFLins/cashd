@@ -26,7 +26,9 @@ dependencies = [
 [project.optional-dependencies]
 dev=[
     "pytest-cov>=5.0.0",
-    "black>=24.4.2"
+    "black>=24.4.2",
+    "ipykernel",
+    "nbformat"
 ]
 
 [build-system]
