@@ -18,5 +18,7 @@ PG_ANALISE = """
 
 
 ELEM_MAIN = """
-<|chart|{main_plot}|config={dict(displayModeBar=False)}|>
+# Título do gráfico
+
+<|chart|figure={main_plot}|config={dict(displayModeBar=False)}|>
 """

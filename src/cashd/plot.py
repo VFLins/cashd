@@ -40,21 +40,62 @@ def _gerar_layout(
 
     return pg.Layout(
         margin=dict(l=0, r=0, t=0, b=0),
-        template="none",
+        template="plotly_white",
         showlegend=False,
         hovermode="x unified",
         xaxis=dict(
             tickmode="array",
             tickvals=[i for i in tbl[date_col]],
             ticktext=[i.strftime(datestr) for i in tbl[date_col]],
+            showticklabels=False
         ),
+        yaxis_tickprefix="R$",
+        yaxis_tickformat=" "
     )
 
 
-def balancos_por_periodo(periodo, n):
+def _gerar_layout_vazio():
+    """
+    Retorna um `plotly.graph_objects.Layout` sem marcadores de eixos
+    """
+    return pg.Layout(
+        margin=dict(l=0, r=0, t=0, b=0),
+        template="none",
+        showlegend=False,
+        xaxis=dict(
+            showgrid=False,
+            zeroline=False,
+            visible=False),
+        yaxis=dict(
+            showgrid=False,
+            zeroline=False,
+            visible=False),
+    )
+
+
+def mensagem(msg: str):
+    layout = _gerar_layout_vazio()
+    fig = pg.Figure(layout=layout)
+    fig.add_annotation(
+        x=0.5,
+        y=0.5,
+        xref="paper",
+        yref="paper",
+        text="Nenhum dado disponível",
+        showarrow=False,
+        font=dict(
+            size=20
+        )
+    )
+    return fig
+
+
+def balancos(periodo, n):
     tbl = _preprocessar_data(
-        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo
-    )
+        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo)
+    if tbl.shape[0] == 0:
+        return mensagem("Sem dados para exibir")
+
     tbl["SomasDisplay"] = tbl["Somas"].apply(
         lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
     )
@@ -90,11 +131,12 @@ def balancos_por_periodo(periodo, n):
     return fig
 
 
-def saldos_por_periodo(periodo, n):
+def saldo_acum(periodo, n):
     tbl = _preprocessar_data(
-        tbl=db.saldos_transac_periodo(periodo=periodo, n=n),
-        periodo=periodo
-    )
+        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo)
+    if tbl.shape[0] == 0:
+        return mensagem("Sem dados para exibir")
+
     tbl["SaldoAcum"] = (tbl["Somas"] + tbl["Abatimentos"]).cumsum()
     tbl["SaldoAcumDisplay"] = tbl["SaldoAcum"].apply(
         lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
