@@ -431,8 +431,8 @@ def saldos_transac_periodo(
     stmt = f"""
     select
         STRFTIME('{formato}', "DataTransac") AS MesTransac,
-        SUM(CASE WHEN Valor>0 THEN Valor ELSE 0 END)*1.0/100 as Somas,
-        SUM(CASE WHEN Valor<0 THEN Valor ELSE 0 END)*1.0/100 as Abatimentos
+        SUM(CASE WHEN Valor>0 THEN Valor ELSE 0 END)*1.0/100 AS Somas,
+        SUM(CASE WHEN Valor<0 THEN Valor ELSE 0 END)*1.0/100 AS Abatimentos
     from transacoes
     group by STRFTIME('{formato}', "DataTransac");
     """
@@ -440,8 +440,35 @@ def saldos_transac_periodo(
     with Session(DB_ENGINE) as ses:
         result = ses.execute(text(stmt)).all()
         tbl = pd.DataFrame(
-            [res for res in result], columns=["Data", "Somas", "Abatimentos"]
+            [res for res in result],
+            columns=["Data", "Somas", "Abatimentos"]
         )
         if n:
             tbl = tbl.tail(n)
         return tbl
+
+
+def ultimas_transac(n: int | None = None):
+    """
+    Lista as ultimas `n` transacoes, comecando pela mais recente.
+    Se `n=None`, retorna todas as transacoes.
+    """
+
+    stmt = """
+    select
+        DataTransac, Valor, IdCliente
+    from transacoes
+    order by Id desc
+    """
+
+    if n:
+        stmt = stmt + f"limit {n};"
+    else:
+        stmt = stmt + ";"
+
+    with Session(DB_ENGINE) as ses:
+        result = ses.execute(text(stmt)).all()
+        return pd.DataFrame(
+            [res for res in result],
+            columns=["Data", "Valor", "Id do cliente"]
+        )
