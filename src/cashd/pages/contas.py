@@ -69,7 +69,7 @@ ELEMENTO_REGS = """
 <|Atualizar listagem|button|on_action={btn_atualizar_listagem}|> 
 <|Editar uma conta|button|class_name=plain|on_action={btn_mostrar_dialogo_selec_cliente}|>
 
-<|{df_clientes}|table|paginated|page_size=6|page_size_options={[12,24,36]}|>
+<|{df_clientes}|table|paginated|filter|page_size=6|page_size_options={[12,24,36]}|>
 
 <|{mostra_selec_cliente}|dialog|title=Selecione o cliente que será editado|width=80%|partial={dial_selec_cliente}|on_action=chg_dialog_selec_cliente_conta|page_id=selecionar_conta|labels=Fechar;Continuar|>
 
