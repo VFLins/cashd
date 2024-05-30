@@ -124,10 +124,11 @@ def check_sqlite(file: str, _raise: bool = False):
 
     con = sqlite3.connect(file)
     cursor = con.cursor()
-    stmt = f"PRAGMA integrity_check;"
+    stmt = f"PRAGMA schema_version;"
     try:
         _ = cursor.execute(stmt).fetchone()
-        con.close()
+        if _ == (0,):
+            raise sqlite3.DatabaseError()
         return True
     except sqlite3.DatabaseError:
         return False
@@ -135,6 +136,8 @@ def check_sqlite(file: str, _raise: bool = False):
         logger.critical(f"Erro inesperado validando {file}", exc_info=1)
         if _raise:
             raise xpt
+    finally:
+        con.close()
 
 
 ####################

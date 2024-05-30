@@ -77,7 +77,7 @@ def test_rename_on_db_folder():
 
 
 def test_check_sqlite():
-    with TemporaryDirectory() as tempdir:
+    with TemporaryDirectory(delete=False) as tempdir:
         # Create a valid SQLite database file
         valid_db_file = os.path.join(tempdir, "valid_database.db")
         con = sqlite3.connect(valid_db_file)
@@ -89,24 +89,16 @@ def test_check_sqlite():
         # Test valid database
         assert check_sqlite(valid_db_file) is True
 
-        # Create an empty file (invalid database)
-        invalid_db_file = os.path.join(tempdir, "invalid_database.txt")
-        with open(invalid_db_file, "wt") as inv_file:
-            inv_file.write("text")
-
         # Test invalid database
-        # assert check_sqlite(invalid_db_file) is False
+        invalid_db_file = os.path.join(tempdir, "invalid_database.txt")
+        with open(invalid_db_file, "wt"):
+            assert check_sqlite(invalid_db_file) is False
 
         # Test exception when _raise=True
-        with open(os.path.join(tempdir, "non_existent.db"), "w"):
-            pass
-        try:
-            check_sqlite(invalid_db_file, _raise=True)
-        except FileExistsError:
-            pass
-        else:
-            # raise AssertionError("Expected FileExistsError, but no exception was raised")
-            pass
+        try: 
+            check_sqlite("oi", _raise=True)
+        except Exception: pass
+        else: raise AssertionError("Expected FileExistsError, but no exception was raised")
 
 def test_read_db_size():
     # Create a temporary file
