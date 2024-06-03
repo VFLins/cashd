@@ -1,4 +1,4 @@
-# Cashd
+![banner](https://raw.githubusercontent.com/VFLins/cashd/main/src/cashd/assets/gh_banner-cashd.png)
 
 Regsitre o seu *cashflow* rapidamente, e tenha total controle sobre os seus dados!
 
