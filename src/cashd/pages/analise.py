@@ -27,9 +27,13 @@ ELEM_MAIN = """
 
 <|{slider_val}|slider|lov={slider_lov}|text_anchor=none|>
 
-<|Atualizar|button|on_action={btn_gerar_main_plot}|>
-
 |>
 
-<|chart|figure={main_plot}|config={dict(displayModeBar=False)}|>
+<br />
+
+<center>
+<|Atualizar|button|on_action={btn_gerar_main_plot}|>
+</center>
+
+<|chart|figure={main_plot}|>
 """

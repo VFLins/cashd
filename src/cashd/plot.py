@@ -128,6 +128,7 @@ def balancos(periodo, n):
             marker=dict(color=CORES[0]),
         )
     )
+    fig._config["displayModeBar"] = False
     return fig
 
 
@@ -158,4 +159,5 @@ def saldo_acum(periodo, n):
         )
     )
     fig.update_xaxes(showgrid=False)
+    fig._config["displayModeBar"] = False
     return fig
