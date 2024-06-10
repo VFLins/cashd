@@ -55,7 +55,7 @@ h1, .h1{
     position: sticky;
     top: 0;
     background-color: white;
-    z-index: 99;
+    z-index: 98;
 }
 
 .taipy-layout.header_container.MuiBox-root.css-1we2j1x {
@@ -145,7 +145,34 @@ html {
     padding: 0% 0% 0% 10%;
 }
 
-/*dropdown*/
+/*top controls*/
+.taipy-layout.top_controls.MuiBox-root {
+    justify-items: flex-end;
+    padding-bottom: 12px;
+    z-index: 99;
+}
+
+/*top controls: slider*/
+.css-xbsnaj.MuiSlider-valueLabelOpen {
+    color: transparent;
+    background-color: transparent;
+}
+
+.css-vnhwe0 {
+    color: #478eff;
+}
+
+@media (pointer: coarse) {
+    .css-1753x30 {
+        padding: 0px;
+    }
+}
+
+.taipy-slider {
+    padding-top: 6px;
+}
+
+/*top controls: dropdown*/
 .css-11z0r10.css-11z0r10.css-11z0r10 {
     width: 11rem;
 }
