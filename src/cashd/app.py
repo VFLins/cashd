@@ -381,6 +381,8 @@ maximizado = False
 # valor inicial da tabela de transacoes do usuario selecionado em SLC_USUARIO
 df_transac = db.listar_transac_cliente(SLC_USUARIO[0])["df"]
 
+df_ult_transac = db.ultimas_transac_displ()
+
 # valor inicial do saldo do usuario selecionado em SLC_USUARIO
 SLC_USUARIO_SALDO = db.listar_transac_cliente(SLC_USUARIO[0])["saldo"]
 

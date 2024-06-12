@@ -37,3 +37,21 @@ ELEM_MAIN = """
 
 <|chart|figure={main_plot}|height=360px|>
 """
+
+ELEM_HIST = """
+<|layout|columns=1fr 1fr|
+
+<|part|class_name=header_logo|
+# Últimas transações
+
+<|{df_ult_transac}|table|paginated|filter|page_size=6|page_size_options={[12,24,36]}|>
+|>
+
+<|part|class_name=header_logo|
+# Maiores saldos
+
+
+|>
+
+|>
+"""

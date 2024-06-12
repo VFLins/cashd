@@ -452,6 +452,12 @@ def ultimas_transac(n: int | None = None):
     """
     Lista as ultimas `n` transacoes, comecando pela mais recente.
     Se `n=None`, retorna todas as transacoes.
+
+    Nome das colunas:
+
+    - `Data`
+    - `Valor`
+    - `Id do cliente`
     """
 
     stmt = """
@@ -472,3 +478,18 @@ def ultimas_transac(n: int | None = None):
             [res for res in result],
             columns=["Data", "Valor", "Id do cliente"]
         )
+
+def ultimas_transac_displ():
+    tbl = ultimas_transac(n=None)
+    def nome_por_id(Id: int):
+        c = cliente_por_id(Id=Id)
+        if c.Apelido != "":
+            return f"{c.PrimeiroNome} {c.Sobrenome} ({c.Apelido})"
+        if c.Bairro != "":
+            return f"{c.PrimeiroNome} {c.Sobrenome}, {c.Bairro}"
+        return f"{c.PrimeiroNome} {c.Sobrenome}"
+
+    tbl["Cliente"] = pd.Series(map(nome_por_id, tbl["Id do cliente"]))
+    tbl["Valor"] = tbl["Valor"].apply(lambda x: fmt_moeda(x, para_mostrar=True))
+    tbl.drop("Id do cliente", axis="columns", inplace=True)
+    return tbl
