@@ -70,7 +70,12 @@ def btn_gerar_main_plot(state: State | None = None):
         state.assign("main_plot", fig)
         state.refresh("main_plot")
         return
-    return fig
+    return 
+
+
+def btn_atualizar_df_ult_transac(state: State):
+    updated_tbl = db.ultimas_transac_displ()
+    state.assign("df_ult_transac", updated_tbl)
 
 
 def btn_atualizar_locais_de_backup(state: State | None = None):
@@ -382,6 +387,8 @@ maximizado = False
 df_transac = db.listar_transac_cliente(SLC_USUARIO[0])["df"]
 
 df_ult_transac = db.ultimas_transac_displ()
+
+df_maiores_saldos = db.rank_maiores_saldos(10)
 
 # valor inicial do saldo do usuario selecionado em SLC_USUARIO
 SLC_USUARIO_SALDO = db.listar_transac_cliente(SLC_USUARIO[0])["saldo"]

@@ -461,16 +461,13 @@ def ultimas_transac(n: int | None = None):
     """
 
     stmt = """
-    select
-        DataTransac, Valor, IdCliente
-    from transacoes
-    order by Id desc
+    SELECT DataTransac, Valor, IdCliente
+    FROM transacoes
+    ORDER BY Id desc;
     """
 
     if n:
-        stmt = stmt + f"limit {n};"
-    else:
-        stmt = stmt + ";"
+        stmt = stmt.replace(";", f" LIMIT {n};")
 
     with Session(DB_ENGINE) as ses:
         result = ses.execute(text(stmt)).all()
@@ -479,17 +476,41 @@ def ultimas_transac(n: int | None = None):
             columns=["Data", "Valor", "Id do cliente"]
         )
 
+
+def nome_por_id(Id: int):
+    c = cliente_por_id(Id=Id)
+    if c.Apelido != "":
+        return f"{c.PrimeiroNome} {c.Sobrenome} ({c.Apelido})"
+    if c.Bairro != "":
+        return f"{c.PrimeiroNome} {c.Sobrenome}, {c.Bairro}"
+    return f"{c.PrimeiroNome} {c.Sobrenome}"
+
+
 def ultimas_transac_displ():
     tbl = ultimas_transac(n=None)
-    def nome_por_id(Id: int):
-        c = cliente_por_id(Id=Id)
-        if c.Apelido != "":
-            return f"{c.PrimeiroNome} {c.Sobrenome} ({c.Apelido})"
-        if c.Bairro != "":
-            return f"{c.PrimeiroNome} {c.Sobrenome}, {c.Bairro}"
-        return f"{c.PrimeiroNome} {c.Sobrenome}"
-
     tbl["Cliente"] = pd.Series(map(nome_por_id, tbl["Id do cliente"]))
     tbl["Valor"] = tbl["Valor"].apply(lambda x: fmt_moeda(x, para_mostrar=True))
     tbl.drop("Id do cliente", axis="columns", inplace=True)
+    return tbl
+
+
+def rank_maiores_saldos(n=None):
+    stmt = """
+    SELECT IdCliente, SUM(Valor) AS Saldo
+    FROM transacoes
+    GROUP BY IdCliente
+    ORDER BY Saldo DESC;
+    """
+    if n:
+        stmt = stmt.replace(";", f" LIMIT {n};")
+
+    with Session(DB_ENGINE) as ses:
+        result = ses.execute(text(stmt)).all()
+
+    tbl = pd.DataFrame(
+        [res for res in result],
+        columns=["Cliente", "Saldo"]
+    )
+    tbl["Cliente"] = pd.Series(map(nome_por_id, tbl["Cliente"]))
+    tbl["Saldo"] = tbl["Saldo"].apply(lambda x: fmt_moeda(x, True))
     return tbl
