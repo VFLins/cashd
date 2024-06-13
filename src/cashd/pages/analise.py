@@ -1,8 +1,12 @@
 PG_ANALISE = """
-<|layout|columns=1fr 1fr|class_name=header_container|
+<|layout|columns=.68fr auto 1fr|class_name=header_container|
 
 <|part|class_name=header_logo|
 <|Cashd|text|height=30px|width=30px|>
+|>
+
+<|part|class_name=align_item_stretch|
+<|{nav_analise_val}|toggle|lov={nav_analise_lov}|on_change={lambda s: s.elem_analise.update_content(s, nav_analise_val[0])}|>
 |>
 
 <|part|class_name=text_right|class_name=header_top_right_corner|
@@ -17,7 +21,7 @@ PG_ANALISE = """
 """
 
 
-ELEM_MAIN = """
+ELEM_PLOT = """
 <|layout|columns=1fr 1fr 2fr|class_name=top_controls|
 
 
@@ -39,17 +43,21 @@ ELEM_MAIN = """
 """
 
 ELEM_HIST = """
-<|layout|columns=1fr 1fr|
+<br />
 
-<|part|class_name=header_logo|
+<|layout|columns=1.2fr .7fr|
+
+<|part|
+<|layout|columns=.9 .1fr|class_name=interactive_header|
 # Últimas transações
 
-<|{df_ult_transac}|table|paginated|filter|page_size=6|page_size_options={[12,24,36]}|>
+<|↻|button|>
+|>
+<|{df_ult_transac}|table|paginated|page_size=8|page_size_options={[16, 32]}|>
 |>
 
-<|part|class_name=header_logo|
+<|part|
 # Maiores saldos
-
 
 |>
 

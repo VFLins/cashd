@@ -13,7 +13,7 @@
 
 h1, .h1{
     color: #478eff;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     border-bottom: .5px #478eff solid;
 }
 
@@ -175,4 +175,11 @@ html {
 /*top controls: dropdown*/
 .css-11z0r10.css-11z0r10.css-11z0r10 {
     width: 11rem;
+}
+
+/*interactive header*/
+.taipy-layout.interactive_header.MuiBox-root {
+    align-items: center;
+    justify-items: legacy;
+    width: -webkit-fill-available;
 }

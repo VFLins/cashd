@@ -424,7 +424,7 @@ elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
 elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
 elem_conta = Gui.add_partial(app, contas.ELEMENTO_FORM)
 elem_config = Gui.add_partial(app, configs.ELEMENTO_BACKUP)
-elem_analise = Gui.add_partial(app, analise.ELEM_MAIN)
+elem_analise = Gui.add_partial(app, analise.ELEM_HIST)
 
 dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
 dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
@@ -445,6 +445,12 @@ nav_conta_lov = [
     (contas.ELEMENTO_REGS, "Contas registradas"),
 ]
 nav_conta_val = nav_conta_lov[0]
+# estatisticas
+nav_analise_lov = [
+    (analise.ELEM_HIST, "Histórico"),
+    (analise.ELEM_PLOT, "Gráficos")
+]
+nav_analise_val = nav_analise_lov[0]
 # configs
 nav_config_lov = [
     (configs.ELEMENTO_BACKUP, "Backup"),
