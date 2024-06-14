@@ -31,19 +31,25 @@ Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
 
 <br />
 
-<|{df_locais_de_backup}|table|page_size=5|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|>
+<|{df_locais_de_backup}|table|page_size=5|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|height=180px|>
 
 # Ações
 
+<|layout|columns=1fr 1fr|
+
+<|part|
 <|Fazer backup|button|on_action={btn_fazer_backups}|>
 
 *_Backups serão salvos nos Locais de backup._
+|>
 
-<br />
+<|part|
 
 <|Carregar backup|button|on_action={btn_carregar_backup}|class_name=plain|>
 
 *_Não se preocupe, esta operação é reversível. Consulte a documentação._
+|>
+|>
 """
 
 ELEMENTO_ATALHO = """
