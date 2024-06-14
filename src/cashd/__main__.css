@@ -94,6 +94,9 @@ h1, .h1{
 .css-4jd6qr.Mui-selected:hover{
     background-color: #cfe2ff;
 }
+div.MuiToggleButtonGroup-root.css-13vtit button[aria-pressed="false"] p {
+    color: gray;
+}
 
 /*toggle de texto: elem*/
 
