@@ -65,12 +65,12 @@ def btn_gerar_main_plot(state: State | None = None):
         fig = plot.saldo_acum(periodo=p, n=n)
     else:
         fig = plot.balancos(periodo=p, n=n)
-    
+
     if state:
         state.assign("main_plot", fig)
         state.refresh("main_plot")
         return
-    return 
+    return
 
 
 def btn_atualizar_df_ult_transac(state: State):
@@ -264,24 +264,10 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
         s.assign("mostra_confirma_conta", False)
 
 
-def chg_dialog_selec_cliente_transac(state: State, id: str, payload: dict):
-    with state as s:
-        if payload["args"][0] < 1:
-            s.assign("mostra_selec_cliente", False)
-
-        if payload["args"][0] == 1:
-            if s.SLC_USUARIO == "0":
-                notify(s, "error", "Nenhum usuário foi selecionado")
-            else:
-                s.TRANSACS_USUARIO = db.listar_transac_cliente(s.SLC_USUARIO[0], False)
-                s.assign("mostra_selec_cliente", False)
-                s.assign("mostra_selec_transac", True)
-
-
 def chg_dialog_selec_transac(state: State, id: str, payload: dict):
     with state as s:
-        if payload["args"][0] == 0:
-            s.assign("mostra_selec_cliente", True)
+        if payload["args"][0] < 1:
+            s.assign("mostra_selec_transac", False)
 
         if payload["args"][0] == 1:
             if s.SLC_TRANSAC == "0":
@@ -344,7 +330,10 @@ slider_val = slider_lov[0]
 dropdown_periodo_lov = [("mes", "Mensal"), ("sem", "Semanal"), ("dia", "Diário")]
 dropdown_periodo_val = dropdown_periodo_lov[0]
 
-dropdown_tipo_lov = ["Balanço", "Saldo Acumulado", ]
+dropdown_tipo_lov = [
+    "Balanço",
+    "Saldo Acumulado",
+]
 dropdown_tipo_val = dropdown_tipo_lov[0]
 
 main_plot = btn_gerar_main_plot()
@@ -453,10 +442,7 @@ nav_conta_lov = [
 ]
 nav_conta_val = nav_conta_lov[0]
 # estatisticas
-nav_analise_lov = [
-    (analise.ELEM_HIST, "Histórico"),
-    (analise.ELEM_PLOT, "Gráficos")
-]
+nav_analise_lov = [(analise.ELEM_HIST, "Histórico"), (analise.ELEM_PLOT, "Gráficos")]
 nav_analise_val = nav_analise_lov[0]
 # configs
 nav_config_lov = [

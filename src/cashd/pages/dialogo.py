@@ -12,7 +12,7 @@ SELECIONAR_TRANSAC_ETAPA = """
 </center>
 
 <center>
-    <|{SLC_TRANSAC}|selector|lov={TRANSACS_USUARIO}|filter|paginated|height=520px|>
+    <|{SLC_TRANSAC}|selector|lov={TRANSACS_USUARIO}|filter|paginated|height=360px|>
 </center>
 """
 

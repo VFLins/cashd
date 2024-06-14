@@ -47,10 +47,10 @@ def _gerar_layout(
             tickmode="array",
             tickvals=[i for i in tbl[date_col]],
             ticktext=[i.strftime(datestr) for i in tbl[date_col]],
-            showticklabels=False
+            showticklabels=False,
         ),
         yaxis_tickprefix="R$",
-        yaxis_tickformat=" "
+        yaxis_tickformat=" ",
     )
 
 
@@ -62,14 +62,8 @@ def _gerar_layout_vazio():
         margin=dict(l=0, r=0, t=0, b=0),
         template="none",
         showlegend=False,
-        xaxis=dict(
-            showgrid=False,
-            zeroline=False,
-            visible=False),
-        yaxis=dict(
-            showgrid=False,
-            zeroline=False,
-            visible=False),
+        xaxis=dict(showgrid=False, zeroline=False, visible=False),
+        yaxis=dict(showgrid=False, zeroline=False, visible=False),
     )
 
 
@@ -83,16 +77,15 @@ def mensagem(msg: str):
         yref="paper",
         text="Nenhum dado disponível",
         showarrow=False,
-        font=dict(
-            size=20
-        )
+        font=dict(size=20),
     )
     return fig
 
 
 def balancos(periodo, n):
     tbl = _preprocessar_data(
-        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo)
+        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo
+    )
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
 
@@ -134,7 +127,8 @@ def balancos(periodo, n):
 
 def saldo_acum(periodo, n):
     tbl = _preprocessar_data(
-        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo)
+        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo
+    )
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
 

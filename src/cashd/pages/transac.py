@@ -81,15 +81,13 @@ _(*) Obrigatório_
 
 
 ELEMENTO_HIST = """
-<|Excluir uma transação|button|class_name=plain|on_action={lambda s: s.assign("mostra_selec_cliente", True)}|>
+<|Excluir uma transação|button|class_name=plain|on_action={lambda s: s.assign("mostra_selec_transac", True)}|>
  
 Saldo devedor atual: **R$ <|{SLC_USUARIO_SALDO}|>**
 
 <|{df_transac}|table|paginated|height=300px|>
 
-<|{mostra_selec_cliente}|dialog|title=De quem devemos remover esta transação?|width=80%|partial={dial_selec_cliente}|on_action=chg_dialog_selec_cliente_transac|page_id=selecionar_conta|labels=Fechar;Continuar|>
-
-<|{mostra_selec_transac}|dialog|title=Qual transação será removida?|width=80%|partial={dial_selec_transac}|on_action=chg_dialog_selec_transac|page_id=selecionar_transacao|labels=Voltar;Continuar|>
+<|{mostra_selec_transac}|dialog|title=Qual transação será removida?|width=80%|partial={dial_selec_transac}|on_action=chg_dialog_selec_transac|page_id=selecionar_transacao|labels=Cancelar;Continuar|>
 
 <|{mostra_confirma_transac}|dialog|title=Confirma remoção desta transação?|width=80%|partial={dial_transac_confirmar}|on_action=chg_dialog_confirma_transac|page_id=confirma_remover_transacao|labels=Voltar;Confirmar|>
 """

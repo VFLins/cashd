@@ -440,8 +440,7 @@ def saldos_transac_periodo(
     with Session(DB_ENGINE) as ses:
         result = ses.execute(text(stmt)).all()
         tbl = pd.DataFrame(
-            [res for res in result],
-            columns=["Data", "Somas", "Abatimentos"]
+            [res for res in result], columns=["Data", "Somas", "Abatimentos"]
         )
         if n:
             tbl = tbl.tail(n)
@@ -472,8 +471,7 @@ def ultimas_transac(n: int | None = None):
     with Session(DB_ENGINE) as ses:
         result = ses.execute(text(stmt)).all()
         return pd.DataFrame(
-            [res for res in result],
-            columns=["Data", "Valor", "Id do cliente"]
+            [res for res in result], columns=["Data", "Valor", "Id do cliente"]
         )
 
 
@@ -507,10 +505,7 @@ def rank_maiores_saldos(n=None):
     with Session(DB_ENGINE) as ses:
         result = ses.execute(text(stmt)).all()
 
-    tbl = pd.DataFrame(
-        [res for res in result],
-        columns=["Cliente", "Saldo"]
-    )
+    tbl = pd.DataFrame([res for res in result], columns=["Cliente", "Saldo"])
     tbl["Cliente"] = pd.Series(map(nome_por_id, tbl["Cliente"]))
     tbl["Saldo"] = tbl["Saldo"].apply(lambda x: fmt_moeda(x, True))
     return tbl
