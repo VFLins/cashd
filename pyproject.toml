@@ -9,8 +9,15 @@ keywords = ["cash-flow", "ftp"]
 license = {file = "LICENSE"}
 readme = "README.md"
 classifiers = [
+    "Topic :: Office/Business :: Financial :: Accounting",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Customer Service",
+    "Natural Language :: Portuguese (Brazilian)",
     "Programming Language :: Python :: 3",
-    "Operating System :: Windows",
+    "Development Status :: 4 - Beta",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "License :: OSI Approved :: MIT License"
 ]
 version = "0.1.0"
 dependencies = [
