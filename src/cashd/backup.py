@@ -216,6 +216,7 @@ def write_rm_backup_place(idx: int):
             idx = idx * -1
     except:
         logger.error("Input invalido para 'write_rm_backup_place'")
+        return
     conf.read(CONFIG_FILE, "utf-8")
 
     current_list_of_paths = parse_list_from_config(conf["default"]["backup_places"])
