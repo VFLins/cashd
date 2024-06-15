@@ -5,6 +5,9 @@ import sqlite3
 import os
 
 from cashd.backup import (
+    conf,
+    DB_FILE,
+    CONFIG_FILE,
     read_db_size,
     write_current_size,
     parse_list_from_config,
@@ -13,7 +16,8 @@ from cashd.backup import (
     rename_on_db_folder,
     check_sqlite,
     read_last_recorded_size,
-    DB_FILE
+    write_add_backup_place,
+    write_rm_backup_place
 )
 
 
@@ -136,3 +140,31 @@ def test_read_last_recorded_size_existing_section():
     size_nonexistent = read_last_recorded_size(config_file=temp_config_file_path)
     assert size_nonexistent == 0
     os.remove(temp_config_file_path)
+
+
+def test_add_rm_backup_place():
+    conf.read(CONFIG_FILE, "utf-8")
+    current = parse_list_from_config(conf["default"]["backup_places"])
+    path_to_add = r"C:\some\path\for\testing"
+
+    # test add path to config
+    write_add_backup_place(path_to_add)
+    expected_add = current + [path_to_add]
+    current_add = parse_list_from_config(conf["default"]["backup_places"])
+    assert current_add == expected_add
+
+    write_add_backup_place(path_to_add)
+    current_add_repeated = parse_list_from_config(conf["default"]["backup_places"])
+    # shall not add a path that already exists
+    assert current_add_repeated == expected_add
+
+    # test remove path from config
+    added_idx = current_add.index(path_to_add)
+    write_rm_backup_place(added_idx)
+    current_rm = parse_list_from_config(conf["default"]["backup_places"])
+    assert current_rm == current
+
+    write_rm_backup_place("not even an index")
+    # shall only perform action with valid indexes
+    current_rm_invalid = parse_list_from_config(conf["default"]["backup_places"])
+    assert current_rm_invalid == current_rm
