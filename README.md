@@ -1,8 +1,12 @@
 ![banner](https://raw.githubusercontent.com/VFLins/cashd/main/src/cashd/assets/gh_banner-cashd.png)
 
-[![Como instalar](https://img.shields.io/badge/como_instalar-478eff?style=for-the-badge)](https://github.com/VFLins/cashd/wiki/Instalando)
-[![Tutoriais](https://img.shields.io/badge/tutoriais-478eff?style=for-the-badge)](https://github.com/VFLins/cashd/wiki/)
-[![Erros conhecidos](https://img.shields.io/badge/problemas_conhecidos-478eff?style=for-the-badge)](https://github.com/VFLins/cashd/wiki/Problemas-conhecidos)
+<p align="center">
+  <img alt="Como instalar" src="https://img.shields.io/badge/como_instalar-478eff?style=for-the-badge" href="https://github.com/VFLins/cashd/wiki/Instalando">
+   &nbsp;
+  <img alt="Tutoriais" src="https://img.shields.io/badge/tutoriais-478eff?style=for-the-badge" href="https://github.com/VFLins/cashd/wiki/">
+   &nbsp;
+  <img alt="Erros conhecidos" src="https://img.shields.io/badge/problemas_conhecidos-478eff?style=for-the-badge" href="https://github.com/VFLins/cashd/wiki/Problemas-conhecidos">
+</p>
 
 Regsitre o seu *cashflow* rapidamente, ou faça controle de fiado. Seus dados serão só seus!
 
