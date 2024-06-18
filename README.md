@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/VFLins/cashd/wiki/Instalando">
     <img alt="Como instalar" src="https://img.shields.io/badge/como_instalar-478eff?style=for-the-badge"></a>
-  <a href="https://github.com/VFLins/cashd/wiki/">
+  <a href="https://github.com/VFLins/cashd/wiki/Tutoriais">
     <img alt="Tutoriais" src="https://img.shields.io/badge/tutoriais-478eff?style=for-the-badge"></a>
   <a href="https://github.com/VFLins/cashd/wiki/Problemas-conhecidos">
     <img alt="Erros conhecidos" src="https://img.shields.io/badge/problemas_conhecidos-478eff?style=for-the-badge"></a>
