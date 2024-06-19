@@ -197,7 +197,7 @@ def write_add_backup_place(path: str):
     current_list_of_paths = parse_list_from_config(conf["default"]["backup_places"])
 
     if path in current_list_of_paths:
-        logger.warn(f"'{path}' nao adicionado em 'backup_places', ja esta na lista")
+        logger.warning(f"'{path}' nao adicionado em 'backup_places', ja esta na lista")
         return
 
     new_list_of_paths = current_list_of_paths + [path]

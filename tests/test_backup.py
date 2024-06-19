@@ -78,6 +78,15 @@ def test_rename_on_db_folder():
         rename_on_db_folder(old_filename, new_filename)
         new_filepath = os.path.join(db_folder, new_filename)
         assert os.path.isfile(new_filepath)
+    
+    # test invalid file
+    try:
+        rename_on_db_folder("not a file", "go brrrrr", _raise=True)
+    except Exception:
+        assert True == True
+    else:
+        raise AssertionError("Should raise an error with an invalid file")
+
 
 
 def test_check_sqlite():
