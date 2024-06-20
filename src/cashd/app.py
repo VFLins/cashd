@@ -150,6 +150,7 @@ def btn_criar_atalho(state: State):
 def btn_inserir_transac(state: State):
     carregar_lista_transac(state)
     try:
+        state.form_transac = state.display_tr_data
         nova_transac: dict = state.form_transac.despejar()
         state.form_transac.Valor = ""
         agora = datetime.now()
@@ -342,8 +343,9 @@ main_plot = btn_gerar_main_plot()
 with db.DB_ENGINE.connect() as conn, conn.begin():
     df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
 
-# valor inicial do campo "Valor" no menu "Adicionar Transacao"
+# valor inicial dos campos "Valor" e "Data" no menu "Adicionar Transacao"
 display_tr_valor = "0,00"
+display_tr_data = datetime.now()
 
 # valor inicial do seletor de conta global
 NOMES_USUARIOS = sel_listar_clientes()

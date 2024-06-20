@@ -186,3 +186,8 @@ html {
     justify-items: legacy;
     width: -webkit-fill-available;
 }
+
+/*gambiarra (remover depois)*/
+.taipy-date.invisible {
+    color: transparent;
+}

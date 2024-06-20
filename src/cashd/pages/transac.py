@@ -29,43 +29,12 @@ PG_TRANSAC = """
 """
 
 
-PG_HIST_TRANSAC = """
-<|layout|columns=1fr auto 1fr|class_name=header_container|
-
-<|part|class_name=header_logo|
-<|Cashd|text|height=30px|width=30px|>
-|>
-
-<|part|class_name=align_item_stretch|
-<|navbar|lov={[("/adicionar_transacao", "Adicionar Transação"), ("/historico_transacoes", "Ver Histórico")]}|>
-|>
-
-<|part|class_name=text_right|class_name=header_top_right_corner|
-<|🗕|button|on_action=btn_mudar_minimizado|>
-<|🗖|button|on_action=btn_mudar_maximizado|>
-<|✖|button|on_action=btn_encerrar|>
-|>
-
-|>
-
-
-<br />
-
-<|layout|columns=1 1|columns[mobile]=1
-
-<|part|partial={elem_transac_sel}|>
-
-<|part|partial={elem_transac_hist}|>
-
-|>
-"""
-
-
 ELEMENTO_FORM = """
 <|
 __Data__*
+<|{display_tr_data}|date|not editable|class_name=invisible|format=e|>
 
-<|{form_transac.DataTransac}|date|format="d-M-y"|>
+<|{display_tr_data}|date|>
 
 __Valor__*: R$ <|{display_tr_valor}|text|>
 
