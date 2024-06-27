@@ -274,17 +274,21 @@ class FormContas(FormObj):
         self.Bairro = tbl.Bairro
         self.Endereco = tbl.Endereco
         self.Estado = tbl.Estado
+    
+    def __str__(self):
+        return ""
 
     def __repr__(self):
         return (
-            f"{self.PrimeiroNome=}\n"
+            "cashd.db.FormContas object. Fields:\n"
+            + f"{self.PrimeiroNome=}\n"
             + f"{self.Sobrenome=}\n"
             + f"{self.Apelido=}\n"
             + f"{self.Telefone=}\n"
             + f"{self.Cidade=}\n"
             + f"{self.Bairro=}\n"
             + f"{self.Endereco=}\n"
-            + f"{self.Estado=}\n"
+            + f"{self.Estado=}"
         )
 
 

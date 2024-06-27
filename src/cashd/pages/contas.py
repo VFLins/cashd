@@ -60,6 +60,7 @@ __Estado__*
 _(*) Obrigatório_
 
 <|Inserir|button|class_name=plain|on_action=btn_inserir_cliente|>
+<|{str(form_contas)}|text|>
 
 |>
 """

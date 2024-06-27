@@ -51,6 +51,7 @@ __Estado__*
 <|{form_conta_selec.Estado}|input|>
 
 _(*) Obrigatório_
+<|{str(form_contas)}|text|>
 """
 
 CONFIRMAR_TRANSAC = """
