@@ -53,13 +53,13 @@ ELEM_HIST = """
 
 <|↻|button|on_action={btn_atualizar_df_ult_transac}|>
 |>
-<|{df_ult_transac}|table|paginated|page_size=8|page_size_options={[16, 24]}|height=360px|>
+<|{df_ult_transac}|table|paginated|page_size=10|page_size_options={[25, 50]}|height=360px|>
 |>
 
 <|part|
 # Maiores saldos
 
-<|{df_maiores_saldos}|table|page_size=8|page_size_options={[16, 24]}|height=360px|>
+<|{df_maiores_saldos}|table|show_all|height=412px|>
 |>
 
 |>
