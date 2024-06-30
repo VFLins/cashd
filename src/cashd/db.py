@@ -346,9 +346,9 @@ def listar_transac_cliente(Id: int, para_mostrar: bool = True) -> dict | list:
 
         if para_mostrar:
             df = pd.DataFrame([row[1:] for row in res], columns=["Data", "Valor R$"])
-            df.drop
-            df["Valor R$"] = df["Valor R$"].apply(lambda x: x / 100)
-            df.sort_values(by="Data", ascending=False, inplace=True)
+            df = df.loc[::-1]\
+                .sort_values("Data", axis=0, ascending=False)
+            df["Valor R$"] = list(map(lambda x: fmt_moeda(x, True), df["Valor R$"]))
 
             saldo = fmt_moeda(sum(r.Valor for r in res), para_mostrar=True)
             return {"df": df, "saldo": saldo}

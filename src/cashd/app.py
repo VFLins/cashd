@@ -150,7 +150,7 @@ def btn_criar_atalho(state: State):
 def btn_inserir_transac(state: State):
     carregar_lista_transac(state)
     try:
-        state.form_transac = state.display_tr_data
+        state.form_transac.DataTransac = state.display_tr_data
         nova_transac: dict = state.form_transac.despejar()
         state.form_transac.Valor = ""
         agora = datetime.now()
