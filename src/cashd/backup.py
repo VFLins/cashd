@@ -120,7 +120,6 @@ def check_sqlite(file: str, _raise: bool = False):
         logger.error(str(xpt))
         if _raise:
             raise xpt
-        return
 
     con = sqlite3.connect(file)
     cursor = con.cursor()

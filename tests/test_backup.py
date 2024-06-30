@@ -90,7 +90,7 @@ def test_rename_on_db_folder():
 
 
 def test_check_sqlite():
-    with TemporaryDirectory(delete=False) as tempdir:
+    with TemporaryDirectory() as tempdir:
         # Create a valid SQLite database file
         valid_db_file = os.path.join(tempdir, "valid_database.db")
         con = sqlite3.connect(valid_db_file)
