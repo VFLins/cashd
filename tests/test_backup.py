@@ -21,7 +21,6 @@ from cashd.backup import (
     write_rm_backup_place,
     load,
     run,
-
 )
 
 
@@ -29,15 +28,18 @@ SCRIPT_PATH = os.path.split(os.path.realpath(__file__))[0]
 
 
 def test_dbsize_read():
-    with TemporaryFile(delete=False) as data_file, TemporaryFile(delete=False) as config_file:
+    with TemporaryFile(delete=False) as data_file, TemporaryFile(
+        delete=False
+    ) as config_file:
         data_file.write(b"testando um teste testoso...")
         write_current_size(
             config_file=config_file.name,
-            current_size=read_db_size(file_path=data_file.name))
+            current_size=read_db_size(file_path=data_file.name),
+        )
         config = ConfigParser()
         config.read(config_file.name)
         read_dbsize = int(config["file_sizes"]["dbsize"])
-        assert  read_dbsize == read_db_size(file_path=data_file.name)
+        assert read_dbsize == read_db_size(file_path=data_file.name)
 
 
 def test_list_parse():
@@ -67,7 +69,7 @@ def test_copy_file():
 
 def test_rename_on_db_folder():
     db_folder = os.path.split(DB_FILE)[0]
-    
+
     # test closed file
     file = TemporaryFile(delete=False, dir=db_folder)
     file.close()
@@ -85,7 +87,7 @@ def test_rename_on_db_folder():
         rename_on_db_folder(old_filename, new_filename)
         new_filepath = os.path.join(db_folder, new_filename)
         assert os.path.isfile(new_filepath)
-    
+
     # test invalid file
     try:
         rename_on_db_folder("not a file", "go brrrrr", _raise=True)
@@ -93,7 +95,6 @@ def test_rename_on_db_folder():
         assert True == True
     else:
         raise AssertionError("Should raise an error with an invalid file")
-
 
 
 def test_check_sqlite():
@@ -115,10 +116,15 @@ def test_check_sqlite():
             assert check_sqlite(invalid_db_file) is False
 
         # Test exception when _raise=True
-        try: 
+        try:
             check_sqlite("oi", _raise=True)
-        except Exception: pass
-        else: raise AssertionError("Expected FileExistsError, but no exception was raised")
+        except Exception:
+            pass
+        else:
+            raise AssertionError(
+                "Expected FileExistsError, but no exception was raised"
+            )
+
 
 def test_read_db_size():
     # Create a temporary file
@@ -194,7 +200,7 @@ def test_load():
         assert True == True
     else:
         raise AssertionError("Should raise OSError")
-    
+
     # test valid file
     dbdir = os.path.split(DB_FILE)[0]
     prev_stash = [f for f in os.listdir(dbdir) if "stash" in f]
@@ -218,7 +224,7 @@ def test_run():
         conf.read(CONFIG_FILE, "utf-8")
         write_rm_backup_place(0)
         curr_backup_places = parse_list_from_config(conf["default"]["backup_places"])
-    
+
     # get current list of backups
     prev_saved_backups = os.listdir(BACKUP_PATH)
 
@@ -243,7 +249,7 @@ def test_run():
             raise AssertionError(f"Expected no exception, got {type(err)}: {str(err)}")
         finally:
             write_rm_backup_place(0)
-    
+
     # restore `backup_places` and cleanup
     for path in prev_backup_places:
         write_add_backup_place(path)
