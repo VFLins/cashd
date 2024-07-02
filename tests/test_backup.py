@@ -17,8 +17,14 @@ from cashd.backup import (
     check_sqlite,
     read_last_recorded_size,
     write_add_backup_place,
-    write_rm_backup_place
+    write_rm_backup_place,
+    load,
+    run,
+
 )
+
+
+SCRIPT_PATH = os.path.split(os.path.realpath(__file__))[0]
 
 
 def test_dbsize_read():
@@ -177,3 +183,26 @@ def test_add_rm_backup_place():
     # shall only perform action with valid indexes
     current_rm_invalid = parse_list_from_config(conf["default"]["backup_places"])
     assert current_rm_invalid == current_rm
+
+
+def test_load():
+    # test invalid file
+    file = "notfile"
+    try:
+        load(file, _raise = True)
+    except OSError:
+        assert True == True
+    else:
+        raise AssertionError("Should raise OSError")
+    
+    # test valid file
+    dbdir = os.path.split(DB_FILE)[0]
+    prev_stash = [f for f in os.listdir(dbdir) if "stash" in f]
+    load(DB_FILE, _raise = True)
+    new_stash = [f for f in os.listdir(dbdir) if "stash" in f]
+    assert len(prev_stash) == len(new_stash) - 1
+
+    # cleanup
+    stashed = [f for f in new_stash if f not in prev_stash][0]
+    os.unlink(os.path.join(dbdir, stashed))
+        

@@ -255,7 +255,10 @@ def load(file: str, _raise: bool = False) -> None:
         stashfilename = f"stashed{now}.db".replace(":", "-")
         rename_on_db_folder(dbfilename, stashfilename)
 
-    shutil.copyfile(file, DB_FILE)
+    try:
+        shutil.copyfile(file, DB_FILE)
+    except shutil.SameFileError:
+        pass
 
 
 def run(force: bool = False, _raise: bool = False) -> None:
