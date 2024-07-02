@@ -8,6 +8,7 @@ from cashd.backup import (
     conf,
     DB_FILE,
     CONFIG_FILE,
+    BACKUP_PATH,
     read_db_size,
     write_current_size,
     parse_list_from_config,
@@ -187,9 +188,8 @@ def test_add_rm_backup_place():
 
 def test_load():
     # test invalid file
-    file = "notfile"
     try:
-        load(file, _raise = True)
+        load(file="notfile", _raise=True)
     except OSError:
         assert True == True
     else:
@@ -198,11 +198,51 @@ def test_load():
     # test valid file
     dbdir = os.path.split(DB_FILE)[0]
     prev_stash = [f for f in os.listdir(dbdir) if "stash" in f]
-    load(DB_FILE, _raise = True)
+    load(DB_FILE, _raise=True)
     new_stash = [f for f in os.listdir(dbdir) if "stash" in f]
     assert len(prev_stash) == len(new_stash) - 1
 
     # cleanup
     stashed = [f for f in new_stash if f not in prev_stash][0]
-    os.unlink(os.path.join(dbdir, stashed))
+    os.remove(os.path.join(dbdir, stashed))
         
+def test_run():
+    # save current `backup_places`
+    conf.read(CONFIG_FILE, "utf-8")
+    prev_backup_places = parse_list_from_config(conf["default"]["backup_places"])
+
+    # remove `backup_places` from config file
+    curr_backup_places = parse_list_from_config(conf["default"]["backup_places"])
+    while len(curr_backup_places) > 0:
+        conf.read(CONFIG_FILE, "utf-8")
+        write_rm_backup_place(0)
+        curr_backup_places = parse_list_from_config(conf["default"]["backup_places"])
+    
+    # get current list of backups
+    prev_saved_backups = os.listdir(BACKUP_PATH)
+
+    # test invalid path
+    write_add_backup_place("notpath")
+    try:
+        run(force=True, _raise=True)
+        write_rm_backup_place(0)
+    except NotADirectoryError:
+        assert True == True
+    else:
+        raise AssertionError("Expected a NotADirectoryError")
+
+    # test valid path
+    write_add_backup_place(SCRIPT_PATH)
+    try:
+        run(force=True, _raise=True)
+        write_rm_backup_place(0)
+    except Exception as err:
+        raise AssertionError(f"Expected no exception, got {type(err)}: {str(err)}")
+    
+    # restore `backup_places` and cleanup
+    for path in prev_backup_places:
+        write_add_backup_place(path)
+    for file in [f for f in os.listdir(SCRIPT_PATH) if ".db" in f]:
+        os.remove(os.path.join(SCRIPT_PATH, file))
+    for file in [f for f in os.listdir(BACKUP_PATH) not in prev_saved_backups]:
+        os.remove(os.path.join(BACKUP_PATH, file))

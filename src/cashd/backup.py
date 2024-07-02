@@ -285,7 +285,10 @@ def run(force: bool = False, _raise: bool = False) -> None:
         backup_places = [i for i in [BACKUP_PATH] + backup_places if i != ""]
         for place in backup_places:
             try:
-                copy_file(DB_FILE, place, _raise=True)
+                if path.exists(place):
+                    copy_file(DB_FILE, place, _raise=_raise)
+                else:
+                    raise NotADirectoryError(f"{place} nao existe")
             except Exception as xpt:
                 logger.error(f"Nao foi possivel salvar em '{place}': {xpt}", exc_info=1)
                 if _raise:
