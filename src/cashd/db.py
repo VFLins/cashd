@@ -274,7 +274,7 @@ class FormContas(FormObj):
         self.Bairro = tbl.Bairro
         self.Endereco = tbl.Endereco
         self.Estado = tbl.Estado
-    
+
     def __str__(self):
         return ""
 
@@ -346,8 +346,7 @@ def listar_transac_cliente(Id: int, para_mostrar: bool = True) -> dict | list:
 
         if para_mostrar:
             df = pd.DataFrame([row[1:] for row in res], columns=["Data", "Valor R$"])
-            df = df.loc[::-1]\
-                .sort_values("Data", axis=0, ascending=False)
+            df = df.loc[::-1].sort_values("Data", axis=0, ascending=False)
             df["Valor R$"] = list(map(lambda x: fmt_moeda(x, True), df["Valor R$"]))
 
             saldo = fmt_moeda(sum(r.Valor for r in res), para_mostrar=True)

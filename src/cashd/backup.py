@@ -291,7 +291,8 @@ def run(force: bool = False, _raise: bool = False) -> None:
                     raise NotADirectoryError(f"{place} nao existe")
             except Exception as xpt:
                 logger.error(f"Nao foi possivel salvar em '{place}': {xpt}", exc_info=1)
-                if _raise: error_was_raised = True
+                if _raise:
+                    error_was_raised = True
     except Exception as xpt:
         logger.error(f"Erro inesperado durante o backup: {xpt}", exc_info=1)
     finally:
