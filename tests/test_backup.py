@@ -205,7 +205,8 @@ def test_load():
     # cleanup
     stashed = [f for f in new_stash if f not in prev_stash][0]
     os.remove(os.path.join(dbdir, stashed))
-        
+
+
 def test_run():
     # save current `backup_places`
     conf.read(CONFIG_FILE, "utf-8")
@@ -233,18 +234,18 @@ def test_run():
         write_rm_backup_place(0)
 
     # test valid path
-    write_add_backup_place(SCRIPT_PATH)
-    try:
-        run(force=True, _raise=True)
-    except Exception as err:
-        raise AssertionError(f"Expected no exception, got {type(err)}: {str(err)}")
-    finally:
-        write_rm_backup_place(0)
+    with TemporaryDirectory() as tempdir:
+        write_add_backup_place(tempdir)
+        try:
+            run(force=False, _raise=True)
+            run(force=True, _raise=True)
+        except Exception as err:
+            raise AssertionError(f"Expected no exception, got {type(err)}: {str(err)}")
+        finally:
+            write_rm_backup_place(0)
     
     # restore `backup_places` and cleanup
     for path in prev_backup_places:
         write_add_backup_place(path)
-    for file in [f for f in os.listdir(SCRIPT_PATH) if ".db" in f]:
-        os.remove(os.path.join(SCRIPT_PATH, file))
     for file in [f for f in os.listdir(BACKUP_PATH) if f not in prev_saved_backups]:
         os.remove(os.path.join(BACKUP_PATH, file))
