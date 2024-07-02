@@ -225,24 +225,26 @@ def test_run():
     write_add_backup_place("notpath")
     try:
         run(force=True, _raise=True)
-        write_rm_backup_place(0)
     except NotADirectoryError:
         assert True == True
     else:
         raise AssertionError("Expected a NotADirectoryError")
+    finally:
+        write_rm_backup_place(0)
 
     # test valid path
     write_add_backup_place(SCRIPT_PATH)
     try:
         run(force=True, _raise=True)
-        write_rm_backup_place(0)
     except Exception as err:
         raise AssertionError(f"Expected no exception, got {type(err)}: {str(err)}")
+    finally:
+        write_rm_backup_place(0)
     
     # restore `backup_places` and cleanup
     for path in prev_backup_places:
         write_add_backup_place(path)
     for file in [f for f in os.listdir(SCRIPT_PATH) if ".db" in f]:
         os.remove(os.path.join(SCRIPT_PATH, file))
-    for file in [f for f in os.listdir(BACKUP_PATH) not in prev_saved_backups]:
+    for file in [f for f in os.listdir(BACKUP_PATH) if f not in prev_saved_backups]:
         os.remove(os.path.join(BACKUP_PATH, file))
