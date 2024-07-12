@@ -181,7 +181,10 @@ def btn_inserir_cliente(state: State):
 
 
 def btn_encerrar():
-    window.destroy()
+    try:
+        window.destroy()
+    except NameError:
+        pass
     raise KeyboardInterrupt("Encerrando...")
 
 
@@ -307,6 +310,7 @@ def chg_transac_valor(state: State) -> None:
 
 def chg_cliente_selecionado(state: State) -> None:
     carregar_lista_transac(state=state)
+    s.assign("TRANSACS_USUARIO", db.listar_transac_cliente(SLC_USUARIO[0], para_mostrar=False))
     state.form_transac.IdCliente = int(state.SLC_USUARIO[0])
     state.nome_cliente_selec = state.SLC_USUARIO[1]
     state.refresh("form_transac")
