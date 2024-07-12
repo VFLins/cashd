@@ -8,10 +8,6 @@ SELECIONAR_CLIENTE_ETAPA = """
 
 SELECIONAR_TRANSAC_ETAPA = """
 <center>
-    <|Atualizar transações|button|on_action={lambda s: s.assign("TRANSACS_USUARIO", db.listar_transac_cliente(SLC_USUARIO[0], para_mostrar=False))}|>
-</center>
-
-<center>
     <|{SLC_TRANSAC}|selector|lov={TRANSACS_USUARIO}|filter|paginated|height=360px|>
 </center>
 """
