@@ -352,7 +352,7 @@ def listar_transac_cliente(Id: int, para_mostrar: bool = True) -> dict | list:
             return {"df": df, "saldo": saldo}
 
         return list(reversed([
-            (row[0], f"{row[1].strftime('%d/%m/%Y')} | {fmt_moeda(row[2], True)}")
+            (str(row[0]), f"{row[1].strftime('%d/%m/%Y')} | {fmt_moeda(row[2], True)}")
             for row in res
         ]))
 
