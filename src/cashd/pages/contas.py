@@ -67,8 +67,8 @@ _(*) Obrigatório_
 
 
 ELEMENTO_REGS = """
-<|Atualizar listagem|button|on_action={btn_atualizar_listagem}|> 
-<|Editar uma conta|button|class_name=plain|on_action={btn_mostrar_dialogo_selec_cliente}|>
+<|Atualizar listagem|button|class_name=plain|on_action={btn_atualizar_listagem}|> 
+<|Editar uma conta|button|on_action={btn_mostrar_dialogo_selec_cliente}|>
 
 <|{df_clientes}|table|paginated|filter|page_size=6|page_size_options={[12,24,36]}|height=380px|>
 
