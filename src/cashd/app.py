@@ -44,12 +44,11 @@ def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
 
 
 def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
-    btn_mostrar_dialogo(state, id, payload, "selec_transac")
     state.assign(
         "TRANSACS_USUARIO",
         db.listar_transac_cliente(state.SLC_USUARIO[0], para_mostrar=False)
     )
-
+    btn_mostrar_dialogo(state, id, payload, "selec_transac")
 
 
 def btn_atualizar_listagem(state: State):
