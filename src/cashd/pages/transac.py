@@ -50,7 +50,7 @@ _(*) Obrigatório_
 
 
 ELEMENTO_HIST = """
-<|Excluir uma transação|button|on_action={lambda s: s.assign("mostra_selec_transac", True)}|>
+<|Excluir uma transação|button|on_action=btn_mostrar_dialogo_selec_transac|>
  
 Saldo devedor atual: **R$ <|{SLC_USUARIO_SALDO}|>**
 

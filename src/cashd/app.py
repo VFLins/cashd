@@ -28,6 +28,7 @@ def btn_mostrar_dialogo(state: State, id: str, payload: dict, show: str):
         "confirma_transac": "mostra_confirma_transac",
         "selec_cliente": "mostra_selec_cliente",
         "edita_cliente": "mostra_form_editar_cliente",
+        "selec_transac": "mostra_selec_transac",
     }
     for dialog in show_dialogs.values():
         state.assign(dialog, False)
@@ -40,6 +41,15 @@ def btn_mostrar_dialogo_selec_cliente(state: State, id: str, payload: dict):
 
 def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
     btn_mostrar_dialogo(state, id, payload, show="edita_cliente")
+
+
+def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
+    btn_mostrar_dialogo(state, id, payload, "selec_transac")
+    state.assign(
+        "TRANSACS_USUARIO",
+        db.listar_transac_cliente(state.SLC_USUARIO[0], para_mostrar=False)
+    )
+
 
 
 def btn_atualizar_listagem(state: State):
@@ -310,7 +320,6 @@ def chg_transac_valor(state: State) -> None:
 
 def chg_cliente_selecionado(state: State) -> None:
     carregar_lista_transac(state=state)
-    state.assign("TRANSACS_USUARIO", db.listar_transac_cliente(state.SLC_USUARIO[0], para_mostrar=False))
     state.form_transac.IdCliente = int(state.SLC_USUARIO[0])
     state.nome_cliente_selec = state.SLC_USUARIO[1]
     state.refresh("form_transac")
