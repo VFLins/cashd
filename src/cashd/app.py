@@ -214,6 +214,7 @@ def carregar_lista_transac(state: State):
     elems = db.listar_transac_cliente(state.SLC_USUARIO[0])
     state.df_transac = elems["df"]
     state.SLC_USUARIO_SALDO = elems["saldo"]
+    state.SLC_USUARIO_LOCAL = elems["local"]
     state.refresh("df_transac")
     state.refresh("SLC_USUARIO_SALDO")
 
@@ -387,14 +388,18 @@ else:
 maximizado = False
 
 # valor inicial da tabela de transacoes do usuario selecionado em SLC_USUARIO
-df_transac = db.listar_transac_cliente(SLC_USUARIO[0])["df"]
+
 
 df_ult_transac = db.ultimas_transac_displ()
 
 df_maiores_saldos = db.rank_maiores_saldos(10)
 
 # valor inicial do saldo do usuario selecionado em SLC_USUARIO
-SLC_USUARIO_SALDO = db.listar_transac_cliente(SLC_USUARIO[0])["saldo"]
+init_meta_cliente = db.listar_transac_cliente(SLC_USUARIO[0])
+
+df_transac = init_meta_cliente["df"]
+SLC_USUARIO_SALDO = init_meta_cliente["saldo"]
+SLC_USUARIO_LOCAL = init_meta_cliente["local"]
 
 # valor inicial da lista de locais de backup
 df_locais_de_backup = btn_atualizar_locais_de_backup()

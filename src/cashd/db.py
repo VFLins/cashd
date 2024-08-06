@@ -322,7 +322,7 @@ def listar_clientes() -> None:
 
         output = []
         for r in res:
-            linha = {"id": r.Id, "nome": f"{r.PrimeiroNome} {r.Sobrenome}"}
+            linha = {"id": r.Id, "nome": f"{r.Id}, {r.PrimeiroNome} {r.Sobrenome}"}
 
             if r.Apelido != "":
                 linha["nome"] = linha["nome"] + f" ({r.Apelido})"
@@ -349,7 +349,8 @@ def listar_transac_cliente(Id: int, para_mostrar: bool = True) -> dict | list:
             df["Valor R$"] = list(map(lambda x: fmt_moeda(x, True), df["Valor R$"]))
             df = df.loc[::-1].sort_values("Data", axis=0, ascending=False)
             saldo = fmt_moeda(sum(r.Valor for r in res), para_mostrar=True)
-            return {"df": df, "saldo": saldo}
+            local = local_por_id(Id = Id)
+            return {"df": df, "saldo": saldo, "local": local}
 
         return list(reversed([
             (str(row[0]), f"{row[1].strftime('%d/%m/%Y')} | {fmt_moeda(row[2], True)}")
@@ -484,6 +485,16 @@ def nome_por_id(Id: int):
     if c.Bairro != "":
         return f"{c.PrimeiroNome} {c.Sobrenome}, {c.Bairro}"
     return f"{c.PrimeiroNome} {c.Sobrenome}"
+
+
+def local_por_id(Id: int):
+    c = cliente_por_id(Id=Id)
+    logradouro = ""
+    if c.Endereco != "":
+        logradouro = logradouro + f"{c.Endereco}, "
+    if c.Bairro != "":
+        logradouro = logradouro + f"{c.Bairro} - "
+    return logradouro + f"{c.Cidade}/{c.Estado}"
 
 
 def ultimas_transac_displ():

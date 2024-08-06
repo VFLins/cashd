@@ -63,7 +63,9 @@ Saldo devedor atual: **R$ <|{SLC_USUARIO_SALDO}|>**
 
 
 ELEMENTO_SELEC_CONTA = """
-__Cliente__: _<|{form_transac.IdCliente}|text|>_, _<|{nome_cliente_selec}|text|>_
+__Cliente__: _<|{nome_cliente_selec}|text|>_
+
+__Local__: _<|SLC_USUARIO_LOCAL|>_
 
 __Saldo devedor__: R$ <|{SLC_USUARIO_SALDO}|>
 
