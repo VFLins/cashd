@@ -18,15 +18,15 @@ CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "backup.ini")
 LOG_FILE = path.join(SCRIPT_PATH, "logs", "backup.log")
 DB_FILE = path.join(SCRIPT_PATH, "data", "database.db")
 
-conf = configparser.ConfigParser()
-conf.read(CONFIG_FILE, "utf-8")
-
 makedirs(BACKUP_PATH, exist_ok=True)
 for file in [CONFIG_FILE, LOG_FILE]:
     makedirs(path.split(file)[0], exist_ok=True)
     if not path.isfile(file):
         with open(file=file, mode="a"):
             pass
+
+conf = configparser.ConfigParser()
+conf.read(CONFIG_FILE, "utf-8")
 
 if not conf.has_section("default"):
     conf.add_section("default")
@@ -91,7 +91,7 @@ def rename_on_db_folder(current: str, new: str, _raise: bool = False):
     operacao falhar porque o arquivo esta em uso, faz uma copia com o novo
     nome em vez de renomear.
 
-    Levanta o erro que recebeu se ambas as operacoes falharem.
+    Levanta o ultimo erro que recebeu se ambas as operacoes falharem.
     """
     logger.debug("function call: rename_on_db_folder")
     current, new = str(current), str(new)

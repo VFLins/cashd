@@ -1,4 +1,4 @@
-from cashd import db, backup, plot
+from cashd import db, backup, plot, prefs
 from cashd.pages import transac, contas, analise, configs, dialogo
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder
@@ -349,6 +349,12 @@ dropdown_tipo_lov = [
     "Saldo Acumulado",
 ]
 dropdown_tipo_val = dropdown_tipo_lov[0]
+
+dropdown_uf_lov = [
+    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
+    "MG", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC",
+    "SE", "SP", "TO"]
+dropdown_uf_val = prefs.read_uf_preferido()
 
 main_plot = btn_gerar_main_plot()
 

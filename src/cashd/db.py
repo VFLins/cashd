@@ -1,4 +1,5 @@
 import pandas as pd
+from cashd import prefs
 from datetime import datetime, date
 from sqlalchemy import (
     ForeignKey,
@@ -253,7 +254,7 @@ class FormContas(FormObj):
         Cidade: NomeObrigatorio = "Palmares",
         Bairro: NomeOpcional = "",
         Endereco: NomeOpcional = "",
-        Estado: NomeObrigatorioMaiusculo = "PE",
+        Estado: NomeObrigatorioMaiusculo = prefs.read_uf_preferido(),
     ):
 
         self.PrimeiroNome = PrimeiroNome

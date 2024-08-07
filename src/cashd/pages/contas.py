@@ -55,7 +55,7 @@ __Estado__*
 
 <|{form_contas.Cidade}|input|>
 
-<|{form_contas.Estado}|input|>
+<|{form_contas.Estado}|selector|lov={dropdown_uf_lov}|dropdown|>
 
 _(*) Obrigatório_
 
