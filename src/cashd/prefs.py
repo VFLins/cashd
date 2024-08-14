@@ -20,83 +20,55 @@ for file in [CONFIG_FILE, LOG_FILE]:
         with open(file=file, mode="a"):
             pass
 
-conf = configparser.ConfigParser()
-conf.read(CONFIG_FILE, "utf-8")
-try:
-    conf.add_section("default")
-except configparser.DuplicateSectionError:
-    pass
 
-logger = logging.getLogger("cashd.prefs")
-logger.setLevel(logging.DEBUG)
-logger.propagate = False
+class PrefHandler:
+    """
+    Valores de configuração aceitos:
+    [default]
+    - limite_ultimas_transacs: `int`
+    - uf_preferido: `str`
+    - cidade_preferida: `str`
+    """
+    def __init__(self, config_file):
+        self.conf = configparser.ConfigParser()
+        self.conf.read(config_file, "utf-8")
+        self.config_file = config_file
+        try:
+            self.conf.add_section("default")
+        except configparser.DuplicateSectionError:
+            pass
 
-log_fmt = logging.Formatter("%(asctime)s :: %(levelname)s %(message)s")
-log_handler = logging.FileHandler(LOG_FILE)
-log_handler.setLevel(logging.DEBUG)
-log_handler.setFormatter(log_fmt)
+        self.logger = logging.getLogger(f"cashd.{__name__}")
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.propagate = False
 
-logger.addHandler(log_handler)
-
-
-def write_uf_preferido(val: str):
-    """Define `val` como o valor no campo [Default] `uf_preferido`"""
-    logger.debug("function call: write_uf_preferido")
-
-    try:
-        conf.set("default", "uf_preferido", val)
-        with open(CONFIG_FILE, "a") as newconfig:
-            conf.write(newconfig)
-        conf.read(CONFIG_FILE, "utf-8")
-    except Exception as xpt:
-        logger.error(f"Erro inesperado: {str(xpt)}")
-        raise xpt
+        log_fmt = logging.Formatter("%(asctime)s :: %(levelname)s %(message)s")
+        log_handler = logging.FileHandler(LOG_FILE)
+        log_handler.setLevel(logging.DEBUG)
+        log_handler.setFormatter(log_fmt)
+        self.logger.addHandler(log_handler)
 
 
-def read_uf_preferido() -> str | None:
-    """Retorna o valor de `uf_preferido` em 'prefs.ini' como `str`"""
-    logger.debug("function call: read_uf_preferido")
-    config = configparser.ConfigParser()
-    config.read(CONFIG_FILE, "utf-8")
+    def write_default(self, key: str, val: str):
+        """Escreve a combinacao de `key` e `val` na categoria 'default'"""
+        try:
+            self.conf.set("default", key, val)
+            with open(CONFIG_FILE, "a") as newconfig:
+                self.conf.write(newconfig)
+                self.conf.read(self.config_file, "utf-8")
 
-    try:
-        return config.get("default", "uf_preferido")
-    except configparser.NoSectionError:
-        return None
-    except configparser.NoOptionError:
-        return None
-
-
-def write_limite_ultimas_transacs(val: int):
-    """Define `val` como o valor no campo [Default] `limite_ultimas_transacs`"""
-    logger.debug("function call: write_limite_ultimas_transacs")
-
-    try:
-        val = int(val)
-        conf.set("default", "limite_ultimas_transacs", str(val))
-        with open(CONFIG_FILE, "w") as newconfig:
-            conf.write(newconfig)
-        conf.read(CONFIG_FILE, "utf-8")
-    except ValueError as xpt:
-        msg = f"Esperado que `val` seja do tipo `int`"
-        logger.error(msg)
-        raise ValueError(msg)
-    except Exception as xpt:
-        msg = f"Erro inesperado: {str(xpt)}"
-        logger.error(msg)
-        raise xpt
+        except Exception as xpt:
+            self.logger.error(f"Erro inesperado: {str(xpt)}")
+            raise xpt
 
 
-def read_limite_ultimas_transacs() -> int | None:
-    """Retorna o valor de `limite_ultimas_transacs` em 'prefs.ini' como `int`"""
-    logger.debug("function call: read_limite_ultimas_transacs")
-
-    try:
-        return conf.getint("default", "limite_ultimas_transacs")
-    except configparser.NoSectionError:
-        return None
-    except configparser.NoOptionError:
-        return None
+    def read_default(self, key: str):
+        try:
+            return self.conf.get("default", key)
+        except configparser.NoSectionError:
+            return None
+        except configparser.NoOptionError:
+            return None
 
 
 ######################
