@@ -46,7 +46,7 @@ def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
 def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
     state.assign(
         "TRANSACS_USUARIO",
-        db.listar_transac_cliente(state.SLC_USUARIO[0], para_mostrar=False)
+        db.listar_transac_cliente(state.SLC_USUARIO[0], para_mostrar=False),
     )
     btn_mostrar_dialogo(state, id, payload, "selec_transac")
 
@@ -351,9 +351,34 @@ dropdown_tipo_lov = [
 dropdown_tipo_val = dropdown_tipo_lov[0]
 
 dropdown_uf_lov = [
-    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
-    "MG", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC",
-    "SE", "SP", "TO"]
+    "AC",
+    "AL",
+    "AP",
+    "AM",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MT",
+    "MS",
+    "MG",
+    "PA",
+    "PB",
+    "PE",
+    "PI",
+    "PR",
+    "RJ",
+    "RN",
+    "RO",
+    "RR",
+    "RS",
+    "SC",
+    "SE",
+    "SP",
+    "TO",
+]
 dropdown_uf_val = prefs.read_uf_preferido()
 
 main_plot = btn_gerar_main_plot()

@@ -350,13 +350,20 @@ def listar_transac_cliente(Id: int, para_mostrar: bool = True) -> dict | list:
             df["Valor R$"] = list(map(lambda x: fmt_moeda(x, True), df["Valor R$"]))
             df = df.loc[::-1].sort_values("Data", axis=0, ascending=False)
             saldo = fmt_moeda(sum(r.Valor for r in res), para_mostrar=True)
-            local = local_por_id(Id = Id)
+            local = local_por_id(Id=Id)
             return {"df": df, "saldo": saldo, "local": local}
 
-        return list(reversed([
-            (str(row[0]), f"{row[1].strftime('%d/%m/%Y')} | {fmt_moeda(row[2], True)}")
-            for row in res
-        ]))
+        return list(
+            reversed(
+                [
+                    (
+                        str(row[0]),
+                        f"{row[1].strftime('%d/%m/%Y')} | {fmt_moeda(row[2], True)}",
+                    )
+                    for row in res
+                ]
+            )
+        )
 
 
 def adicionar_cliente(cliente: tbl_clientes) -> None:

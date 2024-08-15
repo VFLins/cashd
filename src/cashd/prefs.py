@@ -24,7 +24,7 @@ for file in [CONFIG_FILE, LOG_FILE]:
 class SettingsHandler:
     """
     Valores de configuração usados:
-    
+
     ### prefs.ini
 
     `[default]`
@@ -71,20 +71,15 @@ class SettingsHandler:
         list_of_items = string.split(",")
         return [i.strip() for i in list_of_items if i.strip() != ""]
 
-
     def parse_list_to_config(list_: list[str]) -> str:
         """
         Transforma uma lista de strings do python em uma config (str) com mais
         de um item.
         """
         string_list = (
-            str(list_)\
-                .replace("[", "[\n\t")\
-                .replace(", ", ",\n\t")\
-                .replace("'", "")
+            str(list_).replace("[", "[\n\t").replace(", ", ",\n\t").replace("'", "")
         )
         return string_list.replace("\\\\", "\\")
-
 
     def _write(self, sect: str, key: str, val: str):
         """Escreve a combinacao de `key` e `val` na seção `sect`"""
@@ -97,7 +92,6 @@ class SettingsHandler:
         except Exception as xpt:
             self.logger.error(f"Erro escrevendo [{sect}] {key}={val}: {str(xpt)}")
             raise xpt
-
 
     def _read(self, sect: str, key: str, convert_to=None):
         try:
@@ -115,7 +109,6 @@ class SettingsHandler:
         except configparser.NoOptionError:
             return None
 
-
     def _add_to_list(self, sect: str, key: str, val: str):
         current_list = self.parse_list_from_config(self.conf[sect][key])
         new_list = set(current_list + [val])
@@ -124,7 +117,6 @@ class SettingsHandler:
         with open(CONFIG_FILE, "w") as newconfig:
             self.conf.write(newconfig)
         self.conf.read(self.config_file, "utf-8")
-
 
     def _rm_from_list(self, sect: str, key: str, idx: int):
         """Retira o `idx`-esimo item da lista"""
@@ -139,7 +131,6 @@ class SettingsHandler:
         with open(CONFIG_FILE, "w") as newconfig:
             self.conf.write(newconfig)
         self.conf.read(self.config_file, "utf-8")
-
 
     def write_limite_ultimas_transacs(self, val: int):
         """
