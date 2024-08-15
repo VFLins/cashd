@@ -21,14 +21,28 @@ for file in [CONFIG_FILE, LOG_FILE]:
             pass
 
 
-class PrefHandler:
+class SettingsHandler:
     """
-    Valores de configuração aceitos:
-    [default]
+    Valores de configuração usados:
+    
+    ### prefs.ini
+
+    `[default]`
     - limite_ultimas_transacs: `int`
     - uf_preferido: `str`
     - cidade_preferida: `str`
+
+    ### backup.ini
+
+    `[default]`
+    - executar_ao_fechar: `bool`
+    - verificar_tamanho_de_arquivo: `bool`
+    - lugares_de_backup: `list`
+
+    `[data]`
+    - tamanho_db: `int`
     """
+
     def __init__(self, config_file):
         self.conf = configparser.ConfigParser()
         self.conf.read(config_file, "utf-8")
@@ -48,35 +62,122 @@ class PrefHandler:
         log_handler.setFormatter(log_fmt)
         self.logger.addHandler(log_handler)
 
+    def parse_list_from_config(string: str) -> list[str]:
+        """
+        Transforma uma config com multiplos itens uma uma lista de strings
+        do python.
+        """
+        string = string.replace("[", "").replace("]", "")
+        list_of_items = string.split(",")
+        return [i.strip() for i in list_of_items if i.strip() != ""]
 
-    def write_default(self, key: str, val: str):
-        """Escreve a combinacao de `key` e `val` na categoria 'default'"""
+
+    def parse_list_to_config(list_: list[str]) -> str:
+        """
+        Transforma uma lista de strings do python em uma config (str) com mais
+        de um item.
+        """
+        string_list = (
+            str(list_)\
+                .replace("[", "[\n\t")\
+                .replace(", ", ",\n\t")\
+                .replace("'", "")
+        )
+        return string_list.replace("\\\\", "\\")
+
+
+    def _write(self, sect: str, key: str, val: str):
+        """Escreve a combinacao de `key` e `val` na seção `sect`"""
         try:
-            self.conf.set("default", key, val)
+            self.conf.set(sect, key, val)
             with open(CONFIG_FILE, "a") as newconfig:
                 self.conf.write(newconfig)
-                self.conf.read(self.config_file, "utf-8")
+            self.conf.read(self.config_file, "utf-8")
 
         except Exception as xpt:
-            self.logger.error(f"Erro inesperado: {str(xpt)}")
+            self.logger.error(f"Erro escrevendo [{sect}] {key}={val}: {str(xpt)}")
             raise xpt
 
 
-    def read_default(self, key: str):
+    def _read(self, sect: str, key: str, convert_to=None):
         try:
-            return self.conf.get("default", key)
+            if not convert_to:
+                return self.conf.get(sect, key)
+            elif convert_to == "bool":
+                return self.conf.getboolean(sect, key)
+            elif convert_to == "int":
+                return self.conf.getint(sect, key)
+            elif convert_to == "list":
+                return self.parse_list_from_config(self.conf.get(sect, key))
+
         except configparser.NoSectionError:
             return None
         except configparser.NoOptionError:
             return None
 
 
+    def _add_to_list(self, sect: str, key: str, val: str):
+        current_list = self.parse_list_from_config(self.conf[sect][key])
+        new_list = set(current_list + [val])
+
+        self.conf.set(sect, key, self.parse_list_to_config(new_list))
+        with open(CONFIG_FILE, "w") as newconfig:
+            self.conf.write(newconfig)
+        self.conf.read(self.config_file, "utf-8")
+
+
+    def _rm_from_list(self, sect: str, key: str, idx: int):
+        """Retira o `idx`-esimo item da lista"""
+        current_list = self.parse_list_from_config(self.conf[sect][key])
+        n = len(current_list)
+
+        if (idx + 1) > n:
+            self.logger.error(f"{idx} fora dos limites, deve ser menor que {n}")
+
+        _ = current_list.pop(idx)
+        self.conf.set(sect, key, self.parse_list_to_config(current_list))
+        with open(CONFIG_FILE, "w") as newconfig:
+            self.conf.write(newconfig)
+        self.conf.read(self.config_file, "utf-8")
+
+
+    def write_limite_ultimas_transacs(self, val: int):
+        """
+        Define um limite de transações a ser exibidas na tabela
+        'Últimas transações'.
+        """
+        val = int(val)
+        self._write("default", "limite_ultimas_transacs", str(val))
+
+    def write_uf_preferido(self, val: str):
+        """Define o UF padrão exibido no formulário 'Criar conta'"""
+        self._write("default", "uf_preferido", val)
+
+    def write_cidade_preferida(self, val: str):
+        """Define a cidade padrão exibida no formulário 'Criar conta'"""
+        self._write("default", "cidade_preferida", val)
+
+    def read_limite_ultimas_transacs(self) -> int | None:
+        self._read("default", "limite_ultimas_transacs", convert_to="int")
+
+    def read_uf_preferido(self) -> str | None:
+        self._read("default", "uf_preferido")
+
+    def read_cidade_preferida(self) -> str | None:
+        self._read("default", "cidade_preferida")
+
+
 ######################
 ### write defaults ###
 ######################
 
-if not read_uf_preferido():
-    write_uf_preferido("AC")
+prefs_ = SettingsHandler(config_file=CONFIG_FILE)
 
-if not read_limite_ultimas_transacs():
-    write_limite_ultimas_transacs(1000)
+if not prefs_.read_uf_preferido():
+    prefs_.write_uf_preferido("AC")
+
+if not prefs_.read_cidade_preferida():
+    prefs_.write_cidade_preferida("")
+
+if not prefs_.read_limite_ultimas_transacs():
+    prefs_.write_limite_ultimas_transacs(1000)
