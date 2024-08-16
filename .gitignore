@@ -158,6 +158,9 @@ cython_debug/
 # databases
 database.db
 
+# configuration files
+src/cashd/configs/*
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
@@ -165,4 +168,3 @@ database.db
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .python-version
-src/cashd/configs/prefs.ini
