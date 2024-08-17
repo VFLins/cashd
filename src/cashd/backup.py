@@ -1,4 +1,5 @@
 from cashd.db import DB_ENGINE
+from cashd.prefs import SettingsHandler
 
 import sqlite3
 from os import path, makedirs, rename
@@ -25,13 +26,7 @@ for file in [CONFIG_FILE, LOG_FILE]:
         with open(file=file, mode="a"):
             pass
 
-conf = configparser.ConfigParser()
-conf.read(CONFIG_FILE, "utf-8")
-
-if not conf.has_section("default"):
-    conf.add_section("default")
-if not conf.has_option("default", "backup_places"):
-    conf.set("default", "backup_places", "[]")
+prefs_ = SettingsHandler(config_file=CONFIG_FILE)
 
 logger = logging.getLogger("cashd.backup")
 logger.setLevel(logging.DEBUG)
@@ -50,33 +45,11 @@ logger.addHandler(log_handler)
 ####################
 
 
-def parse_list_from_config(string: str) -> list[str]:
-    """
-    Transforma uma config com multiplos itens uma uma lista de strings
-    do python.
-    """
-    logger.debug("function call: parse_list_from_config")
-    string = string.replace("[", "").replace("]", "")
-    list_of_items = string.split(",")
-    return [i.strip() for i in list_of_items if i.strip() != ""]
-
-
-def parse_list_to_config(list_: list) -> str:
-    """
-    Transforma uma lista de strings do python em uma config (str) com mais
-    de um item.
-    """
-    string_list = (
-        str(list_).replace("[", "[\n\t").replace(", ", ",\n\t").replace("'", "")
-    )
-    return string_list.replace("\\\\", "\\")
-
-
 def copy_file(source_path, target_dir, _raise: bool = False):
     logger.debug("function call: copy_file")
-    now = datetime.now()
+    now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")
     try:
-        filename = f"backup_{now}.db".replace(":", "-")
+        filename = f"backup_{now}.db"
         shutil.copyfile(source_path, path.join(target_dir, filename))
         logger.info(f"Copia de '{source_path}' criada em '{target_dir}'")
     except FileNotFoundError as xpt:
@@ -139,19 +112,19 @@ def check_sqlite(file: str, _raise: bool = False):
         con.close()
 
 
-####################
-# LEITURAS
-####################
-
-
 def read_db_size(file_path: str = DB_FILE) -> int:
     logger.debug("function call: read_db_size")
     try:
         size = path.getsize(file_path)
         return size
-    except FileNotFoundError:
-        logger.error(f"Arquivo '{file_path}' não encontrado.")
-        return None
+    except Exception as xpt:
+        logger.error(f"Erro lendo tamanho do arquivo: {str(xpt)}")
+        return
+
+
+####################
+# LEITURAS
+####################
 
 
 def read_last_recorded_size(config_file: str = CONFIG_FILE):
@@ -169,65 +142,22 @@ def read_last_recorded_size(config_file: str = CONFIG_FILE):
 ####################
 
 
-def write_current_size(
-    config_file: str = CONFIG_FILE, current_size: int = read_db_size()
-) -> None:
+def write_current_size(current_size: int = read_db_size()) -> None:
     """Writes current database size to `backup.ini`"""
     logger.debug("function call: write_current_size")
-    conf.read(config_file)
-
-    try:
-        conf.add_section("file_sizes")
-    except configparser.DuplicateSectionError:
-        pass
-    except Exception as xpt:
-        logger.error(f"Erro inesperado criando a seção `file_sizes`: {xpt}")
-
-    conf["file_sizes"]["dbsize"] = str(current_size)
-    with open(config_file, "w") as config_writer:
-        conf.write(config_writer)
+    prefs_._write("data", "dbsize", current_size)
 
 
 def write_add_backup_place(path: str):
     """Inclui o input `path` na opcao 'backup_places' em `backup.ini`"""
     logger.debug("function call: write_add_backup_place")
-    conf.read(CONFIG_FILE, "utf-8")
-
-    current_list_of_paths = parse_list_from_config(conf["default"]["backup_places"])
-
-    if path in current_list_of_paths:
-        logger.warning(f"'{path}' nao adicionado em 'backup_places', ja esta na lista")
-        return
-
-    new_list_of_paths = current_list_of_paths + [path]
-
-    conf.set("default", "backup_places", parse_list_to_config(new_list_of_paths))
-    with open(CONFIG_FILE, "w") as newconfig:
-        conf.write(newconfig)
+    prefs_._add_to_list("default", "backup_places", path)
 
 
 def write_rm_backup_place(idx: int):
     """Retira o `idx`-esimo item da lista 'backup_places' em `backup.ini`"""
     logger.debug("function call: write_rm_backup_place")
-    try:
-        idx = int(idx)
-        if idx < 0:
-            idx = idx * -1
-    except:
-        logger.error("Input invalido para 'write_rm_backup_place'")
-        return
-    conf.read(CONFIG_FILE, "utf-8")
-
-    current_list_of_paths = parse_list_from_config(conf["default"]["backup_places"])
-    _n_paths = len(current_list_of_paths)
-
-    if (idx + 1) > _n_paths:
-        logger.error(f"{idx} fora dos limites, deve ser menor que {_n_paths}")
-
-    _ = current_list_of_paths.pop(idx)
-    conf.set("default", "backup_places", parse_list_to_config(current_list_of_paths))
-    with open(CONFIG_FILE, "w") as newconfig:
-        conf.write(newconfig)
+    prefs_._rm_from_list("default", "backup_places", idx=idx)
 
 
 def load(file: str, _raise: bool = False) -> None:
@@ -269,8 +199,7 @@ def run(force: bool = False, _raise: bool = False) -> None:
     Usar `force = False` so vai fazer uma copia se o arquivo aumentou de
     tamanho, comparado com o registrado em 'file_sizes'.
     """
-    conf.read(CONFIG_FILE, "utf-8")
-    backup_places = parse_list_from_config(conf["default"]["backup_places"])
+    backup_places = prefs_._read("default", "backup_places", convert_to="list")
     error_was_raised = False
 
     if not force:

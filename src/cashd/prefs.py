@@ -1,13 +1,7 @@
-from os import path, makedirs, rename
-from datetime import datetime
-import shutil
+from os import path, makedirs
 import configparser
 import logging
 
-
-####################
-# GLOBAL VARS
-####################
 
 SCRIPT_PATH = path.split(path.realpath(__file__))[0]
 CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "prefs.ini")
@@ -132,30 +126,30 @@ class SettingsHandler:
             self.conf.write(newconfig)
         self.conf.read(self.config_file, "utf-8")
 
-    def write_limite_ultimas_transacs(self, val: int):
+    def write_last_transacs_limit(self, val: int):
         """
         Define um limite de transações a ser exibidas na tabela
         'Últimas transações'.
         """
         val = int(val)
-        self._write("default", "limite_ultimas_transacs", str(val))
+        self._write("default", "last_transacs_limit", str(val))
 
-    def write_uf_preferido(self, val: str):
+    def write_main_state(self, val: str):
         """Define o UF padrão exibido no formulário 'Criar conta'"""
-        self._write("default", "uf_preferido", val)
+        self._write("default", "main_state", val)
 
-    def write_cidade_preferida(self, val: str):
+    def write_main_city(self, val: str):
         """Define a cidade padrão exibida no formulário 'Criar conta'"""
-        self._write("default", "cidade_preferida", val)
+        self._write("default", "main_city", val)
 
-    def read_limite_ultimas_transacs(self) -> int | None:
-        self._read("default", "limite_ultimas_transacs", convert_to="int")
+    def read_last_transacs_limit(self) -> int | None:
+        self._read("default", "last_transacs_limit", convert_to="int")
 
-    def read_uf_preferido(self) -> str | None:
-        self._read("default", "uf_preferido")
+    def read_main_state(self) -> str | None:
+        self._read("default", "main_state")
 
-    def read_cidade_preferida(self) -> str | None:
-        self._read("default", "cidade_preferida")
+    def read_main_city(self) -> str | None:
+        self._read("default", "main_city")
 
 
 ######################
@@ -164,11 +158,11 @@ class SettingsHandler:
 
 prefs_ = SettingsHandler(config_file=CONFIG_FILE)
 
-if not prefs_.read_uf_preferido():
-    prefs_.write_uf_preferido("AC")
+if not prefs_.read_main_state():
+    prefs_.write_main_state("AC")
 
-if not prefs_.read_cidade_preferida():
-    prefs_.write_cidade_preferida("")
+if not prefs_.read_main_city():
+    prefs_.write_main_city("")
 
-if not prefs_.read_limite_ultimas_transacs():
-    prefs_.write_limite_ultimas_transacs(1000)
+if not prefs_.read_last_transacs_limit():
+    prefs_.write_last_transacs_limit(1000)
