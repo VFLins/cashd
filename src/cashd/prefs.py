@@ -28,19 +28,19 @@ class SettingsHandler:
     ### prefs.ini
 
     `[default]`
-    - limite_ultimas_transacs: `int`
-    - uf_preferido: `str`
-    - cidade_preferida: `str`
+    - last_transacs_limit: `int`
+    - main_state: `str`
+    - main_city: `str`
 
     ### backup.ini
 
     `[default]`
-    - executar_ao_fechar: `bool`
-    - verificar_tamanho_de_arquivo: `bool`
-    - lugares_de_backup: `list`
+    - run_after_closing: `bool`
+    - check_file_size: `bool`
+    - backup_places: `list`
 
     `[data]`
-    - tamanho_db: `int`
+    - dbsize: `int`
     """
 
     def __init__(self, config_file):
