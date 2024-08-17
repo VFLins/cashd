@@ -56,7 +56,7 @@ class SettingsHandler:
         log_handler.setFormatter(log_fmt)
         self.logger.addHandler(log_handler)
 
-    def parse_list_from_config(string: str) -> list[str]:
+    def parse_list_from_config(self, string: str) -> list[str]:
         """
         Transforma uma config com multiplos itens uma uma lista de strings
         do python.
@@ -65,7 +65,7 @@ class SettingsHandler:
         list_of_items = string.split(",")
         return [i.strip() for i in list_of_items if i.strip() != ""]
 
-    def parse_list_to_config(list_: list[str]) -> str:
+    def parse_list_to_config(self, list_: list[str]) -> str:
         """
         Transforma uma lista de strings do python em uma config (str) com mais
         de um item.
@@ -143,13 +143,22 @@ class SettingsHandler:
         self._write("default", "main_city", val)
 
     def read_last_transacs_limit(self) -> int | None:
-        self._read("default", "last_transacs_limit", convert_to="int")
+        return self._read("default", "last_transacs_limit", convert_to="int")
 
     def read_main_state(self) -> str | None:
-        self._read("default", "main_state")
+        return self._read("default", "main_state")
 
     def read_main_city(self) -> str | None:
-        self._read("default", "main_city")
+        return self._read("default", "main_city")
+    
+    def read_backup_places(self) -> str | None:
+        return self._read("default", "backup_places", convert_to="list")
+
+    def add_backup_place(self, place: str) -> None:
+        return self._add_to_list("default", "backup_places", place)
+    
+    def rm_backup_place(self, idx: int) -> None:
+        return self._rm_from_list("default", "backup_places", idx)
 
 
 ######################
@@ -158,7 +167,7 @@ class SettingsHandler:
 
 prefs_ = SettingsHandler(config_file=CONFIG_FILE)
 
-if not prefs_.read_main_state():
+""" if not prefs_.read_main_state():
     prefs_.write_main_state("AC")
 
 if not prefs_.read_main_city():
@@ -166,3 +175,4 @@ if not prefs_.read_main_city():
 
 if not prefs_.read_last_transacs_limit():
     prefs_.write_last_transacs_limit(1000)
+ """
