@@ -91,11 +91,12 @@ def btn_atualizar_locais_de_backup(state: State | None = None):
     """
     Se `state=None` retorna um `pd.DataFrame`, caso contrario, atualiza o valor
     de `'df_locais_de_backup'`."""
-    locais_de_backup = backup.parse_list_from_config(
-        backup.conf["default"]["backup_places"]
-    )
+    locais_de_backup = backup.prefs_.read_backup_places()
     df = pd.DataFrame(
-        {"Id": range(len(locais_de_backup)), "Locais de backup": locais_de_backup}
+        {
+            "Id": range(len(locais_de_backup)),
+            "Locais de backup": locais_de_backup
+        }
     )
 
     if state:
@@ -117,13 +118,13 @@ def btn_add_local_de_backup(state: State):
     root = tk.Tk()
     root.withdraw()
     folder = filedialog.askdirectory()
-    backup.write_add_backup_place(folder)
+    backup.prefs_.add_backup_place(folder)
     btn_atualizar_locais_de_backup(state)
 
 
 def btn_rm_local_de_backup(state: State, var_name, payload):
-    idx = payload["index"]
-    backup.write_rm_backup_place(idx)
+    idx = int(payload["index"])
+    backup.prefs_.rm_backup_place(idx)
     btn_atualizar_locais_de_backup(state)
 
 
