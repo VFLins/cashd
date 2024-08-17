@@ -254,7 +254,7 @@ class FormContas(FormObj):
         Cidade: NomeObrigatorio = "Palmares",
         Bairro: NomeOpcional = "",
         Endereco: NomeOpcional = "",
-        Estado: NomeObrigatorioMaiusculo = prefs.read_uf_preferido(),
+        Estado: NomeObrigatorioMaiusculo = prefs.prefs_.read_main_state(),
     ):
 
         self.PrimeiroNome = PrimeiroNome

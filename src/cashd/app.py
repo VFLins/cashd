@@ -379,7 +379,7 @@ dropdown_uf_lov = [
     "SP",
     "TO",
 ]
-dropdown_uf_val = prefs.read_uf_preferido()
+dropdown_uf_val = prefs.prefs_.read_main_state()
 
 main_plot = btn_gerar_main_plot()
 
