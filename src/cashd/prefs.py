@@ -85,9 +85,10 @@ class SettingsHandler:
         """Escreve a combinacao de `key` e `val` na seção `sect`"""
         try:
             self.conf.set(sect, key, val)
-            with open(self.config_file, "a") as newconfig:
+            with open(self.config_file, "w") as newconfig:
                 self.conf.write(newconfig)
             self.conf.read(self.config_file, "utf-8")
+            self.logger.info(f"Valor atualizado em {self.config_file}: [{sect}] {key} = {val}")
 
         except Exception as xpt:
             self.logger.error(f"Erro escrevendo [{sect}] {key}={val}: {str(xpt)}")
@@ -96,7 +97,7 @@ class SettingsHandler:
     def _read(self, sect: str, key: str, convert_to=None):
         try:
             if not convert_to:
-                return self.conf.get(sect, key)
+                return self.conf[sect][key]
             elif convert_to == "bool":
                 return self.conf.getboolean(sect, key)
             elif convert_to == "int":
@@ -104,6 +105,8 @@ class SettingsHandler:
             elif convert_to == "list":
                 return self.parse_list_from_config(self.conf.get(sect, key))
 
+        except KeyError:
+            return None
         except configparser.NoSectionError:
             return None
         except configparser.NoOptionError:
@@ -136,6 +139,16 @@ class SettingsHandler:
 class PreferencesHandler(SettingsHandler):
     def __init__(self, configname = "prefs"):
         super().__init__(configname)
+
+        # set defaults
+        if self.read_last_transacs_limit() is None:
+            self.write_last_transacs_limit(1000)
+        
+        if self.read_main_state() is None:
+            self.write_main_state("AC")
+        
+        if self.read_main_city() is None:
+            self.write_main_city("")
     
     def write_last_transacs_limit(self, val: int):
         """
@@ -177,18 +190,8 @@ class BackupPrefsHandler(SettingsHandler):
         return self._rm_from_list("default", "backup_places", idx)
 
 
-######################
-### write defaults ###
-######################
+###########################
+# init and write defaults #
+###########################
 
-prefs_ = PreferencesHandler()
-
-""" if not prefs_.read_main_state():
-    prefs_.write_main_state("AC")
-
-if not prefs_.read_main_city():
-    prefs_.write_main_city("")
-
-if not prefs_.read_last_transacs_limit():
-    prefs_.write_last_transacs_limit(1000)
- """
+_settings = PreferencesHandler()
