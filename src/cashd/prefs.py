@@ -4,15 +4,10 @@ import logging
 
 
 SCRIPT_PATH = path.split(path.realpath(__file__))[0]
-CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "prefs.ini")
+PREFS_CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "prefs.ini")
+BACKUP_CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "backup.ini")
 LOG_FILE = path.join(SCRIPT_PATH, "logs", "prefs.log")
 DB_FILE = path.join(SCRIPT_PATH, "data", "database.db")
-
-for file in [CONFIG_FILE, LOG_FILE]:
-    makedirs(path.split(file)[0], exist_ok=True)
-    if not path.isfile(file):
-        with open(file=file, mode="a"):
-            pass
 
 
 class SettingsHandler:
@@ -37,15 +32,19 @@ class SettingsHandler:
     - dbsize: `int`
     """
 
-    def __init__(self, config_file):
+    def __init__(self, configname):
+        self.config_file = path.join(SCRIPT_PATH, "configs", f"{configname}.ini")
+        self.log_file = path.join(SCRIPT_PATH, "logs", f"{configname}.log")
+
+        # config parser
         self.conf = configparser.ConfigParser()
-        self.conf.read(config_file, "utf-8")
-        self.config_file = config_file
+        self.conf.read(self.config_file, "utf-8")
         try:
             self.conf.add_section("default")
         except configparser.DuplicateSectionError:
             pass
-
+        
+        # logger
         self.logger = logging.getLogger(f"cashd.{__name__}")
         self.logger.setLevel(logging.DEBUG)
         self.logger.propagate = False
@@ -55,6 +54,13 @@ class SettingsHandler:
         log_handler.setLevel(logging.DEBUG)
         log_handler.setFormatter(log_fmt)
         self.logger.addHandler(log_handler)
+
+        # create files, if not exist
+        for file in [self.config_file, self.log_file]:
+            makedirs(path.split(file)[0], exist_ok=True)
+            if not path.isfile(file):
+                with open(file=file, mode="a"):
+                    pass
 
     def parse_list_from_config(self, string: str) -> list[str]:
         """
@@ -79,7 +85,7 @@ class SettingsHandler:
         """Escreve a combinacao de `key` e `val` na seção `sect`"""
         try:
             self.conf.set(sect, key, val)
-            with open(CONFIG_FILE, "a") as newconfig:
+            with open(self.config_file, "a") as newconfig:
                 self.conf.write(newconfig)
             self.conf.read(self.config_file, "utf-8")
 
@@ -108,7 +114,7 @@ class SettingsHandler:
         new_list = set(current_list + [val])
 
         self.conf.set(sect, key, self.parse_list_to_config(new_list))
-        with open(CONFIG_FILE, "w") as newconfig:
+        with open(self.config_file, "w") as newconfig:
             self.conf.write(newconfig)
         self.conf.read(self.config_file, "utf-8")
 
@@ -122,10 +128,15 @@ class SettingsHandler:
 
         _ = current_list.pop(idx)
         self.conf.set(sect, key, self.parse_list_to_config(current_list))
-        with open(CONFIG_FILE, "w") as newconfig:
+        with open(self.config_file, "w") as newconfig:
             self.conf.write(newconfig)
         self.conf.read(self.config_file, "utf-8")
 
+
+class PreferencesHandler(SettingsHandler):
+    def __init__(self, configname = "prefs"):
+        super().__init__(configname)
+    
     def write_last_transacs_limit(self, val: int):
         """
         Define um limite de transações a ser exibidas na tabela
@@ -151,6 +162,11 @@ class SettingsHandler:
     def read_main_city(self) -> str | None:
         return self._read("default", "main_city")
     
+
+class BackupPrefsHandler(SettingsHandler):
+    def __init__(self, configname = "backup"):
+        super().__init__(configname)
+
     def read_backup_places(self) -> str | None:
         return self._read("default", "backup_places", convert_to="list")
 
@@ -165,7 +181,7 @@ class SettingsHandler:
 ### write defaults ###
 ######################
 
-prefs_ = SettingsHandler(config_file=CONFIG_FILE)
+prefs_ = PreferencesHandler()
 
 """ if not prefs_.read_main_state():
     prefs_.write_main_state("AC")
