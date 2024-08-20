@@ -18,6 +18,7 @@ class SettingsHandler:
 
     `[default]`
     - last_transacs_limit: `int`
+    - highest_balaces_limit: `int`
     - main_state: `str`
     - main_city: `str`
 
@@ -143,6 +144,9 @@ class PreferencesHandler(SettingsHandler):
         # set defaults
         if self.read_last_transacs_limit() is None:
             self.write_last_transacs_limit(1000)
+
+        if self.read_highest_balaces_limit() is None:
+            self.write_highest_balaces_limit(10)
         
         if self.read_main_state() is None:
             self.write_main_state("AC")
@@ -152,22 +156,33 @@ class PreferencesHandler(SettingsHandler):
     
     def write_last_transacs_limit(self, val: int):
         """
-        Define um limite de transações a ser exibidas na tabela
+        Controla um limite de transações a ser exibidas na tabela
         'Últimas transações'.
         """
         val = int(val)
         self._write("default", "last_transacs_limit", str(val))
+    
+    def write_highest_balaces_limit(self, val: str):
+        """
+        Controla um limite de contas a ser exibidas na tabela
+        'Maiores saldos'.
+        """
+        val = int(val)
+        self._write("default", "highest_balaces_limit", str(val))
 
     def write_main_state(self, val: str):
-        """Define o UF padrão exibido no formulário 'Criar conta'"""
+        """Controla o UF padrão exibido no formulário 'Criar conta'"""
         self._write("default", "main_state", val)
 
     def write_main_city(self, val: str):
-        """Define a cidade padrão exibida no formulário 'Criar conta'"""
+        """Controla a cidade padrão exibida no formulário 'Criar conta'"""
         self._write("default", "main_city", val)
 
     def read_last_transacs_limit(self) -> int | None:
         return self._read("default", "last_transacs_limit", convert_to="int")
+
+    def read_highest_balaces_limit(self) -> int | None:
+        return self._read("default", "highest_balaces_limit", convert_to="int")
 
     def read_main_state(self) -> str | None:
         return self._read("default", "main_state")
@@ -180,18 +195,21 @@ class BackupPrefsHandler(SettingsHandler):
     def __init__(self, configname = "backup"):
         super().__init__(configname)
 
+        if self.read_backup_places() is None:
+            self._write("default", "backup_places", "[]")
+
     def read_backup_places(self) -> str | None:
         return self._read("default", "backup_places", convert_to="list")
 
     def add_backup_place(self, place: str) -> None:
-        return self._add_to_list("default", "backup_places", place)
+        self._add_to_list("default", "backup_places", place)
     
     def rm_backup_place(self, idx: int) -> None:
-        return self._rm_from_list("default", "backup_places", idx)
+        self._rm_from_list("default", "backup_places", idx)
 
 
 ###########################
 # init and write defaults #
 ###########################
 
-_settings = PreferencesHandler()
+settings = PreferencesHandler()

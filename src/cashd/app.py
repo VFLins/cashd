@@ -91,7 +91,7 @@ def btn_atualizar_locais_de_backup(state: State | None = None):
     """
     Se `state=None` retorna um `pd.DataFrame`, caso contrario, atualiza o valor
     de `'df_locais_de_backup'`."""
-    locais_de_backup = backup.prefs_.read_backup_places()
+    locais_de_backup = backup.settings.read_backup_places()
     df = pd.DataFrame(
         {
             "Id": range(len(locais_de_backup)),
@@ -188,6 +188,48 @@ def btn_inserir_cliente(state: State):
         state.NOMES_USUARIOS = sel_listar_clientes()
     except Exception as msg_erro:
         notify(state, "error", str(msg_erro))
+
+
+def btn_chg_prefs_main_state(state: State, val: str):
+    try:
+        prefs.settings.write_main_state(val)
+        state.form_contas.Estado = val
+        state.refresh("form_contas")
+        notify(state, "success", f"Estado preferido atualizado para {val}")
+    except Exception as xpt:
+        notify(state, "error", f"Erro inesperado: {str(xpt)}")
+
+
+def btn_chg_prefs_main_city(state: State, val: str):
+    try:
+        val = val.title()
+        prefs.settings.write_main_city(val)
+        state.input_cidade_val = val
+        state.form_contas.Cidade = val
+        state.refresh("form_contas")
+        notify(state, "success", f"Cidade preferida atualizada para {val}")
+    except Exception as xpt:
+        notify(state, "error", f"Erro inesperado: {str(xpt)}")
+
+
+def btn_chg_max_ultimas_transacs(state: State, val: int):
+    try:
+        val = int(val)
+        prefs.settings.write_last_transacs_limit(val)
+        btn_atualizar_df_ult_transac(state)
+        notify(state, "success", f"Limite de entradas em 'Últimas transações' atualizado para {val}")
+    except Exception as xpt:
+        notify(state, "error", f"Erro inesperado: {str(xpt)}")
+
+
+def btn_chg_max_highest_balances(state: State, val: int):
+    try:
+        val = int(val)
+        prefs.settings.write_highest_balaces_limit(val)
+        state.df_maiores_saldos = db.rank_maiores_saldos(val)
+        notify(state, "success", f"Limite de entradas em 'Maiores saldos' atualizado para {val}")
+    except Exception as xpt:
+        notify(state, "error", f"Erro inesperado: {str(xpt)}")
 
 
 def btn_encerrar():
@@ -380,7 +422,7 @@ dropdown_uf_lov = [
     "SP",
     "TO",
 ]
-dropdown_uf_val = prefs.prefs_.read_main_state()
+dropdown_uf_val = prefs.settings.read_main_state()
 
 main_plot = btn_gerar_main_plot()
 
@@ -420,11 +462,9 @@ else:
 maximizado = False
 
 # valor inicial da tabela de transacoes do usuario selecionado em SLC_USUARIO
-
-
 df_ult_transac = db.ultimas_transac_displ()
 
-df_maiores_saldos = db.rank_maiores_saldos(10)
+df_maiores_saldos = db.rank_maiores_saldos()
 
 # valor inicial do saldo do usuario selecionado em SLC_USUARIO
 init_meta_cliente = db.listar_transac_cliente(SLC_USUARIO[0])
@@ -435,6 +475,14 @@ SLC_USUARIO_LOCAL = init_meta_cliente["local"]
 
 # valor inicial da lista de locais de backup
 df_locais_de_backup = btn_atualizar_locais_de_backup()
+
+# valor inicial do campo "cidade preferida"
+input_cidade_val = prefs.settings.read_main_city()
+
+# valor inicial da configuracao Limite de linhas na tabela "Últimas transações"
+input_quant_max_ultimas_transacs = prefs.settings.read_last_transacs_limit()
+#                    " " "                       na tabela "Maiores saldos"
+input_quant_max_highest_balances = prefs.settings.read_highest_balaces_limit()
 
 # dados de entradas e abatimentos
 df_entradas_abatimentos = db.saldos_transac_periodo()
@@ -470,7 +518,7 @@ app = Gui(pages=paginas, css_file="__main__.css")
 elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
 elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
 elem_conta = Gui.add_partial(app, contas.ELEMENTO_FORM)
-elem_config = Gui.add_partial(app, configs.ELEMENTO_BACKUP)
+elem_config = Gui.add_partial(app, configs.ELEMENTO_PREFS)
 elem_analise = Gui.add_partial(app, analise.ELEM_HIST)
 
 dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
@@ -497,6 +545,7 @@ nav_analise_lov = [(analise.ELEM_HIST, "Histórico"), (analise.ELEM_PLOT, "Gráf
 nav_analise_val = nav_analise_lov[0]
 # configs
 nav_config_lov = [
+    (configs.ELEMENTO_PREFS, "Preferências"),
     (configs.ELEMENTO_BACKUP, "Backup"),
     (configs.ELEMENTO_ATALHO, "Outros"),
 ]

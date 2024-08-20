@@ -17,7 +17,7 @@ PG_TRANSAC = """
 
 |>
 
-<br /><br /><br />
+<br /><br />
 
 <|layout|columns=1 1|columns[mobile]=1
 

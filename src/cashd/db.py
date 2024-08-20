@@ -251,10 +251,10 @@ class FormContas(FormObj):
         Sobrenome: NomeObrigatorio = "",
         Apelido: NomeOpcional = "",
         Telefone: NumeroTelefone = "81900000000",
-        Cidade: NomeObrigatorio = "Palmares",
+        Cidade: NomeObrigatorio = prefs.settings.read_main_city(),
         Bairro: NomeOpcional = "",
         Endereco: NomeOpcional = "",
-        Estado: NomeObrigatorioMaiusculo = prefs.prefs_.read_main_state(),
+        Estado: NomeObrigatorioMaiusculo = prefs.settings.read_main_state(),
     ):
 
         self.PrimeiroNome = PrimeiroNome
@@ -458,7 +458,7 @@ def saldos_transac_periodo(
         return tbl
 
 
-def ultimas_transac(n: int | None = None):
+def ultimas_transac(n: int | None = prefs.settings.read_last_transacs_limit()):
     """
     Lista as ultimas `n` transacoes, comecando pela mais recente.
     Se `n=None`, retorna todas as transacoes.
@@ -470,7 +470,7 @@ def ultimas_transac(n: int | None = None):
     - `Id do cliente`
     """
 
-    stmt = """
+    stmt = f"""
     SELECT DataTransac, Valor, IdCliente
     FROM transacoes
     ORDER BY Id desc;
@@ -513,7 +513,7 @@ def ultimas_transac_displ():
     return tbl
 
 
-def rank_maiores_saldos(n=None):
+def rank_maiores_saldos(n=prefs.settings.read_highest_balaces_limit()):
     stmt = """
     SELECT IdCliente, SUM(Valor) AS Saldo
     FROM transacoes

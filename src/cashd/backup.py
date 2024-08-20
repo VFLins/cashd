@@ -1,5 +1,5 @@
 from cashd.db import DB_ENGINE
-from cashd.prefs import SettingsHandler
+from cashd.prefs import BackupPrefsHandler
 
 import sqlite3
 from os import path, makedirs, rename
@@ -19,14 +19,7 @@ CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "backup.ini")
 LOG_FILE = path.join(SCRIPT_PATH, "logs", "backup.log")
 DB_FILE = path.join(SCRIPT_PATH, "data", "database.db")
 
-makedirs(BACKUP_PATH, exist_ok=True)
-for file in [CONFIG_FILE, LOG_FILE]:
-    makedirs(path.split(file)[0], exist_ok=True)
-    if not path.isfile(file):
-        with open(file=file, mode="a"):
-            pass
-
-prefs_ = SettingsHandler(config_file=CONFIG_FILE)
+settings = BackupPrefsHandler()
 
 logger = logging.getLogger("cashd.backup")
 logger.setLevel(logging.DEBUG)
@@ -145,19 +138,19 @@ def read_last_recorded_size(config_file: str = CONFIG_FILE):
 def write_current_size(current_size: int = read_db_size()) -> None:
     """Writes current database size to `backup.ini`"""
     logger.debug("function call: write_current_size")
-    prefs_._write("data", "dbsize", current_size)
+    settings._write("data", "dbsize", current_size)
 
 
 def write_add_backup_place(path: str):
     """Inclui o input `path` na opcao 'backup_places' em `backup.ini`"""
     logger.debug("function call: write_add_backup_place")
-    prefs_._add_to_list("default", "backup_places", path)
+    settings._add_to_list("default", "backup_places", path)
 
 
 def write_rm_backup_place(idx: int):
     """Retira o `idx`-esimo item da lista 'backup_places' em `backup.ini`"""
     logger.debug("function call: write_rm_backup_place")
-    prefs_._rm_from_list("default", "backup_places", idx=idx)
+    settings._rm_from_list("default", "backup_places", idx=idx)
 
 
 def load(file: str, _raise: bool = False) -> None:
@@ -199,7 +192,7 @@ def run(force: bool = False, _raise: bool = False) -> None:
     Usar `force = False` so vai fazer uma copia se o arquivo aumentou de
     tamanho, comparado com o registrado em 'file_sizes'.
     """
-    backup_places = prefs_._read("default", "backup_places", convert_to="list")
+    backup_places = settings._read("default", "backup_places", convert_to="list")
     error_was_raised = False
 
     if not force:
