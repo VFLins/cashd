@@ -83,8 +83,11 @@ def btn_gerar_main_plot(state: State | None = None):
 
 
 def btn_atualizar_df_ult_transac(state: State):
-    updated_tbl = db.ultimas_transac_displ()
-    state.assign("df_ult_transac", updated_tbl)
+    try:
+        updated_tbl = db.ultimas_transac_displ()
+        state.assign("df_ult_transac", updated_tbl)
+    except Exception as xpt:
+        notify(state, "error", f"Erro inesperado atualizando a tabela: {str(xpt)}")
 
 
 def btn_atualizar_locais_de_backup(state: State | None = None):

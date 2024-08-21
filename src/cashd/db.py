@@ -476,7 +476,7 @@ def ultimas_transac(n: int | None = prefs.settings.read_last_transacs_limit()):
     ORDER BY Id desc;
     """
 
-    if n:
+    if n is not None:
         stmt = stmt.replace(";", f" LIMIT {n};")
 
     with Session(DB_ENGINE) as ses:
@@ -505,8 +505,10 @@ def local_por_id(Id: int):
     return logradouro + f"{c.Cidade}/{c.Estado}"
 
 
-def ultimas_transac_displ():
-    tbl = ultimas_transac(n=None)
+def ultimas_transac_displ(
+        n: int | None = prefs.settings.read_last_transacs_limit()
+    ):
+    tbl = ultimas_transac(n=n)
     tbl["Cliente"] = pd.Series(map(nome_por_id, tbl["Id do cliente"]))
     tbl["Valor"] = tbl["Valor"].apply(lambda x: fmt_moeda(x, para_mostrar=True))
     tbl.drop("Id do cliente", axis="columns", inplace=True)
