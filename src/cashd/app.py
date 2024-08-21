@@ -237,6 +237,8 @@ def btn_chg_max_highest_balances(state: State, val: int):
 
 def btn_encerrar():
     try:
+        if backup.settings.read_backup_on_exit():
+            backup.run(force=False, _raise=False)
         window.destroy()
     except NameError:
         pass

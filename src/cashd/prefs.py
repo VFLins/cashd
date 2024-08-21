@@ -1,4 +1,5 @@
 from os import path, makedirs
+from typing import Literal
 import configparser
 import logging
 
@@ -25,8 +26,7 @@ class SettingsHandler:
     ### backup.ini
 
     `[default]`
-    - run_after_closing: `bool`
-    - check_file_size: `bool`
+    - backup_on_exit: `bool`
     - backup_places: `list`
 
     `[data]`
@@ -95,7 +95,7 @@ class SettingsHandler:
             self.logger.error(f"Erro escrevendo [{sect}] {key}={val}: {str(xpt)}")
             raise xpt
 
-    def _read(self, sect: str, key: str, convert_to=None):
+    def _read(self, sect: str, key: str, convert_to: Literal[None, "bool", "int", "list"]=None):
         try:
             if not convert_to:
                 return self.conf[sect][key]
@@ -197,9 +197,19 @@ class BackupPrefsHandler(SettingsHandler):
 
         if self.read_backup_places() is None:
             self._write("default", "backup_places", "[]")
+        
+        if self.read_backup_on_exit() is None:
+            self._write("default", "backup_on_exit", "false")
 
     def read_backup_places(self) -> str | None:
         return self._read("default", "backup_places", convert_to="list")
+
+    def read_backup_on_exit(self) -> bool | None:
+        self._read("default", "backup_on_exit", convert_to="bool")
+
+    def write_backup_on_exit(self, val: bool) -> None:
+        val = str(val).lower()
+        self._write("default", "backup_on_exit", val)
 
     def add_backup_place(self, place: str) -> None:
         self._add_to_list("default", "backup_places", place)
