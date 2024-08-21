@@ -69,6 +69,10 @@ Executando em http://127.0.0.1:<|{port}|text|>
 ELEMENTO_PREFS = """
 # Contas
 
+__Valores padrão no formulário:__
+
+<br />
+
 <|layout|columns=1 1|columns[mobile]=1 1|class_name=container
 
 <|{dropdown_uf_val}|selector|label=Estado padrão|lov={dropdown_uf_lov}|dropdown|on_change={lambda s: btn_chg_prefs_main_state(s, dropdown_uf_val)}|>
