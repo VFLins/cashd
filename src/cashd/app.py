@@ -240,6 +240,13 @@ def btn_chg_max_highest_balances(state: State, val: int):
         notify(state, "error", f"Erro inesperado: {str(xpt)}")
 
 
+def tggl_backup_on_exit(state: State | None = None):
+    if not state:
+        return backup.settings.read_backup_on_exit()
+    val = state.toggle_backup_on_exit
+    backup.settings.write_backup_on_exit(val)
+
+
 def btn_encerrar():
     try:
         if backup.settings.read_backup_on_exit():
@@ -493,6 +500,9 @@ input_cidade_val = prefs.settings.read_main_city()
 input_quant_max_ultimas_transacs = prefs.settings.read_last_transacs_limit()
 #                    " " "                       na tabela "Maiores saldos"
 input_quant_max_highest_balances = prefs.settings.read_highest_balaces_limit()
+
+# valor inicial do toggle "backup ao sair"
+toggle_backup_on_exit = tggl_backup_on_exit()
 
 # dados de entradas e abatimentos
 df_entradas_abatimentos = db.saldos_transac_periodo()

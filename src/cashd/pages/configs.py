@@ -49,6 +49,11 @@ Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
 
 *_Não se preocupe, esta operação é reversível. Consulte a documentação._
 |>
+
+<|part|
+__Backup ao sair:__‎ ‎ ‎ ‎
+<|{toggle_backup_on_exit}|toggle|on_action={tggl_backup_on_exit}|>
+|>
 |>
 """
 
