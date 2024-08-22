@@ -249,12 +249,12 @@ def tggl_backup_on_exit(state: State | None = None):
 
 def btn_encerrar():
     try:
-        if backup.settings.read_backup_on_exit():
-            backup.run(force=False, _raise=False)
+        backup.run(force=False, _raise=False)
         window.destroy()
     except NameError:
         pass
-    raise KeyboardInterrupt("Encerrando...")
+    finally:
+        raise KeyboardInterrupt("Encerrando...")
 
 
 def btn_mudar_maximizado():

@@ -206,13 +206,13 @@ class BackupPrefsHandler(SettingsHandler):
             self._write("default", "backup_places", "[]")
 
         if self.read_backup_on_exit() is None:
-            self._write("default", "backup_on_exit", "false")
+            self._write("default", "backup_on_exit", "true")
 
     def read_backup_places(self) -> str | None:
         return self._read("default", "backup_places", convert_to="list")
 
     def read_backup_on_exit(self) -> bool | None:
-        self._read("default", "backup_on_exit", convert_to="bool")
+        return self._read("default", "backup_on_exit", convert_to="bool")
 
     def write_backup_on_exit(self, val: bool) -> None:
         val = str(val).lower()

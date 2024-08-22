@@ -38,21 +38,15 @@ Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
 <|layout|columns=1fr 1fr|
 
 <|part|
-<|Fazer backup|button|class_name=plain|on_action={btn_fazer_backups}|>
-
-*_Backups serão salvos nos Locais de backup._
-|>
-
-<|part|
-
 <|Carregar backup|button|on_action={btn_carregar_backup}|>
 
 *_Não se preocupe, esta operação é reversível. Consulte a documentação._
 |>
 
 <|part|
-__Backup ao sair:__‎ ‎ ‎ ‎
-<|{toggle_backup_on_exit}|toggle|on_action={tggl_backup_on_exit}|>
+<|Fazer backup|button|class_name=plain|on_action={btn_fazer_backups}|>
+
+*_Backups serão salvos nos Locais de backup._
 |>
 |>
 """
