@@ -169,3 +169,4 @@ src/cashd/configs/*
 #.idea/
 .python-version
 src/cashd/configs/backup.ini
+src/cashd/configs/backup.ini
