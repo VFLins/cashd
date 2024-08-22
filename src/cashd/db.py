@@ -400,7 +400,15 @@ def cliente_por_id(Id: int) -> tbl_clientes:
     Id = int(Id)
     with Session(DB_ENGINE) as ses:
         stmt = select(tbl_clientes).where(tbl_clientes.Id == Id)
-        return ses.execute(stmt).first()[0]
+        try:
+            ses.execute(stmt).first()[0]
+        except TypeError:
+            return tbl_clientes(
+                Endereco="",
+                Bairro="",
+                Cidade="N",
+                Estado="D",
+            )
 
 
 def transac_por_id(Id: int) -> tbl_transacoes:
@@ -495,7 +503,8 @@ def nome_por_id(Id: int):
     return f"{c.PrimeiroNome} {c.Sobrenome}"
 
 
-def local_por_id(Id: int):
+def local_por_id(Id: int) -> str:
+    """Retorna um texto com informacoes de localizacao da conta selecionada"""
     c = cliente_por_id(Id=Id)
     logradouro = ""
     if c.Endereco != "":
@@ -505,9 +514,7 @@ def local_por_id(Id: int):
     return logradouro + f"{c.Cidade}/{c.Estado}"
 
 
-def ultimas_transac_displ(
-        n: int | None = prefs.settings.read_last_transacs_limit()
-    ):
+def ultimas_transac_displ(n: int | None = prefs.settings.read_last_transacs_limit()):
     tbl = ultimas_transac(n=n)
     tbl["Cliente"] = pd.Series(map(nome_por_id, tbl["Id do cliente"]))
     tbl["Valor"] = tbl["Valor"].apply(lambda x: fmt_moeda(x, para_mostrar=True))

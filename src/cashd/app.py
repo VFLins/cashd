@@ -96,10 +96,7 @@ def btn_atualizar_locais_de_backup(state: State | None = None):
     de `'df_locais_de_backup'`."""
     locais_de_backup = backup.settings.read_backup_places()
     df = pd.DataFrame(
-        {
-            "Id": range(len(locais_de_backup)),
-            "Locais de backup": locais_de_backup
-        }
+        {"Id": range(len(locais_de_backup)), "Locais de backup": locais_de_backup}
     )
 
     if state:
@@ -220,7 +217,11 @@ def btn_chg_max_ultimas_transacs(state: State, val: int):
         val = int(val)
         prefs.settings.write_last_transacs_limit(val)
         btn_atualizar_df_ult_transac(state)
-        notify(state, "success", f"Limite de entradas em 'Últimas transações' atualizado para {val}")
+        notify(
+            state,
+            "success",
+            f"Limite de entradas em 'Últimas transações' atualizado para {val}",
+        )
     except Exception as xpt:
         notify(state, "error", f"Erro inesperado: {str(xpt)}")
 
@@ -230,7 +231,11 @@ def btn_chg_max_highest_balances(state: State, val: int):
         val = int(val)
         prefs.settings.write_highest_balaces_limit(val)
         state.df_maiores_saldos = db.rank_maiores_saldos(val)
-        notify(state, "success", f"Limite de entradas em 'Maiores saldos' atualizado para {val}")
+        notify(
+            state,
+            "success",
+            f"Limite de entradas em 'Maiores saldos' atualizado para {val}",
+        )
     except Exception as xpt:
         notify(state, "error", f"Erro inesperado: {str(xpt)}")
 

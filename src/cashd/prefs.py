@@ -44,7 +44,7 @@ class SettingsHandler:
             self.conf.add_section("default")
         except configparser.DuplicateSectionError:
             pass
-        
+
         # logger
         self.logger = logging.getLogger(f"cashd.{__name__}")
         self.logger.setLevel(logging.DEBUG)
@@ -89,13 +89,20 @@ class SettingsHandler:
             with open(self.config_file, "w") as newconfig:
                 self.conf.write(newconfig)
             self.conf.read(self.config_file, "utf-8")
-            self.logger.info(f"Valor atualizado em {self.config_file}: [{sect}] {key} = {val}")
+            self.logger.info(
+                f"Valor atualizado em {self.config_file}: [{sect}] {key} = {val}"
+            )
 
         except Exception as xpt:
             self.logger.error(f"Erro escrevendo [{sect}] {key}={val}: {str(xpt)}")
             raise xpt
 
-    def _read(self, sect: str, key: str, convert_to: Literal[None, "bool", "int", "list"]=None):
+    def _read(
+        self,
+        sect: str,
+        key: str,
+        convert_to: Literal[None, "bool", "int", "list"] = None,
+    ):
         try:
             if not convert_to:
                 return self.conf[sect][key]
@@ -138,7 +145,7 @@ class SettingsHandler:
 
 
 class PreferencesHandler(SettingsHandler):
-    def __init__(self, configname = "prefs"):
+    def __init__(self, configname="prefs"):
         super().__init__(configname)
 
         # set defaults
@@ -147,13 +154,13 @@ class PreferencesHandler(SettingsHandler):
 
         if self.read_highest_balaces_limit() is None:
             self.write_highest_balaces_limit(10)
-        
+
         if self.read_main_state() is None:
             self.write_main_state("AC")
-        
+
         if self.read_main_city() is None:
             self.write_main_city("")
-    
+
     def write_last_transacs_limit(self, val: int):
         """
         Controla um limite de transações a ser exibidas na tabela
@@ -161,7 +168,7 @@ class PreferencesHandler(SettingsHandler):
         """
         val = int(val)
         self._write("default", "last_transacs_limit", str(val))
-    
+
     def write_highest_balaces_limit(self, val: str):
         """
         Controla um limite de contas a ser exibidas na tabela
@@ -189,15 +196,15 @@ class PreferencesHandler(SettingsHandler):
 
     def read_main_city(self) -> str | None:
         return self._read("default", "main_city")
-    
+
 
 class BackupPrefsHandler(SettingsHandler):
-    def __init__(self, configname = "backup"):
+    def __init__(self, configname="backup"):
         super().__init__(configname)
 
         if self.read_backup_places() is None:
             self._write("default", "backup_places", "[]")
-        
+
         if self.read_backup_on_exit() is None:
             self._write("default", "backup_on_exit", "false")
 
@@ -213,7 +220,7 @@ class BackupPrefsHandler(SettingsHandler):
 
     def add_backup_place(self, place: str) -> None:
         self._add_to_list("default", "backup_places", place)
-    
+
     def rm_backup_place(self, idx: int) -> None:
         self._rm_from_list("default", "backup_places", idx)
 
