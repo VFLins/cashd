@@ -400,15 +400,7 @@ def cliente_por_id(Id: int) -> tbl_clientes:
     Id = int(Id)
     with Session(DB_ENGINE) as ses:
         stmt = select(tbl_clientes).where(tbl_clientes.Id == Id)
-        try:
-            ses.execute(stmt).first()[0]
-        except TypeError:
-            return tbl_clientes(
-                Endereco="",
-                Bairro="",
-                Cidade="N",
-                Estado="D",
-            )
+        return ses.execute(stmt).first()[0]
 
 
 def transac_por_id(Id: int) -> tbl_transacoes:
@@ -505,7 +497,12 @@ def nome_por_id(Id: int):
 
 def local_por_id(Id: int) -> str:
     """Retorna um texto com informacoes de localizacao da conta selecionada"""
-    c = cliente_por_id(Id=Id)
+    try:
+        c = cliente_por_id(Id=Id)
+    except TypeError:
+        # retorna string vazia se nao houverem cadastros
+        return ""
+
     logradouro = ""
     if c.Endereco != "":
         logradouro = logradouro + f"{c.Endereco}, "
