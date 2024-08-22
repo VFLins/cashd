@@ -213,6 +213,12 @@ class BackupPrefsHandler(SettingsHandler):
 
     def read_backup_on_exit(self) -> bool | None:
         return self._read("default", "backup_on_exit", convert_to="bool")
+    
+    def read_dbsize(self) -> int | None:
+        return self._read("data", "dbsize", convert_to="int")
+    
+    def write_dbsize(self, val: int) -> None:
+        self._write("data", "dbsize", val)
 
     def write_backup_on_exit(self, val: bool) -> None:
         val = str(val).lower()

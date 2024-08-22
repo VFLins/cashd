@@ -197,11 +197,10 @@ def run(force: bool = False, _raise: bool = False) -> None:
 
     if not force:
         current_size = read_db_size()
-        previous_size = read_last_recorded_size()
+        previous_size = settings.read_dbsize()
         if current_size <= previous_size:
             return
-        else:
-            write_current_size(current_size=current_size)
+    settings.write_dbsize(current_size)
 
     try:
         backup_places = [i for i in [BACKUP_PATH] + backup_places if i != ""]
