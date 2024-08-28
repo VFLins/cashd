@@ -170,3 +170,4 @@ src/cashd/configs/*
 .python-version
 src/cashd/configs/backup.ini
 src/cashd/configs/backup.ini
+src/cashd/configs/backup.ini
