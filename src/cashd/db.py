@@ -320,10 +320,15 @@ def listar_clientes() -> None:
     with Session(DB_ENGINE) as ses:
         stmt = select(tbl_clientes)
         res = ses.execute(stmt).scalars()
-
+        max_id = ses.execute(text("SELECT MAX(Id) FROM clientes;")).scalar()
+        n_digits = len(str(max_id))
         output = []
         for r in res:
-            linha = {"id": r.Id, "nome": f"{r.Id}, {r.PrimeiroNome} {r.Sobrenome}"}
+            linha = {
+                "id": str(r.Id).zfill(n_digits),
+                "nome": f"{str(r.Id).zfill(n_digits)}, {r.PrimeiroNome} {r.Sobrenome}",
+            }
+            print(linha)
 
             if r.Apelido != "":
                 linha["nome"] = linha["nome"] + f" ({r.Apelido})"
