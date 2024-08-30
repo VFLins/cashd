@@ -239,7 +239,7 @@ class FormObj:
                 except Exception as msg_erro:
                     raise ErroDeFormatacao(f"Erro em '{var}':\n{str(msg_erro)}")
 
-    def despejar(self):
+    def despejar(self) -> dict:
         self.format_vars()
         return deepcopy(vars(self))
 
@@ -291,6 +291,11 @@ class FormContas(FormObj):
             + f"{self.Endereco=}\n"
             + f"{self.Estado=}"
         )
+
+    def despejar(self) -> dict:
+        form = super().despejar()
+        self.__init__()
+        return form
 
 
 class FormTransac(FormObj):
