@@ -328,7 +328,6 @@ def listar_clientes() -> None:
                 "id": str(r.Id).zfill(n_digits),
                 "nome": f"{str(r.Id).zfill(n_digits)}, {r.PrimeiroNome} {r.Sobrenome}",
             }
-            print(linha)
 
             if r.Apelido != "":
                 linha["nome"] = linha["nome"] + f" ({r.Apelido})"
