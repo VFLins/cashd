@@ -85,6 +85,9 @@ class SettingsHandler:
     def _write(self, sect: str, key: str, val: str):
         """Escreve a combinacao de `key` e `val` na seção `sect`"""
         try:
+            if not self.conf.has_section(sect):
+                self.conf.add_section(sect)
+
             self.conf.set(sect, key, val)
             with open(self.config_file, "w") as newconfig:
                 self.conf.write(newconfig)
@@ -218,7 +221,8 @@ class BackupPrefsHandler(SettingsHandler):
         return self._read("data", "dbsize", convert_to="int")
 
     def write_dbsize(self, val: int) -> None:
-        self._write("data", "dbsize", val)
+        val = int(val)
+        self._write("data", "dbsize", str(val))
 
     def write_backup_on_exit(self, val: bool) -> None:
         val = str(val).lower()

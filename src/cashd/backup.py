@@ -198,6 +198,8 @@ def run(force: bool = False, _raise: bool = False) -> None:
     if not force:
         current_size = read_db_size()
         previous_size = settings.read_dbsize()
+        if not previous_size:
+            previous_size = 0
         if current_size <= previous_size:
             return
     settings.write_dbsize(current_size)
