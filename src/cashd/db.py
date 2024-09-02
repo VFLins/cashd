@@ -109,24 +109,24 @@ class ErroDeFormatacao(Exception):
         super().__init__(*args)
 
 
-def fmt_moeda(inp: str, para_mostrar: bool = False) -> str:
-    """Formata números inteiros (em centavos) para R$.
-
-    `para_mostrar == False`:
+def fmt_moeda(inp: str | int, para_mostrar: bool = False) -> str | int:
+    """
+    ### `para_mostrar == False`:
+    
+    Retorna `inp` como um número `int`, ou levanta um `ErroDeFormatacao`.
     - 100000 -> 100000
     - -5254 -> -5254
     - 0 -> ErroDeFormatacao
     - 58/66 -> ErroDeFormatacao
 
-    `para_mostrar == True`:
+    ### `para_mostrar == True`:
+    
+    Formata números inteiros (em centavos) para R$, retornando `str`.
     - 100000 ->  `'1 000,00'`
     - -5254 -> `'-52,54'`
     - 0 -> `'0,00'`
     - 58/66 -> `'0,00'`
     """
-    if inp is str:
-        inp = inp.replace(",", "")
-
     if para_mostrar:
         try:
             return f"{int(inp)/100:_.2f}".replace("_", " ").replace(".", ",")
