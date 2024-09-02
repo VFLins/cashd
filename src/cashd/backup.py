@@ -195,9 +195,9 @@ def run(force: bool = False, _raise: bool = False) -> None:
     backup_places = settings._read("default", "backup_places", convert_to="list")
     error_was_raised = False
 
+    current_size = read_db_size()
+    previous_size = settings.read_dbsize()
     if not force:
-        current_size = read_db_size()
-        previous_size = settings.read_dbsize()
         if not previous_size:
             previous_size = 0
         if current_size <= previous_size:
