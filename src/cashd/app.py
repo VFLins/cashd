@@ -252,7 +252,8 @@ def btn_encerrar():
         backup.run(force=False, _raise=False)
         window.destroy()
     except NameError:
-        pass
+        window = webview.active_window()
+        window.destroy()
     finally:
         raise KeyboardInterrupt("Encerrando...")
 

@@ -239,7 +239,7 @@ class FormObj:
                 except Exception as msg_erro:
                     raise ErroDeFormatacao(f"Erro em '{var}':\n{str(msg_erro)}")
 
-    def despejar(self):
+    def despejar(self) -> dict:
         self.format_vars()
         return deepcopy(vars(self))
 
@@ -292,6 +292,11 @@ class FormContas(FormObj):
             + f"{self.Estado=}"
         )
 
+    def despejar(self) -> dict:
+        form = super().despejar()
+        self.__init__()
+        return form
+
 
 class FormTransac(FormObj):
     def __init__(
@@ -320,10 +325,14 @@ def listar_clientes() -> None:
     with Session(DB_ENGINE) as ses:
         stmt = select(tbl_clientes)
         res = ses.execute(stmt).scalars()
-
+        max_id = ses.execute(text("SELECT MAX(Id) FROM clientes;")).scalar()
+        n_digits = len(str(max_id))
         output = []
         for r in res:
-            linha = {"id": r.Id, "nome": f"{r.Id}, {r.PrimeiroNome} {r.Sobrenome}"}
+            linha = {
+                "id": str(r.Id).zfill(n_digits),
+                "nome": f"{str(r.Id).zfill(n_digits)}, {r.PrimeiroNome} {r.Sobrenome}",
+            }
 
             if r.Apelido != "":
                 linha["nome"] = linha["nome"] + f" ({r.Apelido})"
