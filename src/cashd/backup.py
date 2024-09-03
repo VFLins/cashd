@@ -78,7 +78,7 @@ def rename_on_db_folder(current: str, new: str, _raise: bool = False):
 
 
 def check_sqlite(file: str, _raise: bool = False):
-    """Checa se o full path para o arquivo `file` representa um banco de dados."""
+    """Checa se o full path para o arquivo `file` representa um banco de dados sqlite."""
     logger.debug("function call: check_sqlite")
 
     if not path.isfile(file):
@@ -135,22 +135,31 @@ def read_last_recorded_size(config_file: str = CONFIG_FILE):
 ####################
 
 
-def write_current_size(current_size: int = read_db_size()) -> None:
+def write_current_size(
+        current_size: int = read_db_size(),
+        settings: BackupPrefsHandler = settings
+    ) -> None:
     """Writes current database size to `backup.ini`"""
     logger.debug("function call: write_current_size")
-    settings._write("data", "dbsize", current_size)
+    settings.write_dbsize(current_size)
 
 
-def write_add_backup_place(path: str):
+def write_add_backup_place(
+        path: str,
+        settings: BackupPrefsHandler = settings
+    ) -> None:
     """Inclui o input `path` na opcao 'backup_places' em `backup.ini`"""
     logger.debug("function call: write_add_backup_place")
-    settings._add_to_list("default", "backup_places", path)
+    settings.add_backup_place(path)
 
 
-def write_rm_backup_place(idx: int):
+def write_rm_backup_place(
+        idx: int,
+        settings: BackupPrefsHandler = settings
+    ) -> None:
     """Retira o `idx`-esimo item da lista 'backup_places' em `backup.ini`"""
     logger.debug("function call: write_rm_backup_place")
-    settings._rm_from_list("default", "backup_places", idx=idx)
+    settings.rm_backup_place(idx)
 
 
 def load(file: str, _raise: bool = False) -> None:
