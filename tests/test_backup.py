@@ -21,26 +21,35 @@ from cashd.backup import (
     run,
 )
 
+
 CONFIGS_DIR = os.path.split(CONFIG_FILE)[0]
 
 SCRIPT_PATH = os.path.split(os.path.realpath(__file__))[0]
 BACKUPPREFS_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
 
+class TempBackupPrefs(BackupPrefsHandler):
+    def __init__(self):
+        self.TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
+        configname = self.TEMPFILE.name
+        super().__init__(configname)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.TEMPFILE.close()
+        os.unlink(self.config_file)
+        os.unlink(self.log_file)
+
 
 def test_dbsize_read():
-    settings_handler = BackupPrefsHandler(os.path(BACKUPPREFS_TEMPFILE)[0])
-    with TemporaryFile(delete=False) as data_file, TemporaryFile(
-        delete=False
-    ) as config_file:
+    with TemporaryFile(delete=False) as data_file, TempBackupPrefs() as settings:
         data_file.write(b"testando um teste testoso...")
-        write_current_size(
-            config_file=config_file.name,
-            current_size=read_db_size(file_path=data_file.name),
-        )
-        config = ConfigParser()
-        config.read(config_file.name)
-        read_dbsize = int(config["file_sizes"]["dbsize"])
-        assert read_dbsize == read_db_size(file_path=data_file.name)
+
+        filesize = read_db_size(file_path=data_file.name)
+        write_current_size(current_size=filesize, settings=settings)
+
+        assert settings.read_dbsize() == filesize
 
 
 def test_copy_file():
@@ -156,30 +165,30 @@ def test_read_last_recorded_size_existing_section():
 
 
 def test_add_rm_backup_place():
-    current = settings.read_backup_places()
-    path_to_add = r"C:\some\path\for\testing"
+    with TempBackupPrefs() as settings:
+        current = settings.read_backup_places()
+        if current == None:
+            current = []
+        path_to_add = r"C:\some\path\for\testing"
 
-    # test add path to config
-    write_add_backup_place(path_to_add)
-    expected_add = current + [path_to_add]
-    current_add = settings.read_backup_places()
-    assert current_add == expected_add
+        # test add path to config
+        write_add_backup_place(path_to_add, settings)
+        expected_add: list = current + [path_to_add]
+        assert expected_add == settings.read_backup_places()
 
-    write_add_backup_place(path_to_add)
-    current_add_repeated = settings.read_backup_places()
-    # shall not add a path that already exists
-    assert current_add_repeated == expected_add
+        # shall not add a path that already exists
+        write_add_backup_place(path_to_add)
+        assert expected_add == settings.read_backup_places()
 
-    # test remove path from config
-    added_idx = current_add.index(path_to_add)
-    write_rm_backup_place(added_idx)
-    current_rm = settings.read_backup_places()
-    assert current_rm == current
+        # test remove path from config
+        write_rm_backup_place(0, settings)
+        current_rm = settings.read_backup_places()
+        assert current_rm == current
 
-    write_rm_backup_place("not even an index")
-    # shall only perform action with valid indexes
-    current_rm_invalid = settings.read_backup_places()
-    assert current_rm_invalid == current_rm
+        # shall only perform action with valid indexes
+        write_rm_backup_place("not even an index")
+        current_rm_invalid = settings.read_backup_places()
+        assert current_rm_invalid == current_rm
 
 
 def test_load():
