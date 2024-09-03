@@ -3,16 +3,14 @@ from tempfile import TemporaryFile, TemporaryDirectory
 import pytest
 import sqlite3
 import os
-
+from cashd.prefs import BackupPrefsHandler
 from cashd.backup import (
-    conf,
+    settings,
     DB_FILE,
     CONFIG_FILE,
     BACKUP_PATH,
     read_db_size,
     write_current_size,
-    parse_list_from_config,
-    parse_list_to_config,
     copy_file,
     rename_on_db_folder,
     check_sqlite,
@@ -23,11 +21,14 @@ from cashd.backup import (
     run,
 )
 
+CONFIGS_DIR = os.path.split(CONFIG_FILE)[0]
 
 SCRIPT_PATH = os.path.split(os.path.realpath(__file__))[0]
+BACKUPPREFS_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
 
 
 def test_dbsize_read():
+    settings_handler = BackupPrefsHandler(os.path(BACKUPPREFS_TEMPFILE)[0])
     with TemporaryFile(delete=False) as data_file, TemporaryFile(
         delete=False
     ) as config_file:
@@ -40,16 +41,6 @@ def test_dbsize_read():
         config.read(config_file.name)
         read_dbsize = int(config["file_sizes"]["dbsize"])
         assert read_dbsize == read_db_size(file_path=data_file.name)
-
-
-def test_list_parse():
-    string = "[\n\tc:/some/path,\n\tc:\\some\\other\\path]"
-    expected_list = [r"c:/some/path", r"c:\some\other\path"]
-
-    parsed_from = parse_list_from_config(string)
-    parsed_to = parse_list_to_config(expected_list)
-    assert parsed_from == expected_list
-    assert parsed_to == string
 
 
 def test_copy_file():
@@ -165,30 +156,29 @@ def test_read_last_recorded_size_existing_section():
 
 
 def test_add_rm_backup_place():
-    conf.read(CONFIG_FILE, "utf-8")
-    current = parse_list_from_config(conf["default"]["backup_places"])
+    current = settings.read_backup_places()
     path_to_add = r"C:\some\path\for\testing"
 
     # test add path to config
     write_add_backup_place(path_to_add)
     expected_add = current + [path_to_add]
-    current_add = parse_list_from_config(conf["default"]["backup_places"])
+    current_add = settings.read_backup_places()
     assert current_add == expected_add
 
     write_add_backup_place(path_to_add)
-    current_add_repeated = parse_list_from_config(conf["default"]["backup_places"])
+    current_add_repeated = settings.read_backup_places()
     # shall not add a path that already exists
     assert current_add_repeated == expected_add
 
     # test remove path from config
     added_idx = current_add.index(path_to_add)
     write_rm_backup_place(added_idx)
-    current_rm = parse_list_from_config(conf["default"]["backup_places"])
+    current_rm = settings.read_backup_places()
     assert current_rm == current
 
     write_rm_backup_place("not even an index")
     # shall only perform action with valid indexes
-    current_rm_invalid = parse_list_from_config(conf["default"]["backup_places"])
+    current_rm_invalid = settings.read_backup_places()
     assert current_rm_invalid == current_rm
 
 
@@ -215,15 +205,13 @@ def test_load():
 
 def test_run():
     # save current `backup_places`
-    conf.read(CONFIG_FILE, "utf-8")
-    prev_backup_places = parse_list_from_config(conf["default"]["backup_places"])
+    prev_backup_places = settings.read_backup_places()
 
     # remove `backup_places` from config file
-    curr_backup_places = parse_list_from_config(conf["default"]["backup_places"])
+    curr_backup_places = settings.read_backup_places()
     while len(curr_backup_places) > 0:
-        conf.read(CONFIG_FILE, "utf-8")
         write_rm_backup_place(0)
-        curr_backup_places = parse_list_from_config(conf["default"]["backup_places"])
+        curr_backup_places = settings.read_backup_places()
 
     # get current list of backups
     prev_saved_backups = os.listdir(BACKUP_PATH)
