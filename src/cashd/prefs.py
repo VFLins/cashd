@@ -136,7 +136,12 @@ class SettingsHandler:
         self.conf.read(self.config_file, "utf-8")
 
     def _rm_from_list(self, sect: str, key: str, idx: int):
-        """Retira o `idx`-esimo item da lista"""
+        """Retira o `idx`-esimo item da lista, não faz nada se `idx` for inválido."""
+        try:
+            idx = int(idx)
+        except ValueError:
+            return
+
         current_list = self.parse_list_from_config(self.conf[sect][key])
         n = len(current_list)
 
@@ -214,7 +219,7 @@ class BackupPrefsHandler(SettingsHandler):
         if self.read_backup_on_exit() is None:
             self._write("default", "backup_on_exit", "true")
 
-    def read_backup_places(self) -> str | None:
+    def read_backup_places(self) -> list | None:
         return self._read("default", "backup_places", convert_to="list")
 
     def read_backup_on_exit(self) -> bool | None:
