@@ -108,8 +108,7 @@ def check_sqlite(file: str, _raise: bool = False):
 def read_db_size(file_path: str = DB_FILE) -> int:
     logger.debug("function call: read_db_size")
     try:
-        size = path.getsize(file_path)
-        return size
+        return path.getsize(file_path)
     except Exception as xpt:
         logger.error(f"Erro lendo tamanho do arquivo: {str(xpt)}")
         return
@@ -136,27 +135,20 @@ def read_last_recorded_size(config_file: str = CONFIG_FILE):
 
 
 def write_current_size(
-        current_size: int = read_db_size(),
-        settings: BackupPrefsHandler = settings
-    ) -> None:
+    current_size: int = read_db_size(), settings: BackupPrefsHandler = settings
+) -> None:
     """Writes current database size to `backup.ini`"""
     logger.debug("function call: write_current_size")
     settings.write_dbsize(current_size)
 
 
-def write_add_backup_place(
-        path: str,
-        settings: BackupPrefsHandler = settings
-    ) -> None:
+def write_add_backup_place(path: str, settings: BackupPrefsHandler = settings) -> None:
     """Inclui o input `path` na opcao 'backup_places' em `backup.ini`"""
     logger.debug("function call: write_add_backup_place")
     settings.add_backup_place(path)
 
 
-def write_rm_backup_place(
-        idx: int,
-        settings: BackupPrefsHandler = settings
-    ) -> None:
+def write_rm_backup_place(idx: int, settings: BackupPrefsHandler = settings) -> None:
     """Retira o `idx`-esimo item da lista 'backup_places' em `backup.ini`"""
     logger.debug("function call: write_rm_backup_place")
     settings.rm_backup_place(idx)
@@ -193,7 +185,9 @@ def load(file: str, _raise: bool = False) -> None:
         pass
 
 
-def run(force: bool = False, _raise: bool = False) -> None:
+def run(
+    force: bool = False, settings: BackupPrefsHandler = settings, _raise: bool = False
+) -> None:
     """
     Vai fazer a copia do arquivo de banco de dados para a pasta local de backup
     e para as pastas listadas na opcao 'backup_places' em `backup.ini`.
@@ -201,14 +195,15 @@ def run(force: bool = False, _raise: bool = False) -> None:
     Usar `force = False` so vai fazer uma copia se o arquivo aumentou de
     tamanho, comparado com o registrado em 'file_sizes'.
     """
-    backup_places = settings._read("default", "backup_places", convert_to="list")
+    backup_places = settings.read_backup_places()
     error_was_raised = False
 
     current_size = read_db_size()
     previous_size = settings.read_dbsize()
+    if not previous_size:
+        previous_size = 0
+
     if not force:
-        if not previous_size:
-            previous_size = 0
         if current_size <= previous_size:
             return
     settings.write_dbsize(current_size)

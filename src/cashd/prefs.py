@@ -126,7 +126,9 @@ class SettingsHandler:
     def _add_to_list(self, sect: str, key: str, val: str):
         current_list = self.parse_list_from_config(self.conf[sect][key])
         if val in current_list:
-            self.logger.warning(f"{val} não foi adicionado à [{sect}] {key}, item já presente.")
+            self.logger.warning(
+                f"{val} não foi adicionado à [{sect}] {key}, item já presente."
+            )
             return
         new_list = current_list + [val]
 
