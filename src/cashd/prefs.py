@@ -39,7 +39,7 @@ class SettingsHandler:
 
         # config parser
         self.conf = configparser.ConfigParser()
-        self.conf.read(self.config_file, "utf-8")
+        self.conf.read(self.config_file, "iso 8859-1")
         try:
             self.conf.add_section("default")
         except configparser.DuplicateSectionError:
@@ -91,7 +91,7 @@ class SettingsHandler:
             self.conf.set(sect, key, val)
             with open(self.config_file, "w") as newconfig:
                 self.conf.write(newconfig)
-            self.conf.read(self.config_file, "utf-8")
+            self.conf.read(self.config_file, "iso 8859-1")
             self.logger.info(
                 f"Valor atualizado em {self.config_file}: [{sect}] {key} = {val}"
             )
@@ -135,7 +135,7 @@ class SettingsHandler:
         self.conf.set(sect, key, self.parse_list_to_config(new_list))
         with open(self.config_file, "w") as newconfig:
             self.conf.write(newconfig)
-        self.conf.read(self.config_file, "utf-8")
+        self.conf.read(self.config_file, "iso 8859-1")
 
     def _rm_from_list(self, sect: str, key: str, idx: int):
         """Retira o `idx`-esimo item da lista, não faz nada se `idx` for inválido."""
@@ -154,7 +154,7 @@ class SettingsHandler:
         self.conf.set(sect, key, self.parse_list_to_config(current_list))
         with open(self.config_file, "w") as newconfig:
             self.conf.write(newconfig)
-        self.conf.read(self.config_file, "utf-8")
+        self.conf.read(self.config_file, "iso 8859-1")
 
 
 class PreferencesHandler(SettingsHandler):

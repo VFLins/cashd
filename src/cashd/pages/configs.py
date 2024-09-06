@@ -27,11 +27,7 @@ PG_CONFIG = """
 ELEMENTO_BACKUP = """
 # Locais de backup
 
-Clique no símbolo de **+** abaixo para adicionar um **Local de backup**:
-
-<br />
-
-<|{df_locais_de_backup}|table|page_size=5|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|height=180px|>
+<|{df_locais_de_backup}|table|page_size=4|page_size_options={[]}|on_add={btn_add_local_de_backup}|on_delete={btn_rm_local_de_backup}|height=190px|hover_text=Clique no símbolo de + para adicionar um local de backup|>
 
 # Ações
 
