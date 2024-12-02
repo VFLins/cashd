@@ -21,7 +21,7 @@ classifiers = [
 ]
 version = "0.2.1.1"
 dependencies = [
-    "taipy>=3.1.0",
+    "taipy==3.1.0",
     "SQLAlchemy==2.*",
     "pywebview>=5.0",
     "phonenumbers>=8.13.31",
