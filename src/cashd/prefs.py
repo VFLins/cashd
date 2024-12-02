@@ -37,6 +37,9 @@ class SettingsHandler:
         self.config_file = path.join(SCRIPT_PATH, "configs", f"{configname}.ini")
         self.log_file = path.join(SCRIPT_PATH, "logs", f"{configname}.log")
 
+        makedirs(path.split(self.config_file)[0], exist_ok=True)
+        makedirs(path.split(self.log_file)[0], exist_ok=True)
+
         # config parser
         self.conf = configparser.ConfigParser()
         self.conf.read(self.config_file, "iso 8859-1")

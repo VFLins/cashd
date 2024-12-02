@@ -2,7 +2,7 @@ from cashd.db import DB_ENGINE
 from cashd.prefs import BackupPrefsHandler
 
 import sqlite3
-from os import path, makedirs, rename
+from os import path, rename
 from datetime import datetime
 import shutil
 import configparser
