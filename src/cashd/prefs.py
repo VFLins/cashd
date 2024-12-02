@@ -5,10 +5,16 @@ import logging
 
 
 SCRIPT_PATH = path.split(path.realpath(__file__))[0]
-PREFS_CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "prefs.ini")
-BACKUP_CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "backup.ini")
-LOG_FILE = path.join(SCRIPT_PATH, "logs", "prefs.log")
+CONFIG_PATH = path.join(SCRIPT_PATH, "configs")
+LOG_PATH = path.join(SCRIPT_PATH, "logs")
+
+PREFS_CONFIG_FILE = path.join(CONFIG_PATH, "prefs.ini")
+BACKUP_CONFIG_FILE = path.join(CONFIG_PATH, "backup.ini")
+LOG_FILE = path.join(LOG_PATH, "prefs.log")
 DB_FILE = path.join(SCRIPT_PATH, "data", "database.db")
+
+for dirpath in [LOG_PATH, CONFIG_PATH]:
+    makedirs(dirpath, exist_ok=True)
 
 
 class SettingsHandler:
@@ -34,11 +40,8 @@ class SettingsHandler:
     """
 
     def __init__(self, configname):
-        self.config_file = path.join(SCRIPT_PATH, "configs", f"{configname}.ini")
-        self.log_file = path.join(SCRIPT_PATH, "logs", f"{configname}.log")
-
-        makedirs(path.split(self.config_file)[0], exist_ok=True)
-        makedirs(path.split(self.log_file)[0], exist_ok=True)
+        self.config_file = path.join(CONFIG_PATH, f"{configname}.ini")
+        self.log_file = path.join(LOG_PATH, f"{configname}.log")
 
         # config parser
         self.conf = configparser.ConfigParser()
