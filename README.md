@@ -1,7 +1,7 @@
 ![banner](https://raw.githubusercontent.com/VFLins/cashd/main/src/cashd/assets/gh_banner-cashd.png)
 
 <p align="center">
-  <a href="https://github.com/VFLins/cashd/wiki/Instalando">
+  <a href="https://github.com/VFLins/cashd/wiki/Instalando-e-Atualizando">
     <img alt="Como instalar" src="https://img.shields.io/badge/como_instalar-478eff?style=for-the-badge"></a>
   <a href="https://github.com/VFLins/cashd/wiki/Tutoriais">
     <img alt="Tutoriais" src="https://img.shields.io/badge/tutoriais-478eff?style=for-the-badge"></a>
