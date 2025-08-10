@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Camada_2"
+   data-name="Camada 2"
+   viewBox="0 0 2025 2025"
+   version="1.1"
+   width="2025"
+   height="2025"
+   sodipodi:docname="SVG_ConfiguracaoBranco.svg"
+   inkscape:export-filename="ConfiguracaoBranco.png"
+   inkscape:export-xdpi="2.2755556"
+   inkscape:export-ydpi="2.2755556"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showguides="true">
+    <sodipodi:guide
+       position="0,1825"
+       orientation="0,1"
+       id="guide1"
+       inkscape:locked="false"
+       inkscape:label="top-margin"
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="0,200"
+       orientation="0,1"
+       id="guide2"
+       inkscape:locked="false"
+       inkscape:label="bottom-margin"
+       inkscape:color="rgb(0,134,229)" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+      .cls-1 {
+        fill: #478eff;
+      }
+
+      .cls-1, .cls-2 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g
+     id="Camada_3"
+     data-name="Camada 3"
+     transform="scale(44.9875)">
+    <g
+       id="g3">
+      <rect
+         class="cls-2"
+         width="45"
+         height="45"
+         id="rect1"
+         style="fill:#ffffff;fill-opacity:0"
+         x="0"
+         y="0"
+         inkscape:label="rect1" />
+      <g
+         id="g2"
+         transform="matrix(0.80479671,0,0,0.80479671,4.5681366,4.386959)">
+        <path
+           id="path1"
+           class="cls-1"
+           d="m 22.539062,0.109375 c -0.663272,0 -1.33001,0.16857134 -1.93164,0.50390625 L 3.9003906,9.9042969 c -1.2427117,0.6903951 -2.03125,2.0112041 -2.03125,3.4511721 v 18.345703 c 0,1.439968 0.7688127,2.741051 2.03125,3.451172 l 16.7070314,9.291015 c 1.183536,0.670671 2.644395,0.670671 3.847656,0 l 16.707031,-9.291015 c 1.242711,-0.690394 2.03125,-2.011204 2.03125,-3.451172 V 13.355469 c 0,-1.439968 -0.768813,-2.741051 -2.03125,-3.4511721 L 24.455078,0.61328125 C 23.863311,0.27794634 23.202335,0.109375 22.539062,0.109375 Z m -0.02734,14.632813 c 0.330403,0 0.661147,0.08233 0.957031,0.25 l 5.285156,2.939453 c 0.611493,0.335334 1.00586,1.006675 1.00586,1.716797 v 5.759765 c 0,0.710121 -0.374642,1.361737 -1.00586,1.716797 l -5.285156,2.9375 c -0.591767,0.335335 -1.322295,0.335335 -1.914062,0 l -5.28711,-2.9375 c -0.611492,-0.335335 -1.005859,-1.006676 -1.005859,-1.716797 v -5.759765 c 0,-0.710121 0.374641,-1.361738 1.005859,-1.716797 l 5.28711,-2.939453 c 0.295883,-0.167668 0.626627,-0.25 0.957031,-0.25 z" />
+      </g>
+    </g>
+  </g>
+</svg>

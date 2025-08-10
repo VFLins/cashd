@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Camada_2"
+   data-name="Camada 2"
+   viewBox="0 0 45 45"
+   version="1.1"
+   sodipodi:docname="SVG_TransacaoBranco-old.svg"
+   inkscape:export-filename="TransacaoBranco.png"
+   inkscape:export-xdpi="102.4"
+   inkscape:export-ydpi="102.4"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showguides="true"
+     inkscape:zoom="11.133333"
+     inkscape:cx="22.45509"
+     inkscape:cy="22.5"
+     inkscape:window-width="1366"
+     inkscape:window-height="697"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Camada_2">
+    <sodipodi:guide
+       position="0,40.5"
+       orientation="0,1"
+       id="guide3"
+       inkscape:locked="false"
+       inkscape:label="margin-top"
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="0,4.5"
+       orientation="0,1"
+       id="guide4"
+       inkscape:label="margin-bottom"
+       inkscape:locked="false"
+       inkscape:color="rgb(0,134,229)" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+      .cls-1 {
+        fill: #478eff;
+      }
+
+      .cls-1, .cls-2 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g
+     id="Camada_3"
+     data-name="Camada 3">
+    <g
+       id="g3">
+      <g
+         id="g2"
+         transform="matrix(1.5770602,0,0,1.5770602,-12.982452,-12.988143)">
+        <path
+           class="cls-1"
+           d="M 11.53,28.99 C 11,28.42 11.01,27.54 11.56,26.98 l 4.57,-4.66 2.07,2.03 -2.17,2.21 h 7.21 v 2.9 h -7.32 l 2.27,2.43 -2.12,1.98 L 11.52,29 Z"
+           id="path1" />
+        <path
+           class="cls-1"
+           d="M 33.47,17.81 C 34,17.24 33.99,16.36 33.44,15.8 l -4.57,-4.66 -2.07,2.03 2.17,2.21 h -7.21 v 2.9 h 7.32 l -2.27,2.43 2.12,1.98 4.55,-4.87 z"
+           id="path2" />
+      </g>
+    </g>
+  </g>
+</svg>
