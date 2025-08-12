@@ -1,5 +1,5 @@
 [project]
-name = "cashd_server"
+name = "cashd"
 authors = [
     {name = "Vitor F. Lins", email = "vflins@live.com"},
 ]
@@ -21,7 +21,7 @@ classifiers = [
 ]
 version = "0.2.2"
 dependencies = [
-    "taipy==3.*",
+    "taipy==4.*",
     "SQLAlchemy==2.*",
     "pywebview>=5.0",
     "phonenumbers>=8.13.31",

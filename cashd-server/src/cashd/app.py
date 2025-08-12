@@ -534,7 +534,7 @@ paginas = {
     "configs": configs.PG_CONFIG,
 }
 
-app = Gui(pages=paginas, css_file="__main__.css")
+app = Gui(pages=paginas)
 
 elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
 elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
