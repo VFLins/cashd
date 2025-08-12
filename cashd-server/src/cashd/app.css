@@ -75,26 +75,26 @@ h1, .h1{
 
 
 /*toggle de texto: texto*/
-.css-13vtit{
+.css-egamh0{
     background-color: #f1f1f1;
 }
 .css-vnhwe0{
     font-weight: 600;
 
 }
-.css-4jd6qr{
+.css-rcq2fb{
     border: 0px;
     padding: 6px 16px;
     text-transform: none;
 }
-.css-4jd6qr.Mui-selected{
+.css-rcq2fb.Mui-selected{
     color: #478eff;
     background-color: #e1edff;
 }
-.css-4jd6qr.Mui-selected:hover{
+.css-rcq2fb.Mui-selected:hover{
     background-color: #cfe2ff;
 }
-div.MuiToggleButtonGroup-root.css-13vtit button[aria-pressed="false"] p {
+div.MuiToggleButtonGroup-root.css-egamh0 button[aria-pressed="false"] p {
     color: gray;
 }
 
