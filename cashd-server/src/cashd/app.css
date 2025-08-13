@@ -32,7 +32,7 @@ h1, .h1{
 }
 
 /*menu-lateral: elemento*/
-.css-1st6821 {
+.css-w1lhxi {
     background-color: #cadfe7;
     border: solid;
     border-width: thin;
@@ -40,7 +40,7 @@ h1, .h1{
 }
 
 /*menu-lateral: icones*/
-.css-6rxl0z {
+.css-1n7qxo8 {
     background-color: #ffffff;
     color: #478eff;
 }
@@ -67,10 +67,21 @@ h1, .h1{
     justify-self: right;
 }
 
+
 /*header-bar: logo*/
 .taipy-part.header_logo.MuiBox-root.css-0 {
     justify-self: left;
+}
+
+.css-7grk6d {
+    justify-self: left;
     font-family: 'Saira';
+    font-size: 1.7rem;
+    line-height: 2;
+    font-weight: 600;
+    color: var(--color-primary);
+    display: inline-block;
+    width: max-content;
 }
 
 
@@ -78,7 +89,7 @@ h1, .h1{
 .css-egamh0{
     background-color: #f1f1f1;
 }
-.css-vnhwe0{
+.css-pqgvxp{
     font-weight: 600;
 
 }
@@ -187,7 +198,21 @@ html {
     width: -webkit-fill-available;
 }
 
-/*gambiarra (remover depois)*/
-.taipy-date.invisible {
-    color: transparent;
+
+/* buttons */
+.css-1dtjr3k {
+    min-height: 38px;
+    min-width: 42px;
+}
+
+
+/* searchable selector */
+.taipy-selector.css-1j7bdiy {
+    width: 40vw;
+}
+
+/* dropdown selector */
+.taipy-selector.css-qi1b3v {
+    width: 20vw;
+    max-width: 15rem;
 }
