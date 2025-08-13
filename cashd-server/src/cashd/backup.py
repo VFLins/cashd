@@ -20,7 +20,7 @@ CONFIG_FILE = Path(SCRIPT_PATH, "configs", "backup.ini")
 LOG_FILE = Path(SCRIPT_PATH, "logs", "backup.log")
 DB_FILE = Path(SCRIPT_PATH, "data", "database.db")
 
-BACKUP_PATH.mkdir(exist_ok=True)
+BACKUP_PATH.mkdir(exist_ok=True, parents=True)
 
 
 settings = BackupPrefsHandler()
