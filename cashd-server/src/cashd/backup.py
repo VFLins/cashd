@@ -3,6 +3,7 @@ from cashd.prefs import BackupPrefsHandler
 
 import sqlite3
 from os import path, rename
+from pathlib import Path
 from datetime import datetime
 import shutil
 import configparser
@@ -13,11 +14,14 @@ import logging
 # GLOBAL VARS
 ####################
 
-SCRIPT_PATH = path.split(path.realpath(__file__))[0]
-BACKUP_PATH = path.join(SCRIPT_PATH, "backup")
-CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "backup.ini")
-LOG_FILE = path.join(SCRIPT_PATH, "logs", "backup.log")
-DB_FILE = path.join(SCRIPT_PATH, "data", "database.db")
+SCRIPT_PATH = Path(path.split(path.realpath(__file__))[0])
+BACKUP_PATH = Path(SCRIPT_PATH, "data", "backup")
+CONFIG_FILE = Path(SCRIPT_PATH, "configs", "backup.ini")
+LOG_FILE = Path(SCRIPT_PATH, "logs", "backup.log")
+DB_FILE = Path(SCRIPT_PATH, "data", "database.db")
+
+BACKUP_PATH.mkdir(exist_ok=True)
+
 
 settings = BackupPrefsHandler()
 
@@ -43,7 +47,7 @@ def copy_file(source_path, target_dir, _raise: bool = False):
     now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")
     try:
         filename = f"backup_{now}.db"
-        shutil.copyfile(source_path, path.join(target_dir, filename))
+        shutil.copyfile(source_path, Path(target_dir, filename))
         logger.info(f"Copia de '{source_path}' criada em '{target_dir}'")
     except FileNotFoundError as xpt:
         logger.error(f"Erro realizando copia: {xpt}.", exc_info=1)
@@ -62,7 +66,7 @@ def rename_on_db_folder(current: str, new: str, _raise: bool = False):
     logger.debug("function call: rename_on_db_folder")
     current, new = str(current), str(new)
 
-    db_folder = path.split(DB_FILE)[0]
+    db_folder = Path(DB_FILE).parent
     path_to_current = path.join(db_folder, current)
     path_to_new = path.join(db_folder, new)
 
