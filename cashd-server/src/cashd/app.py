@@ -63,11 +63,11 @@ def btn_gerar_main_plot(state: State | None = None):
 
     if state:
         p = state.dropdown_periodo_val[0]
-        n = state.slider_val[0]
+        n = int(state.slider_val[0])
         tipo = state.dropdown_tipo_val
     else:
         p = dropdown_periodo_val[0]
-        n = slider_val[0]
+        n = int(slider_val[0])
         tipo = dropdown_tipo_val
 
     if tipo == "Saldo Acumulado":
