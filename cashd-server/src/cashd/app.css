@@ -22,14 +22,6 @@ h1, .h1{
     justify-items: center;
 }
 
-.css-fge750.Mui-selected{
-    background-color: #478eff;
-    color: white
-}
-
-.css-fge750.Mui-selected:hover{
-    background-color: rgb(71 142 255 / 75%)
-}
 
 /*menu-lateral: elemento*/
 .css-w1lhxi {
@@ -39,12 +31,12 @@ h1, .h1{
     border-color: #d3d7d9;
 }
 
+
 /*menu-lateral: icones*/
 .css-1n7qxo8 {
     background-color: #ffffff;
     color: #478eff;
 }
-
 .css-1rom8zt{
     min-height: 36px;
     min-width: 20px;
@@ -57,10 +49,10 @@ h1, .h1{
     background-color: white;
     z-index: 98;
 }
-
 .taipy-layout.header_container.MuiBox-root.css-1we2j1x {
     align-items: center;
 }
+
 
 /*header-bar: botões da janela*/
 .taipy-part.header_top_right_corner.MuiBox-root.css-0 {
@@ -72,7 +64,6 @@ h1, .h1{
 .taipy-part.header_logo.MuiBox-root.css-0 {
     justify-self: left;
 }
-
 .css-7grk6d {
     justify-self: left;
     font-family: 'Saira';
@@ -109,18 +100,18 @@ div.MuiToggleButtonGroup-root.css-egamh0 button[aria-pressed="false"] p {
     color: gray;
 }
 
-/*toggle de texto: elem*/
 
+/*toggle de texto: elem*/
 div.taipy-part.header_logo.MuiBox-root.css-0 span.MuiTypography-root.MuiTypography-body1.taipy-text.css-lpnwt2{
     font-family: 'Saira';
     font-weight: 600;
     font-size: 1.45rem;
     color: #478eff;
 }
-
 .css-etkd7z {
     font-weight: bold;
 }
+
 
 /*border around the full page*/
 html {
@@ -134,20 +125,20 @@ html {
 .css-2e6htv.Mui-expanded:last-of-type {
     background-color: rgb(202 223 231 / 25%);
 }
-
 .taipy-expandable .MuiAccordionSummary-content{
     font-size: large;
 }
+
 
 /*expandable sections: collapsed*/
 .taipy-expandable.MuiPaper-rounded{
     background-color: rgb(202 223 231 / 25%);
 }
-
 .taipy-part.narrow_element{
     width: 90%;
     padding: 0% 0% 0% 10%;
 }
+
 
 /*top controls*/
 .taipy-layout.top_controls.MuiBox-root {
@@ -155,31 +146,29 @@ html {
     padding-bottom: 12px;
     z-index: 99;
 }
-
 /*top controls: slider*/
 .css-xbsnaj.MuiSlider-valueLabelOpen {
     color: transparent;
     background-color: transparent;
 }
-
 .css-vnhwe0 {
     color: #478eff;
 }
-
 @media (pointer: coarse) {
     .css-1753x30 {
         padding: 0px;
     }
 }
-
 .taipy-slider {
     padding-top: 6px;
 }
+
 
 /*top controls: dropdown*/
 .css-11z0r10.css-11z0r10.css-11z0r10 {
     width: 11rem;
 }
+
 
 /*interactive header*/
 .taipy-layout.interactive_header.MuiBox-root {
@@ -211,11 +200,10 @@ html {
 .css-n9cvde {
     max-width: unset;
 }
-
 /* searchable selector: selectable item: text */
-.css-pqgvxp {
+.MuiListItemText-primary.css-pqgvxp {
     line-height: 1.15;
-    max-width: 21rem;
+    font-weight: 400;
 }
 
 
