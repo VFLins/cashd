@@ -129,16 +129,6 @@ html {
     border-color: #e1edff;
 }
 
-/*menu and selector: spacing and sizing*/
-.css-fge750 {
-    padding: 6px 16px;
-}
-.css-1psnylk {
-    line-height: 1.15;
-}
-.css-cszb8q {
-    max-width: 21rem;
-}
 
 /*expandable sections: expanded*/
 .css-2e6htv.Mui-expanded:last-of-type {
@@ -210,6 +200,24 @@ html {
 .taipy-selector.css-1j7bdiy {
     width: 40vw;
 }
+/* searchable selector: selectable item */
+.css-1frfrn2.Mui-selected{
+    background-color: #478eff;
+    color: white
+}
+.css-1frfrn2.Mui-selected:hover{
+    background-color: rgb(71 142 255 / 75%)
+}
+.css-n9cvde {
+    max-width: unset;
+}
+
+/* searchable selector: selectable item: text */
+.css-pqgvxp {
+    line-height: 1.15;
+    max-width: 21rem;
+}
+
 
 /* dropdown selector */
 .taipy-selector.css-qi1b3v {
