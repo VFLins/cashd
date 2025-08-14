@@ -1,1 +1,1 @@
-from . import app, backup, db, plot, prefs
+from . import app, backup, db, plot, prefs, startup
