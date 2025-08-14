@@ -399,7 +399,7 @@ mostra_confirma_transac = False
 
 # controles dos graficos
 slider_elems = list(range(10, 51)) + [None]
-slider_lov = [(i, str(i)) if i is not None else (i, "Tudo") for i in slider_elems]
+slider_lov = [(str(i), str(i)) if i is not None else (i, "Tudo") for i in slider_elems]
 slider_val = slider_lov[0]
 
 dropdown_periodo_lov = [("mes", "Mensal"), ("sem", "Semanal"), ("dia", "Diário")]
