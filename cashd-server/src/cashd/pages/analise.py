@@ -6,7 +6,7 @@ PG_ANALISE = """
 |>
 
 <|part|class_name=align_item_stretch|
-<|{nav_analise_val}|toggle|lov={nav_analise_lov}|on_change={lambda s: s.elem_analise.update_content(s, nav_analise_val[0])}|>
+<|{nav_analise_val}|toggle|lov={nav_analise_lov}|on_change={lambda s: s.elem_analise.update_content(s, s.nav_analise_val[0])}|>
 |>
 
 <|part|class_name=text_right|class_name=header_top_right_corner|

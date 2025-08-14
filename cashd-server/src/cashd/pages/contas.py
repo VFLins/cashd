@@ -6,7 +6,7 @@ PG_CONTAS = """
 |>
 
 <|part|class_name=align_item_stretch|
-<|{nav_conta_val}|toggle|lov={nav_conta_lov}|on_change={lambda s: s.elem_conta.update_content(s, nav_conta_val[0])}|>
+<|{nav_conta_val}|toggle|lov={nav_conta_lov}|on_change={lambda s: s.elem_conta.update_content(s, s.nav_conta_val[0])}|>
 |>
 
 <|part|class_name=text_right|class_name=header_top_right_corner|
