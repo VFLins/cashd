@@ -160,7 +160,7 @@ cython_debug/
 database.db
 
 # configuration files
-cashd-server/src/cashd/configs/*.ini
+**/configs/*.ini
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
