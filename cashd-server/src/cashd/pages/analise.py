@@ -29,7 +29,7 @@ ELEM_PLOT = """
 
 <|{dropdown_periodo_val}|selector|lov={dropdown_periodo_lov}|dropdown|>
 
-<|{slider_val}|slider|lov={slider_lov}|text_anchor=botom|>
+<|{slider_val}|slider|lov={slider_lov}|text_anchor=bottom|>
 
 |>
 

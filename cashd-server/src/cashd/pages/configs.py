@@ -27,7 +27,7 @@ PG_CONFIG = """
 ELEMENTO_BACKUP = """
 # Locais de backup
 
-<|{df_locais_de_backup}|table|editable|page_size=4|page_size_options={[]}|on_add=btn_add_local_de_backup|on_delete={btn_rm_local_de_backup}|height=190px|hover_text=Clique no símbolo de + para adicionar um local de backup|>
+<|{df_locais_de_backup}|table|editable|editable[Id]=False|editable[Locais de backup]=False|width[Id]=50px|page_size=4|page_size_options={[]}|on_add=btn_add_local_de_backup|on_delete={btn_rm_local_de_backup}|height=190px|hover_text=Clique no símbolo de + para adicionar um local de backup|>
 
 # Ações
 

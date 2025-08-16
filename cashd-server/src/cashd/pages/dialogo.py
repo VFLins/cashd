@@ -48,6 +48,7 @@ __Estado__*
 
 _(*) Obrigatório_
 <|{str(form_contas)}|text|>
+|>
 """
 
 CONFIRMAR_TRANSAC = """
