@@ -98,7 +98,6 @@ def btn_atualizar_locais_de_backup(state: State | None = None):
     df = pd.DataFrame(
         {"Id": range(len(locais_de_backup)), "Locais de backup": locais_de_backup}
     )
-
     if state:
         state.assign("df_locais_de_backup", df)
         state.refresh("df_locais_de_backup")
@@ -117,6 +116,7 @@ def btn_fazer_backups(state: State):
 def btn_add_local_de_backup(state: State):
     root = tk.Tk()
     root.withdraw()
+    root.attributes("-topmost", True)
     folder = filedialog.askdirectory()
     backup.settings.add_backup_place(folder)
     btn_atualizar_locais_de_backup(state)
