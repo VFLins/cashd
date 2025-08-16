@@ -32,9 +32,8 @@ PG_TRANSAC = """
 ELEMENTO_FORM = """
 <|
 __Data__*
-<|{display_tr_data}|date|not editable|class_name=invisible|format=e|>
 
-<|{display_tr_data}|date|>
+<|{display_tr_data}|date|format=dd/MM/y|>
 
 __Valor__*: R$ <|{display_tr_valor}|text|>
 
