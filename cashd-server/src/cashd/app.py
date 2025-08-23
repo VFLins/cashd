@@ -586,6 +586,9 @@ port = porta_aberta()
 
 
 def start_cashd(with_webview: bool = False):
+    if "--webview" in sys.argv:
+        with_webview = True
+
     def run_taipy_gui():
         app.run(
             title="Cashd",
