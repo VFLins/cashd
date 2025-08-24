@@ -1,4 +1,4 @@
-name: Cashd Local Build
+name: Build cashd-local
 
 on:
   release:
@@ -42,27 +42,27 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: ../cashd-local
+                working-directory: ./cashd-local
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
-              with:
-                path: cashd-local
 
             - name: Set up Python
               uses: actions/setup-python@v5
-              with:
-                python-version: '3.11'
 
             - name: Install dependencies
               run: |
                 sudo apt-get update
                 sudo apt-get install -y python3-dev python3-pip build-essential
+                sudo apt-get install -y git pkg-config python3-dev libgirepository2.0-dev libcairo2-dev gir1.2-gtk-3.0 libcanberra-gtk3-module
                 python -m pip install --upgrade pip
                 pip install briefcase
 
             - name: Build Linux .deb installer
-              run: briefcase build linux
+              run: |
+                cd cashd-local
+                briefcase create
+                briefcase build linux
 
             - name: Package Linux .deb installer
               run: briefcase package linux
@@ -79,7 +79,7 @@ jobs:
             image: fedora:latest
         defaults:
             run:
-                working-directory: /github/workspace/cashd-local
+                working-directory: cashd-local
         steps:
             - name: Install dependencies
               run: |
