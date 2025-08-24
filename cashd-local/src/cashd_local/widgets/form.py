@@ -11,8 +11,8 @@ from toga.widgets.selection import Selection
 from toga.widgets.box import Box, StyleT, Column
 from toga.widgets.label import Label
 
-from cashd import style, data, const
-from cashd.widgets.elems import (
+from cashd_local import style, data, const
+from cashd_local.widgets.elems import (
     LabeledSelection,
     LabeledNumberInput,
 )
@@ -282,7 +282,8 @@ class HorizontalDateForm:
     @property
     def value(self):
         return date(
-            int(self.year_input.value), self._month_number(), int(self.day_input.value)
+            int(self.year_input.value), self._month_number(), int(
+                self.day_input.value)
         )
 
     @value.setter

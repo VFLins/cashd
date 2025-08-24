@@ -3,9 +3,9 @@ import datetime as dt
 import re
 from sqlalchemy import exc
 
-from cashd import const, data, style, widgets
-from cashd.pages.base import BaseSection
-from cashd.widgets.paginated import PaginatedDetailedList
+from cashd_local import const, data, style, widgets
+from cashd_local.pages.base import BaseSection
+from cashd_local.widgets.paginated import PaginatedDetailedList
 
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
@@ -235,7 +235,8 @@ class MainSection(BaseSection):
         )
         self.customer_data_context_content = ScrollContainer(
             content=Box(
-                style=Pack(direction=COLUMN, align_items="center", width=const.FORM_WIDTH),
+                style=Pack(direction=COLUMN, align_items="center",
+                           width=const.FORM_WIDTH),
                 children=[
                     self.customer_data_form.full_contents,
                     self.customer_data_interaction_buttons,

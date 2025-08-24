@@ -6,7 +6,7 @@ from toga.widgets.table import Table
 from toga.widgets.textinput import TextInput
 from toga.widgets.detailedlist import DetailedList
 
-from cashd import data, style
+from cashd_local import data, style
 from .elems import _DataInteractor
 
 
@@ -38,7 +38,8 @@ class PaginatedDetailedList(_DataInteractor):
         super().__init__(datasource=datasource, id=id, style=style, on_select=on_select)
 
     def _set_data_widget(self, id=None, style=None, on_select=None):
-        self.data_widget = DetailedList(id=id, style=style, on_select=on_select)
+        self.data_widget = DetailedList(
+            id=id, style=style, on_select=on_select)
 
     def refresh(self, widget: TextInput | None = None):
         """Fetches data and updates `self.data_widget`. Requires a data source with at

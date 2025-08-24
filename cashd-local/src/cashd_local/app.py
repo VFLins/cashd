@@ -11,7 +11,7 @@ from toga.command import Command
 from toga.style import Pack
 from toga.style.pack import ROW
 
-from cashd import pages, const
+from cashd_local import pages, const
 
 
 class Cashd(App):
@@ -71,7 +71,7 @@ class Cashd(App):
         )
         self.main_window.show()
 
-    ### Methods
+    # Methods
     async def set_context_content(self, command: Command):
         contents = {
             "Transações": self.main_section,

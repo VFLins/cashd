@@ -1,5 +1,3 @@
-from cashd.prefs import BackupPrefsHandler
-
 from os import path, rename, makedirs
 from datetime import datetime
 import configparser
@@ -7,6 +5,7 @@ import sqlite3
 import logging
 import shutil
 
+from cashd_local.prefs import BackupPrefsHandler
 
 ####################
 # GLOBAL VARS
@@ -103,7 +102,8 @@ def rename_on_db_folder(current: str, new: str, _raise: bool = False):
     except WindowsError:
         shutil.copy(path_to_current, path_to_new)
     except Exception as xpt:
-        logger.error(f"Erro renomeando {path_to_current}: {xpt}", exc_info=True)
+        logger.error(f"Erro renomeando {path_to_current}: {
+                     xpt}", exc_info=True)
         if _raise:
             raise xpt
 
