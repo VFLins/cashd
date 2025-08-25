@@ -7,14 +7,10 @@ on:
 jobs:
     build-windows:
         runs-on: windows-latest
-        defaults:
-            run:
-                working-directory: ./cashd-local/
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
-              with:
-                path: cashd-local
 
             - name: Set up Python
               uses: actions/setup-python@v5
@@ -25,22 +21,22 @@ jobs:
                 pip install briefcase
 
             - name: Build Windows installer
-              run: briefcase build windows
+              run: |
+                cd D:\a\cashd\cashd\cashd-local
+                briefcase build windows
 
             - name: Package Windows installer
-              run: briefcase package windows --adhoc-sigh
+              run: briefcase package windows --adhoc-sign
 
             - name: Upload Windows installer
               uses: actions/upload-artifact@v4
               with:
                 name: cashd-windows-installer
-                path: /github/workspace/cashd-local/dist/*.msi
+                path: D:\a\cashd\cashd\cashd-local\dist\*.msi
 
     build-ubuntu:
         runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: ./cashd-local
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -58,46 +54,45 @@ jobs:
 
             - name: Build Linux .deb installer
               run: |
-                cd cashd-local
+                cd /github/workspace/cashd/cashd-local/
                 briefcase build linux
 
             - name: Package Linux .deb installer
-              run: briefcase package linux
+              run: briefcase package linux --adhoc-sign
 
             - name: Upload .deb installer
               uses: actions/upload-artifact@v4
               with:
-                name: cashd-ubuntu-installer
-                path: /github/workspace/cashd-local/dist/*.deb
+                name: cashd-deb-installer
+                path: /__w/cashd/cashd/cashd-local/dist/*.deb
 
     build-fedora:
         runs-on: ubuntu-latest
         container:
             image: fedora:latest
-        defaults:
-            run:
-                working-directory: cashd-local
+
         steps:
             - name: Install dependencies
               run: |
                 dnf install -y python3 python3-pip python3-devel gcc make
+                dnf install -y git pkg-config gobject-introspection-devel cairo-gobject-devel gtk3 libcanberra-gtk3
                 pip3 install --upgrade pip
                 pip3 install briefcase
                 dnf install -y git
 
             - name: Checkout repository
               uses: actions/checkout@v4
-              with:
-                path: cashd-local
 
             - name: Build Linux .rpm installer
-              run: briefcase build linux
+              run: |
+                cd /__w/cashd/cashd/cashd-local/
+                briefcase build linux
 
             - name: Package Linux .rpm installer
-              run: briefcase package linux
+              run: briefcase package linux --adhoc-sign
 
             - name: Upload .rpm installer
               uses: actions/upload-artifact@v4
               with:
-                name: cashd-fedora-installer
-                path: /github/workspace/cashd-local/dist/*.rpm
+                name: cashd-rpm-installer
+                path: /__w/cashd/cashd/cashd-local/dist/*.rpm
