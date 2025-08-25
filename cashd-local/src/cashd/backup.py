@@ -1,4 +1,6 @@
 from os import path, rename, makedirs
+from sys import platform
+from pathlib import Path
 from datetime import datetime
 import configparser
 import sqlite3
@@ -11,13 +13,22 @@ from cashd.prefs import BackupPrefsHandler
 # GLOBAL VARS
 ####################
 
-SCRIPT_PATH = path.split(path.realpath(__file__))[0]
-BACKUP_PATH = path.join(SCRIPT_PATH, "data", "backup")
-CONFIG_FILE = path.join(SCRIPT_PATH, "configs", "backup.ini")
-LOG_FILE = path.join(SCRIPT_PATH, "logs", "backup.log")
-DB_FILE = path.join(SCRIPT_PATH, "data", "database.db")
+if platform == "win32":
+    CASHD_FILES_PATH = Path.home().joinpath("AppData", "Local", "Cashd")
+    CONFIG_PATH = Path(CASHD_FILES_PATH, "configs")
+    LOG_PATH = Path(CASHD_FILES_PATH, "logs")
+else:
+    CASHD_FILES_PATH = Path.home().joinpath(".local", "share", "Cashd")
+    CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
+    LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
 
-makedirs(BACKUP_PATH, exist_ok=True)
+CONFIG_FILE = Path(CONFIG_PATH, "backup.ini")
+LOG_FILE = path.join(LOG_PATH, "backup.log")
+DB_FILE = path.join(CASHD_FILES_PATH, "data", "database.db")
+BACKUP_PATH = path.join(CASHD_FILES_PATH, "data", "backup")
+
+for dirpath in [CASHD_FILES_PATH, CONFIG_PATH, LOG_PATH, BACKUP_PATH]:
+    makedirs(dirpath, exist_ok=True)
 
 settings = BackupPrefsHandler()
 

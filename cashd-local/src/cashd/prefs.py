@@ -1,19 +1,26 @@
 from os import path, makedirs
+from sys import platform
+from pathlib import Path
 from typing import Literal
 import configparser
 import logging
 
 
-SCRIPT_PATH = path.split(path.realpath(__file__))[0]
-CONFIG_PATH = path.join(SCRIPT_PATH, "configs")
-LOG_PATH = path.join(SCRIPT_PATH, "logs")
+if platform == "win32":
+    CASHD_FILES_PATH = Path.home().joinpath("AppData", "Local", "Cashd")
+    CONFIG_PATH = Path(CASHD_FILES_PATH, "configs")
+    LOG_PATH = Path(CASHD_FILES_PATH, "logs")
+else:
+    CASHD_FILES_PATH = Path.home().joinpath(".local", "share", "Cashd")
+    CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
+    LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
 
-PREFS_CONFIG_FILE = path.join(CONFIG_PATH, "prefs.ini")
-BACKUP_CONFIG_FILE = path.join(CONFIG_PATH, "backup.ini")
+PREFS_CONFIFG_FILE = Path(CONFIG_PATH, "prefs.ini")
+BACKUP_CONFIG_FILE = Path(CONFIG_PATH, "backup.ini")
 LOG_FILE = path.join(LOG_PATH, "prefs.log")
-DB_FILE = path.join(SCRIPT_PATH, "data", "database.db")
+DB_FILE = path.join(CASHD_FILES_PATH, "data", "database.db")
 
-for dirpath in [LOG_PATH, CONFIG_PATH]:
+for dirpath in [CASHD_FILES_PATH, LOG_PATH, CONFIG_PATH]:
     makedirs(dirpath, exist_ok=True)
 
 
@@ -84,7 +91,8 @@ class SettingsHandler:
         de um item.
         """
         string_list = (
-            str(list_).replace("[", "[\n\t").replace(", ", ",\n\t").replace("'", "")
+            str(list_).replace("[", "[\n\t").replace(
+                ", ", ",\n\t").replace("'", "")
         )
         return string_list.replace("\\\\", "\\")
 
@@ -99,11 +107,13 @@ class SettingsHandler:
                 self.conf.write(newconfig)
             self.conf.read(self.config_file, "iso 8859-1")
             self.logger.info(
-                f"Valor atualizado em {self.config_file}: [{sect}] {key} = {val}"
+                f"Valor atualizado em {
+                    self.config_file}: [{sect}] {key} = {val}"
             )
 
         except Exception as xpt:
-            self.logger.error(f"Erro escrevendo [{sect}] {key}={val}: {str(xpt)}")
+            self.logger.error(f"Erro escrevendo [{sect}] {
+                              key}={val}: {str(xpt)}")
             raise xpt
 
     def _read(
@@ -157,7 +167,8 @@ class SettingsHandler:
         n = len(current_list)
 
         if (idx + 1) > n:
-            self.logger.error(f"{idx} fora dos limites, deve ser menor que {n}")
+            self.logger.error(
+                f"{idx} fora dos limites, deve ser menor que {n}")
 
         _ = current_list.pop(idx)
         self.conf.set(sect, key, self.parse_list_to_config(current_list))
@@ -183,7 +194,8 @@ class PreferencesHandler(SettingsHandler):
         """
         val = str(val)
         if not val.isnumeric():
-            raise ValueError(f"Expected an integer or numeric string, got '{val}'.")
+            raise ValueError(
+                f"Expected an integer or numeric string, got '{val}'.")
         self._write("default", "highest_balaces_limit", str(val))
 
     def read_highest_balaces_limit(self) -> int | None:
@@ -191,10 +203,12 @@ class PreferencesHandler(SettingsHandler):
 
     @property
     def data_tables_rows_per_page(self) -> int:
-        value = self._read("default", "data_tables_rows_per_page", convert_to="int")
+        value = self._read(
+            "default", "data_tables_rows_per_page", convert_to="int")
         if not value:
             default_value = 200
-            self._write("default", "data_tables_rows_per_page", str(default_value))
+            self._write("default", "data_tables_rows_per_page",
+                        str(default_value))
             return default_value
         return value
 

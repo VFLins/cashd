@@ -31,6 +31,7 @@ from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from copy import copy
+from sys import platform
 import phonenumbers
 import re
 
@@ -41,11 +42,19 @@ from cashd import prefs, const
 # CONSTANTS
 ####################
 
-SCRIPT_FOLDER = Path(__file__).parent
-DATA_FOLDER = Path(SCRIPT_FOLDER, "data")
-DATA_FOLDER.mkdir(exist_ok=True)
+if platform == "win32":
+    CASHD_FILES_PATH = Path.home().joinpath("AppData", "Local", "Cashd")
+    CONFIG_PATH = Path(CASHD_FILES_PATH, "configs")
+    LOG_PATH = Path(CASHD_FILES_PATH, "logs")
+else:
+    CASHD_FILES_PATH = Path.home().joinpath(".local", "share", "Cashd")
+    CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
+    LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
+
+DATA_PATH = Path(CASHD_FILES_PATH, "data")
+DATA_PATH.mkdir(exist_ok=True)
 DB_ENGINE = create_engine(
-    f"sqlite:///{Path(DATA_FOLDER, 'database.db')}", echo=False)
+    f"sqlite:///{Path(DATA_PATH, 'database.db')}", echo=False)
 
 
 ####################
