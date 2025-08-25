@@ -11,8 +11,8 @@ from toga.widgets.selection import Selection
 from toga.widgets.table import Table
 from toga.widgets.base import Widget
 
-from cashd_local import const, data, style
-from cashd_local.widgets.paginated import PaginatedTable
+from cashd import const, data, style
+from cashd.widgets.paginated import PaginatedTable
 from .base import BaseSection
 
 

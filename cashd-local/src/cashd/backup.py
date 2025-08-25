@@ -5,7 +5,7 @@ import sqlite3
 import logging
 import shutil
 
-from cashd_local.prefs import BackupPrefsHandler
+from cashd.prefs import BackupPrefsHandler
 
 ####################
 # GLOBAL VARS

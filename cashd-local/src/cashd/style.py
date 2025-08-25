@@ -15,7 +15,7 @@ from toga import (
     Box,
 )
 
-from cashd_local import const
+from cashd import const
 
 
 def write_args(**kwargs):

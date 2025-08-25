@@ -11,7 +11,7 @@ from toga.command import Command
 from toga.style import Pack
 from toga.style.pack import ROW
 
-from cashd_local import pages, const
+from cashd import pages, const
 
 
 class Cashd(App):

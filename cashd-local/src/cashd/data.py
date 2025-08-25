@@ -34,7 +34,7 @@ from copy import copy
 import phonenumbers
 import re
 
-from cashd_local import prefs, const
+from cashd import prefs, const
 
 
 ####################

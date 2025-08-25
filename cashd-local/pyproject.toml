@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 dynamic = ["version"]
-name = "cashd-local"
+name = "cashd"
 dependencies = [
     "briefcase",
     "toga==0.5.0",
@@ -15,48 +15,44 @@ dependencies = [
 
 [tool.briefcase]
 project_name = "Cashd"
-bundle = "com.vitorlins"
+bundle = "pro.vitorlins.cashd"
 version = "0.3.0a1"
 url = "https://vitorlins.com/cashd"
 license.file = "LICENSE"
 author = "Vitor F. Lins"
 author_email = "vflins@live.com"
 
-[tool.briefcase.app.cashd-local]
+[tool.briefcase.app.cashd]
 formal_name = "Cashd"
-description = "Local-first application that helps you handle cash flow records quickly!"
-long_description = """More details about the app should go here.
+description = "Aplicativo local-first que ajuda você a lidar com registros de caixa rapidamente."
+long_description = """Cashd enables you to keep track of all the transactions performed by your
+most loyal customers, while giving you access to useful insights about them and your business's
+financial health.
 """
-icon = "src/cashd-local/resources/cashd"
-installer_icon = "src/cashd-local/resources/cashd"
-sources = [
-    "src/cashd-local",
-]
-test_sources = [
-    "tests",
-]
+icon = "src/cashd/resources/cashd"
+installer_icon = "src/cashd/resources/cashd"
+sources = ["src/cashd"]
+test_sources = ["tests"]
 requires = []
-test_requires = [
-    "pytest",
-]
+test_requires = ["pytest"]
 cleanup_paths = [
     "src/app/cashd/configs/*",
     "src/app/cashd/data/*"
 ]
 
-[tool.briefcase.app.cashd-local.macOS]
+[tool.briefcase.app.cashd.macOS]
 universal_build = true
 requires = [
     "toga-cocoa~=0.5.0",
     "std-nslog~=1.0.3",
 ]
 
-[tool.briefcase.app.cashd-local.linux]
+[tool.briefcase.app.cashd.linux]
 requires = [
     "toga-gtk~=0.5.0",
 ]
 
-[tool.briefcase.app.cashd-local.linux.system.debian]
+[tool.briefcase.app.cashd.linux.system.debian]
 system_requires = [
     # Needed to compile pycairo wheel
     "libcairo2-dev",
@@ -75,7 +71,7 @@ system_runtime_requires = [
     # "gir1.2-webkit2-4.1",
 ]
 
-[tool.briefcase.app.cashd-local.linux.system.rhel]
+[tool.briefcase.app.cashd.linux.system.rhel]
 system_requires = [
     # Needed to compile pycairo wheel
     "cairo-gobject-devel",
@@ -94,7 +90,7 @@ system_runtime_requires = [
     # "webkit2gtk3",
 ]
 
-[tool.briefcase.app.cashd-local.linux.system.suse]
+[tool.briefcase.app.cashd.linux.system.suse]
 system_requires = [
     # Needed to compile pycairo wheel
     "cairo-devel",
@@ -113,7 +109,7 @@ system_runtime_requires = [
     # "libwebkit2gtk3", "typelib(WebKit2)",
 ]
 
-[tool.briefcase.app.cashd-local.linux.system.arch]
+[tool.briefcase.app.cashd.linux.system.arch]
 system_requires = [
     # Needed to compile pycairo wheel
     "cairo",
@@ -140,7 +136,7 @@ system_runtime_requires = [
     # "webkit2gtk",
 ]
 
-[tool.briefcase.app.cashd-local.linux.appimage]
+[tool.briefcase.app.cashd.linux.appimage]
 manylinux = "manylinux_2_28"
 
 system_requires = [
@@ -161,24 +157,24 @@ linuxdeploy_plugins = [
     "DEPLOY_GTK_VERSION=3 gtk",
 ]
 
-[tool.briefcase.app.cashd-local.linux.flatpak]
+[tool.briefcase.app.cashd.linux.flatpak]
 flatpak_runtime = "org.gnome.Platform"
 flatpak_runtime_version = "47"
 flatpak_sdk = "org.gnome.Sdk"
 
-[tool.briefcase.app.cashd-local.windows]
+[tool.briefcase.app.cashd.windows]
 requires = [
     "toga-winforms~=0.5.0",
 ]
 
 # Mobile deployments
-[tool.briefcase.app.cashd-local.iOS]
+[tool.briefcase.app.cashd.iOS]
 requires = [
     "toga-iOS~=0.5.0",
     "std-nslog~=1.0.3",
 ]
 
-[tool.briefcase.app.cashd-local.android]
+[tool.briefcase.app.cashd.android]
 requires = [
     "toga-android~=0.5.0",
 ]
@@ -194,7 +190,7 @@ build_gradle_dependencies = [
 ]
 
 # Web deployments
-[tool.briefcase.app.cashd-local.web]
+[tool.briefcase.app.cashd.web]
 requires = [
     "toga-web~=0.5.0",
 ]

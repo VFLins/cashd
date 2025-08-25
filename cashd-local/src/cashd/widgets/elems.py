@@ -13,8 +13,8 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.detailedlist import DetailedList
 
-from cashd_local.style import input_annotation
-from cashd_local import data, const, style
+from cashd import data, const, style
+from cashd.style import input_annotation
 
 
 class _LabeledInput:

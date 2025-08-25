@@ -4,8 +4,8 @@ from toga.widgets.box import Box
 from toga.widgets.button import Button
 
 from .base import BaseSection
-from cashd_local import const, style, data, widgets
-from cashd_local.widgets.form import FormHandler
+from cashd import const, style, data, widgets
+from cashd.widgets.form import FormHandler
 
 
 class CreateCustomerSection(BaseSection):

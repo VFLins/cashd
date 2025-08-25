@@ -3,10 +3,6 @@ import datetime as dt
 import re
 from sqlalchemy import exc
 
-from cashd_local import const, data, style, widgets
-from cashd_local.pages.base import BaseSection
-from cashd_local.widgets.paginated import PaginatedDetailedList
-
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from toga.dialogs import ConfirmDialog
@@ -19,6 +15,10 @@ from toga.widgets.selection import Selection
 from toga.widgets.textinput import TextInput
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.widgets.optioncontainer import OptionContainer
+
+from cashd import const, data, style, widgets
+from cashd.pages.base import BaseSection
+from cashd.widgets.paginated import PaginatedDetailedList
 
 
 class MainSection(BaseSection):
