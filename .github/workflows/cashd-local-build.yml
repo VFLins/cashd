@@ -97,5 +97,6 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
               run: |
                 cd $GITHUB_WORKSPACE/cashd-local/dist/
+                git config --global --add safe.directory $GITHUB_WORKSPACE
                 zip cashd-rpm-installer-x86_64.zip *.rpm
                 gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
