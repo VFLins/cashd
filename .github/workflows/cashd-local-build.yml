@@ -34,7 +34,8 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
               run: |
                 cd D:\a\cashd\cashd\cashd-local\dist\
-                gh release upload ${{ github.event.release.tag_name }} *.msi --clobber
+                tar.exe -c -f cashd-windows-installer-x86_64.zip *.msi
+                gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
 
     build-ubuntu:
         runs-on: ubuntu-latest
@@ -65,7 +66,8 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
               run: |
                 cd $GITHUB_WORKSPACE/cashd-local/dist/
-                gh release upload ${{ github.event.release.tag_name }} *.deb --clobber
+                zip cashd-deb-installer-x86_64.zip *.deb
+                gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
 
     build-fedora:
         runs-on: ubuntu-latest
@@ -95,4 +97,5 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
               run: |
                 cd $GITHUB_WORKSPACE/cashd-local/dist/
-                gh release upload ${{ github.event.release.tag_name }} *.rpm --clobber
+                zip cashd-rpm-installer-x86_64.zip *.rpm
+                gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
