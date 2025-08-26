@@ -70,7 +70,7 @@ jobs:
         steps:
             - name: Install dependencies
               run: |
-                dnf install -y python3 python3-pip python3-devel gcc make
+                dnf install -y python3 python3-pip python3-devel gcc make rpm-build
                 dnf install -y git pkg-config gobject-introspection-devel cairo-gobject-devel gtk3 libcanberra-gtk3
                 pip3 install --upgrade pip
                 pip3 install briefcase
