@@ -30,7 +30,7 @@ jobs:
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                gh release upload ${{ github.event.release.tag_name }} D:\a\cashd\cashd\cashd-local\dist\*.deb --clobber
+                gh release upload ${{ github.event.release.tag_name }} D:\a\cashd\cashd\cashd-local\dist\*.msi --clobber
 
     build-ubuntu:
         runs-on: ubuntu-latest
