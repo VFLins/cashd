@@ -24,9 +24,7 @@ jobs:
               run: |
                 cd D:\a\cashd\cashd\cashd-local
                 briefcase build windows
-
-            - name: Package Windows installer
-              run: briefcase package windows --adhoc-sign
+                briefcase package windows --adhoc-sign
 
             - name: Upload Windows installer
               uses: actions/upload-artifact@v4
@@ -54,17 +52,15 @@ jobs:
 
             - name: Build Linux .deb installer
               run: |
-                cd /__w/cashd/cashd/cashd-local/
+                cd $GITHUB_WORKSPACE/cashd-local
                 briefcase build linux
-
-            - name: Package Linux .deb installer
-              run: briefcase package linux --adhoc-sign
+                briefcase package linux --adhoc-sign
 
             - name: Upload .deb installer
               uses: actions/upload-artifact@v4
               with:
                 name: cashd-deb-installer
-                path: /__w/cashd/cashd/cashd-local/dist/*.deb
+                path: $GITHUB_WORKSPACE/cashd-local/dist/*.deb
 
     build-fedora:
         runs-on: ubuntu-latest
@@ -85,14 +81,12 @@ jobs:
 
             - name: Build Linux .rpm installer
               run: |
-                cd /__w/cashd/cashd/cashd-local/
+                cd $GITHUB_WORKSPACE/cashd-local
                 briefcase build linux
-
-            - name: Package Linux .rpm installer
-              run: briefcase package linux --adhoc-sign
+                briefcase package linux --adhoc-sign
 
             - name: Upload .rpm installer
               uses: actions/upload-artifact@v4
               with:
                 name: cashd-rpm-installer
-                path: /__w/cashd/cashd/cashd-local/dist/*.rpm
+                path: $GITHUB_WORKSPACE/cashd-local/dist/*.rpm
