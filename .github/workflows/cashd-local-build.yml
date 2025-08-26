@@ -26,11 +26,11 @@ jobs:
                 briefcase build windows
                 briefcase package windows --adhoc-sign
 
-            - name: Upload Windows installer
-              uses: actions/upload-artifact@v4
-              with:
-                name: cashd-windows-installer
-                path: D:\a\cashd\cashd\cashd-local\dist\*.msi
+            - name: Upload Windows installer to release
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                gh release upload ${{ github.event.release.tag_name }} D:\a\cashd\cashd\cashd-local\dist\*.deb --clobber
 
     build-ubuntu:
         runs-on: ubuntu-latest
@@ -56,11 +56,11 @@ jobs:
                 briefcase build linux
                 briefcase package linux --adhoc-sign
 
-            - name: Upload .deb installer
-              uses: actions/upload-artifact@v4
-              with:
-                name: cashd-deb-installer
-                path: $GITHUB_WORKSPACE/cashd-local/dist/*.deb
+            - name: Upload .deb installer to release
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                gh release upload ${{ github.event.release.tag_name }} $GITHUB_WORKSPACE/cashd-local/dist/*.deb --clobber
 
     build-fedora:
         runs-on: ubuntu-latest
@@ -86,7 +86,7 @@ jobs:
                 briefcase package linux --adhoc-sign
 
             - name: Upload .rpm installer
-              uses: actions/upload-artifact@v4
-              with:
-                name: cashd-rpm-installer
-                path: $GITHUB_WORKSPACE/cashd-local/dist/*.rpm
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                gh release upload ${{ github.event.release.tag_name }} $GITHUB_WORKSPACE/cashd-local/dist/*.rpm --clobber
