@@ -130,6 +130,7 @@ class StatisticsSection(BaseSection):
         else:
             self.time_grouping_selection.enabled = False
         self.change_visualization(selection=selected_visualization)
+        self.update_data(widget)
 
     def change_visualization(self, selection):
         match selection:
@@ -163,6 +164,7 @@ class StatisticsSection(BaseSection):
         tbl: PaginatedTable = tables.get(selected_view)
         date_freq = date_freqs.get(self.time_grouping_selection.value)
         tbl._datasource.update_date_format(date_freq)
+        print(f"Update displayed table: {selected_view=}, {date_freq=}")
         tbl.refresh()
 
     def update_data_widgets(self):
