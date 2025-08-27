@@ -186,7 +186,11 @@ html {
 
 
 /* searchable selector */
-.taipy-selector.css-1j7bdiy {
+.sel_user.user_search_input {
+    width: 40vw;
+    max-width: 100%;
+}
+.sel_user.user_selector {
     width: 40vw;
 }
 /* searchable selector: selectable item */

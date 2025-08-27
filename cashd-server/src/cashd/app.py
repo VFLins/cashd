@@ -386,6 +386,10 @@ def chg_cliente_selecionado(state: State) -> None:
     state.refresh("form_transac")
 
 
+def chg_cliente_pesquisa(state, id, payload):
+    print(f"user search input's value: {state.search_user_input_value}")
+
+
 ####################
 # VALORES INICIAIS
 ####################
@@ -443,6 +447,9 @@ dropdown_uf_lov = [
 dropdown_uf_val = prefs.settings.read_main_state()
 
 main_plot = btn_gerar_main_plot()
+
+# campo de pesquisa de clientes
+search_user_input_value = ""
 
 # listagem de clientes
 with db.DB_ENGINE.connect() as conn, conn.begin():
