@@ -1,4 +1,4 @@
-from cashd import db, backup, plot, prefs
+from cashd import db, backup, plot, prefs, data
 from cashd.pages import transac, contas, analise, configs, dialogo
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder
@@ -386,8 +386,13 @@ def chg_cliente_selecionado(state: State) -> None:
     state.refresh("form_transac")
 
 
-def chg_cliente_pesquisa(state, id, payload):
-    print(f"user search input's value: {state.search_user_input_value}")
+def chg_cliente_pesquisa(state: State, id, payload):
+    usuarios = data.CustomerListSource()
+    usuarios._fetch_metadata(search_text=state.search_user_input_value)
+    state.assign(
+        "NOMES_USUARIOS",
+        ((r.Id, r.Name) for r in usuarios.current_data)
+    )
 
 
 ####################
