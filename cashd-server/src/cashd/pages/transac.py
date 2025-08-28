@@ -17,6 +17,12 @@ PG_TRANSAC = """
 
 |>
 
+__Cliente__: _<|{nome_cliente_selec}|text|>_
+
+__Local__: _<|{SLC_USUARIO_LOCAL}|text|>_
+
+__Saldo devedor__: R$ <|{SLC_USUARIO_SALDO}|>
+
 <|layout|columns=1 1|columns[mobile]=1
 
 <|part|partial={elem_transac_sel}|>
@@ -28,8 +34,6 @@ PG_TRANSAC = """
 
 
 ELEMENTO_FORM = """
-<br /><br />
-
 <|
 __Data__*
 
@@ -62,11 +66,6 @@ Saldo devedor atual: **R$ <|{SLC_USUARIO_SALDO}|>**
 
 
 ELEMENTO_SELEC_CONTA = """
-__Cliente__: _<|{nome_cliente_selec}|text|>_
-
-__Local__: _<|{SLC_USUARIO_LOCAL}|text|>_
-
-__Saldo devedor__: R$ <|{SLC_USUARIO_SALDO}|>
 
 <|{search_user_input_value}|input|label=Pesquisa|on_change={chg_cliente_pesquisa}|class_name=sel-user user-search-input|>
 
