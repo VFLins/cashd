@@ -17,8 +17,6 @@ PG_TRANSAC = """
 
 |>
 
-<br />
-
 <|layout|columns=1 1|columns[mobile]=1
 
 <|part|partial={elem_transac_sel}|>
@@ -30,6 +28,8 @@ PG_TRANSAC = """
 
 
 ELEMENTO_FORM = """
+<br /><br />
+
 <|
 __Data__*
 
@@ -73,6 +73,6 @@ __Saldo devedor__: R$ <|{SLC_USUARIO_SALDO}|>
 <|{SLC_USUARIO}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|on_change={chg_cliente_selecionado}|class_name=sel-user user-selector|>
 
 <|{search_user_pagination_legend}|text|class_name=small-text|>
-<|Anterior|button|class_name=small-button|>
-<|Próxima|button|class_name=small-button|>
+<|Anterior|button|class_name=small-button|on_action=btn_prev_page_customer_search|>
+<|Próxima|button|class_name=small-button|on_action=btn_next_page_customer_search|>
 """

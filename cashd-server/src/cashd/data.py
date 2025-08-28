@@ -509,7 +509,7 @@ class _DataSource:
                 )
         if paginated:
             self._current_page = 1
-            self._rows_per_page = prefs.settings.read_last_transacs_limit()
+            self._rows_per_page = 100
         if searchable:
             self._search_text = ""
             self.SEARCH_COLNAMES = search_colnames
@@ -533,6 +533,10 @@ class _DataSource:
 
         - :min_idx: Index of the first item in the current page;
         - :max_idx: Index of the last item in the current page.
+
+        :type search_text: ``str``
+        :param search_text: Text with all the keywords that will be inserted into the
+          searched SELECT query.
         """
         # `search_text`
         if self.is_searchable():
@@ -611,7 +615,7 @@ class _DataSource:
 
     @property
     def rows_per_page(self) -> int:
-        self._rows_per_page = prefs.settings.read_last_transacs_limit()
+        self._rows_per_page = 100
         return self._rows_per_page
 
     def fetch_next_page(self):

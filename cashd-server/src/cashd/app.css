@@ -196,7 +196,7 @@ html {
 
 /* searchable selector */
 .sel-user.user-search-input {
-    margin-top: 24px;
+    margin-top: 18px;
     width: 40vw;
     max-width: 100%;
 }
@@ -218,6 +218,7 @@ html {
 .MuiListItemText-primary.css-pqgvxp {
     line-height: 1.15;
     font-weight: 400;
+    font-size: 0.8rem
 }
 
 

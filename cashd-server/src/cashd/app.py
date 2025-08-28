@@ -17,9 +17,21 @@ import sys
 
 PYTHON_PATH = path.dirname(sys.executable)
 
+
 ####################
 # BOTOES
 ####################
+
+def btn_next_page_customer_search(state: State):
+    usuarios = getattr(state, "usuarios", data.CustomerListSource())
+    usuarios.fetch_next_page()
+    update_search_widgets(state=state)
+
+
+def btn_prev_page_customer_search(state: State):
+    usuarios = getattr(state, "usuarios", data.CustomerListSource())
+    usuarios.fetch_previous_page()
+    update_search_widgets(state=state)
 
 
 def btn_mostrar_dialogo(state: State, id: str, payload: dict, show: str):
@@ -292,6 +304,17 @@ def menu_lateral(state, action, info):
     navigate(state, to=page)
 
 
+def update_search_widgets(state: State):
+    with state as s:
+        s.NOMES_USUARIOS = [
+            (str(row[0]), f"{row[1]} — {row[2]}") for row in usuarios.current_data
+        ]
+        s.search_user_pagination_legend = (
+            f"{usuarios.nrows} itens, "
+            f"mostrando {usuarios.min_idx + 1} até {usuarios.max_idx}"
+        )
+
+
 ####################
 # ON ACTION
 ####################
@@ -389,16 +412,10 @@ def chg_cliente_selecionado(state: State) -> None:
 
 
 def chg_cliente_pesquisa(state: State, id, payload):
-    usuarios = data.CustomerListSource()
+    usuarios = getattr(state, "usuarios", data.CustomerListSource())
     with state as s:
-        usuarios._fetch_metadata(search_text=s.search_user_input_value)
-        s.NOMES_USUARIOS = [
-            (str(row[0]), f"{row[1]} — {row[2]}") for row in usuarios.current_data
-        ]
-        s.search_user_pagination_legend = (
-            f"{len(s.NOMES_USUARIOS)} itens, "
-            f"mostrando{usuarios.min_idx + 1} até {usuarios.max_idx}."
-        )
+        usuarios.search_text = s.search_user_input_value
+        update_search_widgets(state=state)
         s.usuarios = usuarios
 
 
