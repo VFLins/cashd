@@ -182,7 +182,8 @@ def btn_inserir_cliente(state: State):
         state.form_contas.__init__()
         db.adicionar_cliente(db.tbl_clientes(**novo_cliente))
 
-        nome_completo = f"{novo_cliente['PrimeiroNome']} {novo_cliente['Sobrenome']}"
+        nome_completo = f"{novo_cliente['PrimeiroNome']} {
+            novo_cliente['Sobrenome']}"
         notify(state, "success", message=f"Novo cliente adicionado!\n{nome_completo}")
         state.refresh("form_contas")
         state.NOMES_USUARIOS = sel_listar_clientes()
@@ -220,7 +221,8 @@ def btn_chg_max_ultimas_transacs(state: State, val: int):
         notify(
             state,
             "success",
-            f"Limite de entradas em 'Últimas transações' atualizado para {val}",
+            f"Limite de entradas em 'Últimas transações' atualizado para {
+                val}",
         )
     except Exception as xpt:
         notify(state, "error", f"Erro inesperado: {str(xpt)}")
@@ -388,11 +390,16 @@ def chg_cliente_selecionado(state: State) -> None:
 
 def chg_cliente_pesquisa(state: State, id, payload):
     usuarios = data.CustomerListSource()
-    usuarios._fetch_metadata(search_text=state.search_user_input_value)
-    state.assign(
-        "NOMES_USUARIOS",
-        ((r.Id, r.Name) for r in usuarios.current_data)
-    )
+    with state as s:
+        usuarios._fetch_metadata(search_text=s.search_user_input_value)
+        s.NOMES_USUARIOS = [
+            (str(row[0]), f"{row[1]} — {row[2]}") for row in usuarios.current_data
+        ]
+        s.search_user_pagination_legend = (
+            f"{len(s.NOMES_USUARIOS)} itens, "
+            f"mostrando{usuarios.min_idx + 1} até {usuarios.max_idx}."
+        )
+        s.usuarios = usuarios
 
 
 ####################
@@ -465,11 +472,21 @@ display_tr_valor = "0,00"
 display_tr_data = datetime.now()
 
 # valor inicial do seletor de conta global
-NOMES_USUARIOS = sel_listar_clientes()
+usuarios = data.CustomerListSource()
+usuarios.search_text = search_user_input_value
+
+NOMES_USUARIOS = [
+    (str(row[0]), f"{row[1]} — {row[2]}") for row in usuarios.current_data
+]
 if len(NOMES_USUARIOS) > 0:
     SLC_USUARIO = NOMES_USUARIOS[0]
 else:
     SLC_USUARIO = "0"
+
+# texto de paginação da pesquisa de clientes
+search_user_pagination_legend = (
+    f"{usuarios.nrows} itens, mostrando 1 até {usuarios.max_idx}"
+)
 
 # formularios
 form_contas = db.FormContas()

@@ -22,7 +22,16 @@ h1, .h1{
     justify-items: center;
 }
 
+.small-text {
+    font-size: 0.8rem;
+}
 
+.taipy-button.small-button {
+    font-size: 0.8rem;
+    text-transform: capitalize;
+    padding: 8px;
+    height: 24px;
+}
 /*menu-lateral: elemento*/
 .css-w1lhxi {
     background-color: #cadfe7;
@@ -180,17 +189,18 @@ html {
 
 /* buttons */
 .css-1dtjr3k {
-    min-height: 38px;
+    min-height: 28px;
     min-width: 42px;
 }
 
 
 /* searchable selector */
-.sel_user.user_search_input {
+.sel-user.user-search-input {
+    margin-top: 24px;
     width: 40vw;
     max-width: 100%;
 }
-.sel_user.user_selector {
+.sel-user.user-selector {
     width: 40vw;
 }
 /* searchable selector: selectable item */

@@ -17,7 +17,7 @@ PG_TRANSAC = """
 
 |>
 
-<br /><br />
+<br />
 
 <|layout|columns=1 1|columns[mobile]=1
 
@@ -68,7 +68,11 @@ __Local__: _<|{SLC_USUARIO_LOCAL}|text|>_
 
 __Saldo devedor__: R$ <|{SLC_USUARIO_SALDO}|>
 
-<|{search_user_input_value}|input|label=Pesquisa|on_change={chg_cliente_pesquisa}|class_name=sel_user user_search_input|>
+<|{search_user_input_value}|input|label=Pesquisa|on_change={chg_cliente_pesquisa}|class_name=sel-user user-search-input|>
 
-<|{SLC_USUARIO}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|on_change={chg_cliente_selecionado}|class_name=sel_user user_selector|>
+<|{SLC_USUARIO}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|on_change={chg_cliente_selecionado}|class_name=sel-user user-selector|>
+
+<|{search_user_pagination_legend}|text|class_name=small-text|>
+<|Anterior|button|class_name=small-button|>
+<|Próxima|button|class_name=small-button|>
 """
