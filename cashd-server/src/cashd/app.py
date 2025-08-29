@@ -76,11 +76,11 @@ def btn_gerar_main_plot(state: State | None = None):
     if state:
         p = state.dropdown_periodo_val[0]
         n = int(state.slider_val[0])
-        tipo = state.dropdown_tipo_val
+        tipo = state.dropdown_plot_type_val
     else:
         p = dropdown_periodo_val[0]
         n = int(slider_val[0])
-        tipo = dropdown_tipo_val
+        tipo = dropdown_plot_type_val
 
     if tipo == "Saldo Acumulado":
         fig = plot.saldo_acum(periodo=p, n=n)
@@ -404,6 +404,36 @@ def chg_transac_valor(state: State) -> None:
     return
 
 
+def chg_select_table_stats(state: State):
+    source_names = {
+        "Últimas transações": "last_transacs_data_source",
+        "Maiores saldos": "highest_amounts_data_source",
+        "Clientes inativos": "inactive_customers_data_source",
+    }
+    tablename = state.dropdown_table_type_val # option selected in the dropdown
+    sources = {
+        "Últimas transações": last_transacs_data_source,
+        "Maiores saldos": highest_amounts_data_source,
+        "Clientes inativos": inactive_customers_data_source,
+    }
+    tables = {
+        "Últimas transações": analise.ELEM_TABLE_TRANSAC_HIST,
+        "Maiores saldos": analise.ELEM_TABLE_HIGHEST_AMOUNTS,
+        "Clientes inativos": analise.ELEM_TABLE_INACTIVE_CUSTOMERS,
+    }
+    selected_source = getattr(state, source_names[tablename], None)
+    if selected_source is None:
+        selected_source = sources.get(tablename)
+    if selected_source is None:
+        print(f"No valid table name selected: {tablename}.")
+        return
+    state.assign(
+        name=source_names[tablename],
+        value=sources[tablename],
+    )
+    state.part_stats_displayed_table.update_content(state, tables[tablename])
+
+
 def chg_cliente_selecionado(state: State) -> None:
     carregar_lista_transac(state=state)
     state.form_transac.IdCliente = int(state.SLC_USUARIO[0])
@@ -438,11 +468,7 @@ slider_val = slider_lov[0]
 dropdown_periodo_lov = [("mes", "Mensal"), ("sem", "Semanal"), ("dia", "Diário")]
 dropdown_periodo_val = dropdown_periodo_lov[0]
 
-dropdown_tipo_lov = [
-    "Balanço",
-    "Saldo Acumulado",
-]
-dropdown_tipo_val = dropdown_tipo_lov[0]
+dropdown_plot_type_val = "Balanço"
 
 dropdown_uf_lov = [
     "AC",
@@ -526,9 +552,24 @@ else:
 maximizado = False
 
 # valor inicial da tabela de transacoes do usuario selecionado em SLC_USUARIO
-df_ult_transac = db.ultimas_transac_displ()
+last_transacs_data_source = data.LastTransactionsSource()
+highest_amounts_data_source = data.HighestAmountsSource()
+inactive_customers_data_source = data.InactiveCustomersSource()
 
-df_maiores_saldos = db.rank_maiores_saldos()
+df_last_transacs = pd.DataFrame(
+    data=last_transacs_data_source.current_data,
+    columns=["Data", "Cliente", "Valor"],
+)
+df_highest_amounts = pd.DataFrame(
+    data=highest_amounts_data_source.current_data,
+    columns=["Nome", "Saldo devedor"],
+)
+df_inactive_customers = pd.DataFrame(
+    data=inactive_customers_data_source.current_data,
+    columns=["Nome", "Última transação", "Saldo devedor"],
+)
+
+dropdown_table_type_val = "Últimas transações"
 
 # valor inicial do saldo do usuario selecionado em SLC_USUARIO
 init_meta_cliente = db.listar_transac_cliente(SLC_USUARIO[0])
@@ -586,13 +627,15 @@ elem_transac_sel = Gui.add_partial(app, transac.ELEMENTO_SELEC_CONTA)
 elem_transac_form = Gui.add_partial(app, transac.ELEMENTO_FORM)
 elem_conta = Gui.add_partial(app, contas.ELEMENTO_FORM)
 elem_config = Gui.add_partial(app, configs.ELEMENTO_PREFS)
-elem_analise = Gui.add_partial(app, analise.ELEM_HIST)
+elem_analise = Gui.add_partial(app, analise.ELEM_TABLES)
 
 dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
 dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
 dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
 dial_transac_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_TRANSAC)
 dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
+
+part_stats_displayed_table = Gui.add_partial(app, analise.ELEM_TABLE_TRANSAC_HIST)
 
 ### menus de navegacao ###
 # transacoes
@@ -608,7 +651,7 @@ nav_conta_lov = [
 ]
 nav_conta_val = nav_conta_lov[0]
 # estatisticas
-nav_analise_lov = [(analise.ELEM_HIST, "Histórico"), (analise.ELEM_PLOT, "Gráficos")]
+nav_analise_lov = [(analise.ELEM_TABLES, "Tabelas"), (analise.ELEM_PLOT, "Gráficos")]
 nav_analise_val = nav_analise_lov[0]
 # configs
 nav_config_lov = [

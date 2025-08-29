@@ -22,16 +22,11 @@ PG_ANALISE = """
 
 
 ELEM_PLOT = """
-<|layout|columns=1fr 1fr 2fr|class_name=top_controls|
-
-
-<|{dropdown_tipo_val}|selector|lov={dropdown_tipo_lov}|dropdown|>
-
+<center>
+<|{dropdown_plot_type_val}|selector|lov=Balanço;Saldo acumulado|dropdown|>
 <|{dropdown_periodo_val}|selector|lov={dropdown_periodo_lov}|dropdown|>
-
 <|{slider_val}|slider|lov={slider_lov}|text_anchor=bottom|>
-
-|>
+</center>
 
 <center>
 <|Atualizar|button|on_action={btn_gerar_main_plot}|>
@@ -42,25 +37,27 @@ ELEM_PLOT = """
 <|chart|figure={main_plot}|height=360px|>
 """
 
-ELEM_HIST = """
-<br />
 
-<|layout|columns=1.2fr .7fr|
-
-<|part|
-<|layout|columns=.9 .1fr|class_name=interactive_header|
-# Últimas transações
-
-<|↻|button|on_action={btn_atualizar_df_ult_transac}|>
-|>
-<|{df_ult_transac}|table|paginated|page_size=10|page_size_options={[25, 50]}|height=360px|>
+ELEM_TABLES = """
+<|layout|class_name=top_controls|
+<|{dropdown_table_type_val}|selector|dropdown|lov=Últimas transações;Maiores saldos;Clientes inativos|on_change={chg_select_table_stats}|>
+<|↻|button|on_action={chg_select_table_stats}|>
 |>
 
-<|part|
-# Maiores saldos
+<|part|partial={part_stats_displayed_table}|>
+"""
 
-<|{df_maiores_saldos}|table|show_all|height=412px|>
-|>
 
-|>
+ELEM_TABLE_TRANSAC_HIST = """
+<|{df_last_transacs}|table|paginated|show_all=True|editable=False|sortable=False|height=360px|>
+"""
+
+
+ELEM_TABLE_HIGHEST_AMOUNTS = """
+<|{df_highest_amounts}|table|paginated|show_all=True|editable=False|sortable=False|height=360px|>
+"""
+
+
+ELEM_TABLE_INACTIVE_CUSTOMERS = """
+<|{df_inactive_customers}|table|paginated|show_all=True|editable=False|sortable=False|height=360px|>
 """

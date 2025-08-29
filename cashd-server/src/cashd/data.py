@@ -720,11 +720,10 @@ class HighestAmountsSource(_DataSource):
         """Manages database interaction on for 'Highest Owed Amounts' data,
         with columns:
 
-        :Name: Customer name formatted as
+        - **Name** Customer name formatted as
         "`{Id},  {FirstName} {LastName} ({Nickname})`" whit nickname
         present, or "`{Id},  {FirstName} {LastName}`" otherwise.
-        :LastTransac: Date of last transaction performed by the customer.
-        :OwedAmount: Total amount owed by the customer.
+        - **OwedAmount** Total amount owed by the customer.
         """
         select_stmt = (
             select(
@@ -749,11 +748,11 @@ class InactiveCustomersSource(_DataSource):
         """Manages database interaction on for 'Inactive Customers' data,
         with columns:
 
-        :Name: Customer name formatted as
+        - **Name** Customer name formatted as
         "`{Id},  {FirstName} {LastName} ({Nickname})`" whit nickname
         present, or "`{Id},  {FirstName} {LastName}`" otherwise.
-        :LastTransac: Date of last transaction performed by the customer.
-        :OwedAmount: Total amount owed by the customer.
+        - **LastTransac** Date of last transaction performed by the customer.
+        - **OwedAmount** Total amount owed by the customer.
         """
         select_stmt = (
             select(

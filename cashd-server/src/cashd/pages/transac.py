@@ -9,7 +9,7 @@ PG_TRANSAC = """
 <|{nav_transac_val}|toggle|lov={nav_transac_lov}|on_change={lambda s: s.elem_transac_form.update_content(s, s.nav_transac_val[0])}|>
 |>
 
-<|part|class_name=text_right|class_name=header_top_right_corner|
+<|part|class_name=text_right header_top_right_corner|
 <|🗕|button|on_action=btn_mudar_minimizado|>
 <|🗖|button|on_action=btn_mudar_maximizado|>
 <|✖|button|on_action=btn_encerrar|>
