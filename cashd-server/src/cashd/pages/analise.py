@@ -40,11 +40,15 @@ ELEM_PLOT = """
 
 ELEM_TABLES = """
 <|layout|class_name=top_controls|
-<|{dropdown_table_type_val}|selector|dropdown|lov=Últimas transações;Maiores saldos;Clientes inativos|on_change={chg_select_table_stats}|>
+<|{dropdown_table_type_val}|selector|dropdown|lov=Últimas transações;Maiores saldos;Clientes inativos|on_change={chg_select_table_stats}|class_name=top_controls_dropdown|>
 <|↻|button|on_action={chg_select_table_stats}|>
 |>
 
 <|part|partial={part_stats_displayed_table}|>
+
+<|{stats_tables_pagination_legend}|text|class_name=small-text|>
+<|Anterior|button|class_name=small-button|on_action=btn_prev_page_displayed_table|>
+<|Próxima|button|class_name=small-button|on_action=btn_next_page_displayed_table|>
 """
 
 

@@ -1,7 +1,4 @@
-from cashd import db, backup, plot, prefs, data
-from cashd.pages import transac, contas, analise, configs, dialogo
-
-from taipy.gui import Gui, notify, State, navigate, Icon, builder
+from typing import Literal, Type
 from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
@@ -13,6 +10,12 @@ import threading
 import webview
 import socket
 import sys
+
+from taipy.gui import Gui, notify, State, navigate, Icon, builder
+
+from cashd import db, backup, plot, prefs, data
+from cashd.pages import transac, contas, analise, configs, dialogo
+
 
 
 PYTHON_PATH = path.dirname(sys.executable)
@@ -32,6 +35,20 @@ def btn_prev_page_customer_search(state: State):
     usuarios = getattr(state, "usuarios", data.CustomerListSource())
     usuarios.fetch_previous_page()
     update_search_widgets(state=state)
+
+
+def btn_next_page_displayed_table(state: State):
+    tablename = state.dropdown_table_type_val
+    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
+    selected_source.fetch_next_page()
+    chg_select_table_stats(state=state)
+
+
+def btn_prev_page_displayed_table(state: State):
+    tablename = state.dropdown_table_type_val
+    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
+    selected_source.fetch_previous_page()
+    chg_select_table_stats(state=state)
 
 
 def btn_mostrar_dialogo(state: State, id: str, payload: dict, show: str):
@@ -315,6 +332,37 @@ def update_search_widgets(state: State):
         )
 
 
+def fetch_displayed_table_datasource(
+        state: State,
+        tablename = Literal["Últimas transações", "Maiores saldos", "Clientes inativos"]
+    ) -> Type[data._DataSource] | None:
+    source_names = {
+        "Últimas transações": "last_transacs_data_source",
+        "Maiores saldos": "highest_amounts_data_source",
+        "Clientes inativos": "inactive_customers_data_source",
+    }
+    sources = {
+        "Últimas transações": last_transacs_data_source,
+        "Maiores saldos": highest_amounts_data_source,
+        "Clientes inativos": inactive_customers_data_source,
+    }
+    selected_source = getattr(state, source_names[tablename], None)
+    if selected_source is None:
+        selected_source = sources.get(tablename)
+    return selected_source
+
+
+def update_displayed_table_pagination(
+        state: State,
+        tablename = Literal["Últimas transações", "Maiores saldos", "Clientes inativos"]
+    ):
+    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
+    selected_source._fetch_metadata()
+    state.stats_tables_pagination_legend = (
+        f"{selected_source.nrows} itens, "
+        f"mostrando {selected_source.min_idx + 1} até {selected_source.max_idx}"
+    )
+
 ####################
 # ON ACTION
 ####################
@@ -410,28 +458,37 @@ def chg_select_table_stats(state: State):
         "Maiores saldos": "highest_amounts_data_source",
         "Clientes inativos": "inactive_customers_data_source",
     }
-    tablename = state.dropdown_table_type_val # option selected in the dropdown
     sources = {
         "Últimas transações": last_transacs_data_source,
         "Maiores saldos": highest_amounts_data_source,
         "Clientes inativos": inactive_customers_data_source,
     }
-    tables = {
+    table_partials = {
         "Últimas transações": analise.ELEM_TABLE_TRANSAC_HIST,
         "Maiores saldos": analise.ELEM_TABLE_HIGHEST_AMOUNTS,
         "Clientes inativos": analise.ELEM_TABLE_INACTIVE_CUSTOMERS,
     }
-    selected_source = getattr(state, source_names[tablename], None)
+    dataframe_names = {
+        "Últimas transações": "df_last_transacs",
+        "Maiores saldos": "df_highest_amounts",
+        "Clientes inativos": "df_inactive_customers",
+    }
+    # Get option selected in the dropdown
+    tablename = state.dropdown_table_type_val
+    # Fetch datasource from state, if not available, use local datasource
+    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
     if selected_source is None:
-        selected_source = sources.get(tablename)
-    if selected_source is None:
-        print(f"No valid table name selected: {tablename}.")
         return
-    state.assign(
-        name=source_names[tablename],
-        value=sources[tablename],
-    )
-    state.part_stats_displayed_table.update_content(state, tables[tablename])
+    # Assign newest data to dataframe
+    df = getattr(state, dataframe_names[tablename])
+    df = pd.DataFrame(data=selected_source.current_data, columns=df.columns)
+    state.assign(dataframe_names[tablename], df)
+    # Update pagination label
+    update_displayed_table_pagination(state=state, tablename=tablename)
+    # Ensure datasource is assigned to state
+    state.assign(name=source_names[tablename], value=sources[tablename])
+    # Display selected dataframe
+    state.part_stats_displayed_table.update_content(state, table_partials[tablename])
 
 
 def chg_cliente_selecionado(state: State) -> None:
@@ -570,6 +627,10 @@ df_inactive_customers = pd.DataFrame(
 )
 
 dropdown_table_type_val = "Últimas transações"
+stats_tables_pagination_legend = (
+    f"{last_transacs_data_source.nrows} itens, mostrando "
+    f"{last_transacs_data_source.min_idx + 1} até {last_transacs_data_source.max_idx}"
+)
 
 # valor inicial do saldo do usuario selecionado em SLC_USUARIO
 init_meta_cliente = db.listar_transac_cliente(SLC_USUARIO[0])

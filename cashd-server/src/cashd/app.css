@@ -149,13 +149,17 @@ html {
 }
 
 
-/*top controls*/
+/* top controls */
 .taipy-layout.top_controls.MuiBox-root {
     justify-items: flex-end;
     padding-bottom: 12px;
     z-index: 99;
 }
-/*top controls: slider*/
+/* top controls: dropdown */
+.top_controls_dropdown{
+    min-width: 190px;
+}
+/* top controls: slider */
 .css-xbsnaj.MuiSlider-valueLabelOpen {
     color: transparent;
     background-color: transparent;
