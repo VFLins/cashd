@@ -17,27 +17,30 @@ dependencies = [
 project_name = "Cashd"
 bundle = "pro.vitorlins.cashd"
 version = "0.3.0"
-url = "https://vitorlins.com/cashd"
+url = "https://vitorlins.pro/cashd"
 license.file = "LICENSE"
 author = "Vitor F. Lins"
 author_email = "vflins@live.com"
 
 [tool.briefcase.app.cashd]
 formal_name = "Cashd"
-description = "Aplicativo local-first que ajuda você a lidar com registros de caixa rapidamente."
-long_description = """Cashd enables you to keep track of all the transactions performed by your
-most loyal customers, while giving you access to useful insights about them and your business's
-financial health.
+description = "Aplicativo local-first que ajuda você a lidar com registros de caixa."
+long_description = """Cashd te permite acompanhar todas as transações de seus clientes
+leais, permitindo também que você acesso a informações relevantes sobre eles e a saúde
+financeira de sua empresa.
 """
 icon = "src/cashd/resources/cashd"
 installer_icon = "src/cashd/resources/cashd"
+accent_color = #478eff
+primary_color = #478eff
+primary_dark_color = #478eff
 sources = ["src/cashd"]
 test_sources = ["tests"]
 requires = []
 test_requires = ["pytest"]
 cleanup_paths = [
     "src/app/cashd/configs/*",
-    "src/app/cashd/data/*"
+    "src/app/cashd/data/*",
 ]
 
 [tool.briefcase.app.cashd.macOS]
