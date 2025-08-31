@@ -22,7 +22,7 @@ classifiers = [
     "Operating System :: Microsoft :: Windows :: Windows 11",
     "License :: OSI Approved :: MIT License"
 ]
-version = "0.3.0a2"
+version = "0.3.0"
 dependencies = [
     "taipy==4.*",
     "SQLAlchemy==2.*",
@@ -46,8 +46,8 @@ dev=[
 requires = ["setuptools", "setuptools-scm", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[project.gui-scripts]
-cashd = "cashd.app:start_cashd"
+[project.scripts]
+cashd-server = "cashd.app:start_cashd"
 
 [tool.pytest.ini_options]
 testpaths = "tests"
