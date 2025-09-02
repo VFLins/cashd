@@ -193,20 +193,22 @@ def btn_criar_atalho(state: State):
 def btn_inserir_transac(state: State):
     carregar_lista_transac(state)
     try:
+        # fetch transaction data
         state.form_transac.DataTransac = state.display_tr_data
         nova_transac: dict = state.form_transac.despejar()
         state.form_transac.Valor = ""
         agora = datetime.now()
-
+        # insert data to database and notify
         db.adicionar_transac(db.tbl_transacoes(CarimboTempo=agora, **nova_transac))
-        notify(state, "success", f"Nova transação adicionada!")
-
-        id_selecionado = int(nova_transac["IdCliente"])
-        state.assign("SLC_USUARIO", state.NOMES_USUARIOS[id_selecionado - 1])
-        state.assign("display_tr_valor", "0,00")
-        state.refresh("form_transac")
+        notify(state, "success", f"Nova transação adicionada")
+        with state as s:
+            # update displayed transaction data
+            s.display_tr_valor = "0,00"
+            carregar_lista_transac(state=s)
+            s.refresh("form_transac")
     except Exception as msg_erro:
         notify(state, "error", str(msg_erro))
+        print(f"{type(msg_erro)}: {msg_erro}")
 
 
 def btn_inserir_cliente(state: State):
