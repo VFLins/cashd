@@ -31,9 +31,9 @@ financeira de sua empresa.
 """
 icon = "src/cashd/resources/cashd"
 installer_icon = "src/cashd/resources/cashd"
-accent_color = #478eff
-primary_color = #478eff
-primary_dark_color = #478eff
+accent_color = "#478eff"
+primary_color = "#478eff"
+primary_dark_color = "#478eff"
 sources = ["src/cashd"]
 test_sources = ["tests"]
 requires = []
