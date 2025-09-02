@@ -1,4 +1,4 @@
-![banner](./src/cashd/assets/gh_banner-cashd.png)
+![banner](https://raw.githubusercontent.com/VFLins/cashd/refs/heads/main/cashd-server/src/cashd/assets/gh_banner-cashd.png)
 
 <p align="center">
   <a href="https://github.com/VFLins/cashd/wiki/Instalando-e-Atualizando">
