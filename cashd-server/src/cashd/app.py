@@ -17,13 +17,13 @@ from cashd import db, backup, plot, prefs, data
 from cashd.pages import transac, contas, analise, configs, dialogo
 
 
-
 PYTHON_PATH = path.dirname(sys.executable)
 
 
 ####################
 # BOTOES
 ####################
+
 
 def btn_next_page_customer_search(state: State):
     usuarios = getattr(state, "usuarios", data.CustomerListSource())
@@ -169,16 +169,18 @@ def btn_carregar_backup(state: State):
 
 
 def btn_criar_atalho(state: State):
-    ico_file = path.join(backup.SCRIPT_PATH, "assets", "ICO_LogoIcone.ico")
     if sys.platform == "win32":
         python_runner = path.join(PYTHON_PATH, "pythonw.exe")
+        icon_file = path.join(backup.SCRIPT_PATH, "assets", "ICO_LogoIcone.ico")
     else:
         python_runner = path.join(PYTHON_PATH, "python3")
-    startup_script = path.join(PYTHON_PATH, "Lib", "site-packages", "cashd", "startup.pyw")
+        icon_file = path.join(backup.SCRIPT_PATH, "assets", "PNG_LogoIcone.png")
+    startup_script = path.join(backup.SCRIPT_PATH, "startup.pyw")
 
     make_shortcut(
-        script=f'"{python_runner}" "{startup_script}"',
-        icon=ico_file,
+        executable=python_runner,
+        script=startup_script,
+        icon=icon_file,
         name="Cashd",
         description="Registre seu fluxo de caixa rapidamente e tenha total controle dos seus dados!",
         terminal=False,
@@ -335,9 +337,9 @@ def update_search_widgets(state: State):
 
 
 def fetch_displayed_table_datasource(
-        state: State,
-        tablename = Literal["Últimas transações", "Maiores saldos", "Clientes inativos"]
-    ) -> Type[data._DataSource] | None:
+    state: State,
+    tablename=Literal["Últimas transações", "Maiores saldos", "Clientes inativos"],
+) -> Type[data._DataSource] | None:
     source_names = {
         "Últimas transações": "last_transacs_data_source",
         "Maiores saldos": "highest_amounts_data_source",
@@ -355,15 +357,17 @@ def fetch_displayed_table_datasource(
 
 
 def update_displayed_table_pagination(
-        state: State,
-        tablename = Literal["Últimas transações", "Maiores saldos", "Clientes inativos"]
-    ):
+    state: State,
+    tablename=Literal["Últimas transações", "Maiores saldos", "Clientes inativos"],
+):
     selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
     selected_source._fetch_metadata()
     state.stats_tables_pagination_legend = (
         f"{selected_source.nrows} itens, "
-        f"mostrando {selected_source.min_idx + 1} até {selected_source.max_idx}"
+        f"mostrando {selected_source.min_idx +
+                     1} até {selected_source.max_idx}"
     )
+
 
 ####################
 # ON ACTION
@@ -631,7 +635,8 @@ df_inactive_customers = pd.DataFrame(
 dropdown_table_type_val = "Últimas transações"
 stats_tables_pagination_legend = (
     f"{last_transacs_data_source.nrows} itens, mostrando "
-    f"{last_transacs_data_source.min_idx + 1} até {last_transacs_data_source.max_idx}"
+    f"{last_transacs_data_source.min_idx +
+        1} até {last_transacs_data_source.max_idx}"
 )
 
 # valor inicial do saldo do usuario selecionado em SLC_USUARIO
