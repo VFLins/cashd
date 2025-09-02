@@ -170,12 +170,14 @@ def btn_carregar_backup(state: State):
 
 def btn_criar_atalho(state: State):
     ico_file = path.join(backup.SCRIPT_PATH, "assets", "ICO_LogoIcone.ico")
-    startup_script = path.join(PYTHON_PATH, "cashd.exe")
-    if not path.isfile(startup_script):
-        startup_script = path.join(PYTHON_PATH, "Scripts", "cashd.exe")
+    if sys.platform == "win32":
+        python_runner = path.join(PYTHON_PATH, "pythonw.exe")
+    else:
+        python_runner = path.join(PYTHON_PATH, "python3")
+    startup_script = path.join(PYTHON_PATH, "Lib", "site-packages", "cashd", "startup.pyw")
 
     make_shortcut(
-        script=startup_script,
+        script=f'"{python_runner}" "{startup_script}"',
         icon=ico_file,
         name="Cashd",
         description="Registre seu fluxo de caixa rapidamente e tenha total controle dos seus dados!",
