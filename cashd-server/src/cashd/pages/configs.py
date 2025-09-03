@@ -70,9 +70,9 @@ __Valores padrão no formulário:__
 
 <|layout|columns=1 1|columns[mobile]=1 1|class_name=container
 
-<|{dropdown_uf_val}|selector|label=Estado padrão|lov={dropdown_uf_lov}|dropdown|on_change={lambda s: btn_chg_prefs_main_state(s, dropdown_uf_val)}|>
+<|{dropdown_uf_val}|selector|label=Estado padrão|lov={dropdown_uf_lov}|dropdown|on_change=btn_chg_prefs_main_state|>
 
-<|{input_cidade_val}|input|label=Cidade padrão|change_delay=1200|on_change={lambda s: btn_chg_prefs_main_city(s, input_cidade_val)}|>
+<|{input_cidade_val}|input|label=Cidade padrão|change_delay=1200|on_change=btn_chg_prefs_main_city|>
 
 |>
 

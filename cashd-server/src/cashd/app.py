@@ -226,7 +226,8 @@ def btn_inserir_cliente(state: State):
         notify(state, "error", str(msg_erro))
 
 
-def btn_chg_prefs_main_state(state: State, val: str):
+def btn_chg_prefs_main_state(state: State):
+    val = state.dropdown_uf_val
     try:
         prefs.settings.write_main_state(val)
         state.form_contas.Estado = val
@@ -236,7 +237,8 @@ def btn_chg_prefs_main_state(state: State, val: str):
         notify(state, "error", f"Erro inesperado: {str(xpt)}")
 
 
-def btn_chg_prefs_main_city(state: State, val: str):
+def btn_chg_prefs_main_city(state: State):
+    val = state.input_cidade_val
     try:
         val = val.title()
         prefs.settings.write_main_city(val)
