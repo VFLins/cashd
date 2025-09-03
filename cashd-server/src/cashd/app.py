@@ -502,9 +502,13 @@ def chg_select_table_stats(state: State):
 
 
 def chg_cliente_selecionado(state: State) -> None:
-    carregar_lista_transac(state=state)
-    state.form_transac.IdCliente = int(state.SLC_USUARIO[0])
-    state.nome_cliente_selec = state.SLC_USUARIO[1]
+    cliente = data.tbl_clientes()
+    with state as s:
+        carregar_lista_transac(state=s)
+        id_cliente = int(s.SLC_USUARIO[0])
+        s.form_transac.IdCliente = id_cliente
+    cliente.read(row_id=id_cliente, engine=db.DB_ENGINE)
+    state.nome_cliente_selec = cliente.NomeCompleto
     state.refresh("form_transac")
 
 

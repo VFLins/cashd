@@ -36,7 +36,7 @@ import phonenumbers
 import re
 
 from cashd import prefs
-from cashd.db import DB_ENGINE
+from cashd.db import DB_ENGINE, dec_base
 
 
 ####################
