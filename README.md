@@ -2,18 +2,18 @@
 
 ## Sobre
 
-O **Cashd** é um software simples e poderoso para o dono de pequenas lojas que pretendem
-aceitar o fiado como forma de pagamento, mas não querem ter que registrar tudo em papel.
-O Cahsd permite que você ofereça o fiado sem as dores de cabeça de ter que gastar tempo
-procurando por um nome no "caderninho das dívidas", com menos propensão à erros, e
-armazenando seus dados virtualmente, onde estarão mais seguros.
+O **Cashd** é um software simples e poderoso para o dono de uma pequena loja que
+pretende aceitar o fiado como forma de pagamento, mas não quer ter que registrar tudo
+em papel. O Cahsd permite que você ofereça o fiado sem as dores de cabeça de ter que
+gastar tempo procurando por um nome no "caderninho das dívidas", com menos propensão à
+erros, e armazenando seus dados virtualmente, onde estarão mais seguros.
 
 Você pode dizer o nome dos seus clientes que estão a mais tempo sem te visitar? Ou
 aqueles que possuem os maiores saldos devedores? Com o Cashd você consegue ter acesso à
 estas e outras informações rapidamente, que podem te ajudar a tomar as melhores decisões
 para não deixar o fiado virar um problema.
 
-## A duas edições de Cashd
+## As duas edições de Cashd
 
 O cashd vem em duas edições, que possuem a mesma funcionalidade, mas que são pensadas
 para atender casos de uso diferentes:
@@ -28,7 +28,7 @@ indicado para casos em que um computador hospedará o programa, servindo para ou
 dispositivos conectados na mesma rede, assim todos os diferentes dispositivos podem ter
 acesso ao mesmo banco de dados simultaneamente.
 
-É caso deseje usar o `cashd-server` da maneira indicada, é recomendado que tenha algum
+Caso deseje usar o `cashd-server` da maneira indicada, é recomendado que tenha algum
 nível de conhecimento em computadores, e seguir as instruções de instalação com cuidado.
 Caso não tenha conhecimento procure um profissional técnico de confiança para fazer isso
 por você.
