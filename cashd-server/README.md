@@ -2,9 +2,9 @@
 `cashd-server` <img src="https://raw.githubusercontent.com/VFLins/cashd/refs/heads/main/cashd-server/src/cashd/assets/PNG_LogoIcone.png" width="80" align="left" />
 =================
 
-[<img alt="Como instalar" src="https://img.shields.io/badge/como_instalar-478eff?style=for-the-badge">](https://github.com/VFLins/cashd/wiki/Instalando-e-Atualizando)
-[<img alt="Tutoriais" src="https://img.shields.io/badge/tutoriais-478eff?style=for-the-badge">](https://github.com/VFLins/cashd/wiki/Tutoriais)
-[<img alt="Erros conhecidos" src="https://img.shields.io/badge/problemas_conhecidos-478eff?style=for-the-badge">](https://github.com/VFLins/cashd/wiki/Problemas-conhecidos)
+[![Como instalar](https://img.shields.io/badge/como_instalar-478eff?style=for-the-badge)](https://github.com/VFLins/cashd/wiki/Instalando-e-Atualizando#1-cashd-server)
+[![Tutoriais](https://img.shields.io/badge/tutoriais-478eff?style=for-the-badge)](https://github.com/VFLins/cashd/wiki/Tutoriais)
+[![Problemas conhecidos](https://img.shields.io/badge/problemas_conhecidos-478eff?style=for-the-badge)](https://github.com/VFLins/cashd/wiki/Problemas-conhecidos)
 
 Esta é a edição do **Cashd** que executa como um serviço, você pode registrar tudo pelo
 mesmo computador em que ele está instalado ou por outros dispositivos na mesma rede, para
