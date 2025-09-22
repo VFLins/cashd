@@ -15,4 +15,5 @@ uma instalação mais simples, com uso apenas em um dispositivo, veja
 
 ---
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Versão do python: 3.10, 3.11, 3.12](https://img.shields.io/badge/pythonversion-3.10%20%7C%203.11%20%7C%203.12-blue?logo=python&logoColor=white&label=Vers%C3%A3o%20do%20Python)](https://github.com/Avaiga/taipy/issues/2167)
+[![Estilo de código: black](https://img.shields.io/badge/Estilo%20de%20código-Black-000000.svg)](https://github.com/psf/black)
