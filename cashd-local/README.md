@@ -1,5 +1,5 @@
 
-`cashd-local` <img src="https://raw.githubusercontent.com/VFLins/cashd/refs/heads/main/cashd-server/src/cashd/assets/PNG_LogoIcone.png" width="80" align="left" />
+`cashd-local` <img src="https://raw.githubusercontent.com/VFLins/cashd/refs/heads/main/cashd-server/src/cashd/assets/PNG_LogoIcone.png" width="100" align="left" />
 =================
 
 [![Como instalar](https://img.shields.io/badge/como_instalar-478eff?style=for-the-badge)](https://github.com/VFLins/cashd/wiki/Instalando-e-Atualizando#2-cashd-local)
