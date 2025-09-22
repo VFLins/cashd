@@ -18,15 +18,11 @@ para não deixar o fiado virar um problema.
 O cashd vem em duas edições, que possuem a mesma funcionalidade, mas que são pensadas
 para atender casos de uso diferentes:
 
-- O [`cashd-local`](https://github.com/VFLins/cashd/tree/main/cashd-local) é pensado para
-o caso em que ele só precisa ser instalado em um dispositivo, o mesmo dispositivo que
-recebe a instalação será usado para o controle das dívidas;
-
-- Já o [`cashd-server`](https://github.com/VFLins/cashd/tree/main/cashd-server) também é
-capaz de agir como o `cashd-local`, executando apenas localmente em um computador, mas é
-indicado para casos em que um computador hospedará o programa, servindo para outros
-dispositivos conectados na mesma rede, assim todos os diferentes dispositivos podem ter
-acesso ao mesmo banco de dados simultaneamente.
+| [`cashd-local`](https://github.com/VFLins/cashd/tree/main/cashd-local) | [`cashd-server`](https://github.com/VFLins/cashd/tree/main/cashd-server)               |
+| :---                                                   | :---                                                                                                   |
+| Instalação simples e convencional.                     | Instalação mais complexa e com mais dependências.                                                      |
+| Só pode ser usado no dispositivo em que foi instalado. | Indicado para ser hospedado em um servidor, mas também pode ser usado localmente como o `cashd-local`. |
+| Aparência nativa no sistema em que é instalado.        | Aparência de aplicativo Web, independente do dispositivo onde está sendo executado.                    |
 
 Caso deseje usar o `cashd-server` da maneira indicada, é recomendado que tenha algum
 nível de conhecimento em computadores, e seguir as instruções de instalação com cuidado.
