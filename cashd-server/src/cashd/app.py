@@ -13,7 +13,8 @@ import sys
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder
 
-from cashd import db, backup, plot, prefs, data
+from cashd_core import data, prefs, backup
+from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
 
 
@@ -221,7 +222,7 @@ def btn_inserir_cliente(state: State):
             novo_cliente['Sobrenome']}"
         notify(state, "success", message=f"Novo cliente adicionado!\n{nome_completo}")
         state.refresh("form_contas")
-        state.NOMES_USUARIOS = sel_listar_clientes()
+        state.NOMES_USUARIOS = sel_listar_clientes(state)
     except Exception as msg_erro:
         notify(state, "error", str(msg_erro))
 
@@ -229,7 +230,7 @@ def btn_inserir_cliente(state: State):
 def btn_chg_prefs_main_state(state: State):
     val = state.dropdown_uf_val
     try:
-        prefs.settings.write_main_state(val)
+        prefs.settings.default_state = val
         state.form_contas.Estado = val
         state.refresh("form_contas")
         notify(state, "success", f"Estado preferido atualizado para {val}")
@@ -241,7 +242,7 @@ def btn_chg_prefs_main_city(state: State):
     val = state.input_cidade_val
     try:
         val = val.title()
-        prefs.settings.write_main_city(val)
+        prefs.settings.default_city = val
         state.input_cidade_val = val
         state.form_contas.Cidade = val
         state.refresh("form_contas")
@@ -253,7 +254,7 @@ def btn_chg_prefs_main_city(state: State):
 def btn_chg_max_ultimas_transacs(state: State, val: int):
     try:
         val = int(val)
-        prefs.settings.write_last_transacs_limit(val)
+        prefs.settings.data_tables_rows_per_page = val
         btn_atualizar_df_ult_transac(state)
         notify(
             state,
@@ -268,7 +269,7 @@ def btn_chg_max_ultimas_transacs(state: State, val: int):
 def btn_chg_max_highest_balances(state: State, val: int):
     try:
         val = int(val)
-        prefs.settings.write_highest_balaces_limit(val)
+        prefs.settings.data_tables_rows_per_page = val
         state.df_maiores_saldos = db.rank_maiores_saldos(val)
         notify(
             state,
@@ -319,9 +320,12 @@ def carregar_lista_transac(state: State):
     state.refresh("SLC_USUARIO_SALDO")
 
 
-def sel_listar_clientes():
-    clientes = db.listar_clientes()
-    return [(str(i["id"]), i["nome"]) for i in clientes]
+def sel_listar_clientes(state):
+    if state.usuarios:
+        clientes = state.usuarios
+    else:
+        clientes = data.CustomerListSource()
+    return [(str(i["id"]), i["nome"]) for i in clientes.current_data]
 
 
 def menu_lateral(state, action, info):
@@ -413,7 +417,7 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
         if payload["args"][0] == 1:
             try:
                 db.atualizar_cliente(state.SLC_USUARIO[0], state.form_conta_selec)
-                state.NOMES_USUARIOS = sel_listar_clientes()
+                state.NOMES_USUARIOS = sel_listar_clientes(state)
                 notify(s, "success", "Cadastro atualizado com sucesso!")
             except Exception as xpt:
                 notify(s, "error", f"Erro ao atualizar cadastro: {str(xpt)}")
@@ -570,7 +574,7 @@ dropdown_uf_lov = [
     "SP",
     "TO",
 ]
-dropdown_uf_val = prefs.settings.read_main_state()
+dropdown_uf_val = prefs.settings.default_state
 
 main_plot = btn_gerar_main_plot()
 
@@ -603,17 +607,17 @@ search_user_pagination_legend = (
 )
 
 # formularios
-form_contas = db.FormContas()
-form_transac = db.FormTransac(IdCliente=SLC_USUARIO[0])
-form_conta_selec = db.FormContas()
-form_transac_selec = db.FormTransac(IdCliente=SLC_USUARIO[0])
+form_contas = data.tbl_clientes()
+form_transac = data.tbl_transacoes(IdCliente=SLC_USUARIO[0])
+form_conta_selec = data.tbl_clientes()
+form_transac_selec = data.tbl_transacoes(IdCliente=SLC_USUARIO[0])
 
 
 # nome do cliente selecionado
 nome_cliente_selec = ""
 
 # valor inicial do seletor de transacao global
-TRANSACS_USUARIO = db.listar_transac_cliente(SLC_USUARIO[0], para_mostrar=False)
+TRANSACS_USUARIO = tuple(form_conta_selec.Transacs)
 if len(TRANSACS_USUARIO) > 0:
     SLC_TRANSAC = TRANSACS_USUARIO[0]
 else:
@@ -658,12 +662,12 @@ SLC_USUARIO_LOCAL = init_meta_cliente["local"]
 df_locais_de_backup = btn_atualizar_locais_de_backup()
 
 # valor inicial do campo "cidade preferida"
-input_cidade_val = prefs.settings.read_main_city()
+input_cidade_val = prefs.settings.default_city
 
 # valor inicial da configuracao Limite de linhas na tabela "Últimas transações"
-input_quant_max_ultimas_transacs = prefs.settings.read_last_transacs_limit()
+input_quant_max_ultimas_transacs = prefs.settings.data_tables_rows_per_page
 #                    " " "                       na tabela "Maiores saldos"
-input_quant_max_highest_balances = prefs.settings.read_highest_balaces_limit()
+input_quant_max_highest_balances = prefs.settings.data_tables_rows_per_page
 
 # valor inicial do toggle "backup ao sair"
 toggle_backup_on_exit = tggl_backup_on_exit()
