@@ -16,7 +16,8 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.selection import Selection
 from toga.widgets.scrollcontainer import ScrollContainer
 
-from cashd import const, style, prefs, backup, widgets
+from cashd_core import prefs
+from cashd import const, style, backup, widgets
 from cashd.widgets.elems import ListOfItems
 
 
