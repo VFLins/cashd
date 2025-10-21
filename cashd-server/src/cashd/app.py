@@ -112,14 +112,6 @@ def btn_gerar_main_plot(state: State | None = None):
     return
 
 
-def btn_atualizar_df_ult_transac(state: State):
-    try:
-        updated_tbl = db.ultimas_transac_displ()
-        state.assign("df_ult_transac", updated_tbl)
-    except Exception as xpt:
-        notify(state, "error", f"Erro inesperado atualizando a tabela: {str(xpt)}")
-
-
 def btn_atualizar_locais_de_backup(state: State | None = None):
     """
     Se `state=None` retorna um `pd.DataFrame`, caso contrario, atualiza o valor
@@ -194,27 +186,28 @@ def btn_criar_atalho(state: State):
 def btn_inserir_transac(state: State):
     carregar_lista_transac(state)
     try:
-        # fetch transaction data
-        state.form_transac.DataTransac = state.display_tr_data
-        nova_transac: dict = state.form_transac.despejar()
-        state.form_transac.Valor = ""
-        agora = datetime.now()
-        # insert data to database and notify
-        db.adicionar_transac(db.tbl_transacoes(CarimboTempo=agora, **nova_transac))
-        notify(state, "success", f"Nova transação adicionada")
+        # fetch and write data
         with state as s:
-            # update displayed transaction data
+            s.form_transac.DataTransac = s.display_tr_data
+            s.form_transac.IdCliente = s.SLC_USUARIO[0]
+            s.form_transac.CarimboTempo = datetime.now()
+            s.form_transac.write()
+        # reset form fields
+        with state as s:
+            s.form_transac.Valor = ""
             s.display_tr_valor = "0,00"
             carregar_lista_transac(state=s)
             s.refresh("form_transac")
-    except Exception as msg_erro:
-        notify(state, "error", str(msg_erro))
-        print(f"{type(msg_erro)}: {msg_erro}")
+    except Exception as err:
+        notify(state, "error", str(err))
+        print(f"{type(err)}: {err}")
+    else:
+        notify(state, "success", f"Nova transação adicionada")
 
 
 def btn_inserir_cliente(state: State):
     try:
-        novo_cliente: db.FormContas = state.form_contas.despejar()
+        novo_cliente: db.FormContas = state.form_contas.data
         state.form_contas.__init__()
         db.adicionar_cliente(db.tbl_clientes(**novo_cliente))
 
@@ -247,21 +240,6 @@ def btn_chg_prefs_main_city(state: State):
         state.form_contas.Cidade = val
         state.refresh("form_contas")
         notify(state, "success", f"Cidade preferida atualizada para {val}")
-    except Exception as xpt:
-        notify(state, "error", f"Erro inesperado: {str(xpt)}")
-
-
-def btn_chg_max_ultimas_transacs(state: State, val: int):
-    try:
-        val = int(val)
-        prefs.settings.data_tables_rows_per_page = val
-        btn_atualizar_df_ult_transac(state)
-        notify(
-            state,
-            "success",
-            f"Limite de entradas em 'Últimas transações' atualizado para {
-                val}",
-        )
     except Exception as xpt:
         notify(state, "error", f"Erro inesperado: {str(xpt)}")
 
