@@ -76,7 +76,7 @@ def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
 def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
     state.assign(
         "TRANSACS_USUARIO",
-        db.listar_transac_cliente(state.SLC_USUARIO[0], para_mostrar=False),
+        db.listar_transac_cliente(state.SELECTED_CUSTOMER[0], para_mostrar=False),
     )
     btn_mostrar_dialogo(state, id, payload, "selec_transac")
 
@@ -189,7 +189,7 @@ def btn_inserir_transac(state: State):
         # fetch and write data
         with state as s:
             s.form_transac.DataTransac = s.display_tr_data
-            s.form_transac.IdCliente = s.SLC_USUARIO[0]
+            s.form_transac.IdCliente = s.SELECTED_CUSTOMER[0]
             s.form_transac.CarimboTempo = datetime.now()
             s.form_transac.write()
         # reset form fields
@@ -290,12 +290,12 @@ def btn_mudar_minimizado():
 
 
 def carregar_lista_transac(state: State):
-    elems = db.listar_transac_cliente(state.SLC_USUARIO[0])
+    elems = db.listar_transac_cliente(state.SELECTED_CUSTOMER[0])
     state.df_transac = elems["df"]
-    state.SLC_USUARIO_SALDO = elems["saldo"]
-    state.SLC_USUARIO_LOCAL = elems["local"]
+    state.SELECTED_CUSTOMER_BALANCE = elems["saldo"]
+    state.SELECTED_CUSTOMER_PLACE = elems["local"]
     state.refresh("df_transac")
-    state.refresh("SLC_USUARIO_SALDO")
+    state.refresh("SELECTED_CUSTOMER_BALANCE")
 
 
 def sel_listar_clientes(state):
@@ -366,10 +366,10 @@ def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
             s.assign("mostra_selec_cliente", False)
 
         if payload["args"][0] == 1:
-            if s.SLC_USUARIO[0] == "0":
+            if s.SELECTED_CUSTOMER[0] == "0":
                 notify(s, "error", "Nenhuma conta foi selecionada")
             else:
-                cliente_selec = db.cliente_por_id(s.SLC_USUARIO[0])
+                cliente_selec = db.cliente_por_id(s.SELECTED_CUSTOMER[0])
                 s.form_conta_selec.carregar_valores(cliente_selec)
                 s.refresh("form_conta_selec")
                 s.assign("mostra_selec_cliente", False)
@@ -394,7 +394,7 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
     with state as s:
         if payload["args"][0] == 1:
             try:
-                db.atualizar_cliente(state.SLC_USUARIO[0], state.form_conta_selec)
+                db.atualizar_cliente(state.SELECTED_CUSTOMER[0], state.form_conta_selec)
                 state.NOMES_USUARIOS = sel_listar_clientes(state)
                 notify(s, "success", "Cadastro atualizado com sucesso!")
             except Exception as xpt:
@@ -413,7 +413,7 @@ def chg_dialog_selec_transac(state: State, id: str, payload: dict):
             if s.SLC_TRANSAC == "0":
                 notify(s, "error", "Nenhuma transação foi selecionada")
             elif not db.id_transac_pertence_a_cliente(
-                s.SLC_TRANSAC[0], s.SLC_USUARIO[0]
+                s.SLC_TRANSAC[0], s.SELECTED_CUSTOMER[0]
             ):
                 notify(s, "error", "Selecione uma transação antes de continuar")
                 return
@@ -487,7 +487,7 @@ def chg_cliente_selecionado(state: State) -> None:
     cliente = data.tbl_clientes()
     with state as s:
         carregar_lista_transac(state=s)
-        id_cliente = int(s.SLC_USUARIO[0])
+        id_cliente = int(s.SELECTED_CUSTOMER[0])
         s.form_transac.IdCliente = id_cliente
     cliente.read(row_id=id_cliente, engine=db.DB_ENGINE)
     state.nome_cliente_selec = cliente.NomeCompleto
@@ -575,9 +575,9 @@ NOMES_USUARIOS = [
     (str(row[0]), f"{row[1]} — {row[2]}") for row in usuarios.current_data
 ]
 if len(NOMES_USUARIOS) > 0:
-    SLC_USUARIO = NOMES_USUARIOS[0]
+    SELECTED_CUSTOMER = NOMES_USUARIOS[0]
 else:
-    SLC_USUARIO = "0"
+    SELECTED_CUSTOMER = "0"
 
 # texto de paginação da pesquisa de clientes
 search_user_pagination_legend = (
@@ -586,9 +586,9 @@ search_user_pagination_legend = (
 
 # formularios
 form_contas = data.tbl_clientes()
-form_transac = data.tbl_transacoes(IdCliente=SLC_USUARIO[0])
+form_transac = data.tbl_transacoes(IdCliente=SELECTED_CUSTOMER[0])
 form_conta_selec = data.tbl_clientes()
-form_transac_selec = data.tbl_transacoes(IdCliente=SLC_USUARIO[0])
+form_transac_selec = data.tbl_transacoes(IdCliente=SELECTED_CUSTOMER[0])
 
 
 # nome do cliente selecionado
@@ -604,7 +604,7 @@ else:
 # define se a webview vai iniciar em tela cheia
 maximizado = False
 
-# valor inicial da tabela de transacoes do usuario selecionado em SLC_USUARIO
+# valor inicial da tabela de transacoes do usuario selecionado em SELECTED_CUSTOMER
 last_transacs_data_source = data.LastTransactionsSource()
 highest_amounts_data_source = data.HighestAmountsSource()
 inactive_customers_data_source = data.InactiveCustomersSource()
@@ -629,12 +629,12 @@ stats_tables_pagination_legend = (
         1} até {last_transacs_data_source.max_idx}"
 )
 
-# valor inicial do saldo do usuario selecionado em SLC_USUARIO
-init_meta_cliente = db.listar_transac_cliente(SLC_USUARIO[0])
+# valor inicial do saldo do usuario selecionado em SELECTED_CUSTOMER
+init_meta_cliente = db.listar_transac_cliente(SELECTED_CUSTOMER[0])
 
 df_transac = init_meta_cliente["df"]
-SLC_USUARIO_SALDO = init_meta_cliente["saldo"]
-SLC_USUARIO_LOCAL = init_meta_cliente["local"]
+SELECTED_CUSTOMER_BALANCE = init_meta_cliente["saldo"]
+SELECTED_CUSTOMER_PLACE = init_meta_cliente["local"]
 
 # valor inicial da lista de locais de backup
 df_locais_de_backup = btn_atualizar_locais_de_backup()

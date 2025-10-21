@@ -19,9 +19,9 @@ PG_TRANSAC = """
 
 __Cliente__: _<|{nome_cliente_selec}|text|>_
 
-__Local__: _<|{SLC_USUARIO_LOCAL}|text|>_
+__Local__: _<|{SELECTED_CUSTOMER_PLACE}|text|>_
 
-__Saldo devedor__: R$ <|{SLC_USUARIO_SALDO}|>
+__Saldo devedor__: R$ <|{SELECTED_CUSTOMER_BALANCE}|>
 
 <|layout|columns=1 1|columns[mobile]=1
 
@@ -55,7 +55,7 @@ __Valor__*: R$ <|{display_tr_valor}|text|>
 ELEMENTO_HIST = """
 <|Excluir uma transação|button|on_action=btn_mostrar_dialogo_selec_transac|>
  
-Saldo devedor atual: **R$ <|{SLC_USUARIO_SALDO}|>**
+Saldo devedor atual: **R$ <|{SELECTED_CUSTOMER_BALANCE}|>**
 
 <|{df_transac}|table|paginated|height=300px|>
 
@@ -69,7 +69,7 @@ ELEMENTO_SELEC_CONTA = """
 
 <|{search_user_input_value}|input|label=Pesquisa|on_change={chg_cliente_pesquisa}|class_name=sel-user user-search-input|>
 
-<|{SLC_USUARIO}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|on_change={chg_cliente_selecionado}|class_name=sel-user user-selector|>
+<|{SELECTED_CUSTOMER}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|on_change={chg_cliente_selecionado}|class_name=sel-user user-selector|>
 
 <|{search_user_pagination_legend}|text|class_name=small-text|>
 <|Anterior|button|class_name=small-button|on_action=btn_prev_page_customer_search|>
