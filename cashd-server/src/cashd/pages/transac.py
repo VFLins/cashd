@@ -48,7 +48,7 @@ __Valor__*: R$ <|{display_tr_valor}|text|>
 
 <br />
 
-<|Inserir|button|class_name=plain|on_action=btn_inserir_transac|>
+<|Inserir|button|class_name=plain|on_action=btn_add_transac|>
 """
 
 

@@ -27,14 +27,14 @@ PYTHON_PATH = path.dirname(sys.executable)
 
 
 def btn_next_page_customer_search(state: State):
-    usuarios = getattr(state, "usuarios", data.CustomerListSource())
-    usuarios.fetch_next_page()
+    customers = get_customers_datasource(state=state)
+    customers.fetch_next_page()
     update_search_widgets(state=state)
 
 
 def btn_prev_page_customer_search(state: State):
-    usuarios = getattr(state, "usuarios", data.CustomerListSource())
-    usuarios.fetch_previous_page()
+    customers = get_customers_datasource(state=state)
+    customers.fetch_previous_page()
     update_search_widgets(state=state)
 
 
@@ -183,8 +183,8 @@ def btn_criar_atalho(state: State):
     notify(state, "success", "Atalho criado com sucesso!")
 
 
-def btn_inserir_transac(state: State):
-    carregar_lista_transac(state)
+def btn_add_transac(state: State):
+    # carregar_lista_transac(state)
     try:
         # fetch and write data
         with state as s:
@@ -196,7 +196,7 @@ def btn_inserir_transac(state: State):
         with state as s:
             s.form_transac.Valor = ""
             s.display_tr_valor = "0,00"
-            carregar_lista_transac(state=s)
+            # carregar_lista_transac(state=s)
             s.refresh("form_transac")
     except Exception as err:
         notify(state, "error", str(err))
@@ -287,6 +287,13 @@ def btn_mudar_minimizado():
 ####################
 # UTILS
 ####################
+
+
+def get_customers_datasource(state: State | None = None) -> data.CustomerListSource:
+    if not state:
+        return data.CustomerListSource()
+    customers = getattr(state, "customers", data.CustomerListSource())
+    state.assign("customers", customers)
 
 
 def carregar_lista_transac(state: State):
@@ -568,11 +575,11 @@ display_tr_valor = "0,00"
 display_tr_data = datetime.now()
 
 # valor inicial do seletor de conta global
-usuarios = data.CustomerListSource()
-usuarios.search_text = search_user_input_value
+customers = data.CustomerListSource()
+customers.search_text = search_user_input_value
 
 NOMES_USUARIOS = [
-    (str(row[0]), f"{row[1]} — {row[2]}") for row in usuarios.current_data
+    (str(row[0]), f"{row[1]} — {row[2]}") for row in customers.current_data
 ]
 if len(NOMES_USUARIOS) > 0:
     SELECTED_CUSTOMER = NOMES_USUARIOS[0]
