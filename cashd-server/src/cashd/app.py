@@ -292,12 +292,15 @@ def get_customers_datasource(state: State | None = None) -> data.CustomerListSou
 
 
 def carregar_lista_transac(state: State):
-    elems = db.listar_transac_cliente(state.SELECTED_CUSTOMER[0])
-    state.df_transac = elems["df"]
-    state.SELECTED_CUSTOMER_BALANCE = elems["saldo"]
-    state.SELECTED_CUSTOMER_PLACE = elems["local"]
-    state.refresh("df_transac")
-    state.refresh("SELECTED_CUSTOMER_BALANCE")
+    with state as s:
+        selected_customer = data.tbl_clientes()
+        selected_customer.read(row_id=s.SELECTED_CUSTOMER[0])
+        state.df_transac = elems["df"]
+        s.df_transac = pd.DataFrame(data=selected_customer.Transacs)
+        state.SELECTED_CUSTOMER_BALANCE = selected_customer.Saldo
+        state.SELECTED_CUSTOMER_PLACE = selected_customer.Local
+        state.refresh("df_transac")
+        state.refresh("SELECTED_CUSTOMER_BALANCE")
 
 
 def sel_listar_clientes(state):
@@ -636,11 +639,16 @@ stats_tables_pagination_legend = (
 )
 
 # valor inicial do saldo do usuario selecionado em SELECTED_CUSTOMER
-init_meta_cliente = db.listar_transac_cliente(SELECTED_CUSTOMER[0])
+# init_meta_cliente = db.listar_transac_cliente(SELECTED_CUSTOMER[0])
+selected_customer = data.tbl_clientes()
+selected_customer.read(row_id=SELECTED_CUSTOMER[0])
 
-df_transac = init_meta_cliente["df"]
-SELECTED_CUSTOMER_BALANCE = init_meta_cliente["saldo"]
-SELECTED_CUSTOMER_PLACE = init_meta_cliente["local"]
+# df_transac = init_meta_cliente["df"]
+# SELECTED_CUSTOMER_BALANCE = init_meta_cliente["saldo"]
+# SELECTED_CUSTOMER_PLACE = init_meta_cliente["local"]
+df_transac = pd.DataFrame(data=selected_customer.Transacs)
+SELECTED_CUSTOMER_BALANCE = selected_customer.Saldo
+SELECTED_CUSTOMER_PLACE = selected_customer.Local
 
 # valor inicial da lista de locais de backup
 df_locais_de_backup = btn_atualizar_locais_de_backup()
