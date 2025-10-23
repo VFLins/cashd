@@ -192,12 +192,7 @@ def btn_add_transac(state: State):
             s.form_transac.IdCliente = s.SELECTED_CUSTOMER[0]
             s.form_transac.CarimboTempo = datetime.now()
             s.form_transac.write()
-        # reset form fields
-        with state as s:
-            s.form_transac.Valor = ""
-            s.display_tr_valor = "0,00"
-            # carregar_lista_transac(state=s)
-            s.refresh("form_transac")
+            reset_transac_form_widgets(state=s)
     except Exception as err:
         notify(state, "error", str(err))
         print(f"{type(err)}: {err}")
@@ -306,11 +301,8 @@ def carregar_lista_transac(state: State):
 
 
 def sel_listar_clientes(state):
-    if state.usuarios:
-        clientes = state.usuarios
-    else:
-        clientes = data.CustomerListSource()
-    return [(str(i["id"]), i["nome"]) for i in clientes.current_data]
+    customers = get_customers_datasource(state=state)
+    return [(str(i["id"]), i["nome"]) for i in customers.current_data]
 
 
 def menu_lateral(state, action, info):
@@ -327,6 +319,14 @@ def update_search_widgets(state: State):
             f"{usuarios.nrows} itens, "
             f"mostrando {usuarios.min_idx + 1} até {usuarios.max_idx}"
         )
+
+
+def reset_transac_form_widgets(state: State):
+    """Reset all fields of pages.transac.ELEMENTO_FORM to their default state."""
+    with state as s:
+        s.display_tr_data = datetime.today()
+        s.form_transac.Valor = ""
+        s.refresh("form_transac")
 
 
 def fetch_displayed_table_datasource(
@@ -502,11 +502,10 @@ def chg_cliente_selecionado(state: State) -> None:
 
 
 def chg_cliente_pesquisa(state: State, id, payload):
-    usuarios = getattr(state, "usuarios", data.CustomerListSource())
+    customers = get_customers_datasource(state=state)
     with state as s:
-        usuarios.search_text = s.search_user_input_value
+        customers.search_text = s.search_user_input_value
         update_search_widgets(state=state)
-        s.usuarios = usuarios
 
 
 ####################
@@ -588,7 +587,7 @@ else:
 
 # texto de paginação da pesquisa de clientes
 search_user_pagination_legend = (
-    f"{usuarios.nrows} itens, mostrando 1 até {usuarios.max_idx}"
+    f"{customers.nrows} itens, mostrando 1 até {customers.max_idx}"
 )
 
 # formularios
