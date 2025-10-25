@@ -1,15 +1,13 @@
-from typing import Literal, Type
-from datetime import datetime
 import tkinter as tk
-from tkinter import filedialog
-from tkinter.filedialog import askopenfilename
-from pyshortcuts import make_shortcut
-from os import path
 import pandas as pd
 import threading
 import webview
 import socket
 import sys
+from pyshortcuts import make_shortcut
+from typing import Literal, Type
+from datetime import datetime
+from os import path
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder
 
@@ -139,7 +137,7 @@ def btn_add_local_de_backup(state: State):
     root = tk.Tk()
     root.withdraw()
     root.attributes("-topmost", True)
-    folder = filedialog.askdirectory()
+    folder = tk.filedialog.askdirectory()
     backup.settings.add_backup_place(folder)
     btn_atualizar_locais_de_backup(state)
 
@@ -151,7 +149,7 @@ def btn_rm_local_de_backup(state: State, var_name, payload):
 
 
 def btn_carregar_backup(state: State):
-    filename = askopenfilename()
+    filename = tk.filedialog.askopenfilename()
     try:
         backup.load(file=filename, _raise=True)
         notify(state, "success", "Dados carregados com sucesso")
