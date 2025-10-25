@@ -57,7 +57,7 @@ ELEMENTO_HIST = """
  
 Saldo devedor atual: **R$ <|{SELECTED_CUSTOMER_BALANCE}|>**
 
-<|{df_transac}|table|paginated|height=300px|>
+<|{df_transac}|table|paginated|columns=Data;Valor|height=300px|>
 
 <|{mostra_selec_transac}|dialog|title=Qual transação será removida?|width=80%|partial={dial_selec_transac}|on_action=chg_dialog_selec_transac|page_id=selecionar_transacao|labels=Cancelar;Continuar|>
 

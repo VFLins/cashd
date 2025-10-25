@@ -288,7 +288,10 @@ def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
     if state is not None:
         state.SELECTED_CUSTOMER_BALANCE = customer.Saldo
         state.SELECTED_CUSTOMER_PLACE = customer.Local
-    return pd.DataFrame(data=customer.Transacs)
+    return (
+        pd.DataFrame(data=customer.Transacs)
+        .rename(columns={"id": "Id", "data": "Data", "valor": "Valor"})
+    )
 
 
 def get_customers_datasource(state: State | None = None) -> data.CustomerListSource:
@@ -405,7 +408,6 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
             except Exception as xpt:
                 notify(s, "error", f"Erro ao atualizar cadastro: {str(xpt)}")
                 s.assign("mostra_confirma_conta", False)
-
         s.assign("mostra_confirma_conta", False)
 
 
@@ -413,7 +415,6 @@ def chg_dialog_selec_transac(state: State, id: str, payload: dict):
     with state as s:
         if payload["args"][0] < 1:
             s.assign("mostra_selec_transac", False)
-
         if payload["args"][0] == 1:
             if s.SLC_TRANSAC == "0":
                 notify(s, "error", "Nenhuma transação foi selecionada")
@@ -433,10 +434,8 @@ def chg_dialog_selec_transac(state: State, id: str, payload: dict):
 def chg_dialog_confirma_transac(state: State, id: str, payload: dict):
     with state as s:
         s.assign("mostra_confirma_transac", False)
-
         if payload["args"][0] == 0:
             s.assign("mostra_selec_transac", True)
-
         if payload["args"][0] == 1:
             db.remover_transac(s.SLC_TRANSAC[0])
             notify(s, "success", "Transação removida.")
