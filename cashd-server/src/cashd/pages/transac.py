@@ -69,7 +69,7 @@ ELEMENTO_SELEC_CONTA = """
 
 <|{search_user_input_value}|input|label=Pesquisa|on_change={chg_cliente_pesquisa}|class_name=sel-user user-search-input|>
 
-<|{SELECTED_CUSTOMER}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|on_change={chg_cliente_selecionado}|class_name=sel-user user-selector|>
+<|{SELECTED_CUSTOMER}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|on_change={chg_selected_customer}|class_name=sel-user user-selector|>
 
 <|{search_user_pagination_legend}|text|class_name=small-text|>
 <|Anterior|button|class_name=small-button|on_action=btn_prev_page_customer_search|>

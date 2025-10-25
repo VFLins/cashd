@@ -184,20 +184,19 @@ def btn_criar_atalho(state: State):
 
 
 def btn_add_transac(state: State):
-    # carregar_lista_transac(state)
     try:
-        # fetch and write data
         with state as s:
             s.form_transac.DataTransac = s.display_tr_data
             s.form_transac.IdCliente = s.SELECTED_CUSTOMER[0]
             s.form_transac.CarimboTempo = datetime.now()
             s.form_transac.write()
             reset_transac_form_widgets(state=s)
+            get_customer_transacs(state=s)
     except Exception as err:
         notify(state, "error", str(err))
         print(f"{type(err)}: {err}")
     else:
-        notify(state, "success", f"Nova transação adicionada")
+        notify(state, "success", "Nova transação adicionada")
 
 
 def btn_inserir_cliente(state: State):
@@ -284,23 +283,21 @@ def btn_mudar_minimizado():
 ####################
 
 
+def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
+    customer = data.tbl_clientes()
+    customer_id = state.SELECTED_CUSTOMER[0] if state else 1
+    customer.read(row_id=customer_id)
+    if state is not None:
+        state.SELECTED_CUSTOMER_BALANCE = customer.Saldo
+        state.SELECTED_CUSTOMER_PLACE = customer.Local
+    return pd.DataFrame(data=customer.Transacs)
+
+
 def get_customers_datasource(state: State | None = None) -> data.CustomerListSource:
     if not state:
         return data.CustomerListSource()
     customers = getattr(state, "customers", data.CustomerListSource())
     state.assign("customers", customers)
-
-
-def carregar_lista_transac(state: State):
-    with state as s:
-        selected_customer = data.tbl_clientes()
-        selected_customer.read(row_id=s.SELECTED_CUSTOMER[0])
-        state.df_transac = elems["df"]
-        s.df_transac = pd.DataFrame(data=selected_customer.Transacs)
-        state.SELECTED_CUSTOMER_BALANCE = selected_customer.Saldo
-        state.SELECTED_CUSTOMER_PLACE = selected_customer.Local
-        state.refresh("df_transac")
-        state.refresh("SELECTED_CUSTOMER_BALANCE")
 
 
 def sel_listar_clientes(state):
@@ -493,14 +490,14 @@ def chg_select_table_stats(state: State):
     state.part_stats_displayed_table.update_content(state, table_partials[tablename])
 
 
-def chg_cliente_selecionado(state: State) -> None:
+def chg_selected_customer(state: State) -> None:
     cliente = data.tbl_clientes()
     with state as s:
-        carregar_lista_transac(state=s)
+        s.df_transac = get_customer_transacs(state=s)
         id_cliente = int(s.SELECTED_CUSTOMER[0])
         s.form_transac.IdCliente = id_cliente
-    cliente.read(row_id=id_cliente, engine=db.DB_ENGINE)
-    state.nome_cliente_selec = cliente.NomeCompleto
+        cliente.read(row_id=id_cliente, engine=db.DB_ENGINE)
+        s.nome_cliente_selec = cliente.NomeCompleto
     state.refresh("form_transac")
 
 
@@ -508,7 +505,7 @@ def chg_cliente_pesquisa(state: State, id, payload):
     customers = get_customers_datasource(state=state)
     with state as s:
         customers.search_text = s.search_user_input_value
-        update_search_widgets(state=state)
+        update_search_widgets(state=s)
 
 
 ####################
@@ -646,7 +643,7 @@ selected_customer.read(row_id=SELECTED_CUSTOMER[0])
 # df_transac = init_meta_cliente["df"]
 # SELECTED_CUSTOMER_BALANCE = init_meta_cliente["saldo"]
 # SELECTED_CUSTOMER_PLACE = init_meta_cliente["local"]
-df_transac = pd.DataFrame(data=selected_customer.Transacs)
+df_transac = get_customer_transacs(state=None)
 SELECTED_CUSTOMER_BALANCE = selected_customer.Saldo
 SELECTED_CUSTOMER_PLACE = selected_customer.Local
 
