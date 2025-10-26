@@ -314,11 +314,11 @@ def get_customers_datasource(state: State | None = None) -> data.CustomerListSou
 
 def get_customer_lov(state: State | None = None) -> list[LOVItem]:
     customers = get_customers_datasource(state=state)
-    with state as s:
-        return [
-            LOVItem(Id=str(c[0]), Value=f"{c[1]} - {c[2]}")
-            for c in customers.current_data
-        ]
+    return [
+        LOVItem(Id=str(c[0]), Value=f"{c[1]} - {c[2]}")
+        for c in customers.current_data
+    ]
+
 
 def menu_lateral(state, action, info):
     page = info["args"][0]
@@ -521,7 +521,7 @@ def chg_selected_customer(state: State) -> None:
         s.form_transac.IdCliente = customer_id
         customer.read(row_id=customer_id)
         s.nome_cliente_selec = customer.NomeCompleto
-    state.refresh("form_transac")
+        s.refresh("form_transac")
 
 
 def chg_cliente_pesquisa(state: State, id, payload):
@@ -600,10 +600,7 @@ display_tr_date = datetime.now()
 customers = data.CustomerListSource()
 customers.search_text = search_user_input_value
 
-NOMES_USUARIOS = [
-    LOVItem(Id=str(c.Id), Value=f"{c.Name} — {c.Place}")
-    for c in customers.current_data
-]
+NOMES_USUARIOS = get_customer_lov(state=None)
 if len(NOMES_USUARIOS) > 0:
     SELECTED_CUSTOMER = NOMES_USUARIOS[0]
 else:
