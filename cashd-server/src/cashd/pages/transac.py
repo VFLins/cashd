@@ -37,7 +37,7 @@ ELEMENTO_FORM = """
 <|
 __Data__*
 
-<|{display_tr_data}|date|format=dd/MM/y|>
+<|{display_tr_date}|date|format=dd/MM/y|>
 
 __Valor__*: R$ <|{display_tr_valor}|text|>
 
@@ -57,7 +57,7 @@ ELEMENTO_HIST = """
  
 Saldo devedor atual: **R$ <|{SELECTED_CUSTOMER_BALANCE}|>**
 
-<|{df_transac}|table|paginated|columns=Data;Valor|height=300px|>
+<|{df_transac}|table|editable|paginated|on_delete=rm_customer_transac|on_edit=False|on_add=False|columns=Data;Valor|height=300px|>
 
 <|{mostra_selec_transac}|dialog|title=Qual transação será removida?|width=80%|partial={dial_selec_transac}|on_action=chg_dialog_selec_transac|page_id=selecionar_transacao|labels=Cancelar;Continuar|>
 
