@@ -200,6 +200,7 @@ def btn_add_transac(state: State):
             s.form_transac.CarimboTempo = datetime.now()
             s.form_transac.write()
             reset_transac_form_widgets(state=s)
+            print(f"state user {get_state_id(s)} added transaction: {s.form_transac}")
             s.df_transac = get_customer_transacs(state=s)
     except Exception as err:
         notify(state, "error", str(err))
@@ -391,14 +392,18 @@ def update_displayed_table_pagination(
 
 
 def rm_customer_transac(state: State, var_name: str, payload: dict):
+    """Removes the selected transaction of the selected customer when the user
+    interacts with the table widget.
+    """
     selected_customer = data.tbl_clientes()
-    selected_transaction = data.tbl_transacs()
+    selected_transaction = data.tbl_transacoes()
     table_row_id: int = payload["index"]
-    with satate as s:
+    with state as s:
         selected_customer.read(row_id=s.SELECTED_CUSTOMER.Id)
         rm_transac_data: dict = tuple(selected_customer.Transacs)[table_row_id]
         selected_transaction.read(row_id=rm_transac_data["id"])
         selected_transaction.delete()
+        print(f"state user {get_state_id(s)} removed {selected_transaction}")
         state.df_transac = get_customer_transacs(state=state)
 
 
