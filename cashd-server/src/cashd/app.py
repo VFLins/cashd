@@ -83,10 +83,10 @@ def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
             LOVItem(Id=str(t["id"]), Value=f"{t['data']} | {t['valor']}")
             for t in customer.Transacs
         ]
-    #state.assign(
+    # state.assign(
     #    "TRANSACS_USUARIO",
     #    db.listar_transac_cliente(state.SELECTED_CUSTOMER[0], para_mostrar=False),
-    #)
+    # )
     btn_mostrar_dialogo(state, id, payload, "selec_transac")
 
 
@@ -192,15 +192,17 @@ def btn_criar_atalho(state: State):
     notify(state, "success", "Atalho criado com sucesso!")
 
 
-def btn_add_transac(state: State):
+def add_customer_transaction(state: State):
+    """Adds a transaction to the database, uses currently selected customer and data
+    filled by the user.
+    """
     try:
         with state as s:
-            s.form_transac.DataTransac = s.display_tr_date
             s.form_transac.IdCliente = s.SELECTED_CUSTOMER.Id
             s.form_transac.CarimboTempo = datetime.now()
             s.form_transac.write()
-            reset_transac_form_widgets(state=s)
             print(f"state user {get_state_id(s)} added transaction: {s.form_transac}")
+            reset_transac_form_widgets(state=s)
             s.df_transac = get_customer_transacs(state=s)
     except Exception as err:
         notify(state, "error", str(err))
@@ -301,6 +303,7 @@ def adapt_lovitem(item: LOVItem | str) -> tuple | None:
     except IndexError:
         return (None, None)
 
+
 def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
     customer = data.tbl_clientes()
     customer_id = state.SELECTED_CUSTOMER[0] if state else 1
@@ -308,9 +311,8 @@ def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
     if state is not None:
         state.SELECTED_CUSTOMER_BALANCE = customer.Saldo
         state.SELECTED_CUSTOMER_PLACE = customer.Local
-    return (
-        pd.DataFrame(data=customer.Transacs)
-        .rename(columns={"id": "Id", "data": "Data", "valor": "Valor"})
+    return pd.DataFrame(data=customer.Transacs).rename(
+        columns={"id": "Id", "data": "Data", "valor": "Valor"}
     )
 
 
@@ -324,8 +326,7 @@ def get_customers_datasource(state: State | None = None) -> data.CustomerListSou
 def get_customer_lov(state: State | None = None) -> list[LOVItem]:
     customers = get_customers_datasource(state=state)
     return [
-        LOVItem(Id=str(c[0]), Value=f"{c[1]} - {c[2]}")
-        for c in customers.current_data
+        LOVItem(Id=str(c[0]), Value=f"{c[1]} - {c[2]}") for c in customers.current_data
     ]
 
 
@@ -348,8 +349,9 @@ def update_search_widgets(state: State):
 def reset_transac_form_widgets(state: State):
     """Reset all fields of pages.transac.ELEMENTO_FORM to their default state."""
     with state as s:
-        s.display_tr_date = datetime.today()
+        s.form_transac.DataTransac = datetime.today()
         s.form_transac.Valor = ""
+        s.display_tr_valor = "0,00"
         s.refresh("form_transac")
 
 
@@ -398,13 +400,18 @@ def rm_customer_transac(state: State, var_name: str, payload: dict):
     selected_customer = data.tbl_clientes()
     selected_transaction = data.tbl_transacoes()
     table_row_id: int = payload["index"]
-    with state as s:
-        selected_customer.read(row_id=s.SELECTED_CUSTOMER.Id)
-        rm_transac_data: dict = tuple(selected_customer.Transacs)[table_row_id]
-        selected_transaction.read(row_id=rm_transac_data["id"])
-        selected_transaction.delete()
-        print(f"state user {get_state_id(s)} removed {selected_transaction}")
-        state.df_transac = get_customer_transacs(state=state)
+    try:
+        with state as s:
+            selected_customer.read(row_id=s.SELECTED_CUSTOMER.Id)
+            rm_transac_data: dict = tuple(selected_customer.Transacs)[table_row_id]
+            selected_transaction.read(row_id=rm_transac_data["id"])
+            selected_transaction.delete()
+            notify(s, "success", f"Sucesso removendo a transação")
+            print(f"state user {get_state_id(s)} removed {selected_transaction}")
+    except Exception as err:
+        notify(s, "error", f"Erro inesperado removendo esta transação: {str(err)}")
+    finally:
+            state.df_transac = get_customer_transacs(state=state)
 
 
 def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
@@ -527,13 +534,15 @@ def chg_select_table_stats(state: State):
 
 
 def chg_selected_customer(state: State) -> None:
+    """Update customer information widgets when the user interacts with the customer
+    selector.
+    """
     customer = data.tbl_clientes()
     with state as s:
-        s.df_transac = get_customer_transacs(state=s)
         customer_id = int(s.SELECTED_CUSTOMER.Id)
-        s.form_transac.IdCliente = customer_id
         customer.read(row_id=customer_id)
-        s.nome_cliente_selec = customer.NomeCompleto
+        s.df_transac = get_customer_transacs(state=s)
+        s.nome_cliente_selec = s.SELECTED_CUSTOMER.Value
         s.refresh("form_transac")
     print(f"state user {get_state_id(state)} selected: {customer.NomeCompleto}")
 
@@ -618,7 +627,7 @@ NOMES_USUARIOS = get_customer_lov(state=None)
 if len(NOMES_USUARIOS) > 0:
     SELECTED_CUSTOMER = NOMES_USUARIOS[0]
 else:
-    SELECTED_CUSTOMER = LOVItem()
+    SELECTED_CUSTOMER = LOVItem(Id="0", Value="")
 
 # texto de paginação da pesquisa de clientes
 search_user_pagination_legend = (
@@ -627,13 +636,16 @@ search_user_pagination_legend = (
 
 # formularios
 form_contas = data.tbl_clientes()
-form_transac = data.tbl_transacoes(IdCliente=SELECTED_CUSTOMER.Id)
+form_transac = data.tbl_transacoes(
+    IdCliente=SELECTED_CUSTOMER.Id,
+    DataTransac=datetime.today(),
+)
 form_conta_selec = data.tbl_clientes()
 form_transac_selec = data.tbl_transacoes(IdCliente=SELECTED_CUSTOMER.Id)
 
 
 # nome do cliente selecionado
-nome_cliente_selec = ""
+nome_cliente_selec = SELECTED_CUSTOMER.Value
 
 # valor inicial do seletor de transacao global
 TRANSACS_USUARIO = tuple(form_conta_selec.Transacs)

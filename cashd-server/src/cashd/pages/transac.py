@@ -37,18 +37,18 @@ ELEMENTO_FORM = """
 <|
 __Data__*
 
-<|{display_tr_date}|date|format=dd/MM/y|>
+<|{form_transac.DataTransac}|date|format=dd/MM/y|>
 
 __Valor__*: R$ <|{display_tr_valor}|text|>
 
-<|{form_transac.Valor}|input|on_change=chg_transac_valor|change_delay=0|>
+<|{form_transac.Valor}|input|on_change=chg_transac_valor|on_action=add_customer_transaction|change_delay=0|>
 
 <small><i>(*) Obrigatório</i></small>
 |>
 
 <br />
 
-<|Inserir|button|class_name=plain|on_action=btn_add_transac|>
+<|Inserir|button|class_name=plain|on_action=add_customer_transaction|>
 """
 
 
