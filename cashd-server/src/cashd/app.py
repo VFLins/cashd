@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Literal, Type, NamedTuple
 from os import path
 
-from taipy.gui import Gui, notify, State, navigate, Icon, builder
+from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
 from cashd_core import data, prefs, backup
 from cashd import plot, db
@@ -292,6 +292,14 @@ def btn_mudar_minimizado():
 ####################
 
 
+def adapt_lovitem(item: LOVItem | str) -> tuple | None:
+    """Handles LOVItem objetcs when they are handed to Taipy widgets."""
+    try:
+        if type(item) in [LOVItem, tuple]:
+            return tuple(item[:2])
+    except IndexError:
+        return (None, None)
+
 def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
     customer = data.tbl_clientes()
     customer_id = state.SELECTED_CUSTOMER[0] if state else 1
@@ -522,6 +530,7 @@ def chg_selected_customer(state: State) -> None:
         customer.read(row_id=customer_id)
         s.nome_cliente_selec = customer.NomeCompleto
         s.refresh("form_transac")
+    print(f"state user {get_state_id(state)} selected: {customer.NomeCompleto}")
 
 
 def chg_cliente_pesquisa(state: State, id, payload):
