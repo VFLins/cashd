@@ -197,9 +197,11 @@ def add_customer_transaction(state: State):
     filled by the user.
     """
     try:
+        if is_empty_currency_input(state.form_transac.Valor):
+            notify(state, "error", "Valor não pode ser zero")
+            return
         if not is_valid_currency_input(state.form_transac.Valor):
             notify(state, "error", "Valor inválido, insira apenas números")
-            state.form_transac.Valor = ""
             return
         state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
         state.form_transac.CarimboTempo = datetime.now()
@@ -299,9 +301,32 @@ def btn_mudar_minimizado():
 ####################
 
 
+def fmt_currency_input(inp: str) -> str:
+    try:
+        return f"{int(inp)/100:_.2f}".replace("_", " ").replace(".", ",")
+    except ValueError:
+        return "0,00"
+
+
 def is_valid_currency_input(inp: str) -> bool:
     """Returns a boolean value indicating if `inp` is a valid currency input."""
     return inp.isdigit()
+
+
+def is_empty_currency_input(inp: str) -> bool:
+    """Retuns a boolean value indicating if `inp` is an empty currency input."""
+    if inp is None:
+        return True
+    inp = inp.strip()
+    if inp == "":
+        return True
+    try:
+        inp = int(inp)
+    except ValueError:
+        return True
+    if inp == 0:
+        return True
+    return False
 
 
 def adapt_lovitem(item: LOVItem | str) -> tuple | None:
@@ -498,7 +523,7 @@ def chg_dialog_confirma_transac(state: State, id: str, payload: dict):
 
 
 def chg_transac_valor(state: State) -> None:
-    state.display_tr_valor = db.fmt_moeda(state.form_transac.Valor, para_mostrar=True)
+    state.display_tr_valor = fmt_currency_input(inp=state.form_transac.Valor)
     state.refresh("form_transac")
     return
 
