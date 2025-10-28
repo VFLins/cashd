@@ -197,18 +197,22 @@ def add_customer_transaction(state: State):
     filled by the user.
     """
     try:
-        with state as s:
-            s.form_transac.IdCliente = s.SELECTED_CUSTOMER.Id
-            s.form_transac.CarimboTempo = datetime.now()
-            s.form_transac.write()
-            print(f"state user {get_state_id(s)} added transaction: {s.form_transac}")
-            reset_transac_form_widgets(state=s)
-            s.df_transac = get_customer_transacs(state=s)
+        if not is_valid_currency_input(state.form_transac.Valor):
+            notify(state, "error", "Valor inválido, insira apenas números")
+            state.form_transac.Valor = ""
+            return
+        state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
+        state.form_transac.CarimboTempo = datetime.now()
+        state.form_transac.write()
+        print(f"state user {get_state_id(state)} added {state.form_transac}")
     except Exception as err:
         notify(state, "error", str(err))
-        print(f"{type(err)}: {err}")
+        print(f"Unexpected {type(err)}: {err}")
     else:
         notify(state, "success", "Nova transação adicionada")
+    finally:
+        reset_transac_form_widgets(state=state)
+        state.df_transac = get_customer_transacs(state=state)
 
 
 def btn_inserir_cliente(state: State):
@@ -293,6 +297,11 @@ def btn_mudar_minimizado():
 ####################
 # UTILS
 ####################
+
+
+def is_valid_currency_input(inp: str) -> bool:
+    """Returns a boolean value indicating if `inp` is a valid currency input."""
+    return inp.isdigit()
 
 
 def adapt_lovitem(item: LOVItem | str) -> tuple | None:
