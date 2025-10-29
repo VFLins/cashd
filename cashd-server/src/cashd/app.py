@@ -192,7 +192,7 @@ def btn_criar_atalho(state: State):
     notify(state, "success", "Atalho criado com sucesso!")
 
 
-def add_customer_transaction(state: State):
+def add_transaction(state: State):
     """Adds a transaction to the database, uses currently selected customer and data
     filled by the user.
     """
@@ -207,13 +207,13 @@ def add_customer_transaction(state: State):
         state.form_transac.CarimboTempo = datetime.now()
         state.form_transac.write()
         print(f"state user {get_state_id(state)} added {state.form_transac}")
+        reset_transac_form_widgets(state=state)
     except Exception as err:
         notify(state, "error", str(err))
         print(f"Unexpected {type(err)}: {err}")
     else:
         notify(state, "success", "Nova transação adicionada")
     finally:
-        reset_transac_form_widgets(state=state)
         state.df_transac = get_customer_transacs(state=state)
 
 
@@ -427,7 +427,7 @@ def update_displayed_table_pagination(
 ####################
 
 
-def rm_customer_transac(state: State, var_name: str, payload: dict):
+def rm_transaction(state: State, var_name: str, payload: dict):
     """Removes the selected transaction of the selected customer when the user
     interacts with the table widget.
     """

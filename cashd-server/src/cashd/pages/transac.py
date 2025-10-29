@@ -41,14 +41,14 @@ __Data__*
 
 __Valor__*: R$ <|{display_tr_valor}|text|>
 
-<|{form_transac.Valor}|input|on_change=chg_transac_valor|on_action=add_customer_transaction|change_delay=0|>
+<|{form_transac.Valor}|input|on_change=chg_transac_valor|on_action=add_transaction|change_delay=0|>
 
 <small><i>(*) Obrigatório</i></small>
 |>
 
 <br />
 
-<|Inserir|button|class_name=plain|on_action=add_customer_transaction|>
+<|Inserir|button|class_name=plain|on_action=add_transaction|>
 """
 
 
@@ -57,7 +57,7 @@ ELEMENTO_HIST = """
  
 Saldo devedor atual: **R$ <|{SELECTED_CUSTOMER_BALANCE}|>**
 
-<|{df_transac}|table|editable|paginated|on_delete=rm_customer_transac|on_edit=False|on_add=False|columns=Data;Valor|height=300px|>
+<|{df_transac}|table|editable|paginated|on_delete=rm_transaction|on_edit=False|on_add=False|columns=Data;Valor|height=300px|>
 
 <|{mostra_selec_transac}|dialog|title=Qual transação será removida?|width=80%|partial={dial_selec_transac}|on_action=chg_dialog_selec_transac|page_id=selecionar_transacao|labels=Cancelar;Continuar|>
 
