@@ -351,10 +351,13 @@ def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
 
 
 def get_customers_datasource(state: State | None = None) -> data.CustomerListSource:
-    if not state:
-        return data.CustomerListSource()
-    customers = getattr(state, "customers", data.CustomerListSource())
-    state.assign("customers", customers)
+    """Initializes or get a `data.CustomerListSource` from `state`, if `state` is
+    not None, adds it to state.
+    """
+    customers = getattr(state, "customers_source", data.CustomerListSource())
+    if state:
+        state.assign("customers_source", customers)
+    return customers
 
 
 def get_customer_lov(state: State | None = None) -> list[LOVItem]:
@@ -459,7 +462,7 @@ def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
             else:
                 cliente_selec = db.cliente_por_id(s.SELECTED_CUSTOMER.Id)
                 s.form_conta_selec.carregar_valores(cliente_selec)
-                s.refresh("form_conta_selec")
+                s.refresh("selected_customer_handler")
                 s.assign("mostra_selec_cliente", False)
                 s.assign("mostra_form_editar_cliente", True)
 
@@ -576,7 +579,7 @@ def chg_selected_customer(state: State) -> None:
         customer_id = int(s.SELECTED_CUSTOMER.Id)
         customer.read(row_id=customer_id)
         s.df_transac = get_customer_transacs(state=s)
-        s.nome_cliente_selec = s.SELECTED_CUSTOMER.Value
+        s.nome_cliente_selec = customer.NomeCompleto
         s.refresh("form_transac")
     print(f"state user {get_state_id(state)} selected: {customer.NomeCompleto}")
 
@@ -654,39 +657,35 @@ display_tr_valor = "0,00"
 display_tr_date = datetime.now()
 
 # valor inicial do seletor de conta global
-customers = data.CustomerListSource()
-customers.search_text = search_user_input_value
+customers_source = data.CustomerListSource()
+customers_source.search_text = search_user_input_value
+
+# formularios
+form_contas = data.tbl_clientes()
+form_transac = data.tbl_transacoes(DataTransac=datetime.today())
+selected_customer_handler = data.tbl_clientes()
 
 NOMES_USUARIOS = get_customer_lov(state=None)
 if len(NOMES_USUARIOS) > 0:
     SELECTED_CUSTOMER = NOMES_USUARIOS[0]
+    selected_customer_handler.read(row_id=SELECTED_CUSTOMER.Id)
 else:
     SELECTED_CUSTOMER = LOVItem(Id="0", Value="")
 
 # texto de paginação da pesquisa de clientes
 search_user_pagination_legend = (
-    f"{customers.nrows} itens, mostrando 1 até {customers.max_idx}"
+    f"{customers_source.nrows} itens, mostrando 1 até {customers_source.max_idx}"
 )
-
-# formularios
-form_contas = data.tbl_clientes()
-form_transac = data.tbl_transacoes(
-    IdCliente=SELECTED_CUSTOMER.Id,
-    DataTransac=datetime.today(),
-)
-form_conta_selec = data.tbl_clientes()
-form_transac_selec = data.tbl_transacoes(IdCliente=SELECTED_CUSTOMER.Id)
-
 
 # nome do cliente selecionado
-nome_cliente_selec = SELECTED_CUSTOMER.Value
+nome_cliente_selec = selected_customer_handler.NomeCompleto
 
 # valor inicial do seletor de transacao global
-TRANSACS_USUARIO = tuple(form_conta_selec.Transacs)
-if len(TRANSACS_USUARIO) > 0:
-    SLC_TRANSAC = TRANSACS_USUARIO[0]
-else:
-    SLC_TRANSAC = "0"
+#TRANSACS_USUARIO = tuple(selected_customer_handler.Transacs)
+#if len(TRANSACS_USUARIO) > 0:
+#    SLC_TRANSAC = TRANSACS_USUARIO[0]
+#else:
+#    SLC_TRANSAC = "0"
 
 # define se a webview vai iniciar em tela cheia
 maximizado = False
