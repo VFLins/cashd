@@ -214,8 +214,8 @@ class dec_base(DeclarativeBase):
     def required_fieldnames(self) -> List[str]:
         """Names of every required fields in this table."""
         return [
-            colname for colname in self.__table__.c.keys()
-            if (type(getattr(self, colname)) in REQUIRED_TYPES) and (colname != "Id")
+            colname for colname in self.data.keys()
+            if self.types[colname] in REQUIRED_TYPES
         ]
 
     def required_fields_are_filled(self) -> bool:
