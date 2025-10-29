@@ -323,7 +323,7 @@ def is_empty_currency_input(inp: str) -> bool:
     try:
         inp = int(inp)
     except ValueError:
-        return True
+        pass
     if inp == 0:
         return True
     return False
