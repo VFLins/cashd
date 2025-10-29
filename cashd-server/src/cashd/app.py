@@ -192,7 +192,7 @@ def btn_criar_atalho(state: State):
     notify(state, "success", "Atalho criado com sucesso!")
 
 
-def add_customer_transaction(state: State):
+def add_transaction(state: State):
     """Adds a transaction to the database, uses currently selected customer and data
     filled by the user.
     """
@@ -402,7 +402,7 @@ def update_displayed_table_pagination(
 ####################
 
 
-def rm_customer_transac(state: State, var_name: str, payload: dict):
+def rm_transaction(state: State, var_name: str, payload: dict):
     """Removes the selected transaction of the selected customer when the user
     interacts with the table widget.
     """
