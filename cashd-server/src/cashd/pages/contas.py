@@ -29,38 +29,37 @@ __Primeiro Nome__*
 
 __Sobrenome__*
 
-<|{form_contas.PrimeiroNome}|input|>
+<|{form_customer.PrimeiroNome}|input|>
 
-<|{form_contas.Sobrenome}|input|>
+<|{form_customer.Sobrenome}|input|>
 
 __Apelido__
 
 __Telefone__
 
-<|{form_contas.Apelido}|input|>
+<|{form_customer.Apelido}|input|>
 
-<|{form_contas.Telefone}|input|label=DDD + 9 dígitos|>
+<|{form_customer.Telefone}|input|label=DDD + 9 dígitos|>
 
 __Endereço__
 
 __Bairro__
 
-<|{form_contas.Endereco}|input|>
+<|{form_customer.Endereco}|input|>
 
-<|{form_contas.Bairro}|input|>
+<|{form_customer.Bairro}|input|>
 
 __Cidade__*
 
 __Estado__*
 
-<|{form_contas.Cidade}|input|>
+<|{form_customer.Cidade}|input|>
 
-<|{form_contas.Estado}|selector|lov={dropdown_uf_lov}|dropdown|>
+<|{form_customer.Estado}|selector|lov={dropdown_uf_lov}|dropdown|>
 
 _(*) Obrigatório_
 
-<|Inserir|button|class_name=plain|on_action=btn_inserir_cliente|>
-<|{str(form_contas)}|text|>
+<|Inserir|button|class_name=plain|on_action=add_customer|>
 
 |>
 """

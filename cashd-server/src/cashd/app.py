@@ -225,17 +225,15 @@ def add_transaction(state: State):
         state.df_transac = get_customer_transacs(state=state)
 
 
-def btn_inserir_cliente(state: State):
+def add_customer(state: State):
+    customer = state.form_customer
+    if not customer.required_fields_are_filled():
+        notify(state, "error", "Algum campo obrigatório (*) ainda não foi preenchido")
+        return
     try:
-        novo_cliente: db.FormContas = state.form_contas.data
-        state.form_contas.__init__()
-        db.adicionar_cliente(db.tbl_clientes(**novo_cliente))
-
-        nome_completo = f"{novo_cliente['PrimeiroNome']} {
-            novo_cliente['Sobrenome']}"
-        notify(state, "success", message=f"Novo cliente adicionado!\n{nome_completo}")
-        state.refresh("form_contas")
-        state.NOMES_USUARIOS = sel_listar_clientes(state)
+        notify(state, "success", message=f"Novo cliente adicionado!\n{customer.NomeCompleto}")
+        state.refresh("form_customer")
+        state.NOMES_USUARIOS = get_customer_lov(state=state)
     except Exception as msg_erro:
         notify(state, "error", str(msg_erro))
 
@@ -680,7 +678,7 @@ customers_source = data.CustomerListSource()
 customers_source.search_text = search_user_input_value
 
 # formularios
-form_contas = data.tbl_clientes()
+form_customer = data.get_default_customer()
 form_transac = data.tbl_transacoes(DataTransac=datetime.today())
 selected_customer_handler = data.tbl_clientes()
 

@@ -210,6 +210,20 @@ class dec_base(DeclarativeBase):
             if colname != "Id"
         }
 
+    @property
+    def required_fieldnames(self) -> List[str]:
+        """Names of every required fields in this table."""
+        return [
+            colname for colname in self.__table__.c.keys()
+            if (type(getattr(self, colname)) in REQUIRED_TYPES) and (colname != "Id")
+        ]
+
+    def required_fields_are_filled(self) -> bool:
+        """Returns a boolean value indicating if all required fields for this table
+        are filled.
+        """
+        return all(getattr(self, col) for col in self.required_fieldnames)
+
     def read(self, row_id: int, engine: Engine = DB_ENGINE):
         """
         Fetches one row of data from the database and loads into this instance.
