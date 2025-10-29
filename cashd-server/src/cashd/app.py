@@ -196,6 +196,14 @@ def add_transaction(state: State):
     """Adds a transaction to the database, uses currently selected customer and data
     filled by the user.
     """
+    customer = data.tbl_clientes()
+    if customer.table_is_empty():
+        notify(
+            state,
+            "error",
+            "Você deve cadastrar um cliente antes de registrar uma transação",
+        )
+        return
     try:
         if is_empty_currency_input(state.form_transac.Valor):
             notify(state, "error", "Valor não pode ser zero")
@@ -459,7 +467,7 @@ def rm_transaction(state: State, var_name: str, payload: dict):
     except Exception as err:
         notify(s, "error", f"Erro inesperado removendo esta transação: {str(err)}")
     finally:
-            state.df_transac = get_customer_transacs(state=state)
+        state.df_transac = get_customer_transacs(state=state)
 
 
 def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
@@ -692,10 +700,10 @@ search_user_pagination_legend = (
 nome_cliente_selec = selected_customer_handler.NomeCompleto
 
 # valor inicial do seletor de transacao global
-#TRANSACS_USUARIO = tuple(selected_customer_handler.Transacs)
-#if len(TRANSACS_USUARIO) > 0:
+# TRANSACS_USUARIO = tuple(selected_customer_handler.Transacs)
+# if len(TRANSACS_USUARIO) > 0:
 #    SLC_TRANSAC = TRANSACS_USUARIO[0]
-#else:
+# else:
 #    SLC_TRANSAC = "0"
 
 # define se a webview vai iniciar em tela cheia
