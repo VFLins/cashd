@@ -302,6 +302,7 @@ def btn_mudar_minimizado():
 
 
 def fmt_currency_input(inp: str) -> str:
+    """Formats a numeric string to currency, returns '0,00' if zeroed or invalid."""
     try:
         return f"{int(inp)/100:_.2f}".replace("_", " ").replace(".", ",")
     except ValueError:
@@ -339,10 +340,20 @@ def adapt_lovitem(item: LOVItem | str) -> tuple | None:
 
 
 def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
+    """When `state` is defined:
+    - Refreshes customer transaction data on `pages.ELEMENTO_SELEC_CONTA`;
+    - Returns a `pd.DataFrame` with the transaction history of the selected customer.
+
+    When `state` is _not_ defined:
+    - Returns a `pd.DataFrame` with the transaction history of the first customer, or
+      an empty one if there are no customers.
+    """
     customer = data.tbl_clientes()
+    if customer.table_is_empty():
+        return pd.DataFrame(columns=["Id", "Data", "Valor"])
     customer_id = state.SELECTED_CUSTOMER[0] if state else 1
     customer.read(row_id=customer_id)
-    if state is not None:
+    if (state is not None) and (customer.Id is not None):
         state.SELECTED_CUSTOMER_BALANCE = customer.Saldo
         state.SELECTED_CUSTOMER_PLACE = customer.Local
     return pd.DataFrame(data=customer.Transacs).rename(
@@ -718,7 +729,8 @@ stats_tables_pagination_legend = (
 # valor inicial do saldo do usuario selecionado em SELECTED_CUSTOMER
 # init_meta_cliente = db.listar_transac_cliente(SELECTED_CUSTOMER[0])
 selected_customer = data.tbl_clientes()
-selected_customer.read(row_id=SELECTED_CUSTOMER.Id)
+if not selected_customer.table_is_empty():
+    selected_customer.read(row_id=SELECTED_CUSTOMER.Id)
 
 # df_transac = init_meta_cliente["df"]
 # SELECTED_CUSTOMER_BALANCE = init_meta_cliente["saldo"]
