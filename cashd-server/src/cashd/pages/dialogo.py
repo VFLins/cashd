@@ -6,12 +6,6 @@ SELECIONAR_CLIENTE_ETAPA = """
 </center>
 """
 
-SELECIONAR_TRANSAC_ETAPA = """
-<center>
-    <|{SLC_TRANSAC}|selector|lov={TRANSACS_USUARIO}|filter|paginated|height=360px|>
-</center>
-"""
-
 FORM_EDITAR_CLIENTE = """
 <|layout|columns=1 1|columns[mobile]=1 1|class_name=container
 __Primeiro Nome__*
@@ -50,13 +44,6 @@ _(*) Obrigatório_
 <|{str(form_contas)}|text|>
 |>
 """
-
-CONFIRMAR_TRANSAC = """
-Valor: *<|{form_transac_selec.Valor}|>*
-
-Data: *<|{form_transac_selec.DataTransac}|>*
-"""
-
 
 CONFIRMAR_CONTA = """
 <|layout|columns=1 1|columns[mobile]=1 1|class_name=container

@@ -57,10 +57,8 @@ def btn_prev_page_displayed_table(state: State):
 def btn_mostrar_dialogo(state: State, id: str, payload: dict, show: str):
     show_dialogs = {
         "confirma_conta": "mostra_confirma_conta",
-        "confirma_transac": "mostra_confirma_transac",
         "selec_cliente": "mostra_selec_cliente",
         "edita_cliente": "mostra_form_editar_cliente",
-        "selec_transac": "mostra_selec_transac",
     }
     for dialog in show_dialogs.values():
         state.assign(dialog, False)
@@ -83,10 +81,6 @@ def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
             LOVItem(Id=str(t["id"]), Value=f"{t['data']} | {t['valor']}")
             for t in customer.Transacs
         ]
-    # state.assign(
-    #    "TRANSACS_USUARIO",
-    #    db.listar_transac_cliente(state.SELECTED_CUSTOMER[0], para_mostrar=False),
-    # )
     btn_mostrar_dialogo(state, id, payload, "selec_transac")
 
 
@@ -178,7 +172,6 @@ def btn_criar_atalho(state: State):
         python_runner = path.join(PYTHON_PATH, "python3")
         icon_file = path.join(backup.SCRIPT_PATH, "assets", "PNG_LogoIcone.png")
     startup_script = path.join(backup.SCRIPT_PATH, "startup.pyw")
-
     make_shortcut(
         executable=python_runner,
         script=startup_script,
@@ -232,7 +225,7 @@ def add_customer(state: State):
         return
     try:
         customer.write()
-        notify(state, "success", message=f"Novo cliente adicionado!\n{customer.NomeCompleto}")
+        notify(state, "success", message=f"Novo cliente adicionado: {customer.NomeCompleto}")
         state.refresh("form_customer")
         state.NOMES_USUARIOS = get_customer_lov(state=state)
     except Exception as msg_erro:
@@ -459,7 +452,7 @@ def rm_transaction(state: State, var_name: str, payload: dict):
             rm_transac_data: dict = tuple(selected_customer.Transacs)[table_row_id]
             selected_transaction.read(row_id=rm_transac_data["id"])
             selected_transaction.delete()
-            notify(s, "success", f"Sucesso removendo a transação")
+            notify(s, "success", f"Transação de R$ {selected_transaction.Valor/100} removida".replace(".", ","))
             print(f"state user {get_state_id(s)} removed {selected_transaction}")
     except Exception as err:
         notify(s, "error", f"Erro inesperado removendo esta transação: {str(err)}")
@@ -508,37 +501,6 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
                 notify(s, "error", f"Erro ao atualizar cadastro: {str(xpt)}")
                 s.assign("mostra_confirma_conta", False)
         s.assign("mostra_confirma_conta", False)
-
-
-def chg_dialog_selec_transac(state: State, id: str, payload: dict):
-    with state as s:
-        if payload["args"][0] < 1:
-            s.assign("mostra_selec_transac", False)
-        if payload["args"][0] == 1:
-            if s.SLC_TRANSAC == "0":
-                notify(s, "error", "Nenhuma transação foi selecionada")
-            elif not db.id_transac_pertence_a_cliente(
-                s.SLC_TRANSAC[0], s.SELECTED_CUSTOMER[0]
-            ):
-                notify(s, "error", "Selecione uma transação antes de continuar")
-                return
-            else:
-                transac_selec = db.transac_por_id(s.SLC_TRANSAC[0])
-                s.form_transac_selec.carregar_valores(transac_selec)
-                s.refresh("form_transac_selec")
-                s.assign("mostra_confirma_transac", True)
-        s.assign("mostra_selec_transac", False)
-
-
-def chg_dialog_confirma_transac(state: State, id: str, payload: dict):
-    with state as s:
-        s.assign("mostra_confirma_transac", False)
-        if payload["args"][0] == 0:
-            s.assign("mostra_selec_transac", True)
-        if payload["args"][0] == 1:
-            db.remover_transac(s.SLC_TRANSAC[0])
-            notify(s, "success", "Transação removida.")
-            s.assign("SLC_TRANSAC", "0")
 
 
 def chg_transac_valor(state: State) -> None:
@@ -613,10 +575,8 @@ def chg_cliente_pesquisa(state: State, id, payload):
 
 # visibilidade de dialogos
 mostra_selec_cliente = False
-mostra_selec_transac = False
 mostra_form_editar_cliente = False
 mostra_confirma_conta = False
-mostra_confirma_transac = False
 
 # controles dos graficos
 slider_elems = list(range(10, 51)) + [None]
@@ -796,9 +756,7 @@ elem_config = Gui.add_partial(app, configs.ELEMENTO_PREFS)
 elem_analise = Gui.add_partial(app, analise.ELEM_TABLES)
 
 dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
-dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
 dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
-dial_transac_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_TRANSAC)
 dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
 part_stats_displayed_table = Gui.add_partial(app, analise.ELEM_TABLE_TRANSAC_HIST)

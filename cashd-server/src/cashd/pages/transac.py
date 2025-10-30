@@ -53,15 +53,7 @@ __Valor__*: R$ <|{display_tr_valor}|text|>
 
 
 ELEMENTO_HIST = """
-<|Excluir uma transação|button|on_action=btn_mostrar_dialogo_selec_transac|>
- 
-Saldo devedor atual: **R$ <|{SELECTED_CUSTOMER_BALANCE}|>**
-
 <|{df_transac}|table|editable|paginated|on_delete=rm_transaction|on_edit=False|on_add=False|columns=Data;Valor|height=300px|>
-
-<|{mostra_selec_transac}|dialog|title=Qual transação será removida?|width=80%|partial={dial_selec_transac}|on_action=chg_dialog_selec_transac|page_id=selecionar_transacao|labels=Cancelar;Continuar|>
-
-<|{mostra_confirma_transac}|dialog|title=Confirma remoção desta transação?|width=80%|partial={dial_transac_confirmar}|on_action=chg_dialog_confirma_transac|page_id=confirma_remover_transacao|labels=Voltar;Confirmar|>
 """
 
 
