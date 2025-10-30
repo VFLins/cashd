@@ -469,8 +469,8 @@ def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
             if s.SELECTED_CUSTOMER.Id == "0":
                 notify(s, "error", "Nenhuma conta foi selecionada")
             else:
-                cliente_selec = db.cliente_por_id(s.SELECTED_CUSTOMER.Id)
-                s.form_conta_selec.carregar_valores(cliente_selec)
+                selected_customer = data.tbl_clientes()
+                selected_customer.read(row_id=s.SELECTED_CUSTOMER.Id)
                 s.refresh("selected_customer_handler")
                 s.assign("mostra_selec_cliente", False)
                 s.assign("mostra_form_editar_cliente", True)

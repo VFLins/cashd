@@ -1,9 +1,13 @@
 # chamado em:
 #   contas.ELEMENTO_REGS
 SELECIONAR_CLIENTE_ETAPA = """
-<center>
-    <|{SLC_USUARIO}|selector|lov={NOMES_USUARIOS}|filter|propagate|height=520px|width=650px|on_change=chg_cliente_selecionado|>
-</center>
+<|{search_user_input_value}|input|label=Pesquisa|on_change={chg_cliente_pesquisa}|class_name=sel-user user-search-input|>
+
+<|{SELECTED_CUSTOMER}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|adapter={adapt_lovitem}|on_change={chg_selected_customer}|class_name=sel-user user-selector|>
+
+<|{search_user_pagination_legend}|text|class_name=small-text|>
+<|Anterior|button|class_name=small-button|on_action=btn_prev_page_customer_search|>
+<|Próxima|button|class_name=small-button|on_action=btn_next_page_customer_search|>
 """
 
 FORM_EDITAR_CLIENTE = """
@@ -12,55 +16,54 @@ __Primeiro Nome__*
 
 __Sobrenome__*
 
-<|{form_conta_selec.PrimeiroNome}|input|>
+<|{selected_customer_handler.PrimeiroNome}|input|>
 
-<|{form_conta_selec.Sobrenome}|input|>
+<|{selected_customer_handler.Sobrenome}|input|>
 
 __Apelido__
 
 __Telefone__
 
-<|{form_conta_selec.Apelido}|input|>
+<|{selected_customer_handler.Apelido}|input|>
 
-<|{form_conta_selec.Telefone}|input|label=DDD + 9 dígitos|>
+<|{selected_customer_handler.Telefone}|input|label=DDD + 9 dígitos|>
 
 __Endereço__
 
 __Bairro__
 
-<|{form_conta_selec.Endereco}|input|>
+<|{selected_customer_handler.Endereco}|input|>
 
-<|{form_conta_selec.Bairro}|input|>
+<|{selected_customer_handler.Bairro}|input|>
 
 __Cidade__*
 
 __Estado__*
 
-<|{form_conta_selec.Cidade}|input|>
+<|{selected_customer_handler.Cidade}|input|>
 
-<|{form_conta_selec.Estado}|input|>
+<|{selected_customer_handler.Estado}|input|>
 
 _(*) Obrigatório_
-<|{str(form_contas)}|text|>
 |>
 """
 
 CONFIRMAR_CONTA = """
 <|layout|columns=1 1|columns[mobile]=1 1|class_name=container
-Primeiro Nome: *<|{form_conta_selec.PrimeiroNome}|>*
+Primeiro Nome: *<|{selected_customer_handler.PrimeiroNome}|>*
 
-Sobrenome: *<|{form_conta_selec.Sobrenome}|>*
+Sobrenome: *<|{selected_customer_handler.Sobrenome}|>*
 
-Apelido: *<|{form_conta_selec.Apelido}|>*
+Apelido: *<|{selected_customer_handler.Apelido}|>*
 
-Telefone: *<|{form_conta_selec.Telefone}|>*
+Telefone: *<|{selected_customer_handler.Telefone}|>*
 
-Endereço: *<|{form_conta_selec.Endereco}|>*
+Endereço: *<|{selected_customer_handler.Endereco}|>*
 
-Bairro: *<|{form_conta_selec.Bairro}|>*
+Bairro: *<|{selected_customer_handler.Bairro}|>*
 
-Cidade: *<|{form_conta_selec.Cidade}|>*
+Cidade: *<|{selected_customer_handler.Cidade}|>*
 
-Estado: *<|{form_conta_selec.Estado}|>*
+Estado: *<|{selected_customer_handler.Estado}|>*
 |>
 """
