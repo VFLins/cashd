@@ -29,14 +29,14 @@ LOVItem = NamedTuple("LOVItem", [("Id", str), ("Value", str)])
 
 
 def btn_next_page_customer_search(state: State):
-    customers = get_customers_datasource(state=state)
-    customers.fetch_next_page()
+    customers_source = get_customers_datasource(state=state)
+    customers_source.fetch_next_page()
     update_search_widgets(state=state)
 
 
 def btn_prev_page_customer_search(state: State):
-    customers = get_customers_datasource(state=state)
-    customers.fetch_previous_page()
+    customers_source = get_customers_datasource(state=state)
+    customers_source.fetch_previous_page()
     update_search_widgets(state=state)
 
 
@@ -392,10 +392,11 @@ def menu_lateral(state, action, info):
 
 def update_search_widgets(state: State):
     with state as s:
+        customers_source = get_customers_datasource(state=s)
         s.NOMES_USUARIOS = get_customer_lov(state=s)
         s.search_user_pagination_legend = (
-            f"{usuarios.nrows} itens, "
-            f"mostrando {usuarios.min_idx + 1} até {usuarios.max_idx}"
+            f"{customers_source.nrows} itens, "
+            f"mostrando {customers_source.min_idx + 1} até {customers_source.max_idx}"
         )
 
 
@@ -433,7 +434,6 @@ def update_displayed_table_pagination(
     tablename=Literal["Últimas transações", "Maiores saldos", "Clientes inativos"],
 ):
     selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
-    selected_source._fetch_metadata()
     state.stats_tables_pagination_legend = (
         f"{selected_source.nrows} itens, "
         f"mostrando {selected_source.min_idx +
@@ -601,9 +601,9 @@ def chg_selected_customer(state: State) -> None:
 
 
 def chg_cliente_pesquisa(state: State, id, payload):
-    customers = get_customers_datasource(state=state)
+    customers_source = get_customers_datasource(state=state)
     with state as s:
-        customers.search_text = s.search_user_input_value
+        customers_source.search_text = s.search_user_input_value
         update_search_widgets(state=s)
 
 

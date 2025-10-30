@@ -673,7 +673,7 @@ class _DataSource:
     @search_text.setter
     def search_text(self, value: str):
         if self.is_searchable():
-            self._search_text = value
+            self._fetch_metadata(search_text=value)
 
 
 class LastTransactionsSource(_DataSource):
