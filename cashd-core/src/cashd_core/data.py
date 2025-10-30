@@ -338,13 +338,12 @@ class tbl_clientes(dec_base):
 
     @property
     def NomeCompleto(self):
-        if self.Id is None:
+        if (self.PrimeiroNome is None) or (self.Sobrenome is None):
             return const.NA_VALUE
-        nome_completo = f"{str(self.Id).zfill(3)}, {
-            self.PrimeiroNome} {self.Sobrenome}"
-        if self.Apelido != "":
+        nome_completo = f"{self.PrimeiroNome} {self.Sobrenome}"
+        if (self.Apelido != "") and (self.Apelido is not None):
             nome_completo = nome_completo + f" ({self.Apelido})"
-        return nome_completo
+        return nome_completo.title()
 
     @property
     def Local(self):
