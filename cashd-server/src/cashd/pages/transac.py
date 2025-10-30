@@ -53,7 +53,14 @@ __Valor__*: R$ <|{display_tr_valor}|text|>
 
 
 ELEMENTO_HIST = """
+<|Informações do cliente|button|on_action={lambda s: s.assign("show_dialog_edit_customer", True)}|>
+
 <|{df_transac}|table|editable|paginated|on_delete=rm_transaction|on_edit=False|on_add=False|columns=Data;Valor|height=300px|>
+
+
+<|{show_dialog_edit_customer}|dialog|title=Editando...|width=80%|partial={dialog_edit_customer}|on_action=show_dialog|page_id=editar_conta|labels=Voltar;Salvar alterações|>
+
+<|{show_dialog_confirm_edit_customer}|dialog|title=Confirma alterações?|width=80%|partial={dialog_confirm_customer_update}|page_id=confirmar_alteracoes_conta|labels=Cancelar;Confirmar|>
 """
 
 

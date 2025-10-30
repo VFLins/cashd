@@ -73,7 +73,5 @@ ELEMENTO_REGS = """
 
 <|{mostra_selec_cliente}|dialog|title=Selecione o cliente que será editado|width=80%|partial={dial_selec_cliente}|on_action=chg_dialog_selec_cliente_conta|page_id=selecionar_conta|labels=Fechar;Continuar|>
 
-<|{mostra_form_editar_cliente}|dialog|title=Editando...|width=80%|partial={dial_form_editar_cliente}|on_action=chg_dialog_editar_cliente|page_id=editar_conta|labels=Voltar;Continuar|>
-
 <|{mostra_confirma_conta}|dialog|title=Tem certeza?|width=80%|partial={dial_conta_confirmar}|on_action=chg_dialog_confirma_cliente|page_id=confirma_editar_conta|labels=Cancelar;Confirmar|>
 """

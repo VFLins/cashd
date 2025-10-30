@@ -54,11 +54,10 @@ def btn_prev_page_displayed_table(state: State):
     chg_select_table_stats(state=state)
 
 
-def btn_mostrar_dialogo(state: State, id: str, payload: dict, show: str):
+def show_dialog(state: State, id: str, payload: dict, show: str):
     show_dialogs = {
-        "confirma_conta": "mostra_confirma_conta",
-        "selec_cliente": "mostra_selec_cliente",
-        "edita_cliente": "mostra_form_editar_cliente",
+        "confirma_conta": "dialog_confirm_customer_edit",
+        "edita_cliente": "dialog_edit_customer",
     }
     for dialog in show_dialogs.values():
         state.assign(dialog, False)
@@ -574,9 +573,8 @@ def chg_cliente_pesquisa(state: State, id, payload):
 ####################
 
 # visibilidade de dialogos
-mostra_selec_cliente = False
-mostra_form_editar_cliente = False
-mostra_confirma_conta = False
+show_dialog_confirm_edit_customer = False
+show_dialog_edit_customer = False
 
 # controles dos graficos
 slider_elems = list(range(10, 51)) + [None]
@@ -755,9 +753,9 @@ elem_conta = Gui.add_partial(app, contas.ELEMENTO_FORM)
 elem_config = Gui.add_partial(app, configs.ELEMENTO_PREFS)
 elem_analise = Gui.add_partial(app, analise.ELEM_TABLES)
 
-dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
-dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
-dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
+# dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
+dialog_edit_customer = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
+dialog_confirm_edit_customer= Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
 part_stats_displayed_table = Gui.add_partial(app, analise.ELEM_TABLE_TRANSAC_HIST)
 

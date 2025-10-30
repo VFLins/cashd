@@ -1,5 +1,3 @@
-# chamado em:
-#   contas.ELEMENTO_REGS
 SELECIONAR_CLIENTE_ETAPA = """
 <|{search_user_input_value}|input|label=Pesquisa|on_change={chg_cliente_pesquisa}|class_name=sel-user user-search-input|>
 
