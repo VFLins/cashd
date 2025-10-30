@@ -231,6 +231,7 @@ def add_customer(state: State):
         notify(state, "error", "Algum campo obrigatório (*) ainda não foi preenchido")
         return
     try:
+        customer.write()
         notify(state, "success", message=f"Novo cliente adicionado!\n{customer.NomeCompleto}")
         state.refresh("form_customer")
         state.NOMES_USUARIOS = get_customer_lov(state=state)
@@ -391,9 +392,7 @@ def menu_lateral(state, action, info):
 
 def update_search_widgets(state: State):
     with state as s:
-        s.NOMES_USUARIOS = [
-            (str(row[0]), f"{row[1]} — {row[2]}") for row in s.usuarios.current_data
-        ]
+        s.NOMES_USUARIOS = get_customer_lov(state=s)
         s.search_user_pagination_legend = (
             f"{usuarios.nrows} itens, "
             f"mostrando {usuarios.min_idx + 1} até {usuarios.max_idx}"
