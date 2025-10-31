@@ -56,8 +56,8 @@ def btn_prev_page_displayed_table(state: State):
 
 def show_dialog(state: State, id: str, payload: dict, show: str):
     show_dialogs = {
-        "confirma_conta": "dialog_confirm_customer_edit",
-        "edita_cliente": "dialog_edit_customer",
+        "confirm_edit_customer": "dialog_confirm_customer_edit",
+        "edit_customer": "dialog_edit_customer",
     }
     for dialog in show_dialogs.values():
         state.assign(dialog, False)
@@ -457,6 +457,27 @@ def rm_transaction(state: State, var_name: str, payload: dict):
         notify(s, "error", f"Erro inesperado removendo esta transação: {str(err)}")
     finally:
         state.df_transac = get_customer_transacs(state=state)
+
+
+def dialog_edit_customer_action(state: State, id: str, payload: dict):
+    # click 'x' button
+    if payload["args"][0] < 1:
+        state.show_dialog_edit_customer = False
+        return
+    # click 'save changes' button
+    if payload["args"][0] == 1:
+        show_dialog(state=state, id=id, payload=payload, show="confirm_edit_customer")
+        print(state.selected_customer_handler)
+
+
+def dialog_confirm_edit_customer_action(state: State, id: str, payload: dict):
+    # click 'x' button
+    if payload["args"][0] < 1:
+        state.show_dialog_confirm_edit_customer = False
+    # click 'return' button
+    if payload["args"][0] == 1:
+        show_dialog(state=state, id=id, payload=payload, show="edit_customer")
+    # click 'confirm' button
 
 
 def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
