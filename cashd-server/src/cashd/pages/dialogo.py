@@ -20,7 +20,7 @@ __Sobrenome__*
 
 __Apelido__
 
-__Telefone__
+__Telefone__*
 
 <|{selected_customer_handler.Apelido}|input|>
 
@@ -47,21 +47,11 @@ _(*) Obrigatório_
 """
 
 CONFIRMAR_CONTA = """
-<|layout|columns=1 1|columns[mobile]=1 1|class_name=container
-Primeiro Nome: *<|{selected_customer_handler.PrimeiroNome}|>*
+<|layout|columns=1|columns[mobile]=1|class_name=container
+**Nome:** <|{selected_customer_handler.NomeCompleto}|>
 
-Sobrenome: *<|{selected_customer_handler.Sobrenome}|>*
+**Local:** <|{selected_customer_handler.Local}|>
 
-Apelido: *<|{selected_customer_handler.Apelido}|>*
-
-Telefone: *<|{selected_customer_handler.Telefone}|>*
-
-Endereço: *<|{selected_customer_handler.Endereco}|>*
-
-Bairro: *<|{selected_customer_handler.Bairro}|>*
-
-Cidade: *<|{selected_customer_handler.Cidade}|>*
-
-Estado: *<|{selected_customer_handler.Estado}|>*
+**Telefone:** <|{selected_customer_handler.Telefone}|>
 |>
 """

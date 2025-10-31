@@ -35,7 +35,7 @@ __Sobrenome__*
 
 __Apelido__
 
-__Telefone__
+__Telefone__*
 
 <|{form_customer.Apelido}|input|>
 

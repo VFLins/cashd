@@ -56,8 +56,8 @@ def btn_prev_page_displayed_table(state: State):
 
 def show_dialog(state: State, id: str, payload: dict, show: str):
     show_dialogs = {
-        "confirm_edit_customer": "dialog_confirm_customer_edit",
-        "edit_customer": "dialog_edit_customer",
+        "confirm_edit_customer": "show_dialog_confirm_edit_customer",
+        "edit_customer": "show_dialog_edit_customer",
     }
     for dialog in show_dialogs.values():
         state.assign(dialog, False)
@@ -459,25 +459,40 @@ def rm_transaction(state: State, var_name: str, payload: dict):
         state.df_transac = get_customer_transacs(state=state)
 
 
+def btn_edit_customer(state: State):
+    customer = state.selected_customer_handler
+    customer.read(row_id=state.SELECTED_CUSTOMER.Id)
+    state.refresh("selected_customer_handler")
+    state.show_dialog_edit_customer = True
+
+
 def dialog_edit_customer_action(state: State, id: str, payload: dict):
-    # click 'x' button
-    if payload["args"][0] < 1:
-        state.show_dialog_edit_customer = False
-        return
-    # click 'save changes' button
-    if payload["args"][0] == 1:
-        show_dialog(state=state, id=id, payload=payload, show="confirm_edit_customer")
-        print(state.selected_customer_handler)
+    customer = state.selected_customer_handler
+    match payload["args"][0]:
+        # click 'x' button
+        case -1:
+            state.show_dialog_edit_customer = False
+        # click 'save changes' button
+        case 0:
+            if not customer.required_fields_are_filled():
+                notify(state, "error", "Algum campo obrigatório (*) ainda não foi preenchido")
+                btn_edit_customer(state=state)
+            else:
+                show_dialog(state=state, id=id, payload=payload, show="confirm_edit_customer")
 
 
 def dialog_confirm_edit_customer_action(state: State, id: str, payload: dict):
-    # click 'x' button
-    if payload["args"][0] < 1:
-        state.show_dialog_confirm_edit_customer = False
-    # click 'return' button
-    if payload["args"][0] == 1:
-        show_dialog(state=state, id=id, payload=payload, show="edit_customer")
-    # click 'confirm' button
+    match payload["args"][0]:
+        # click 'x' button
+        case -1: state.show_dialog_confirm_edit_customer = False
+        # click 'return' button
+        case 0: show_dialog(state=state, id=id, payload=payload, show="edit_customer")
+        # click 'confirm' button
+        case 1:
+            state.selected_customer_handler.update()
+            state.show_dialog_confirm_edit_customer = False
+            notify(state, "success", f"Informações atualizadas com sucesso")
+            state.NOMES_USUARIOS = get_customer_lov(state=state)
 
 
 def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
@@ -572,13 +587,14 @@ def chg_selected_customer(state: State) -> None:
     """Update customer information widgets when the user interacts with the customer
     selector.
     """
-    customer = data.tbl_clientes()
+    customer = state.selected_customer_handler
     with state as s:
         customer_id = int(s.SELECTED_CUSTOMER.Id)
         customer.read(row_id=customer_id)
         s.df_transac = get_customer_transacs(state=s)
         s.nome_cliente_selec = customer.NomeCompleto
         s.refresh("form_transac")
+        s.refresh("selected_customer_handler")
     print(f"state user {get_state_id(state)} selected: {customer.NomeCompleto}")
 
 
