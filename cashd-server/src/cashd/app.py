@@ -6,6 +6,7 @@ import pandas as pd
 import sys
 from pyshortcuts import make_shortcut
 from datetime import datetime
+from tkinter import filedialog
 from typing import Literal, Type, NamedTuple
 from os import path
 
@@ -350,7 +351,7 @@ def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
     customer = data.tbl_clientes()
     if customer.table_is_empty():
         return pd.DataFrame(columns=["Id", "Data", "Valor"])
-    customer_id = state.SELECTED_CUSTOMER[0] if state else 1
+    customer_id = state.SELECTED_CUSTOMER.Id if state else 1
     customer.read(row_id=customer_id)
     if (state is not None) and (customer.Id is not None):
         state.SELECTED_CUSTOMER_BALANCE = customer.Saldo
@@ -803,12 +804,6 @@ nav_transac_lov = [
     (transac.ELEMENTO_HIST, "Ver histórico"),
 ]
 nav_transac_val = nav_transac_lov[0]
-# contas
-nav_conta_lov = [
-    (contas.ELEMENTO_FORM, "Criar conta"),
-    (contas.ELEMENTO_REGS, "Contas registradas"),
-]
-nav_conta_val = nav_conta_lov[0]
 # estatisticas
 nav_analise_lov = [(analise.ELEM_TABLES, "Tabelas"), (analise.ELEM_PLOT, "Gráficos")]
 nav_analise_val = nav_analise_lov[0]
