@@ -115,19 +115,12 @@ def btn_gerar_main_plot(state: State | None = None):
     return
 
 
-def btn_atualizar_locais_de_backup(state: State | None = None):
-    """
-    Se `state=None` retorna um `pd.DataFrame`, caso contrario, atualiza o valor
-    de `'df_locais_de_backup'`."""
-    locais_de_backup = backup.settings.read_backup_places()
-    df = pd.DataFrame(
-        {"Id": range(len(locais_de_backup)), "Locais de backup": locais_de_backup}
+def get_backup_places() -> pd.DataFrame:
+    """Returns a `pd.DataFrame` listing all current backup places."""
+    backup_places = backup.settings.read_backup_places()
+    return pd.DataFrame(
+        {"Id": range(len(backup_places)), "Locais de backup": backup_places}
     )
-    if state:
-        state.assign("df_locais_de_backup", df)
-        state.refresh("df_locais_de_backup")
-        return
-    return df
 
 
 def btn_fazer_backups(state: State):
@@ -144,13 +137,13 @@ def btn_add_local_de_backup(state: State):
     root.attributes("-topmost", True)
     folder = tk.filedialog.askdirectory()
     backup.settings.add_backup_place(folder)
-    btn_atualizar_locais_de_backup(state)
+    state.df_backup_places = get_backup_places()
 
 
 def btn_rm_local_de_backup(state: State, var_name, payload):
     idx = int(payload["index"])
     backup.settings.rm_backup_place(idx)
-    btn_atualizar_locais_de_backup(state)
+    state.df_backup_places = get_backup_places()
 
 
 def btn_carregar_backup(state: State):
@@ -741,7 +734,7 @@ SELECTED_CUSTOMER_BALANCE = selected_customer.Saldo
 SELECTED_CUSTOMER_PLACE = selected_customer.Local
 
 # valor inicial da lista de locais de backup
-df_locais_de_backup = btn_atualizar_locais_de_backup()
+df_backup_places = get_backup_places()
 
 # valor inicial do campo "cidade preferida"
 input_cidade_val = prefs.settings.default_city
