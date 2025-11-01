@@ -51,7 +51,7 @@ logger.addHandler(log_handler)
 
 class BackupPlacesSource:
     def __init__(self):
-        """Mimics `cashd.db._DataSource` behavior providing interaction to the
+        """Mimics `cashd_core.data._DataSource` behavior providing interaction to the
         list of backup places.
         """
 
