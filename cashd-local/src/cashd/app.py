@@ -4,7 +4,7 @@ Local-first application that helps you handle cash flow records quickly!
 
 import asyncio
 from typing import Type
-from toga import App
+from toga import App, Group
 from toga.window import MainWindow
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.command import Command
@@ -37,24 +37,30 @@ class Cashd(App):
         )
         self.main_window.min_width = 600
         self.main_window.content = self.main_box
+        group_main = Group("Cashd", order=10)
+        group_navigate = Group("Navegar", order=20)
+        group_help = Group("Ajuda", order=30)
         self.main_window.toolbar.add(
             Command(
                 order=3,
                 text="Configurações",
                 action=self.set_context_content,
                 icon=const.ICON_CONFIG,
+                group=group_navigate,
             ),
             Command(
                 order=2,
                 text="Estatísticas",
                 action=self.set_context_content,
                 icon=const.ICON_STATS,
+                group=group_navigate,
             ),
             Command(
                 order=1,
                 text="Novo Cliente",
                 action=self.set_context_content,
                 icon=const.ICON_CONTAS,
+                group=group_navigate,
             ),
             Command(
                 order=0,
@@ -62,8 +68,15 @@ class Cashd(App):
                 action=self.set_context_content,
                 icon=const.ICON_TRANSAC,
                 enabled=False,
+                group=group_navigate,
             ),
         )
+        self.commands[Command.EXIT].text = "Encerrar"
+        self.commands[Command.EXIT].group = group_main
+        self.commands[Command.ABOUT].text = "Sobre"
+        self.commands[Command.ABOUT].group = group_help
+        self.commands[Command.VISIT_HOMEPAGE].text = "Documentação"
+        self.commands[Command.VISIT_HOMEPAGE].group = group_help
         self.main_window.show()
 
     # Methods
