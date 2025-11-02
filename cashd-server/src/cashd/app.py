@@ -43,14 +43,14 @@ def btn_prev_page_customer_search(state: State):
 
 def btn_next_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
-    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
+    selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_next_page()
     chg_select_table_stats(state=state)
 
 
 def btn_prev_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
-    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
+    selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_previous_page()
     chg_select_table_stats(state=state)
 
@@ -395,35 +395,40 @@ def reset_transac_form_widgets(state: State):
         s.refresh("form_transac")
 
 
-def fetch_displayed_table_datasource(
-    state: State,
+def get_table_datasource(
+    state: State | None = None,
     tablename=Literal["Últimas transações", "Maiores saldos", "Clientes inativos"],
-) -> Type[data._DataSource] | None:
+) -> Type[data._DataSource]:
+    """Returns an instance of datasource according to the `tablename`. Assigns this
+    datasource to the `state` if provided.
+    """
     source_names = {
-        "Últimas transações": "last_transacs_data_source",
-        "Maiores saldos": "highest_amounts_data_source",
-        "Clientes inativos": "inactive_customers_data_source",
+        "Últimas transações": "datasource_last_transacs",
+        "Clientes inativos": "datasource_inactive_customers",
+        "Maiores saldos": "datasource_highest_amounts",
     }
     sources = {
-        "Últimas transações": last_transacs_data_source,
-        "Maiores saldos": highest_amounts_data_source,
-        "Clientes inativos": inactive_customers_data_source,
+        "Últimas transações": data.LastTransactionsSource(),
+        "Clientes inativos": data.InactiveCustomersSource(),
+        "Maiores saldos": data.HighestAmountsSource(),
     }
-    selected_source = getattr(state, source_names[tablename], None)
-    if selected_source is None:
-        selected_source = sources.get(tablename)
-    return selected_source
+    if not state:
+        return sources.get(tablename)
+    datasource = getattr(state, source_names[tablename], None)
+    if datasource is None:
+        state.assign(source_names[tablename], datasource)
+    return datasource
 
 
 def update_displayed_table_pagination(
     state: State,
     tablename=Literal["Últimas transações", "Maiores saldos", "Clientes inativos"],
 ):
-    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
+    selected_source = get_table_datasource(state=state, tablename=tablename)
     state.stats_tables_pagination_legend = (
         f"{selected_source.nrows} itens, "
-        f"mostrando {selected_source.min_idx +
-                     1} até {selected_source.max_idx}"
+        f"mostrando {selected_source.min_idx + 1} "
+        f"até {selected_source.max_idx}"
     )
 
 
@@ -464,7 +469,9 @@ def set_rows_per_page(state: State):
     state.rows_per_page = int(state.rows_per_page)
     prefs.settings.data_tables_rows_per_page = state.rows_per_page
     n_rows = prefs.settings.data_tables_rows_per_page
-    notify(state, "success", f"Mostrando {n_rows} por página em todas as tabelas paginadas")
+    with state as s:
+        s.NOMES_USUARIOS = get_customer_lov(state=s)
+    notify(state, "warning", f"Esta mudança só será aplicada completamente após reiniciar o Cashd")
 
 
 def dialog_edit_customer_action(state: State, id: str, payload: dict):
@@ -545,42 +552,36 @@ def chg_transac_valor(state: State) -> None:
     return
 
 
-def chg_select_table_stats(state: State):
+def update_displayed_table(state: State):
     source_names = {
-        "Últimas transações": "last_transacs_data_source",
-        "Maiores saldos": "highest_amounts_data_source",
-        "Clientes inativos": "inactive_customers_data_source",
+        "Últimas transações": "datasource_last_transacs",
+        "Clientes inativos": "datasource_inactive_customers",
+        "Maiores saldos": "datasource_highest_amounts",
     }
     sources = {
-        "Últimas transações": last_transacs_data_source,
-        "Maiores saldos": highest_amounts_data_source,
-        "Clientes inativos": inactive_customers_data_source,
+        "Últimas transações": datasource_last_transacs,
+        "Clientes inativos": datasource_inactive_customers,
+        "Maiores saldos": datasource_highest_amounts,
     }
     table_partials = {
         "Últimas transações": analise.ELEM_TABLE_TRANSAC_HIST,
-        "Maiores saldos": analise.ELEM_TABLE_HIGHEST_AMOUNTS,
         "Clientes inativos": analise.ELEM_TABLE_INACTIVE_CUSTOMERS,
+        "Maiores saldos": analise.ELEM_TABLE_HIGHEST_AMOUNTS,
     }
     dataframe_names = {
         "Últimas transações": "df_last_transacs",
         "Maiores saldos": "df_highest_amounts",
         "Clientes inativos": "df_inactive_customers",
     }
-    # Get option selected in the dropdown
     tablename = state.dropdown_table_type_val
-    # Fetch datasource from state, if not available, use local datasource
-    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
-    if selected_source is None:
-        return
-    # Assign newest data to dataframe
+    datasource = get_table_datasource(state=state, tablename=tablename)
+    # Update data
     df = getattr(state, dataframe_names[tablename])
-    df = pd.DataFrame(data=selected_source.current_data, columns=df.columns)
+    df = pd.DataFrame(data=datasource.current_data, columns=df.columns)
     state.assign(dataframe_names[tablename], df)
     # Update pagination label
     update_displayed_table_pagination(state=state, tablename=tablename)
-    # Ensure datasource is assigned to state
-    state.assign(name=source_names[tablename], value=sources[tablename])
-    # Display selected dataframe
+    # Update Taipy partial
     state.part_stats_displayed_table.update_content(state, table_partials[tablename])
 
 
@@ -703,28 +704,28 @@ nome_cliente_selec = selected_customer_handler.NomeCompleto
 maximizado = False
 
 # valor inicial da tabela de transacoes do usuario selecionado em SELECTED_CUSTOMER
-last_transacs_data_source = data.LastTransactionsSource()
-highest_amounts_data_source = data.HighestAmountsSource()
-inactive_customers_data_source = data.InactiveCustomersSource()
+datasource_last_transacs = get_table_datasource(tablename="Últimas transações")
+datasource_highest_amounts = get_table_datasource(tablename="Maiores saldos")
+datasource_inactive_customers = get_table_datasource(tablename="Clientes inativos")
 
 df_last_transacs = pd.DataFrame(
-    data=last_transacs_data_source.current_data,
+    data=datasource_last_transacs.current_data,
     columns=["Data", "Cliente", "Valor"],
 )
 df_highest_amounts = pd.DataFrame(
-    data=highest_amounts_data_source.current_data,
+    data=datasource_highest_amounts.current_data,
     columns=["Nome", "Saldo devedor"],
 )
 df_inactive_customers = pd.DataFrame(
-    data=inactive_customers_data_source.current_data,
+    data=datasource_inactive_customers.current_data,
     columns=["Nome", "Última transação", "Saldo devedor"],
 )
 
 dropdown_table_type_val = "Últimas transações"
 stats_tables_pagination_legend = (
-    f"{last_transacs_data_source.nrows} itens, mostrando "
-    f"{last_transacs_data_source.min_idx +
-        1} até {last_transacs_data_source.max_idx}"
+    f"{datasource_last_transacs.nrows} itens, mostrando "
+    f"{datasource_last_transacs.min_idx +
+        1} até {datasource_last_transacs.max_idx}"
 )
 
 # valor inicial do saldo do usuario selecionado em SELECTED_CUSTOMER
@@ -827,8 +828,8 @@ port = porta_aberta()
 
 
 def start_cashd(with_webview: bool = False):
-    if "--webview" in sys.argv:
-        with_webview = True
+    with_webview = True if "--webview" in sys.argv else False
+    debug = True if "--debug" in sys.argv else False
 
     def run_taipy_gui():
         app.run(
@@ -843,12 +844,11 @@ def start_cashd(with_webview: bool = False):
             port=port,
             favicon="assets/PNG_LogoFavicon.png",
             watermark="",
+            debug=debug,
         )
-
     if with_webview:
         taipy_thread = threading.Thread(target=run_taipy_gui)
         taipy_thread.start()
-
         global window
         window = webview.create_window(
             title="Cashd",
@@ -858,8 +858,6 @@ def start_cashd(with_webview: bool = False):
             easy_drag=False,
             min_size=(900, 600),
         )
-
         webview.start()
-
     else:
         run_taipy_gui()
