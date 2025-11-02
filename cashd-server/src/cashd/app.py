@@ -460,6 +460,13 @@ def btn_edit_customer(state: State):
     state.show_dialog_edit_customer = True
 
 
+def set_rows_per_page(state: State):
+    state.rows_per_page = int(state.rows_per_page)
+    prefs.settings.data_tables_rows_per_page = state.rows_per_page
+    n_rows = prefs.settings.data_tables_rows_per_page
+    notify(state, "success", f"Mostrando {n_rows} por página em todas as tabelas paginadas")
+
+
 def dialog_edit_customer_action(state: State, id: str, payload: dict):
     customer = state.selected_customer_handler
     match payload["args"][0]:
@@ -740,9 +747,7 @@ df_backup_places = get_backup_places()
 input_cidade_val = prefs.settings.default_city
 
 # valor inicial da configuracao Limite de linhas na tabela "Últimas transações"
-input_quant_max_ultimas_transacs = prefs.settings.data_tables_rows_per_page
-#                    " " "                       na tabela "Maiores saldos"
-input_quant_max_highest_balances = prefs.settings.data_tables_rows_per_page
+rows_per_page = prefs.settings.data_tables_rows_per_page
 
 # valor inicial do toggle "backup ao sair"
 toggle_backup_on_exit = tggl_backup_on_exit()

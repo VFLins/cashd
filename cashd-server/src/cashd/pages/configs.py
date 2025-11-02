@@ -84,10 +84,7 @@ __Limite de linhas na tabela:__
 
 <|layout|columns=1 1|columns[mobile]=1 1|class_name=container
 
-<|{input_quant_max_ultimas_transacs}|number|label=Últimas transações [1000]|change_delay=1200|on_change={lambda s: btn_chg_max_ultimas_transacs(s, input_quant_max_ultimas_transacs)}|>
-
-<|{input_quant_max_highest_balances}|number|label=Maiores saldos [10]|change_delay=1200|on_change={lambda s: btn_chg_max_highest_balances(s, input_quant_max_highest_balances)}|>
-
+<|{rows_per_page}|number|step=10|label=Linhas por página[200]|change_delay=1200|on_change={set_rows_per_page}|>
 |>
 
 """
