@@ -15,7 +15,7 @@ else:
     CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
     LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
 
-PREFS_CONFIFG_FILE = Path(CONFIG_PATH, "prefs.ini")
+PREFS_CONFIG_FILE = Path(CONFIG_PATH, "prefs.ini")
 BACKUP_CONFIG_FILE = Path(CONFIG_PATH, "backup.ini")
 LOG_FILE = path.join(LOG_PATH, "prefs.log")
 DB_FILE = path.join(CASHD_FILES_PATH, "data", "database.db")
