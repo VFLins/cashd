@@ -84,7 +84,7 @@ __Limite de linhas na tabela:__
 
 <|layout|columns=1 1|columns[mobile]=1 1|class_name=container
 
-<|{rows_per_page}|number|step=10|label=Linhas por página[200]|change_delay=1200|on_change={set_rows_per_page}|>
+<|{rows_per_page}|number|max=500|min=50|step=10|label=Linhas por página[200]|change_delay=1200|on_change={set_rows_per_page}|>
 |>
 
 """

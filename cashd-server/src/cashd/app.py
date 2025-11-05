@@ -471,7 +471,7 @@ def set_rows_per_page(state: State):
     n_rows = prefs.settings.data_tables_rows_per_page
     with state as s:
         s.NOMES_USUARIOS = get_customer_lov(state=s)
-    notify(state, "warning", f"Esta mudança só será aplicada completamente após reiniciar o Cashd")
+    notify(state, "warning", f"Esta mudança só terá efeito após reiniciar o Cashd")
 
 
 def dialog_edit_customer_action(state: State, id: str, payload: dict):
