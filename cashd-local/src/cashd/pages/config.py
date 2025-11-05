@@ -13,6 +13,7 @@ from toga.widgets.table import Table
 from toga.widgets.button import Button
 from toga.widgets.divider import Divider
 from toga.widgets.textinput import TextInput
+from toga.widgets.numberinput import NumberInput
 from toga.widgets.selection import Selection
 from toga.widgets.scrollcontainer import ScrollContainer
 
@@ -50,6 +51,17 @@ class ConfigSection(BaseSection):
                         style=style.user_input(TextInput),
                         on_change=self.set_default_city,
                         on_lose_focus=self.set_title_case,
+                    ),
+                ),
+                widgets.form.FormField(
+                    label="Linhas por página",
+                    input_widget=NumberInput(
+                        value=prefs.settings.data_tables_rows_per_page,
+                        style=style.user_input(NumberInput),
+                        on_change=self.set_rows_per_page,
+                        max=500,
+                        min=50,
+                        step=10,
                     ),
                 ),
             ]
@@ -145,6 +157,13 @@ class ConfigSection(BaseSection):
         """
         prefs.settings.default_state = widget.value
         print(f"Default state set to {prefs.settings.default_state}")
+
+    def set_rows_per_page(self, widget: NumberInput):
+        """Runs upon updating the 'Linhas por página' field, affects the number of rows
+        in any paginated data widget.
+        """
+        prefs.settings.data_tables_rows_per_page = widget.value
+        print(f"Amount of rows per page: {prefs.settings.data_tables_rows_per_page}")
 
     async def add_backup_dir(self, widget: Button):
         """Prompts the user to add a new directory where the backups will be stored."""
