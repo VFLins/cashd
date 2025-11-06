@@ -304,7 +304,12 @@ def fmt_currency_input(inp: str) -> str:
 
 def is_valid_currency_input(inp: str) -> bool:
     """Returns a boolean value indicating if `inp` is a valid currency input."""
-    return inp.isdigit()
+    try:
+        _ = int(inp)
+    except ValueError:
+        return False
+    else:
+        return inp.replace("-", "").isdigit()
 
 
 def is_empty_currency_input(inp: str) -> bool:
