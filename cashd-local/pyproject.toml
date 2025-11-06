@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 dynamic = ["version"]
 name = "cashd"
 dependencies = [
-    "cashd-core=0.3.2",
+    "cashd-core==0.3.2",
     "briefcase",
     "toga==0.5.0",
     "sqlalchemy==2.*",
