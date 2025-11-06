@@ -1,6 +1,6 @@
 from random import choice, randint
 from datetime import date, datetime, timedelta
-from cashd.data import tbl_clientes, tbl_transacoes
+from cashd_core.data import tbl_clientes, tbl_transacoes
 
 
 nomes = [

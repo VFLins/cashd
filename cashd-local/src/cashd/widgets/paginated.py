@@ -6,7 +6,8 @@ from toga.widgets.table import Table
 from toga.widgets.textinput import TextInput
 from toga.widgets.detailedlist import DetailedList
 
-from cashd import data, style
+from cashd_core import data
+from cashd import style
 from .elems import _DataInteractor
 
 

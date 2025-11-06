@@ -1,15 +1,11 @@
-# chamado em:
-#   contas.ELEMENTO_REGS
 SELECIONAR_CLIENTE_ETAPA = """
-<center>
-    <|{SLC_USUARIO}|selector|lov={NOMES_USUARIOS}|filter|propagate|height=520px|width=650px|on_change=chg_cliente_selecionado|>
-</center>
-"""
+<|{search_user_input_value}|input|label=Pesquisa|on_change={chg_cliente_pesquisa}|class_name=sel-user user-search-input|>
 
-SELECIONAR_TRANSAC_ETAPA = """
-<center>
-    <|{SLC_TRANSAC}|selector|lov={TRANSACS_USUARIO}|filter|paginated|height=360px|>
-</center>
+<|{SELECTED_CUSTOMER}|selector|lov={NOMES_USUARIOS}|propagate|height=300px|width=450px|adapter={adapt_lovitem}|on_change={chg_selected_customer}|class_name=sel-user user-selector|>
+
+<|{search_user_pagination_legend}|text|class_name=small-text|>
+<|Anterior|button|class_name=small-button|on_action=btn_prev_page_customer_search|>
+<|Próxima|button|class_name=small-button|on_action=btn_next_page_customer_search|>
 """
 
 FORM_EDITAR_CLIENTE = """
@@ -18,62 +14,44 @@ __Primeiro Nome__*
 
 __Sobrenome__*
 
-<|{form_conta_selec.PrimeiroNome}|input|>
+<|{selected_customer_handler.PrimeiroNome}|input|>
 
-<|{form_conta_selec.Sobrenome}|input|>
+<|{selected_customer_handler.Sobrenome}|input|>
 
 __Apelido__
 
-__Telefone__
+__Telefone__*
 
-<|{form_conta_selec.Apelido}|input|>
+<|{selected_customer_handler.Apelido}|input|>
 
-<|{form_conta_selec.Telefone}|input|label=DDD + 9 dígitos|>
+<|{selected_customer_handler.Telefone}|input|label=DDD + 9 dígitos|>
 
 __Endereço__
 
 __Bairro__
 
-<|{form_conta_selec.Endereco}|input|>
+<|{selected_customer_handler.Endereco}|input|>
 
-<|{form_conta_selec.Bairro}|input|>
+<|{selected_customer_handler.Bairro}|input|>
 
 __Cidade__*
 
 __Estado__*
 
-<|{form_conta_selec.Cidade}|input|>
+<|{selected_customer_handler.Cidade}|input|>
 
-<|{form_conta_selec.Estado}|input|>
+<|{selected_customer_handler.Estado}|selector|dropdown|lov={dropdown_uf_lov}|>
 
 _(*) Obrigatório_
-<|{str(form_contas)}|text|>
 |>
 """
 
-CONFIRMAR_TRANSAC = """
-Valor: *<|{form_transac_selec.Valor}|>*
-
-Data: *<|{form_transac_selec.DataTransac}|>*
-"""
-
-
 CONFIRMAR_CONTA = """
-<|layout|columns=1 1|columns[mobile]=1 1|class_name=container
-Primeiro Nome: *<|{form_conta_selec.PrimeiroNome}|>*
+<|layout|columns=1|columns[mobile]=1|class_name=container
+**Nome:** <|{selected_customer_handler.NomeCompleto}|>
 
-Sobrenome: *<|{form_conta_selec.Sobrenome}|>*
+**Local:** <|{selected_customer_handler.Local}|>
 
-Apelido: *<|{form_conta_selec.Apelido}|>*
-
-Telefone: *<|{form_conta_selec.Telefone}|>*
-
-Endereço: *<|{form_conta_selec.Endereco}|>*
-
-Bairro: *<|{form_conta_selec.Bairro}|>*
-
-Cidade: *<|{form_conta_selec.Cidade}|>*
-
-Estado: *<|{form_conta_selec.Estado}|>*
+**Telefone:** <|{selected_customer_handler.Telefone}|>
 |>
 """

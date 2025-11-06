@@ -3,8 +3,9 @@ from toga.widgets.base import Widget
 from toga.widgets.box import Box
 from toga.widgets.button import Button
 
+from cashd_core import data
 from .base import BaseSection
-from cashd import const, style, data, widgets
+from cashd import const, style, widgets
 from cashd.widgets.form import FormHandler
 
 

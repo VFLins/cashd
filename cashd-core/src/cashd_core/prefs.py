@@ -15,7 +15,7 @@ else:
     CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
     LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
 
-PREFS_CONFIFG_FILE = Path(CONFIG_PATH, "prefs.ini")
+PREFS_CONFIG_FILE = Path(CONFIG_PATH, "prefs.ini")
 BACKUP_CONFIG_FILE = Path(CONFIG_PATH, "backup.ini")
 LOG_FILE = path.join(LOG_PATH, "prefs.log")
 DB_FILE = path.join(CASHD_FILES_PATH, "data", "database.db")
@@ -52,7 +52,7 @@ class SettingsHandler:
 
         # config parser
         self.conf = configparser.ConfigParser()
-        self.conf.read(self.config_file, "iso 8859-1")
+        self.conf.read(self.config_file, "utf-8")
         try:
             self.conf.add_section("default")
         except configparser.DuplicateSectionError:
@@ -105,7 +105,7 @@ class SettingsHandler:
             self.conf.set(sect, key, val)
             with open(self.config_file, "w") as newconfig:
                 self.conf.write(newconfig)
-            self.conf.read(self.config_file, "iso 8859-1")
+            self.conf.read(self.config_file, "utf-8")
             self.logger.info(
                 f"Valor atualizado em {
                     self.config_file}: [{sect}] {key} = {val}"
@@ -154,7 +154,7 @@ class SettingsHandler:
         self.conf.set(sect, key, self.parse_list_to_config(new_list))
         with open(self.config_file, "w") as newconfig:
             self.conf.write(newconfig)
-        self.conf.read(self.config_file, "iso 8859-1")
+        self.conf.read(self.config_file, "utf-8")
 
     def _rm_from_list(self, sect: str, key: str, idx: int):
         """Retira o `idx`-esimo item da lista, não faz nada se `idx` for inválido."""

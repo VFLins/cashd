@@ -2,8 +2,8 @@ from tempfile import TemporaryFile, TemporaryDirectory
 import sqlite3
 import pytest
 import os
-from cashd.prefs import BackupPrefsHandler
-from cashd.backup import (
+from cashd_core.prefs import BackupPrefsHandler
+from cashd_core.backup import (
     settings,
     DB_FILE,
     CONFIG_FILE,
@@ -19,7 +19,7 @@ from cashd.backup import (
     load,
     run,
 )
-from cashd import data  # ensure database was created
+from cashd_core import data  # ensure database was created
 
 
 CONFIGS_DIR = os.path.split(CONFIG_FILE)[0]

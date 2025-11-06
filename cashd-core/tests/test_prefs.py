@@ -1,7 +1,7 @@
 import pytest
 from os import path, unlink
 from tempfile import TemporaryFile, TemporaryDirectory
-from cashd.prefs import (
+from cashd_core.prefs import (
     PREFS_CONFIG_FILE,
     SettingsHandler,
     PreferencesHandler,

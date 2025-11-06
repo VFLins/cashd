@@ -11,7 +11,8 @@ from toga.widgets.selection import Selection
 from toga.widgets.box import Box, StyleT, Column
 from toga.widgets.label import Label
 
-from cashd import style, data, const
+from cashd_core import data
+from cashd import style, const
 from cashd.widgets.elems import (
     LabeledSelection,
     LabeledNumberInput,

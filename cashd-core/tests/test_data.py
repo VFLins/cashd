@@ -1,4 +1,4 @@
-from cashd.data import (
+from cashd_core.data import (
     dec_base,
     tbl_clientes,
     tbl_transacoes,
@@ -12,7 +12,7 @@ from cashd.data import (
     Engine,
     Session,
 )
-from cashd.prefs import settings
+from cashd_core.prefs import settings
 from . import mock_data
 from datetime import date, datetime
 from sqlalchemy import exc
@@ -244,7 +244,7 @@ def test_validated_data(test_engine):
         assert customer._display_name(name) == customer.display_names[name]
     # check if data types are correct
     for name in customer.data.keys():
-        assert customer.types[name] == customer.__table__.c[name].type
+        assert customer.types[name] == type(customer.__table__.c[name].type)
 
 
 @pytest.mark.parametrize(argnames=("row_id"), argvalues=[i for i in range(1, 30)])

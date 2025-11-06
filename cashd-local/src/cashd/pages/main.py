@@ -16,7 +16,9 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.widgets.optioncontainer import OptionContainer
 
-from cashd import const, data, style, widgets
+from cashd_core import data
+
+from cashd import const, style, widgets
 from cashd.pages.base import BaseSection
 from cashd.widgets.paginated import PaginatedDetailedList
 

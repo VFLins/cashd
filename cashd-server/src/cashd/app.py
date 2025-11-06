@@ -1,63 +1,64 @@
-from typing import Literal, Type
-from datetime import datetime
-import tkinter as tk
-from tkinter import filedialog
-from tkinter.filedialog import askopenfilename
-from pyshortcuts import make_shortcut
-from os import path
-import pandas as pd
 import threading
 import webview
+import tkinter as tk
 import socket
+import pandas as pd
 import sys
+from pyshortcuts import make_shortcut
+from datetime import datetime
+from tkinter import filedialog
+from typing import Literal, Type, NamedTuple
+from os import path
 
-from taipy.gui import Gui, notify, State, navigate, Icon, builder
+from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
-from cashd import db, backup, plot, prefs, data
+from cashd_core import data, prefs, backup
+from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
 
 
 PYTHON_PATH = path.dirname(sys.executable)
 
+# generalization of Taipy's LoV (list of values)
+# https://docs.taipy.io/en/release-4.1/refmans/gui/viselements/generic/selector/#p-lov
+LOVItem = NamedTuple("LOVItem", [("Id", str), ("Value", str)])
+
 
 ####################
-# BOTOES
+# BUTTONS
 ####################
 
 
 def btn_next_page_customer_search(state: State):
-    usuarios = getattr(state, "usuarios", data.CustomerListSource())
-    usuarios.fetch_next_page()
+    customers_source = get_customers_datasource(state=state)
+    customers_source.fetch_next_page()
     update_search_widgets(state=state)
 
 
 def btn_prev_page_customer_search(state: State):
-    usuarios = getattr(state, "usuarios", data.CustomerListSource())
-    usuarios.fetch_previous_page()
+    customers_source = get_customers_datasource(state=state)
+    customers_source.fetch_previous_page()
     update_search_widgets(state=state)
 
 
 def btn_next_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
-    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
+    selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_next_page()
     chg_select_table_stats(state=state)
 
 
 def btn_prev_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
-    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
+    selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_previous_page()
     chg_select_table_stats(state=state)
 
 
-def btn_mostrar_dialogo(state: State, id: str, payload: dict, show: str):
+def show_dialog(state: State, id: str, payload: dict, show: str):
     show_dialogs = {
-        "confirma_conta": "mostra_confirma_conta",
-        "confirma_transac": "mostra_confirma_transac",
-        "selec_cliente": "mostra_selec_cliente",
-        "edita_cliente": "mostra_form_editar_cliente",
-        "selec_transac": "mostra_selec_transac",
+        "confirm_edit_customer": "show_dialog_confirm_edit_customer",
+        "edit_customer": "show_dialog_edit_customer",
     }
     for dialog in show_dialogs.values():
         state.assign(dialog, False)
@@ -73,10 +74,13 @@ def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
 
 
 def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
-    state.assign(
-        "TRANSACS_USUARIO",
-        db.listar_transac_cliente(state.SLC_USUARIO[0], para_mostrar=False),
-    )
+    customer = data.tbl_clientes()
+    with state as s:
+        customer.read(row_id=s.SELECTED_CUSTOMER.Id)
+        s.TRANSACS_USUARIO = [
+            LOVItem(Id=str(t["id"]), Value=f"{t['data']} | {t['valor']}")
+            for t in customer.Transacs
+        ]
     btn_mostrar_dialogo(state, id, payload, "selec_transac")
 
 
@@ -111,27 +115,12 @@ def btn_gerar_main_plot(state: State | None = None):
     return
 
 
-def btn_atualizar_df_ult_transac(state: State):
-    try:
-        updated_tbl = db.ultimas_transac_displ()
-        state.assign("df_ult_transac", updated_tbl)
-    except Exception as xpt:
-        notify(state, "error", f"Erro inesperado atualizando a tabela: {str(xpt)}")
-
-
-def btn_atualizar_locais_de_backup(state: State | None = None):
-    """
-    Se `state=None` retorna um `pd.DataFrame`, caso contrario, atualiza o valor
-    de `'df_locais_de_backup'`."""
-    locais_de_backup = backup.settings.read_backup_places()
-    df = pd.DataFrame(
-        {"Id": range(len(locais_de_backup)), "Locais de backup": locais_de_backup}
+def get_backup_places() -> pd.DataFrame:
+    """Returns a `pd.DataFrame` listing all current backup places."""
+    backup_places = backup.settings.read_backup_places()
+    return pd.DataFrame(
+        {"Id": range(len(backup_places)), "Locais de backup": backup_places}
     )
-    if state:
-        state.assign("df_locais_de_backup", df)
-        state.refresh("df_locais_de_backup")
-        return
-    return df
 
 
 def btn_fazer_backups(state: State):
@@ -146,19 +135,19 @@ def btn_add_local_de_backup(state: State):
     root = tk.Tk()
     root.withdraw()
     root.attributes("-topmost", True)
-    folder = filedialog.askdirectory()
+    folder = tk.filedialog.askdirectory()
     backup.settings.add_backup_place(folder)
-    btn_atualizar_locais_de_backup(state)
+    state.df_backup_places = get_backup_places()
 
 
 def btn_rm_local_de_backup(state: State, var_name, payload):
     idx = int(payload["index"])
     backup.settings.rm_backup_place(idx)
-    btn_atualizar_locais_de_backup(state)
+    state.df_backup_places = get_backup_places()
 
 
 def btn_carregar_backup(state: State):
-    filename = askopenfilename()
+    filename = tk.filedialog.askopenfilename()
     try:
         backup.load(file=filename, _raise=True)
         notify(state, "success", "Dados carregados com sucesso")
@@ -176,7 +165,6 @@ def btn_criar_atalho(state: State):
         python_runner = path.join(PYTHON_PATH, "python3")
         icon_file = path.join(backup.SCRIPT_PATH, "assets", "PNG_LogoIcone.png")
     startup_script = path.join(backup.SCRIPT_PATH, "startup.pyw")
-
     make_shortcut(
         executable=python_runner,
         script=startup_script,
@@ -190,38 +178,49 @@ def btn_criar_atalho(state: State):
     notify(state, "success", "Atalho criado com sucesso!")
 
 
-def btn_inserir_transac(state: State):
-    carregar_lista_transac(state)
+def add_transaction(state: State):
+    """Adds a transaction to the database, uses currently selected customer and data
+    filled by the user.
+    """
+    customer = data.tbl_clientes()
+    if customer.table_is_empty():
+        notify(
+            state,
+            "error",
+            "Você deve cadastrar um cliente antes de registrar uma transação",
+        )
+        return
     try:
-        # fetch transaction data
-        state.form_transac.DataTransac = state.display_tr_data
-        nova_transac: dict = state.form_transac.despejar()
-        state.form_transac.Valor = ""
-        agora = datetime.now()
-        # insert data to database and notify
-        db.adicionar_transac(db.tbl_transacoes(CarimboTempo=agora, **nova_transac))
-        notify(state, "success", f"Nova transação adicionada")
-        with state as s:
-            # update displayed transaction data
-            s.display_tr_valor = "0,00"
-            carregar_lista_transac(state=s)
-            s.refresh("form_transac")
-    except Exception as msg_erro:
-        notify(state, "error", str(msg_erro))
-        print(f"{type(msg_erro)}: {msg_erro}")
+        if is_empty_currency_input(state.form_transac.Valor):
+            notify(state, "error", "Valor não pode ser zero")
+            return
+        if not is_valid_currency_input(state.form_transac.Valor):
+            notify(state, "error", "Valor inválido, insira apenas números")
+            return
+        state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
+        state.form_transac.CarimboTempo = datetime.now()
+        state.form_transac.write()
+        print(f"state user {get_state_id(state)} added {state.form_transac}")
+        reset_transac_form_widgets(state=state)
+    except Exception as err:
+        notify(state, "error", str(err))
+        print(f"Unexpected {type(err)}: {err}")
+    else:
+        notify(state, "success", "Nova transação adicionada")
+    finally:
+        state.df_transac = get_customer_transacs(state=state)
 
 
-def btn_inserir_cliente(state: State):
+def add_customer(state: State):
+    customer = state.form_customer
+    if not customer.required_fields_are_filled():
+        notify(state, "error", "Algum campo obrigatório (*) ainda não foi preenchido")
+        return
     try:
-        novo_cliente: db.FormContas = state.form_contas.despejar()
-        state.form_contas.__init__()
-        db.adicionar_cliente(db.tbl_clientes(**novo_cliente))
-
-        nome_completo = f"{novo_cliente['PrimeiroNome']} {
-            novo_cliente['Sobrenome']}"
-        notify(state, "success", message=f"Novo cliente adicionado!\n{nome_completo}")
-        state.refresh("form_contas")
-        state.NOMES_USUARIOS = sel_listar_clientes()
+        customer.write()
+        notify(state, "success", message=f"Novo cliente adicionado: {customer.NomeCompleto}")
+        state.refresh("form_customer")
+        state.NOMES_USUARIOS = get_customer_lov(state=state)
     except Exception as msg_erro:
         notify(state, "error", str(msg_erro))
 
@@ -229,7 +228,7 @@ def btn_inserir_cliente(state: State):
 def btn_chg_prefs_main_state(state: State):
     val = state.dropdown_uf_val
     try:
-        prefs.settings.write_main_state(val)
+        prefs.settings.default_state = val
         state.form_contas.Estado = val
         state.refresh("form_contas")
         notify(state, "success", f"Estado preferido atualizado para {val}")
@@ -241,7 +240,7 @@ def btn_chg_prefs_main_city(state: State):
     val = state.input_cidade_val
     try:
         val = val.title()
-        prefs.settings.write_main_city(val)
+        prefs.settings.default_city = val
         state.input_cidade_val = val
         state.form_contas.Cidade = val
         state.refresh("form_contas")
@@ -250,25 +249,10 @@ def btn_chg_prefs_main_city(state: State):
         notify(state, "error", f"Erro inesperado: {str(xpt)}")
 
 
-def btn_chg_max_ultimas_transacs(state: State, val: int):
-    try:
-        val = int(val)
-        prefs.settings.write_last_transacs_limit(val)
-        btn_atualizar_df_ult_transac(state)
-        notify(
-            state,
-            "success",
-            f"Limite de entradas em 'Últimas transações' atualizado para {
-                val}",
-        )
-    except Exception as xpt:
-        notify(state, "error", f"Erro inesperado: {str(xpt)}")
-
-
 def btn_chg_max_highest_balances(state: State, val: int):
     try:
         val = int(val)
-        prefs.settings.write_highest_balaces_limit(val)
+        prefs.settings.data_tables_rows_per_page = val
         state.df_maiores_saldos = db.rank_maiores_saldos(val)
         notify(
             state,
@@ -310,18 +294,81 @@ def btn_mudar_minimizado():
 ####################
 
 
-def carregar_lista_transac(state: State):
-    elems = db.listar_transac_cliente(state.SLC_USUARIO[0])
-    state.df_transac = elems["df"]
-    state.SLC_USUARIO_SALDO = elems["saldo"]
-    state.SLC_USUARIO_LOCAL = elems["local"]
-    state.refresh("df_transac")
-    state.refresh("SLC_USUARIO_SALDO")
+def fmt_currency_input(inp: str) -> str:
+    """Formats a numeric string to currency, returns '0,00' if zeroed or invalid."""
+    try:
+        return f"{int(inp)/100:_.2f}".replace("_", " ").replace(".", ",")
+    except ValueError:
+        return "0,00"
 
 
-def sel_listar_clientes():
-    clientes = db.listar_clientes()
-    return [(str(i["id"]), i["nome"]) for i in clientes]
+def is_valid_currency_input(inp: str) -> bool:
+    """Returns a boolean value indicating if `inp` is a valid currency input."""
+    return inp.isdigit()
+
+
+def is_empty_currency_input(inp: str) -> bool:
+    """Retuns a boolean value indicating if `inp` is an empty currency input."""
+    if inp is None:
+        return True
+    inp = inp.strip()
+    if inp == "":
+        return True
+    try:
+        inp = int(inp)
+    except ValueError:
+        pass
+    if inp == 0:
+        return True
+    return False
+
+
+def adapt_lovitem(item: LOVItem | str) -> tuple | None:
+    """Handles LOVItem objetcs when they are handed to Taipy widgets."""
+    try:
+        if type(item) in [LOVItem, tuple]:
+            return tuple(item[:2])
+    except IndexError:
+        return (None, None)
+
+
+def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
+    """When `state` is defined:
+    - Refreshes customer transaction data on `pages.ELEMENTO_SELEC_CONTA`;
+    - Returns a `pd.DataFrame` with the transaction history of the selected customer.
+
+    When `state` is _not_ defined:
+    - Returns a `pd.DataFrame` with the transaction history of the first customer, or
+      an empty one if there are no customers.
+    """
+    customer = data.tbl_clientes()
+    if customer.table_is_empty():
+        return pd.DataFrame(columns=["Id", "Data", "Valor"])
+    customer_id = state.SELECTED_CUSTOMER.Id if state else 1
+    customer.read(row_id=customer_id)
+    if (state is not None) and (customer.Id is not None):
+        state.SELECTED_CUSTOMER_BALANCE = customer.Saldo
+        state.SELECTED_CUSTOMER_PLACE = customer.Local
+    return pd.DataFrame(data=customer.Transacs).rename(
+        columns={"id": "Id", "data": "Data", "valor": "Valor"}
+    )
+
+
+def get_customers_datasource(state: State | None = None) -> data.CustomerListSource:
+    """Initializes or get a `data.CustomerListSource` from `state`, if `state` is
+    not None, adds it to state.
+    """
+    customers = getattr(state, "customers_source", data.CustomerListSource())
+    if state:
+        state.assign("customers_source", customers)
+    return customers
+
+
+def get_customer_lov(state: State | None = None) -> list[LOVItem]:
+    customers = get_customers_datasource(state=state)
+    return [
+        LOVItem(Id=str(c[0]), Value=f"{c[1]} - {c[2]}") for c in customers.current_data
+    ]
 
 
 def menu_lateral(state, action, info):
@@ -331,45 +378,57 @@ def menu_lateral(state, action, info):
 
 def update_search_widgets(state: State):
     with state as s:
-        s.NOMES_USUARIOS = [
-            (str(row[0]), f"{row[1]} — {row[2]}") for row in usuarios.current_data
-        ]
+        customers_source = get_customers_datasource(state=s)
+        s.NOMES_USUARIOS = get_customer_lov(state=s)
         s.search_user_pagination_legend = (
-            f"{usuarios.nrows} itens, "
-            f"mostrando {usuarios.min_idx + 1} até {usuarios.max_idx}"
+            f"{customers_source.nrows} itens, "
+            f"mostrando {customers_source.min_idx + 1} até {customers_source.max_idx}"
         )
 
 
-def fetch_displayed_table_datasource(
-    state: State,
+def reset_transac_form_widgets(state: State):
+    """Reset all fields of pages.transac.ELEMENTO_FORM to their default state."""
+    with state as s:
+        s.form_transac.DataTransac = datetime.today()
+        s.form_transac.Valor = ""
+        s.display_tr_valor = "0,00"
+        s.refresh("form_transac")
+
+
+def get_table_datasource(
+    state: State | None = None,
     tablename=Literal["Últimas transações", "Maiores saldos", "Clientes inativos"],
-) -> Type[data._DataSource] | None:
+) -> Type[data._DataSource]:
+    """Returns an instance of datasource according to the `tablename`. Assigns this
+    datasource to the `state` if provided.
+    """
     source_names = {
-        "Últimas transações": "last_transacs_data_source",
-        "Maiores saldos": "highest_amounts_data_source",
-        "Clientes inativos": "inactive_customers_data_source",
+        "Últimas transações": "datasource_last_transacs",
+        "Clientes inativos": "datasource_inactive_customers",
+        "Maiores saldos": "datasource_highest_amounts",
     }
     sources = {
-        "Últimas transações": last_transacs_data_source,
-        "Maiores saldos": highest_amounts_data_source,
-        "Clientes inativos": inactive_customers_data_source,
+        "Últimas transações": data.LastTransactionsSource(),
+        "Clientes inativos": data.InactiveCustomersSource(),
+        "Maiores saldos": data.HighestAmountsSource(),
     }
-    selected_source = getattr(state, source_names[tablename], None)
-    if selected_source is None:
-        selected_source = sources.get(tablename)
-    return selected_source
+    if not state:
+        return sources.get(tablename)
+    datasource = getattr(state, source_names[tablename], None)
+    if datasource is None:
+        state.assign(source_names[tablename], datasource)
+    return datasource
 
 
 def update_displayed_table_pagination(
     state: State,
     tablename=Literal["Últimas transações", "Maiores saldos", "Clientes inativos"],
 ):
-    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
-    selected_source._fetch_metadata()
+    selected_source = get_table_datasource(state=state, tablename=tablename)
     state.stats_tables_pagination_legend = (
         f"{selected_source.nrows} itens, "
-        f"mostrando {selected_source.min_idx +
-                     1} até {selected_source.max_idx}"
+        f"mostrando {selected_source.min_idx + 1} "
+        f"até {selected_source.max_idx}"
     )
 
 
@@ -378,18 +437,84 @@ def update_displayed_table_pagination(
 ####################
 
 
+def rm_transaction(state: State, var_name: str, payload: dict):
+    """Removes the selected transaction of the selected customer when the user
+    interacts with the table widget.
+    """
+    selected_customer = data.tbl_clientes()
+    selected_transaction = data.tbl_transacoes()
+    table_row_id: int = payload["index"]
+    try:
+        with state as s:
+            selected_customer.read(row_id=s.SELECTED_CUSTOMER.Id)
+            rm_transac_data: dict = tuple(selected_customer.Transacs)[table_row_id]
+            selected_transaction.read(row_id=rm_transac_data["id"])
+            selected_transaction.delete()
+            notify(s, "success", f"Transação de R$ {selected_transaction.Valor/100} removida".replace(".", ","))
+            print(f"state user {get_state_id(s)} removed {selected_transaction}")
+    except Exception as err:
+        notify(s, "error", f"Erro inesperado removendo esta transação: {str(err)}")
+    finally:
+        state.df_transac = get_customer_transacs(state=state)
+
+
+def btn_edit_customer(state: State):
+    customer = state.selected_customer_handler
+    customer.read(row_id=state.SELECTED_CUSTOMER.Id)
+    state.refresh("selected_customer_handler")
+    state.show_dialog_edit_customer = True
+
+
+def set_rows_per_page(state: State):
+    state.rows_per_page = int(state.rows_per_page)
+    prefs.settings.data_tables_rows_per_page = state.rows_per_page
+    n_rows = prefs.settings.data_tables_rows_per_page
+    with state as s:
+        s.NOMES_USUARIOS = get_customer_lov(state=s)
+    notify(state, "warning", f"Esta mudança só terá efeito após reiniciar o Cashd")
+
+
+def dialog_edit_customer_action(state: State, id: str, payload: dict):
+    customer = state.selected_customer_handler
+    match payload["args"][0]:
+        # click 'x' button
+        case -1:
+            state.show_dialog_edit_customer = False
+        # click 'save changes' button
+        case 0:
+            if not customer.required_fields_are_filled():
+                notify(state, "error", "Algum campo obrigatório (*) ainda não foi preenchido")
+                btn_edit_customer(state=state)
+            else:
+                show_dialog(state=state, id=id, payload=payload, show="confirm_edit_customer")
+
+
+def dialog_confirm_edit_customer_action(state: State, id: str, payload: dict):
+    match payload["args"][0]:
+        # click 'x' button
+        case -1: state.show_dialog_confirm_edit_customer = False
+        # click 'return' button
+        case 0: show_dialog(state=state, id=id, payload=payload, show="edit_customer")
+        # click 'confirm' button
+        case 1:
+            state.selected_customer_handler.update()
+            state.show_dialog_confirm_edit_customer = False
+            notify(state, "success", f"Informações atualizadas com sucesso")
+            state.NOMES_USUARIOS = get_customer_lov(state=state)
+
+
 def chg_dialog_selec_cliente_conta(state: State, id: str, payload: dict):
     with state as s:
         if payload["args"][0] < 1:
             s.assign("mostra_selec_cliente", False)
 
         if payload["args"][0] == 1:
-            if s.SLC_USUARIO[0] == "0":
+            if s.SELECTED_CUSTOMER.Id == "0":
                 notify(s, "error", "Nenhuma conta foi selecionada")
             else:
-                cliente_selec = db.cliente_por_id(s.SLC_USUARIO[0])
-                s.form_conta_selec.carregar_valores(cliente_selec)
-                s.refresh("form_conta_selec")
+                selected_customer = data.tbl_clientes()
+                selected_customer.read(row_id=s.SELECTED_CUSTOMER.Id)
+                s.refresh("selected_customer_handler")
                 s.assign("mostra_selec_cliente", False)
                 s.assign("mostra_form_editar_cliente", True)
 
@@ -412,112 +537,74 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
     with state as s:
         if payload["args"][0] == 1:
             try:
-                db.atualizar_cliente(state.SLC_USUARIO[0], state.form_conta_selec)
-                state.NOMES_USUARIOS = sel_listar_clientes()
+                db.atualizar_cliente(state.SELECTED_CUSTOMER[0], state.form_conta_selec)
+                state.NOMES_USUARIOS = sel_listar_clientes(state)
                 notify(s, "success", "Cadastro atualizado com sucesso!")
             except Exception as xpt:
                 notify(s, "error", f"Erro ao atualizar cadastro: {str(xpt)}")
                 s.assign("mostra_confirma_conta", False)
-
         s.assign("mostra_confirma_conta", False)
 
 
-def chg_dialog_selec_transac(state: State, id: str, payload: dict):
-    with state as s:
-        if payload["args"][0] < 1:
-            s.assign("mostra_selec_transac", False)
-
-        if payload["args"][0] == 1:
-            if s.SLC_TRANSAC == "0":
-                notify(s, "error", "Nenhuma transação foi selecionada")
-            elif not db.id_transac_pertence_a_cliente(
-                s.SLC_TRANSAC[0], s.SLC_USUARIO[0]
-            ):
-                notify(s, "error", "Selecione uma transação antes de continuar")
-                return
-            else:
-                transac_selec = db.transac_por_id(s.SLC_TRANSAC[0])
-                s.form_transac_selec.carregar_valores(transac_selec)
-                s.refresh("form_transac_selec")
-                s.assign("mostra_confirma_transac", True)
-        s.assign("mostra_selec_transac", False)
-
-
-def chg_dialog_confirma_transac(state: State, id: str, payload: dict):
-    with state as s:
-        s.assign("mostra_confirma_transac", False)
-
-        if payload["args"][0] == 0:
-            s.assign("mostra_selec_transac", True)
-
-        if payload["args"][0] == 1:
-            db.remover_transac(s.SLC_TRANSAC[0])
-            notify(s, "success", "Transação removida.")
-            s.assign("SLC_TRANSAC", "0")
-
-
 def chg_transac_valor(state: State) -> None:
-    state.display_tr_valor = db.fmt_moeda(state.form_transac.Valor, para_mostrar=True)
+    state.display_tr_valor = fmt_currency_input(inp=state.form_transac.Valor)
     state.refresh("form_transac")
     return
 
 
-def chg_select_table_stats(state: State):
+def update_displayed_table(state: State):
     source_names = {
-        "Últimas transações": "last_transacs_data_source",
-        "Maiores saldos": "highest_amounts_data_source",
-        "Clientes inativos": "inactive_customers_data_source",
+        "Últimas transações": "datasource_last_transacs",
+        "Clientes inativos": "datasource_inactive_customers",
+        "Maiores saldos": "datasource_highest_amounts",
     }
     sources = {
-        "Últimas transações": last_transacs_data_source,
-        "Maiores saldos": highest_amounts_data_source,
-        "Clientes inativos": inactive_customers_data_source,
+        "Últimas transações": datasource_last_transacs,
+        "Clientes inativos": datasource_inactive_customers,
+        "Maiores saldos": datasource_highest_amounts,
     }
     table_partials = {
         "Últimas transações": analise.ELEM_TABLE_TRANSAC_HIST,
-        "Maiores saldos": analise.ELEM_TABLE_HIGHEST_AMOUNTS,
         "Clientes inativos": analise.ELEM_TABLE_INACTIVE_CUSTOMERS,
+        "Maiores saldos": analise.ELEM_TABLE_HIGHEST_AMOUNTS,
     }
     dataframe_names = {
         "Últimas transações": "df_last_transacs",
         "Maiores saldos": "df_highest_amounts",
         "Clientes inativos": "df_inactive_customers",
     }
-    # Get option selected in the dropdown
     tablename = state.dropdown_table_type_val
-    # Fetch datasource from state, if not available, use local datasource
-    selected_source = fetch_displayed_table_datasource(state=state, tablename=tablename)
-    if selected_source is None:
-        return
-    # Assign newest data to dataframe
+    datasource = get_table_datasource(state=state, tablename=tablename)
+    # Update data
     df = getattr(state, dataframe_names[tablename])
-    df = pd.DataFrame(data=selected_source.current_data, columns=df.columns)
+    df = pd.DataFrame(data=datasource.current_data, columns=df.columns)
     state.assign(dataframe_names[tablename], df)
     # Update pagination label
     update_displayed_table_pagination(state=state, tablename=tablename)
-    # Ensure datasource is assigned to state
-    state.assign(name=source_names[tablename], value=sources[tablename])
-    # Display selected dataframe
+    # Update Taipy partial
     state.part_stats_displayed_table.update_content(state, table_partials[tablename])
 
 
-def chg_cliente_selecionado(state: State) -> None:
-    cliente = data.tbl_clientes()
+def chg_selected_customer(state: State) -> None:
+    """Update customer information widgets when the user interacts with the customer
+    selector.
+    """
+    customer = state.selected_customer_handler
     with state as s:
-        carregar_lista_transac(state=s)
-        id_cliente = int(s.SLC_USUARIO[0])
-        s.form_transac.IdCliente = id_cliente
-    cliente.read(row_id=id_cliente, engine=db.DB_ENGINE)
-    state.nome_cliente_selec = cliente.NomeCompleto
-    state.refresh("form_transac")
+        customer_id = int(s.SELECTED_CUSTOMER.Id)
+        customer.read(row_id=customer_id)
+        s.df_transac = get_customer_transacs(state=s)
+        s.nome_cliente_selec = customer.NomeCompleto
+        s.refresh("form_transac")
+        s.refresh("selected_customer_handler")
+    print(f"state user {get_state_id(state)} selected: {customer.NomeCompleto}")
 
 
 def chg_cliente_pesquisa(state: State, id, payload):
-    usuarios = getattr(state, "usuarios", data.CustomerListSource())
+    customers_source = get_customers_datasource(state=state)
     with state as s:
-        usuarios.search_text = s.search_user_input_value
-        update_search_widgets(state=state)
-        s.usuarios = usuarios
+        customers_source.search_text = s.search_user_input_value
+        update_search_widgets(state=s)
 
 
 ####################
@@ -525,11 +612,8 @@ def chg_cliente_pesquisa(state: State, id, payload):
 ####################
 
 # visibilidade de dialogos
-mostra_selec_cliente = False
-mostra_selec_transac = False
-mostra_form_editar_cliente = False
-mostra_confirma_conta = False
-mostra_confirma_transac = False
+show_dialog_confirm_edit_customer = False
+show_dialog_edit_customer = False
 
 # controles dos graficos
 slider_elems = list(range(10, 51)) + [None]
@@ -570,7 +654,7 @@ dropdown_uf_lov = [
     "SP",
     "TO",
 ]
-dropdown_uf_val = prefs.settings.read_main_state()
+dropdown_uf_val = prefs.settings.default_state
 
 main_plot = btn_gerar_main_plot()
 
@@ -583,87 +667,88 @@ with db.DB_ENGINE.connect() as conn, conn.begin():
 
 # valor inicial dos campos "Valor" e "Data" no menu "Adicionar Transacao"
 display_tr_valor = "0,00"
-display_tr_data = datetime.now()
+display_tr_date = datetime.now()
 
 # valor inicial do seletor de conta global
-usuarios = data.CustomerListSource()
-usuarios.search_text = search_user_input_value
+customers_source = data.CustomerListSource()
+customers_source.search_text = search_user_input_value
 
-NOMES_USUARIOS = [
-    (str(row[0]), f"{row[1]} — {row[2]}") for row in usuarios.current_data
-]
+# formularios
+form_customer = data.get_default_customer()
+form_transac = data.tbl_transacoes(DataTransac=datetime.today())
+selected_customer_handler = data.tbl_clientes()
+
+NOMES_USUARIOS = get_customer_lov(state=None)
 if len(NOMES_USUARIOS) > 0:
-    SLC_USUARIO = NOMES_USUARIOS[0]
+    SELECTED_CUSTOMER = NOMES_USUARIOS[0]
+    selected_customer_handler.read(row_id=SELECTED_CUSTOMER.Id)
 else:
-    SLC_USUARIO = "0"
+    SELECTED_CUSTOMER = LOVItem(Id="0", Value="")
 
 # texto de paginação da pesquisa de clientes
 search_user_pagination_legend = (
-    f"{usuarios.nrows} itens, mostrando 1 até {usuarios.max_idx}"
+    f"{customers_source.nrows} itens, mostrando 1 até {customers_source.max_idx}"
 )
 
-# formularios
-form_contas = db.FormContas()
-form_transac = db.FormTransac(IdCliente=SLC_USUARIO[0])
-form_conta_selec = db.FormContas()
-form_transac_selec = db.FormTransac(IdCliente=SLC_USUARIO[0])
-
-
 # nome do cliente selecionado
-nome_cliente_selec = ""
+nome_cliente_selec = selected_customer_handler.NomeCompleto
 
 # valor inicial do seletor de transacao global
-TRANSACS_USUARIO = db.listar_transac_cliente(SLC_USUARIO[0], para_mostrar=False)
-if len(TRANSACS_USUARIO) > 0:
-    SLC_TRANSAC = TRANSACS_USUARIO[0]
-else:
-    SLC_TRANSAC = "0"
+# TRANSACS_USUARIO = tuple(selected_customer_handler.Transacs)
+# if len(TRANSACS_USUARIO) > 0:
+#    SLC_TRANSAC = TRANSACS_USUARIO[0]
+# else:
+#    SLC_TRANSAC = "0"
 
 # define se a webview vai iniciar em tela cheia
 maximizado = False
 
-# valor inicial da tabela de transacoes do usuario selecionado em SLC_USUARIO
-last_transacs_data_source = data.LastTransactionsSource()
-highest_amounts_data_source = data.HighestAmountsSource()
-inactive_customers_data_source = data.InactiveCustomersSource()
+# valor inicial da tabela de transacoes do usuario selecionado em SELECTED_CUSTOMER
+datasource_last_transacs = get_table_datasource(tablename="Últimas transações")
+datasource_highest_amounts = get_table_datasource(tablename="Maiores saldos")
+datasource_inactive_customers = get_table_datasource(tablename="Clientes inativos")
 
 df_last_transacs = pd.DataFrame(
-    data=last_transacs_data_source.current_data,
+    data=datasource_last_transacs.current_data,
     columns=["Data", "Cliente", "Valor"],
 )
 df_highest_amounts = pd.DataFrame(
-    data=highest_amounts_data_source.current_data,
+    data=datasource_highest_amounts.current_data,
     columns=["Nome", "Saldo devedor"],
 )
 df_inactive_customers = pd.DataFrame(
-    data=inactive_customers_data_source.current_data,
+    data=datasource_inactive_customers.current_data,
     columns=["Nome", "Última transação", "Saldo devedor"],
 )
 
 dropdown_table_type_val = "Últimas transações"
 stats_tables_pagination_legend = (
-    f"{last_transacs_data_source.nrows} itens, mostrando "
-    f"{last_transacs_data_source.min_idx +
-        1} até {last_transacs_data_source.max_idx}"
+    f"{datasource_last_transacs.nrows} itens, mostrando "
+    f"{datasource_last_transacs.min_idx +
+        1} até {datasource_last_transacs.max_idx}"
 )
 
-# valor inicial do saldo do usuario selecionado em SLC_USUARIO
-init_meta_cliente = db.listar_transac_cliente(SLC_USUARIO[0])
+# valor inicial do saldo do usuario selecionado em SELECTED_CUSTOMER
+# init_meta_cliente = db.listar_transac_cliente(SELECTED_CUSTOMER[0])
+selected_customer = data.tbl_clientes()
+if not selected_customer.table_is_empty():
+    selected_customer.read(row_id=SELECTED_CUSTOMER.Id)
 
-df_transac = init_meta_cliente["df"]
-SLC_USUARIO_SALDO = init_meta_cliente["saldo"]
-SLC_USUARIO_LOCAL = init_meta_cliente["local"]
+# df_transac = init_meta_cliente["df"]
+# SELECTED_CUSTOMER_BALANCE = init_meta_cliente["saldo"]
+# SELECTED_CUSTOMER_PLACE = init_meta_cliente["local"]
+df_transac = get_customer_transacs(state=None)
+SELECTED_CUSTOMER_BALANCE = selected_customer.Saldo
+SELECTED_CUSTOMER_PLACE = selected_customer.Local
 
 # valor inicial da lista de locais de backup
-df_locais_de_backup = btn_atualizar_locais_de_backup()
+df_backup_places = get_backup_places()
 
 # valor inicial do campo "cidade preferida"
-input_cidade_val = prefs.settings.read_main_city()
+input_cidade_val = prefs.settings.default_city
 
 # valor inicial da configuracao Limite de linhas na tabela "Últimas transações"
-input_quant_max_ultimas_transacs = prefs.settings.read_last_transacs_limit()
-#                    " " "                       na tabela "Maiores saldos"
-input_quant_max_highest_balances = prefs.settings.read_highest_balaces_limit()
+rows_per_page = prefs.settings.data_tables_rows_per_page
 
 # valor inicial do toggle "backup ao sair"
 toggle_backup_on_exit = tggl_backup_on_exit()
@@ -705,11 +790,9 @@ elem_conta = Gui.add_partial(app, contas.ELEMENTO_FORM)
 elem_config = Gui.add_partial(app, configs.ELEMENTO_PREFS)
 elem_analise = Gui.add_partial(app, analise.ELEM_TABLES)
 
-dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
-dial_selec_transac = Gui.add_partial(app, dialogo.SELECIONAR_TRANSAC_ETAPA)
-dial_form_editar_cliente = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
-dial_transac_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_TRANSAC)
-dial_conta_confirmar = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
+# dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
+dialog_edit_customer = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
+dialog_confirm_edit_customer= Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
 part_stats_displayed_table = Gui.add_partial(app, analise.ELEM_TABLE_TRANSAC_HIST)
 
@@ -720,12 +803,6 @@ nav_transac_lov = [
     (transac.ELEMENTO_HIST, "Ver histórico"),
 ]
 nav_transac_val = nav_transac_lov[0]
-# contas
-nav_conta_lov = [
-    (contas.ELEMENTO_FORM, "Criar conta"),
-    (contas.ELEMENTO_REGS, "Contas registradas"),
-]
-nav_conta_val = nav_conta_lov[0]
 # estatisticas
 nav_analise_lov = [(analise.ELEM_TABLES, "Tabelas"), (analise.ELEM_PLOT, "Gráficos")]
 nav_analise_val = nav_analise_lov[0]
@@ -751,8 +828,8 @@ port = porta_aberta()
 
 
 def start_cashd(with_webview: bool = False):
-    if "--webview" in sys.argv:
-        with_webview = True
+    with_webview = True if "--webview" in sys.argv else False
+    debug = True if "--debug" in sys.argv else False
 
     def run_taipy_gui():
         app.run(
@@ -767,12 +844,11 @@ def start_cashd(with_webview: bool = False):
             port=port,
             favicon="assets/PNG_LogoFavicon.png",
             watermark="",
+            debug=debug,
         )
-
     if with_webview:
         taipy_thread = threading.Thread(target=run_taipy_gui)
         taipy_thread.start()
-
         global window
         window = webview.create_window(
             title="Cashd",
@@ -782,8 +858,6 @@ def start_cashd(with_webview: bool = False):
             easy_drag=False,
             min_size=(900, 600),
         )
-
         webview.start()
-
     else:
         run_taipy_gui()
