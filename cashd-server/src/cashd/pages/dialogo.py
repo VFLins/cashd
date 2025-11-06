@@ -40,7 +40,7 @@ __Estado__*
 
 <|{selected_customer_handler.Cidade}|input|>
 
-<|{selected_customer_handler.Estado}|input|>
+<|{selected_customer_handler.Estado}|selector|dropdown|lov={dropdown_uf_lov}|>
 
 _(*) Obrigatório_
 |>
