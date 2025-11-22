@@ -30,8 +30,8 @@ Caso não tenha conhecimento procure um profissional técnico de confiança para
 por você.
 
 > [!WARNING]
-> Na versão atual **0.3.1**, a possibilidade de usar o `cashd-server` como serviço ainda
-> é meramente planejada, esta funcionalidade deve ser implementada na futura versão
+> Na versão atual, a possibilidade de usar o `cashd-server` como serviço ainda
+> é meramente planejada, esta funcionalidade deve ser implementada a partir da versão
 > **0.4.0**.
 
 Para mais informações sobre as diferentes edições do Cashd, clique no link correspondente
