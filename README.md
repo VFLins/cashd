@@ -13,9 +13,9 @@ aqueles que possuem os maiores saldos devedores? Com o Cashd você consegue ter 
 estas e outras informações rapidamente, que podem te ajudar a tomar as melhores decisões
 para não deixar o fiado virar um problema.
 
-## As duas edições de Cashd
+## As duas distribuições de Cashd
 
-O cashd vem em duas edições, que possuem a mesma funcionalidade, mas que são pensadas
+O cashd vem em duas distribuições, que possuem a mesma funcionalidade, mas que são pensadas
 para atender casos de uso diferentes:
 
 | [`cashd-local`](https://github.com/VFLins/cashd/tree/main/cashd-local) | [`cashd-server`](https://github.com/VFLins/cashd/tree/main/cashd-server)               |
