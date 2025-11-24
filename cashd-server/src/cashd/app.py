@@ -13,6 +13,7 @@ from os import path
 from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
 from cashd_core import data, prefs, backup
+from cashd_core.const import MAX_ALLOWED_VALUE
 from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
 
@@ -196,6 +197,9 @@ def add_transaction(state: State):
             return
         if not is_valid_currency_input(state.form_transac.Valor):
             notify(state, "error", "Valor inválido, insira apenas números")
+            return
+        if int(state.form_transac.Valor) > MAX_ALLOWED_VALUE:
+            notify(state, "error", "Valor acima do permitido")
             return
         state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
         state.form_transac.CarimboTempo = datetime.now()
