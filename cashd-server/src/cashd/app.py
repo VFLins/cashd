@@ -223,6 +223,7 @@ def add_customer(state: State):
     try:
         customer.write()
         notify(state, "success", message=f"Novo cliente adicionado: {customer.NomeCompleto}")
+        state.form_customer = data.get_default_customer()
         state.refresh("form_customer")
         state.NOMES_USUARIOS = get_customer_lov(state=state)
     except Exception as msg_erro:
