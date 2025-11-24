@@ -97,11 +97,11 @@ def btn_gerar_main_plot(state: State | None = None):
 
     if state:
         p = state.dropdown_periodo_val[0]
-        n = int(state.slider_val[0])
+        n = int(state.slider_val)
         tipo = state.dropdown_plot_type_val
     else:
         p = dropdown_periodo_val[0]
-        n = int(slider_val[0])
+        n = int(slider_val)
         tipo = dropdown_plot_type_val
 
     if tipo == "Saldo Acumulado":
@@ -626,8 +626,7 @@ show_dialog_confirm_edit_customer = False
 show_dialog_edit_customer = False
 
 # controles dos graficos
-slider_elems = list(range(10, 51)) + [None]
-slider_lov = [(str(i), str(i)) if i is not None else (i, "Tudo") for i in slider_elems]
+slider_lov = [str(i) for i in list(range(10, 51)) + ["Tudo"]]
 slider_val = slider_lov[0]
 
 dropdown_periodo_lov = [("mes", "Mensal"), ("sem", "Semanal"), ("dia", "Diário")]
