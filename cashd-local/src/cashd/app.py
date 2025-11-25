@@ -23,7 +23,9 @@ class Cashd(App):
         self.new_customer_section = pages.CreateCustomerSection()
         self.conf_section = pages.ConfigSection()
 
-        self.loop.create_task(coro=self.main_section.window_size_listener())
+        self.responsive_layout_task = self.loop.create_task(
+            coro=self.main_section.responsive_layout_listener(app=self)
+        )
 
         self.main_box = ScrollContainer(
             style=Pack(direction=ROW, flex=1, font_size=const.BIG_FONT_SIZE),
@@ -102,7 +104,19 @@ class Cashd(App):
         # wait all coroutines to complete
         # https://stackoverflow.com/a/68629884
         await asyncio.gather(*asyncio.all_tasks() - {asyncio.current_task()})
+        await self.handle_layout_listener(command=command.text)
+
+    async def handle_layout_listener(self, command: str):
+        coroutines = {
+            "Transações": self.main_section.responsive_layout_listener(app=self),
+            "Novo Cliente": self.new_customer_section.responsive_layout_listener(app=self),
+            "Estatísticas": self.stats_section.responsive_layout_listener(app=self),
+            "Configurações": self.conf_section.responsive_layout_listener(app=self),
+        }
+        self.responsive_layout_task.cancel()
+        await self.responsive_layout_task
+        self.responsive_layout_task = self.loop.create_task(coro=coroutines[command])
 
 
 def main():
-    return Cashd("Cashd", "com.cashd.vflins")
+    return Cashd("Cashd", "br.com.vitorlins.cashd")

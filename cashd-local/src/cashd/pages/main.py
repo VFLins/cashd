@@ -543,8 +543,4 @@ class MainSection(BaseSection):
                     self.SELECTED_CUSTOMER.NomeCompleto}"
             )
 
-    async def window_size_listener(self):
-        print(self.body.app.main_window.size)
-        await sleep(2)
-        self.body.app.loop.create_task(self.window_size_listener())
 
