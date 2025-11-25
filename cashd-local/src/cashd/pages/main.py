@@ -1,6 +1,7 @@
 import decimal
 import datetime as dt
 import re
+from asyncio import sleep
 from sqlalchemy import exc
 
 from toga.style import Pack
@@ -541,3 +542,9 @@ class MainSection(BaseSection):
                 f"Removed {transac_id=} from {
                     self.SELECTED_CUSTOMER.NomeCompleto}"
             )
+
+    async def window_size_listener(self):
+        print(self.body.app.main_window.size)
+        await sleep(2)
+        self.body.app.loop.create_task(self.window_size_listener())
+

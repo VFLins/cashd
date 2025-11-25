@@ -23,6 +23,8 @@ class Cashd(App):
         self.new_customer_section = pages.CreateCustomerSection()
         self.conf_section = pages.ConfigSection()
 
+        self.loop.create_task(coro=self.main_section.window_size_listener())
+
         self.main_box = ScrollContainer(
             style=Pack(direction=ROW, flex=1, font_size=const.BIG_FONT_SIZE),
             content=self.main_section.full_contents,
