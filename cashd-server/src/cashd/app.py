@@ -46,14 +46,14 @@ def btn_next_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
     selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_next_page()
-    chg_select_table_stats(state=state)
+    update_displayed_table(state=state)
 
 
 def btn_prev_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
     selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_previous_page()
-    chg_select_table_stats(state=state)
+    update_displayed_table(state=state)
 
 
 def show_dialog(state: State, id: str, payload: dict, show: str):
