@@ -3,6 +3,7 @@ from decimal import Decimal
 import math
 from random import randint
 
+from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from toga.widgets.box import Box
@@ -37,7 +38,8 @@ TIME_GROUP_OPTIONS = [
 
 class StatisticsSection(BaseSection):
 
-    def __init__(self):
+    def __init__(self, app: App):
+        super().__init__(app)
 
         ### widgets ###
         self.visualization_selection = Selection(

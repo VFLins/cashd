@@ -1,11 +1,6 @@
 from .base import BaseSection
 
-from toga.dialogs import (
-    SelectFolderDialog,
-    OpenFileDialog,
-    InfoDialog,
-    ErrorDialog,
-)
+from toga.app import App
 from toga.style import Pack
 from toga.widgets.box import Box
 from toga.widgets.label import Label
@@ -16,6 +11,12 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.selection import Selection
 from toga.widgets.scrollcontainer import ScrollContainer
+from toga.dialogs import (
+    SelectFolderDialog,
+    OpenFileDialog,
+    InfoDialog,
+    ErrorDialog,
+)
 
 from cashd_core import prefs
 from cashd import const, style, backup, widgets
@@ -23,7 +24,9 @@ from cashd.widgets.elems import ListOfItems
 
 
 class ConfigSection(BaseSection):
-    def __init__(self):
+    def __init__(self, app: App):
+        super().__init__(app)
+
         self.default_values_section_title = Label(
             "Valores padrão",
             style=Pack(

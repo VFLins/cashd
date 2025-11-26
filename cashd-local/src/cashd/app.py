@@ -18,13 +18,13 @@ class Cashd(App):
     def startup(self):
         """Construct and show the Toga application."""
 
-        self.main_section = pages.MainSection()
-        self.stats_section = pages.StatisticsSection()
-        self.new_customer_section = pages.CreateCustomerSection()
-        self.conf_section = pages.ConfigSection()
+        self.main_section = pages.MainSection(app=self)
+        self.stats_section = pages.StatisticsSection(app=self)
+        self.new_customer_section = pages.CreateCustomerSection(app=self)
+        self.conf_section = pages.ConfigSection(app=self)
 
         self.responsive_layout_task = self.loop.create_task(
-            coro=self.main_section.responsive_layout_listener(app=self)
+            coro=self.main_section.responsive_layout_listener()
         )
 
         self.main_box = ScrollContainer(
@@ -108,10 +108,10 @@ class Cashd(App):
 
     async def handle_layout_listener(self, command: str):
         coroutines = {
-            "Transações": self.main_section.responsive_layout_listener(app=self),
-            "Novo Cliente": self.new_customer_section.responsive_layout_listener(app=self),
-            "Estatísticas": self.stats_section.responsive_layout_listener(app=self),
-            "Configurações": self.conf_section.responsive_layout_listener(app=self),
+            "Transações": self.main_section.responsive_layout_listener(),
+            "Novo Cliente": self.new_customer_section.responsive_layout_listener(),
+            "Estatísticas": self.stats_section.responsive_layout_listener(),
+            "Configurações": self.conf_section.responsive_layout_listener(),
         }
         self.responsive_layout_task.cancel()
         await self.responsive_layout_task

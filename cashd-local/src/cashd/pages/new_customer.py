@@ -1,3 +1,4 @@
+from toga.app import App
 from toga.style.pack import Pack
 from toga.widgets.base import Widget
 from toga.widgets.box import Box
@@ -11,7 +12,8 @@ from cashd.widgets.form import FormHandler
 
 class CreateCustomerSection(BaseSection):
 
-    def __init__(self):
+    def __init__(self, app: App):
+        super().__init__(app)
         # Winforms erroes if this class is instantiated outside a class function
         self.customer_form = FormHandler(
             on_change=self.change_not_required_fields,

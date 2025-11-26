@@ -4,6 +4,7 @@ import re
 from asyncio import sleep
 from sqlalchemy import exc
 
+from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from toga.dialogs import ConfirmDialog
@@ -28,7 +29,9 @@ class MainSection(BaseSection):
     SELECTED_CUSTOMER = data.tbl_clientes()
     CUSTOMER_LIST = data.CustomerListSource()
 
-    def __init__(self):
+    def __init__(self, app: App):
+        super().__init__(app)
+
         ### widgets: all contexts ###
         self.selected_customer_info = Label(
             f"Nome: {const.NA_VALUE}\n"
