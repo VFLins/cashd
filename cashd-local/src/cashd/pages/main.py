@@ -66,35 +66,6 @@ class MainSection(BaseSection):
         )
         """Button that returns the user to the context of customer selection."""
 
-        self.insert_transac_context_button = Button(
-            "Inserir transação",
-            id="add_transac_button",
-            style=style.CONTEXT_BUTTON,
-            enabled=False,
-            on_press=self.set_context_screen,
-        )
-        """Button that switches to 'Inserir transação' context, enabled only if a customer is selected."""
-
-        self.transac_history_context_button = Button(
-            "Histórico de transações",
-            id="show_transac_button",
-            style=style.CONTEXT_BUTTON,
-            enabled=False,
-            on_press=self.set_context_screen,
-        )
-        """Button that switches to 'Histórico de transações' context, enabled only if a customer is selected."""
-
-        self.customer_data_context_button = Button(
-            "Dados do cliente",
-            id="customer_data_button",
-            style=style.CONTEXT_BUTTON,
-            enabled=False,
-            on_press=self.set_context_screen,
-        )
-        """Button that switches to 'Dados do cliente' context, enabled only if
-        a customer is selected.
-        """
-
         ### widgets: 'select' context ###
         self.customer_list_page_elements = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
@@ -257,15 +228,6 @@ class MainSection(BaseSection):
             ],
         )
         ### containers: all contexts ###
-        self.context_navigation_buttons = Box(
-            style=style.ROW_OF_BUTTONS,
-            children=[
-                self.return_button,
-                self.insert_transac_context_button,
-                self.transac_history_context_button,
-                self.customer_data_context_button,
-            ],
-        )
         self.customer_description_section = Box(
             style=style.HORIZONTAL_BOX,
             children=[
@@ -296,17 +258,11 @@ class MainSection(BaseSection):
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
             self.SELECTED_CUSTOMER.clear()
+            self.customer_options_button.enabled = False
             return
-        context_buttons = [
-            self.customer_data_context_button,
-            self.insert_transac_context_button,
-            self.transac_history_context_button,
-            self.customer_options_button,
-        ]
-        for button in context_buttons:
-            button.enabled = True
         print(f"selected: {widget.selection}")
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
+        self.customer_options_button.enabled = True
         self._upd_selected_info()
 
     def on_click_insert(self, widget):

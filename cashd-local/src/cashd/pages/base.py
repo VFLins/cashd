@@ -1,5 +1,6 @@
+from asyncio import sleep
 from toga.app import App
-from asyncio import sleep, CancelledError
+from cashd import const
 
 class BaseSection:
     """Includes default methods for any custom section."""
@@ -17,8 +18,24 @@ class BaseSection:
         to this section's layout.
         """
         try:
-            print(app.main_window.size)
-            await sleep(2)
-            await self.responsive_layout_listener(app=app)
+            while True:
+                await sleep(1/30)
+                self.rearrange_widgets()
         except CancelledError:
             return
+
+    @property
+    def window_size(self):
+        """Returns the window size (w, h) of the window where this section
+        `full_contents` is being displayed. Returns default initial size if this
+        widget is not assigned to any window.
+        """
+        app = self.full_contents.app
+        if app:
+            return app.window_size
+        return const.MAIN_WINDOW_SIZE
+
+    def rearrange_widgets(self):
+        """Rearranges this section's widgets, should be used to turn this section
+        responsive to the window size.
+        """
