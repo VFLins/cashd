@@ -116,15 +116,15 @@ class Cashd(App):
         try:
             cancelled = self.responsive_layout_task.cancel()
             await self.responsive_layout_task
-            print(f"cancel issue {'successful' if cancelled else 'failed'}")
             if not cancelled:
-                print("task done: ", self.responsive_layout_task.done())
+                print(f"Layout listener de {command.text} concluído: ", self.responsive_layout_task.done())
         except asyncio.CancelledError:
-            print(f"{self.responsive_layout_task} cancelled")
+            print(f"Layout listener de '{command.text}' interrompido.")
         finally:
             coro = coroutines.get(command.text)
-            print(f"starting {coro}")
-            self.responsive_layout_task = await self.loop.create_task(coro)
+            print(f"Iniciando layout listener de '{command.text}'.")
+            self.responsive_layout_task = self.loop.create_task(coro)
+            await asyncio.gather(*asyncio.all_tasks() - {asyncio.current_task()})
 
 
 def main():

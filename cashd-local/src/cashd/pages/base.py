@@ -20,10 +20,11 @@ class BaseSection:
         """
         while True:
             try:
-                await sleep(1/30)
+                await sleep(1)
                 self.rearrange_widgets()
             except CancelledError:
                 break
+                raise
 
     @property
     def window_size(self) -> tuple[int, int]:
