@@ -1,4 +1,4 @@
-from asyncio import sleep
+from asyncio import sleep, CancelledError
 from toga.app import App
 from cashd import const
 
@@ -20,22 +20,21 @@ class BaseSection:
         try:
             while True:
                 await sleep(1/30)
-                self.rearrange_widgets()
+                await self.rearrange_widgets(app)
         except CancelledError:
             return
 
-    @property
-    def window_size(self):
-        """Returns the window size (w, h) of the window where this section
-        `full_contents` is being displayed. Returns default initial size if this
-        widget is not assigned to any window.
+    def read_window_size(self, app: App) -> tuple[int, int]:
+        """Returns the window size (w, h) of the `app`'s main window, or the default
+        window size when the former is not found.
         """
-        app = self.full_contents.app
-        if app:
-            return app.window_size
-        return const.MAIN_WINDOW_SIZE
+        try:
+            return app.main_window.size
+        except AttributeError:
+            return const.MAIN_WINDOW_SIZE
 
-    def rearrange_widgets(self):
+    async def rearrange_widgets(self, app: App):
         """Rearranges this section's widgets, should be used to turn this section
         responsive to the window size.
         """
+        print(self.read_window_size(app=app))
