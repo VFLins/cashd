@@ -16,9 +16,9 @@ class BaseSection:
         """Listens to the window size constantly, applying necessary transformations
         to this section's layout.
         """
-        print(app.main_window.size)
-        await sleep(2)
         try:
-            app.loop.create_task(self.responsive_layout_listener(app=app))
+            print(app.main_window.size)
+            await sleep(2)
+            await self.responsive_layout_listener(app=app)
         except CancelledError:
             return
