@@ -18,12 +18,12 @@ class BaseSection:
         """Listens to the window size constantly, applying necessary transformations
         to this section's layout.
         """
-        try:
-            while True:
+        while True:
+            try:
                 await sleep(1/30)
-                await self.rearrange_widgets()
-        except CancelledError:
-            return
+                self.rearrange_widgets()
+            except CancelledError:
+                break
 
     @property
     def window_size(self) -> tuple[int, int]:
@@ -35,8 +35,8 @@ class BaseSection:
         except AttributeError:
             return const.MAIN_WINDOW_SIZE
 
-    async def rearrange_widgets(self):
+    def rearrange_widgets(self):
         """Rearranges this section's widgets, should be used to turn this section
         responsive to the window size.
         """
-        print(self.window_size)
+        print(self, self.window_size)

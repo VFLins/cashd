@@ -24,7 +24,7 @@ class Cashd(App):
         self.conf_section = pages.ConfigSection(app=self)
 
         self.responsive_layout_task = self.loop.create_task(
-            coro=self.main_section.responsive_layout_listener()
+           coro=self.main_section.responsive_layout_listener()
         )
 
         self.main_box = ScrollContainer(
@@ -103,19 +103,28 @@ class Cashd(App):
         self.main_box.content = current_section.full_contents
         # wait all coroutines to complete
         # https://stackoverflow.com/a/68629884
+        self.loop.create_task(self.handle_layout_listener(command=command))
         await asyncio.gather(*asyncio.all_tasks() - {asyncio.current_task()})
-        await self.handle_layout_listener(command=command.text)
 
-    async def handle_layout_listener(self, command: str):
+    async def handle_layout_listener(self, command: Command):
         coroutines = {
             "Transações": self.main_section.responsive_layout_listener(),
             "Novo Cliente": self.new_customer_section.responsive_layout_listener(),
             "Estatísticas": self.stats_section.responsive_layout_listener(),
             "Configurações": self.conf_section.responsive_layout_listener(),
         }
-        self.responsive_layout_task.cancel()
-        await self.responsive_layout_task
-        self.responsive_layout_task = self.loop.create_task(coro=coroutines[command])
+        try:
+            cancelled = self.responsive_layout_task.cancel()
+            await self.responsive_layout_task
+            print(f"cancel issue {'successful' if cancelled else 'failed'}")
+            if not cancelled:
+                print("task done: ", self.responsive_layout_task.done())
+        except asyncio.CancelledError:
+            print(f"{self.responsive_layout_task} cancelled")
+        finally:
+            coro = coroutines.get(command.text)
+            print(f"starting {coro}")
+            self.responsive_layout_task = await self.loop.create_task(coro)
 
 
 def main():
