@@ -43,10 +43,8 @@ class _LabeledInput:
         self.label = Label(
             text=label_text, id=id + "_label" if id else None, style=input_annotation()
         )
-        self._set_input(id=id + "_input" if id else None,
-                        style=style, **kwargs)
-        self.widget = Column(id=id, style=style, children=[
-                             self.label, self.input])
+        self._set_input(id=id + "_input" if id else None, style=style, **kwargs)
+        self.widget = Column(id=id, style=style, children=[self.label, self.input])
 
     def _set_input(self, id, style, **kwargs):
         """Used by `_LabeledInput`'s children to define the input widget.
@@ -229,8 +227,7 @@ class _DataInteractor:
         **kwargs,
     ):
         """Used by `_DataInteractor`'s children to define `self.data_widget`."""
-        self.data_widget = Table(
-            id=id, style=style, on_select=on_select, **kwargs)
+        self.data_widget = Table(id=id, style=style, on_select=on_select, **kwargs)
         self.data_widget.data = self._datasource.current_data
 
     def _set_top_controls(self):
@@ -379,8 +376,7 @@ def form_options_container(children, alignment="end") -> Box:
     """
     inner_container = Box(style=style.ROW_OF_BUTTONS, children=children)
     outer_container = Box(
-        style=Pack(direction="column", align_items=alignment,
-                   width=const.FORM_WIDTH),
+        style=Pack(direction="column", align_items=alignment, width=const.FORM_WIDTH),
         children=[inner_container],
     )
     return outer_container

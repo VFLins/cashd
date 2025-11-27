@@ -45,8 +45,7 @@ def form_options_container(children, alignment="end") -> Box:
     """
     inner_container = Box(style=ROW_OF_BUTTONS, children=children)
     outer_container = Box(
-        style=Pack(direction="column", align_items=alignment,
-                   width=const.FORM_WIDTH),
+        style=Pack(direction="column", align_items=alignment, width=const.FORM_WIDTH),
         children=[inner_container],
     )
     return outer_container
@@ -71,8 +70,7 @@ def input_annotation(annotation_type: Literal["label", "legend"] = "label") -> P
     elif annotation_type == "legend":
         return Pack(font_size=const.SMALL_FONT_SIZE, margin=(0, 0, 10, 5))
     else:
-        raise ValueError(
-            f"{annotation_type=}, expected one of 'label', 'legend'.")
+        raise ValueError(f"{annotation_type=}, expected one of 'label', 'legend'.")
 
 
 def number_input_width():

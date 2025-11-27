@@ -91,15 +91,13 @@ class ConfigSection(BaseSection):
             fields=[
                 widgets.form.FormField(
                     label="Ações",
-                    input_widget=Button("Carregar backup",
-                                        on_press=self.load_backup),
+                    input_widget=Button("Carregar backup", on_press=self.load_backup),
                     description="Esta operação é reversível, consulte\na documentação.",
                     id="load_backup_button",
                 ),
                 widgets.form.FormField(
                     label="",
-                    input_widget=Button(
-                        "Fazer backup", on_press=self.run_backup),
+                    input_widget=Button("Fazer backup", on_press=self.run_backup),
                     description="Backups serão salvos nos\n'Locais de backup'.",
                     id="run_backup_button",
                 ),

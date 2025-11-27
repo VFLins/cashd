@@ -48,7 +48,7 @@ def _linux_dark_mode() -> bool:
     result = subprocess.run(
         ["gsettings", "get", "org.gnome.desktop.interface", "gtk-theme"],
         capture_output=True,
-        text=True
+        text=True,
     )
     return "dark" in result.stdout.lower()
 
@@ -60,14 +60,12 @@ ICON_CONTAS = Icon(path=Path(RESOURCES_DIR, "ContasBranco"), system=True)
 ICON_STATS = Icon(path=Path(RESOURCES_DIR, "DadosBranco"), system=True)
 ICON_CONFIG = Icon(path=Path(RESOURCES_DIR, "ConfiguracaoBranco"), system=True)
 ICON_RETURN = Icon(
-    path=Path(RESOURCES_DIR, "arrow-left-dark" if sys_dark_mode()
-              else "arrow-left"),
-    system=True
+    path=Path(RESOURCES_DIR, "arrow-left-dark" if sys_dark_mode() else "arrow-left"),
+    system=True,
 )
 ICON_USER_OPTS = Icon(
-    path=Path(RESOURCES_DIR, "user-pen-dark" if sys_dark_mode()
-              else "user-pen"),
-    system=True
+    path=Path(RESOURCES_DIR, "user-pen-dark" if sys_dark_mode() else "user-pen"),
+    system=True,
 )
 
 FONT_SIZE = 10

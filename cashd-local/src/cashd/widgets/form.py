@@ -283,8 +283,7 @@ class HorizontalDateForm:
     @property
     def value(self):
         return date(
-            int(self.year_input.value), self._month_number(), int(
-                self.day_input.value)
+            int(self.year_input.value), self._month_number(), int(self.day_input.value)
         )
 
     @value.setter

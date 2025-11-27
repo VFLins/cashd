@@ -62,15 +62,13 @@ class StatisticsSection(BaseSection):
 
         self.transaction_history_table = PaginatedTable(
             datasource=data.LastTransactionsSource(),
-            style=Pack(flex=1, font_size=const.FONT_SIZE,
-                       width=const.CONTENT_WIDTH),
+            style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.CONTENT_WIDTH),
             headings=["Data", "Cliente", "Valor"],
         )
         """Table containing data of every transaction registered recently, most recent first."""
 
         self.highest_amounts_table = PaginatedTable(
-            style=Pack(flex=1, font_size=const.FONT_SIZE,
-                       width=const.CONTENT_WIDTH),
+            style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.CONTENT_WIDTH),
             headings=["Cliente", "Saldo atual"],
             accessors=["cliente", "saldo_atual"],
             datasource=data.HighestAmountsSource(),
@@ -113,8 +111,7 @@ class StatisticsSection(BaseSection):
                 self.time_grouping_selection,
             ],
         )
-        self.header = Box(style=style.VERTICAL_BOX,
-                          children=[self.controls_first_row])
+        self.header = Box(style=style.VERTICAL_BOX, children=[self.controls_first_row])
         self.body = ScrollContainer(
             style=style.HORIZONTAL_BOX, content=self.transaction_history_table.widget
         )

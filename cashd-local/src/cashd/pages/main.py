@@ -78,8 +78,7 @@ class MainSection(BaseSection):
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
         """
-        self.customer_list_page_elements.widget.add(
-            self.customer_options_button)
+        self.customer_list_page_elements.widget.add(self.customer_options_button)
 
         ### widgets: 'insert' context ###
         self.date_input_controls = widgets.HorizontalDateForm()
@@ -181,8 +180,7 @@ class MainSection(BaseSection):
                         self.insert_amount_label,
                         self.amount_input,
                         widgets.elems.form_options_container(
-                            children=[
-                                self.insert_transac_button], alignment="center"
+                            children=[self.insert_transac_button], alignment="center"
                         ),
                     ],
                 ),
@@ -212,8 +210,9 @@ class MainSection(BaseSection):
         )
         self.customer_data_context_content = ScrollContainer(
             content=Box(
-                style=Pack(direction=COLUMN, align_items="center",
-                           width=const.FORM_WIDTH),
+                style=Pack(
+                    direction=COLUMN, align_items="center", width=const.FORM_WIDTH
+                ),
                 children=[
                     self.customer_data_form.full_contents,
                     self.customer_data_interaction_buttons,
@@ -222,42 +221,48 @@ class MainSection(BaseSection):
         )
         ### containers: 'options' context ###
         self.customer_options_section = OptionContainer(
-            style=Pack(width=const.CONTENT_WIDTH -
-                       5, font_size=const.FONT_SIZE),
+            style=Pack(width=const.CONTENT_WIDTH - 5, font_size=const.FONT_SIZE),
             content=[
                 ("Nova transação", self.insert_transaction_context_content),
                 ("Histórico de transações", self.transaction_history_context_content),
                 ("Informações do cliente", self.customer_data_context_content),
             ],
         )
-        ### containers: all contexts ###
+        ### main container ###
+        self.full_contents = self.get_layout_0()
+
+    # methods
+    def get_layout_0(self):
+        """Returns this section's widgets in a single-column layout."""
         self.customer_description_section = Box(
             style=style.HORIZONTAL_BOX,
-            children=[
-                self.customer_options_button,
-                self.selected_customer_info,
-            ],
+            children=[self.customer_options_button, self.selected_customer_info],
         )
         self.header = Box(
             style=style.VERTICAL_BOX,
-            children=[
-                self.customer_description_section,
-            ],
+            children=[self.customer_description_section],
         )
         self.body = ScrollContainer(
             style=style.PAGE_BODY,
             content=self.customer_list_page_elements.widget,
         )
+        return Box(style=style.FULL_CONTENTS, children=[self.header, self.body])
 
-        self.full_contents = Box(
-            style=style.FULL_CONTENTS,
-            children=[
-                self.header,
-                self.body,
-            ],
+    def get_layout_1(self) -> Box:
+        """Returns this section's widgets in a two-column layout."""
+        self.header = Box(
+            style=style.VERTICAL_BOX,
+            children=[self.selected_customer_info],
         )
+        self.cols = Row(
+            children=[
+                self.customer_list_page_elements.widget,
+                self.customer_options_section,
+            ]
+        )
+        self.body = ScrollContainer(children=[cols])
+        return Box(style=style.FULL_CONTENTS, children=[self.header, self.body])
 
-    # methods
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
             self.SELECTED_CUSTOMER.clear()
@@ -475,8 +480,7 @@ class MainSection(BaseSection):
             IdCliente=self.SELECTED_CUSTOMER.Id,
             CarimboTempo=dt.datetime.now(),
             DataTransac=self.date_input_controls.value,
-            Valor=int(decimal.Decimal(
-                self.amount_input.value.replace(",", ".")) * 100),
+            Valor=int(decimal.Decimal(self.amount_input.value.replace(",", ".")) * 100),
         )
         transac_data.write()
         self.insert_transac_button.enabled = False
@@ -489,7 +493,7 @@ class MainSection(BaseSection):
         transac.read(row_id=transac_id)
         confirm = ConfirmDialog(
             title="Remover transação?",
-            message=f"Data: {transac.DataTransac}\nValor: {transac.Valor/100}"
+            message=f"Data: {transac.DataTransac}\nValor: {transac.Valor/100}",
         )
         if await widget.app.dialog(confirm):
             transac.delete()
@@ -501,5 +505,3 @@ class MainSection(BaseSection):
                 f"Removed {transac_id=} from {
                     self.SELECTED_CUSTOMER.NomeCompleto}"
             )
-
-

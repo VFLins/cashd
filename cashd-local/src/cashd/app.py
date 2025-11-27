@@ -24,7 +24,7 @@ class Cashd(App):
         self.conf_section = pages.ConfigSection(app=self)
 
         self.responsive_layout_task = self.loop.create_task(
-           coro=self.main_section.responsive_layout_listener()
+            coro=self.main_section.responsive_layout_listener()
         )
 
         self.main_box = ScrollContainer(
@@ -117,7 +117,10 @@ class Cashd(App):
             cancelled = self.responsive_layout_task.cancel()
             await self.responsive_layout_task
             if not cancelled:
-                print(f"Layout listener de {command.text} concluído: ", self.responsive_layout_task.done())
+                print(
+                    f"Layout listener de {command.text} concluído: ",
+                    self.responsive_layout_task.done(),
+                )
         except asyncio.CancelledError:
             print(f"Layout listener de '{command.text}' interrompido.")
         finally:

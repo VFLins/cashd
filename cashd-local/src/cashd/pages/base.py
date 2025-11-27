@@ -2,6 +2,7 @@ from asyncio import sleep, CancelledError
 from toga.app import App
 from cashd import const
 
+
 class BaseSection:
     """Includes default methods for any custom section."""
 
