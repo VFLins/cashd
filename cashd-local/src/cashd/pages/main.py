@@ -284,13 +284,13 @@ class MainSection(BaseSection):
 
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
-            self.SELECTED_CUSTOMER.clear()
-            self.customer_options_button.enabled = False
+        #    self.SELECTED_CUSTOMER.clear()
+        #    self.customer_options_button.enabled = False
             return
         print(f"selected: {widget.selection}")
+        self._upd_selected_info()
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
         self.customer_options_button.enabled = True
-        self._upd_selected_info()
 
     def on_click_insert(self, widget):
         try:
@@ -314,12 +314,15 @@ class MainSection(BaseSection):
         self.amount_input.value = None
 
     def _upd_selected_info(self):
+        self.customer_options_section.current_tab = 0
         self.selected_customer_info.text = (
             f"Nome: {self.SELECTED_CUSTOMER.NomeCompleto}\n"
             f"Local: {self.SELECTED_CUSTOMER.Local}\n"
             f"Saldo devedor: R$ {self.SELECTED_CUSTOMER.Saldo}"
         )
         self.transaction_history_table.data = self.SELECTED_CUSTOMER.Transacs
+        self.customer_data_form.clear()
+        self.customer_data_form.add_table_fields(self.SELECTED_CUSTOMER)
 
     def _search_results(self, search: str):
         if len(search) == 0:
@@ -391,9 +394,6 @@ class MainSection(BaseSection):
                 old_child=self.customer_options_button,
                 new_child=self.return_button,
             )
-            self.customer_data_form.clear()
-            self.customer_data_form.add_table_fields(self.SELECTED_CUSTOMER)
-            self.customer_options_section.current_tab = 0
         if widget.id == "return_button":
             self.customer_description_section.replace(
                 old_child=self.return_button,
