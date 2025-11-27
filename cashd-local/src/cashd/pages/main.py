@@ -229,44 +229,57 @@ class MainSection(BaseSection):
             ],
         )
         ### main container ###
+        self.header_block = Box(
+            style=style.HORIZONTAL_BOX,
+            children=[self.customer_options_button, self.selected_customer_info],
+        )
+        """Contents on the topmost part of this section, displaying the selected
+        customer's data.
+        """
+        self.body_block = Box(
+            style=style.HORIZONTAL_BOX,
+            children=[
+                self.customer_list_page_elements.widget,
+                self.customer_options_section,
+            ],
+        )
         self.full_contents = Box(
             style=style.FULL_CONTENTS,
             children=self.get_layout_1(),
         )
-        self.full_contents.DEBUG_LAYOUT_ENABLED = True
         self.layout_id: int = 1
 
     # methods
     def get_layout_0(self) -> Box:
         """Returns this section's widgets in a single-column layout."""
-        customer_description_section = Box(
-            style=style.HORIZONTAL_BOX,
-            children=[self.customer_options_button, self.selected_customer_info],
+        self.header_block.clear()
+        self.body_block.clear()
+        self.header_block.add(
+            self.customer_options_button,
+            self.selected_customer_info,
         )
-        header = Box(
-            style=style.VERTICAL_BOX,
-            children=[customer_description_section],
-        )
-        body = ScrollContainer(
-            style=style.PAGE_BODY,
-            content=self.customer_list_page_elements.widget,
-        )
+        self.body_block.add(self.customer_list_page_elements.widget)
+        header = Box(style=style.VERTICAL_BOX, children=[self.header_block])
+        body = ScrollContainer(style=style.PAGE_BODY, content=self.body_block)
         return header, body
 
     def get_layout_1(self) -> Box:
         """Returns this section's widgets in a two-column layout."""
+        self.header_block.clear()
+        self.body_block.clear()
+        self.header_block.add(self.selected_customer_info)
+        self.body_block.add(
+            self.customer_list_page_elements.widget,
+            self.customer_options_section
+        )
         header = Box(
-            style=style.VERTICAL_BOX,
-            children=[self.selected_customer_info],
+            style=Pack(width=1100, direction="row"),
+            children=[self.header_block],
         )
-        cols = Box(
-            style=style.HORIZONTAL_BOX,
-            children=[
-                self.customer_list_page_elements.widget,
-                self.customer_options_section,
-            ]
+        body = ScrollContainer(
+            style=Pack(width=1100, direction="row", flex=1),
+            content=self.body_block,
         )
-        body = ScrollContainer(style=Pack(width=1100, direction="row", flex=1), content=cols)
         return header, body
 
     def on_customer_selection(self, widget: Selection):
