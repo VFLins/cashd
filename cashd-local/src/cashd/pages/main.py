@@ -229,10 +229,14 @@ class MainSection(BaseSection):
             ],
         )
         ### main container ###
-        self.full_contents = self.get_layout_0()
+        self.full_contents: Box = Box(
+            style=style.FULL_CONTENTS,
+            children=self.get_layout_0(),
+        )
+        self.layout_id: int = 0
 
     # methods
-    def get_layout_0(self):
+    def get_layout_0(self) -> Box:
         """Returns this section's widgets in a single-column layout."""
         self.customer_description_section = Box(
             style=style.HORIZONTAL_BOX,
@@ -246,7 +250,7 @@ class MainSection(BaseSection):
             style=style.PAGE_BODY,
             content=self.customer_list_page_elements.widget,
         )
-        return Box(style=style.FULL_CONTENTS, children=[self.header, self.body])
+        return self.header, self.body
 
     def get_layout_1(self) -> Box:
         """Returns this section's widgets in a two-column layout."""
@@ -254,14 +258,15 @@ class MainSection(BaseSection):
             style=style.VERTICAL_BOX,
             children=[self.selected_customer_info],
         )
-        self.cols = Row(
+        cols = Row(
+            style=style.HORIZONTAL_BOX,
             children=[
                 self.customer_list_page_elements.widget,
                 self.customer_options_section,
             ]
         )
-        self.body = ScrollContainer(children=[cols])
-        return Box(style=style.FULL_CONTENTS, children=[self.header, self.body])
+        self.body = ScrollContainer(content=cols)
+        return self.header, self.body
 
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
@@ -505,3 +510,28 @@ class MainSection(BaseSection):
                 f"Removed {transac_id=} from {
                     self.SELECTED_CUSTOMER.NomeCompleto}"
             )
+
+    def rearrange_widgets(self):
+        w, h = self.window_size
+        if w < 1130:
+            expected_layout_id = 0
+        else:
+            expected_layout_id = 1
+        if expected_layout_id == self.layout_id:
+            print("no layout change required")
+            return
+        print("changing layout...")
+        match expected_layout_id:
+            case 0:
+                print("fetching layout 0")
+                head, body = self.get_layout_0()
+            case 1:
+                print("fetching layout 1")
+                head, body = self.get_layout_1()
+        self.full_contents.clear()
+        self.full_contents.add(head)
+        self.full_contents.add(body)
+        head.refresh()
+        body.refresh()
+        self.layout_id = expected_layout_id
+
