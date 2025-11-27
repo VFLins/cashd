@@ -1,7 +1,6 @@
+import re
 import decimal
 import datetime as dt
-import re
-from asyncio import sleep
 from sqlalchemy import exc
 
 from toga.app import App
@@ -287,8 +286,8 @@ class MainSection(BaseSection):
             self.customer_options_button.enabled = False
             return
         print(f"selected: {widget.selection}")
-        self._upd_selected_info()
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
+        self._upd_selected_info()
         self.customer_options_button.enabled = True
 
     def on_click_insert(self, widget):
