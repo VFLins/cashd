@@ -229,44 +229,45 @@ class MainSection(BaseSection):
             ],
         )
         ### main container ###
-        self.full_contents: Box = Box(
+        self.full_contents = Box(
             style=style.FULL_CONTENTS,
-            children=self.get_layout_0(),
+            children=self.get_layout_1(),
         )
-        self.layout_id: int = 0
+        self.full_contents.DEBUG_LAYOUT_ENABLED = True
+        self.layout_id: int = 1
 
     # methods
     def get_layout_0(self) -> Box:
         """Returns this section's widgets in a single-column layout."""
-        self.customer_description_section = Box(
+        customer_description_section = Box(
             style=style.HORIZONTAL_BOX,
             children=[self.customer_options_button, self.selected_customer_info],
         )
-        self.header = Box(
+        header = Box(
             style=style.VERTICAL_BOX,
-            children=[self.customer_description_section],
+            children=[customer_description_section],
         )
-        self.body = ScrollContainer(
+        body = ScrollContainer(
             style=style.PAGE_BODY,
             content=self.customer_list_page_elements.widget,
         )
-        return self.header, self.body
+        return header, body
 
     def get_layout_1(self) -> Box:
         """Returns this section's widgets in a two-column layout."""
-        self.header = Box(
+        header = Box(
             style=style.VERTICAL_BOX,
             children=[self.selected_customer_info],
         )
-        cols = Row(
+        cols = Box(
             style=style.HORIZONTAL_BOX,
             children=[
                 self.customer_list_page_elements.widget,
                 self.customer_options_section,
             ]
         )
-        self.body = ScrollContainer(content=cols)
-        return self.header, self.body
+        body = ScrollContainer(style=Pack(width=1100, direction="row", flex=1), content=cols)
+        return header, body
 
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
@@ -513,25 +514,21 @@ class MainSection(BaseSection):
 
     def rearrange_widgets(self):
         w, h = self.window_size
-        if w < 1130:
-            expected_layout_id = 0
-        else:
-            expected_layout_id = 1
+        expected_layout_id = 0 if (w < 1130) else 1
         if expected_layout_id == self.layout_id:
-            print("no layout change required")
             return
         print("changing layout...")
         match expected_layout_id:
             case 0:
                 print("fetching layout 0")
-                head, body = self.get_layout_0()
+                self.head, self.body = self.get_layout_0()
             case 1:
                 print("fetching layout 1")
-                head, body = self.get_layout_1()
+                self.head, self.body = self.get_layout_1()
         self.full_contents.clear()
-        self.full_contents.add(head)
-        self.full_contents.add(body)
-        head.refresh()
-        body.refresh()
+        self.full_contents.add(self.head)
+        self.full_contents.add(self.body)
+        self.full_contents.style = style.FULL_CONTENTS
+        self.full_contents.refresh()
         self.layout_id = expected_layout_id
 
