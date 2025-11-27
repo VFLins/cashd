@@ -454,7 +454,8 @@ class MainSection(BaseSection):
                 amount:.2f}".replace(
                 ".", ","
             )
-            self.insert_transac_button.enabled = True
+            if self.SELECTED_CUSTOMER.required_fields_are_filled():
+                self.insert_transac_button.enabled = True
 
     def select_transaction(self, widget):
         self.remove_transaction_button.enabled = True
