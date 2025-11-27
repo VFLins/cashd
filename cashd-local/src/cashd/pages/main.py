@@ -284,8 +284,7 @@ class MainSection(BaseSection):
 
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
-        #    self.SELECTED_CUSTOMER.clear()
-        #    self.customer_options_button.enabled = False
+            self.customer_options_button.enabled = False
             return
         print(f"selected: {widget.selection}")
         self._upd_selected_info()
@@ -390,12 +389,12 @@ class MainSection(BaseSection):
         if not context_elem:
             return
         if widget.id == "customer_options_button":
-            self.customer_description_section.replace(
+            self.header_block.replace(
                 old_child=self.customer_options_button,
                 new_child=self.return_button,
             )
         if widget.id == "return_button":
-            self.customer_description_section.replace(
+            self.header_block.replace(
                 old_child=self.return_button,
                 new_child=self.customer_options_button,
             )
