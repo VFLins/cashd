@@ -101,11 +101,11 @@ ROW_OF_BUTTONS = Pack(
 )
 VERTICAL_BOX = Pack(
     direction=COLUMN,
-    alignment="center",
+    align_items="center",
 )
 FILLING_VERTICAL_BOX = Pack(
     direction=COLUMN,
-    alignment="center",
+    align_items="center",
     flex=1,
 )
 HORIZONTAL_BOX = Pack(
@@ -117,19 +117,15 @@ HORIZONTAL_BOX = Pack(
     background_color=TRANSPARENT,
 )
 FULL_CONTENTS = Pack(
-    **write_args(
-        direction=COLUMN,
-        alignment="center",
-        padding=(0, 0, 20, 0),
-    )
+    direction=COLUMN,
+    align_items="center",
+    padding=(0, 0, 20, 0),
 )
 PAGE_BODY = Pack(
-    **write_args(
-        flex=1,
-        width=const.CONTENT_WIDTH + 20,
-        direction=COLUMN,
-        alignment="center",
-    )
+    flex=1,
+    width=const.CONTENT_WIDTH + 20,
+    direction=COLUMN,
+    align_items="center",
 )
 DATE_INPUT_CONTROLS = Pack(**write_args(direction=ROW, alignment="center"))
 TABLE_OF_DATA = Pack(
@@ -142,19 +138,15 @@ INLINE_LABEL = Pack(
     )
 )
 GENERIC_LABEL = Pack(
-    **write_args(
-        width=const.CONTENT_WIDTH,
-        alignment="left",
-        font_size=const.SMALL_FONT_SIZE,
-        padding=(0, 0, 22, 0),
-    )
+    width=const.CONTENT_WIDTH,
+    align_items="start",
+    font_size=const.SMALL_FONT_SIZE,
+    padding=(0, 0, 22, 0),
 )
 SHORT_FIELD = Pack(
-    **write_args(
-        padding=8,
-        width=180,
-        font_size=const.FONT_SIZE,
-    )
+    padding=8,
+    width=180,
+    font_size=const.FONT_SIZE,
 )
 VERTICAL_ALIGNED_BUTTON = Pack(
     **write_args(

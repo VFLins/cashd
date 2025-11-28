@@ -220,7 +220,7 @@ class MainSection(BaseSection):
         )
         ### containers: 'options' context ###
         self.customer_options_section = OptionContainer(
-            style=Pack(width=const.CONTENT_WIDTH - 5, font_size=const.FONT_SIZE),
+            style=Pack(width=const.CONTENT_WIDTH - 5, font_size=const.FONT_SIZE, padding=(0,0,0,10)),
             content=[
                 ("Nova transação", self.insert_transaction_context_content),
                 ("Histórico de transações", self.transaction_history_context_content),
@@ -246,11 +246,11 @@ class MainSection(BaseSection):
         all controls that interact with user data.
         """
         self.head = Box(
-            style=Pack(width=1100, direction="row"),
+            style=Pack(width=990, direction="row"),
             children=[self.header_block],
         )
         self.body = ScrollContainer(
-            style=Pack(width=1100, direction="row", flex=1),
+            style=Pack(width=990, direction="row", flex=1),
             content=self.body_block,
         )
         self.full_contents = Box(
@@ -529,7 +529,7 @@ class MainSection(BaseSection):
 
     def rearrange_widgets(self):
         w, h = self.window_size
-        expected_layout_id = 0 if (w < 1130) else 1
+        expected_layout_id = 0 if (w < 900) else 1
         if expected_layout_id == self.layout_id:
             return
         print("changing layout...")
