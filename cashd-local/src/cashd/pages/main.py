@@ -242,14 +242,25 @@ class MainSection(BaseSection):
                 self.customer_options_section,
             ],
         )
+        """Contents of most of the interactive part of this section, including
+        all controls that interact with user data.
+        """
+        self.head = Box(
+            style=Pack(width=1100, direction="row"),
+            children=[self.header_block],
+        )
+        self.body = ScrollContainer(
+            style=Pack(width=1100, direction="row", flex=1),
+            content=self.body_block,
+        )
         self.full_contents = Box(
             style=style.FULL_CONTENTS,
-            children=self.get_layout_1(),
+            children=[self.head, self.body],
         )
         self.layout_id: int = 1
 
     # methods
-    def get_layout_0(self) -> Box:
+    def set_layout_0(self) -> Box:
         """Returns this section's widgets in a single-column layout."""
         self.header_block.clear()
         self.body_block.clear()
@@ -258,11 +269,10 @@ class MainSection(BaseSection):
             self.selected_customer_info,
         )
         self.body_block.add(self.customer_list_page_elements.widget)
-        header = Box(style=style.VERTICAL_BOX, children=[self.header_block])
-        body = ScrollContainer(style=style.PAGE_BODY, content=self.body_block)
-        return header, body
+        self.head.style =style.VERTICAL_BOX
+        self.body.style = style.PAGE_BODY
 
-    def get_layout_1(self) -> Box:
+    def set_layout_1(self) -> Box:
         """Returns this section's widgets in a two-column layout."""
         self.header_block.clear()
         self.body_block.clear()
@@ -271,15 +281,8 @@ class MainSection(BaseSection):
             self.customer_list_page_elements.widget,
             self.customer_options_section
         )
-        header = Box(
-            style=Pack(width=1100, direction="row"),
-            children=[self.header_block],
-        )
-        body = ScrollContainer(
-            style=Pack(width=1100, direction="row", flex=1),
-            content=self.body_block,
-        )
-        return header, body
+        self.head.style = Pack(width=1100, direction="row")
+        self.body.style = Pack(width=1100, direction="row", flex=1)
 
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
@@ -533,10 +536,10 @@ class MainSection(BaseSection):
         match expected_layout_id:
             case 0:
                 print("fetching layout 0")
-                self.head, self.body = self.get_layout_0()
+                self.set_layout_0()
             case 1:
                 print("fetching layout 1")
-                self.head, self.body = self.get_layout_1()
+                self.set_layout_1()
         self.full_contents.clear()
         self.full_contents.add(self.head)
         self.full_contents.add(self.body)
