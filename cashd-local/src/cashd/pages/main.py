@@ -77,7 +77,6 @@ class MainSection(BaseSection):
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
         """
-        self.customer_list_page_elements.widget.add(self.customer_options_button)
 
         ### widgets: 'insert' context ###
         self.date_input_controls = widgets.HorizontalDateForm()
@@ -232,20 +231,11 @@ class MainSection(BaseSection):
             ],
         )
         ### main container ###
-        self.header_block = Box(
-            style=style.HORIZONTAL_BOX,
-            children=[self.selected_customer_info],
-        )
+        self.header_block = Box(style=style.HORIZONTAL_BOX)
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
-        self.body_block = Box(
-            style=style.HORIZONTAL_BOX,
-            children=[
-                self.customer_list_page_elements.widget,
-                self.customer_options_section,
-            ],
-        )
+        self.body_block = Box(style=style.HORIZONTAL_BOX)
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.
         """
@@ -261,10 +251,11 @@ class MainSection(BaseSection):
             style=style.FULL_CONTENTS,
             children=[self.head, self.body],
         )
+        self.set_layout_1()
         self.layout_id: int = 1
 
     # methods
-    def set_layout_0(self) -> Box:
+    def set_layout_0(self):
         """Returns this section's widgets in a single-column layout."""
         self.header_block.clear()
         self.body_block.clear()
@@ -276,7 +267,7 @@ class MainSection(BaseSection):
         self.head.style = style.VERTICAL_BOX
         self.body.style = style.PAGE_BODY
 
-    def set_layout_1(self) -> Box:
+    def set_layout_1(self):
         """Returns this section's widgets in a two-column layout."""
         self.header_block.clear()
         self.body_block.clear()
