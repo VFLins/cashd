@@ -220,7 +220,11 @@ class MainSection(BaseSection):
         )
         ### containers: 'options' context ###
         self.customer_options_section = OptionContainer(
-            style=Pack(width=const.CONTENT_WIDTH - 5, font_size=const.FONT_SIZE, padding=(0,0,0,10)),
+            style=Pack(
+                width=const.CONTENT_WIDTH - 5,
+                font_size=const.FONT_SIZE,
+                padding=(0, 0, 0, 10),
+            ),
             content=[
                 ("Nova transação", self.insert_transaction_context_content),
                 ("Histórico de transações", self.transaction_history_context_content),
@@ -230,7 +234,7 @@ class MainSection(BaseSection):
         ### main container ###
         self.header_block = Box(
             style=style.HORIZONTAL_BOX,
-            children=[self.customer_options_button, self.selected_customer_info],
+            children=[self.selected_customer_info],
         )
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
@@ -246,11 +250,11 @@ class MainSection(BaseSection):
         all controls that interact with user data.
         """
         self.head = Box(
-            style=Pack(width=990, direction="row"),
+            style=Pack(width=1010, direction="row"),
             children=[self.header_block],
         )
         self.body = ScrollContainer(
-            style=Pack(width=990, direction="row", flex=1),
+            style=Pack(width=1010, direction="row", flex=1),
             content=self.body_block,
         )
         self.full_contents = Box(
@@ -269,7 +273,7 @@ class MainSection(BaseSection):
             self.selected_customer_info,
         )
         self.body_block.add(self.customer_list_page_elements.widget)
-        self.head.style =style.VERTICAL_BOX
+        self.head.style = style.VERTICAL_BOX
         self.body.style = style.PAGE_BODY
 
     def set_layout_1(self) -> Box:
@@ -278,11 +282,10 @@ class MainSection(BaseSection):
         self.body_block.clear()
         self.header_block.add(self.selected_customer_info)
         self.body_block.add(
-            self.customer_list_page_elements.widget,
-            self.customer_options_section
+            self.customer_list_page_elements.widget, self.customer_options_section
         )
-        self.head.style = Pack(width=1100, direction="row")
-        self.body.style = Pack(width=1100, direction="row", flex=1)
+        self.head.style = Pack(width=1010, direction="row")
+        self.body.style = Pack(width=1010, direction="row", flex=1)
 
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
@@ -381,27 +384,28 @@ class MainSection(BaseSection):
         self.upd_customer_list(widget)
 
     def set_context_screen(self, widget: Button | None = None):
-        context_names = {
-            "return_button": self.customer_list_page_elements.widget,
-            "customer_options_button": self.customer_options_section,
-        }
-        if not widget:
-            return
-        context_elem = context_names.get(widget.id)
-        if not context_elem:
-            return
+        """Change between customer selection and customer data management, depending on
+        the button clicked.
+        """
         if widget.id == "customer_options_button":
             self.header_block.replace(
                 old_child=self.customer_options_button,
                 new_child=self.return_button,
+            )
+            self.body_block.replace(
+                old_child=self.customer_list_page_elements.widget,
+                new_child=self.customer_options_section,
             )
         if widget.id == "return_button":
             self.header_block.replace(
                 old_child=self.return_button,
                 new_child=self.customer_options_button,
             )
+            self.body_block.replace(
+                old_child=self.customer_options_section,
+                new_child=self.customer_list_page_elements.widget,
+            )
             self.update_data_widgets()
-        self.body.content = context_elem
         self._refresh_navigation_buttons(selection=widget.id)
         self._refresh_help_message(selection=widget.id)
         self._clear_customer_selection(selection=widget.id)
@@ -529,7 +533,7 @@ class MainSection(BaseSection):
 
     def rearrange_widgets(self):
         w, h = self.window_size
-        expected_layout_id = 0 if (w < 900) else 1
+        expected_layout_id = 0 if (w < 1030) else 1
         if expected_layout_id == self.layout_id:
             return
         print("changing layout...")
@@ -546,4 +550,3 @@ class MainSection(BaseSection):
         self.full_contents.style = style.FULL_CONTENTS
         self.full_contents.refresh()
         self.layout_id = expected_layout_id
-

@@ -21,7 +21,7 @@ class BaseSection:
         """
         while True:
             try:
-                await sleep(1/30)
+                await sleep(1 / 30)
                 self.rearrange_widgets()
             except CancelledError:
                 break
