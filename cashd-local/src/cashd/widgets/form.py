@@ -176,6 +176,12 @@ class FormHandler:
             if form_field.is_required
         )
 
+    def reshape(self, app: App):
+        """Reshape this form to the highest column count allowed by this `app`'s
+        main window.
+        """
+
+
     @property
     def data(self) -> Dict[str, str]:
         """Data currently typed by the user in the form."""
