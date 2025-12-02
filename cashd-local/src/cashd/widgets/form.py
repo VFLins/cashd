@@ -89,9 +89,6 @@ class FormRow(Box):
     def _assert_children_amount(self, *new_children: Widget | None):
         current_children = getattr(self, "_children", [])
         n_children = len(current_children) + len(new_children)
-        assert (
-            n_children < 3
-        ), f"FormRow object can only hold up to 2 children, {n_children} given."
 
 
 class FormHandler:
@@ -159,6 +156,7 @@ class FormHandler:
             min_idx = rn * n_cols
             max_idx = min_idx + n_cols
             children_subset = [c for c in fields[min_idx:max_idx]]
+            print("adding fields:", children_subset)
             row = FormRow(children=children_subset, id=id, style=style)
             self._full_contents.add(row)
         self._save_field_refs()
@@ -183,10 +181,12 @@ class FormHandler:
         )
 
     def reshape(self, n_cols: int):
-        """Rebuilds the form with this amount of columns requested."""
+        """Rebuilds the form with this amount of columns requested. Does nothing if
+        this form has no fields.
+        """
         if not self._fields:
             return
-        fieldnames, fields = deepcopy(self._fields.items())
+        fieldnames, fields = zip(*self._fields.items())
         data = deepcopy(self.data)
         form_width = self._get_rows_width(widgets=self.fields.values(), n_cols=n_cols)
         self._full_contents.style.width = form_width
@@ -198,14 +198,23 @@ class FormHandler:
         )
         self._write_data(**data)
 
-    def _write_data(self, **data):
+    def _write_data(self, **data: dict[str, str]):
+        """Write data on multiple fields by id-value pairs."""
         for id, val in data.items():
             self.fields[id].input.value = val
 
     @staticmethod
     def _get_rows_width(widgets: list[Widget], n_cols: int) -> int:
         """Returns the expected row width for the number of columns and widget list."""
-        elem_width = max(wdg.style.width for wdg in widgets)
+        widths = [
+            wdg.style.width
+            for wdg in widgets
+            if wdg.style.width not in [None, "none"]
+        ]
+        if widths:
+            elem_width = max(widths)
+        else:
+            elem_width = style.user_input(TextInput).width
         return int(n_cols * elem_width) + 20
 
     @staticmethod

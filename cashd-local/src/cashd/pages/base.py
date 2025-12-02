@@ -42,7 +42,7 @@ class BaseSection:
         """Rearranges this section's widgets, should be used to turn this section
         responsive to the window size.
         """
-        print(self, self.window_size)
+        return
 
     def ensure_window_size(self):
         """Restores window size to a value above the minimum values defined at
