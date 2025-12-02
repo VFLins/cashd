@@ -1,3 +1,4 @@
+from math import ceil
 from copy import deepcopy
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -141,7 +142,7 @@ class FormHandler:
         self.add_fields(fields=children, id=id, style=style)
 
     def add_fields(
-        self, fields: List[FormField], id: str | None = None, style: Pack | None = None, n_cols: int = self._get_number_of_cols()
+        self, fields: List[FormField], id: str | None = None, style: Pack | None = None
     ):
         """Adds muiltiple `cashd.widgets.form.FormRow` into this FormHandler
 
@@ -150,7 +151,10 @@ class FormHandler:
           be appended to the end indicating the row number.
         :param style: Common stylesheet for all rows.
         """
-        n_rows = int(len(fields) / n_cols + 0.5)
+        n_cols = self._get_ncols(
+            widgets=fields, row_width=self._full_contents.style.width
+        )
+        n_rows = ceil(len(fields) / n_cols)
         for rn in range(n_rows):
             min_idx = rn * n_cols
             max_idx = min_idx + n_cols
@@ -178,20 +182,45 @@ class FormHandler:
             if form_field.is_required
         )
 
-    def reshape(self, app: App):
-        """Reshape this form to the highest column count allowed by this `app`'s
-        main window.
-        """
-        n_cols = self._get_number_of_columns()
-        current_data = deepcopy(self.data)
+    def reshape(self, n_cols: int):
+        """Rebuilds the form with this amount of columns requested."""
+        if not self._fields:
+            return
+        fieldnames, fields = deepcopy(self._fields.items())
+        data = deepcopy(self.data)
+        form_width = self._get_rows_width(widgets=self.fields.values(), n_cols=n_cols)
+        self._full_contents.style.width = form_width
+        self.clear()
+        self.add_fields(
+            fields=fields,
+            id=self._full_contents.id,
+            style=self._full_contents.style
+        )
+        self._write_data(**data)
 
-    def _get_number_of_columns(self) -> int:
-        widget_width = self._full_contents.style.width
-        if self.fields:
-            elem_width = max(wdg[wdg_id] for wdg_id, wdg in self._fields.items())
+    def _write_data(self, **data):
+        for id, val in data.items():
+            self.fields[id].input.value = val
+
+    @staticmethod
+    def _get_rows_width(widgets: list[Widget], n_cols: int) -> int:
+        """Returns the expected row width for the number of columns and widget list."""
+        elem_width = max(wdg.style.width for wdg in widgets)
+        return int(n_cols * elem_width) + 20
+
+    @staticmethod
+    def _get_ncols(widgets: list[Widget], row_width: int) -> int:
+        """Returns the expected number of columns for the row width and widget list."""
+        widths = [
+            wdg.style.width
+            for wdg in widgets
+            if wdg.style.width not in [None, "none"]
+        ]
+        if widths:
+            elem_width = max(widths)
         else:
-            elem_width = style.user_input(widget_type=TextInput).width
-        return int(widget_width / elem_width)
+            elem_width = style.user_input(TextInput).width
+        return int(row_width / elem_width)
 
     @property
     def data(self) -> Dict[str, str]:
