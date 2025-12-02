@@ -1,7 +1,9 @@
+from copy import deepcopy
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Type, Iterable, Callable
 
+from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from toga.widgets.base import Widget
@@ -139,7 +141,7 @@ class FormHandler:
         self.add_fields(fields=children, id=id, style=style)
 
     def add_fields(
-        self, fields: List[FormField], id: str | None = None, style: Pack | None = None
+        self, fields: List[FormField], id: str | None = None, style: Pack | None = None, n_cols: int = self._get_number_of_cols()
     ):
         """Adds muiltiple `cashd.widgets.form.FormRow` into this FormHandler
 
@@ -148,10 +150,10 @@ class FormHandler:
           be appended to the end indicating the row number.
         :param style: Common stylesheet for all rows.
         """
-        n_rows = int(len(fields) / 2 + 0.5)
+        n_rows = int(len(fields) / n_cols + 0.5)
         for rn in range(n_rows):
-            min_idx = rn * 2
-            max_idx = min_idx + 2
+            min_idx = rn * n_cols
+            max_idx = min_idx + n_cols
             children_subset = [c for c in fields[min_idx:max_idx]]
             row = FormRow(children=children_subset, id=id, style=style)
             self._full_contents.add(row)
@@ -180,7 +182,16 @@ class FormHandler:
         """Reshape this form to the highest column count allowed by this `app`'s
         main window.
         """
+        n_cols = self._get_number_of_columns()
+        current_data = deepcopy(self.data)
 
+    def _get_number_of_columns(self) -> int:
+        widget_width = self._full_contents.style.width
+        if self.fields:
+            elem_width = max(wdg[wdg_id] for wdg_id, wdg in self._fields.items())
+        else:
+            elem_width = style.user_input(widget_type=TextInput).width
+        return int(widget_width / elem_width)
 
     @property
     def data(self) -> Dict[str, str]:
@@ -188,7 +199,7 @@ class FormHandler:
         return {wdg_id: self._fields[wdg_id].input.value for wdg_id in self._fields}
 
     def _save_field_refs(self):
-        """Populates `self.fields` with the children provided. Must be run at the end of
+        """Populates `self.fields` with the children provided. Must run at the end of
         every transforming action.
         """
         children = [
