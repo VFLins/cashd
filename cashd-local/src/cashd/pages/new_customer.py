@@ -83,3 +83,16 @@ class CreateCustomerSection(BaseSection):
         """Overrides inherited method, resets form to the default values."""
         self.customer_form.clear()
         self.customer_form.add_table_fields(table=data.get_default_customer())
+
+    def rearrange_widgets(self):
+        width, height = self.window_size
+        form_width = self.customer_form.full_contents.style.width
+        expected_width = 590 if width > 700 else 400
+        if form_width == expected_width:
+            return
+        if (width > 700):
+            self.customer_form.reshape(n_cols=3)
+        else:
+            self.customer_form.reshape(n_cols=2)
+        self.full_contents.children[1].style.width = form_width
+        self.full_contents.style.width = form_width

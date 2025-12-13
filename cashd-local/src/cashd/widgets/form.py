@@ -187,15 +187,11 @@ class FormHandler:
         if not self._fields:
             return
         fieldnames, fields = zip(*self._fields.items())
-        data = deepcopy(self.data)
+        data: dict[str, str] = deepcopy(self.data)
         form_width = self._get_rows_width(widgets=self.fields.values(), n_cols=n_cols)
         self._full_contents.style.width = form_width
         self.clear()
-        self.add_fields(
-            fields=fields,
-            id=self._full_contents.id,
-            style=self._full_contents.style
-        )
+        self.add_fields(fields=fields)
         self._write_data(**data)
 
     def _write_data(self, **data: dict[str, str]):
