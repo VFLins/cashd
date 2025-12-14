@@ -36,7 +36,7 @@ class ConfigSection(BaseSection):
                 padding=(20, 5, 5, 5),
             ),
         )
-        self.default_values_section_widgets = widgets.form.FormHandler()
+        self.default_values_section_widgets = widgets.form.FormHandler(n_cols=2)
         self.default_values_section_widgets.add_fields(
             fields=[
                 widgets.form.FormField(
@@ -86,7 +86,7 @@ class ConfigSection(BaseSection):
             label_text="Locais de backup",
             style=Pack(width=const.FORM_WIDTH),
         )
-        self.backup_actions = widgets.form.FormHandler()
+        self.backup_actions = widgets.form.FormHandler(n_cols=2)
         self.backup_actions.add_fields(
             fields=[
                 widgets.form.FormField(

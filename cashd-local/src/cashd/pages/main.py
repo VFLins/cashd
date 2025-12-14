@@ -138,6 +138,7 @@ class MainSection(BaseSection):
 
         ### widgets: 'customer data' context ###
         self.customer_data_form = widgets.form.FormHandler(
+            n_cols=2,
             on_change=self.update_customer_data_field,
             on_change_required=self.update_customer_data_required_field,
         )

@@ -94,6 +94,7 @@ class FormRow(Box):
 class FormHandler:
     def __init__(
         self,
+        n_cols: int,
         on_change: Callable[[Widget], None] | None = None,
         on_change_required: Callable[[Widget], None] | None = None,
     ):
@@ -103,11 +104,13 @@ class FormHandler:
         :param on_change_required:  Add `on_change` handler that applies to every
           *required* `FormField` added.
         """
+        self.n_cols = n_cols
+        width = self._get_rows_width(widgets=[], n_cols=n_cols)
         self._on_change = on_change
         self._on_change_required = on_change_required
         self._full_contents = Box(
             style=Pack(
-                direction=COLUMN, width=const.CONTENT_WIDTH, align_items="center"
+                direction=COLUMN, width=width, align_items="center"
             )
         )
 
@@ -122,7 +125,7 @@ class FormHandler:
         style: Pack | None = None,
     ):
         """Adds multiple `cashd.widgets.form.FormRow` into this FormHandler. Each item in
-        children is added in pairs to the form rows.
+        children is added in row groups to the form rows.
 
         :param table: Declared table, child of `cashd.data.dec_base`. Each column name
           will be handled as it's `FormField.id`, and each form field can be fetched as
@@ -148,13 +151,13 @@ class FormHandler:
           be appended to the end indicating the row number.
         :param style: Common stylesheet for all rows.
         """
-        n_cols = self._get_ncols(
+        self.n_cols = self._get_ncols(
             widgets=fields, row_width=self._full_contents.style.width
         )
-        n_rows = ceil(len(fields) / n_cols)
+        n_rows = ceil(len(fields) / self.n_cols)
         for rn in range(n_rows):
-            min_idx = rn * n_cols
-            max_idx = min_idx + n_cols
+            min_idx = rn * self.n_cols
+            max_idx = min_idx + self.n_cols
             children_subset = [c for c in fields[min_idx:max_idx]]
             print("adding fields:", children_subset)
             row = FormRow(children=children_subset, id=id, style=style)
