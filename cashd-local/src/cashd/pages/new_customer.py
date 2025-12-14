@@ -6,7 +6,7 @@ from toga.widgets.button import Button
 
 from cashd_core import data
 from .base import BaseSection
-from cashd import const, style, widgets
+from cashd import style, widgets
 from cashd.widgets.form import FormHandler
 
 
@@ -33,21 +33,12 @@ class CreateCustomerSection(BaseSection):
             on_press=self.confirm_changes,
             style=style.CONTEXT_BUTTON,
         )
-        self.controls = Box(
-            style=style.ROW_OF_BUTTONS,
-            children=[
-                self.undo_button,
-                self.confirm_button,
-            ],
+        self.controls = widgets.elems.form_options_container(
+            children=[self.undo_button, self.confirm_button]
         )
         self.full_contents = Box(
             style=style.FULL_CONTENTS,
-            children=[
-                self.customer_form.full_contents,
-                widgets.elems.form_options_container(
-                    children=[self.undo_button, self.confirm_button]
-                ),
-            ],
+            children=[self.customer_form.full_contents, self.controls],
         )
 
     def disable_buttons(self, widget: Widget):

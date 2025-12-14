@@ -4,14 +4,13 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Type, Iterable, Callable
 
-from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from toga.widgets.base import Widget
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.textinput import TextInput
 from toga.widgets.selection import Selection
-from toga.widgets.box import Box, StyleT, Column
+from toga.widgets.box import Box, StyleT
 from toga.widgets.label import Label
 
 from cashd_core import data
@@ -191,7 +190,8 @@ class FormHandler:
             return
         fieldnames, fields = zip(*self._fields.items())
         data: dict[str, str] = deepcopy(self.data)
-        form_width = self._get_rows_width(widgets=self.fields.values(), n_cols=n_cols)
+        form_width = self._get_rows_width(
+            widgets=self.fields.values(), n_cols=n_cols)
         self._full_contents.style.width = form_width
         self.clear()
         self.add_fields(fields=fields)
@@ -337,7 +337,8 @@ class HorizontalDateForm:
     @property
     def value(self):
         return date(
-            int(self.year_input.value), self._month_number(), int(self.day_input.value)
+            int(self.year_input.value), self._month_number(), int(
+                self.day_input.value)
         )
 
     @value.setter
