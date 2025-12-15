@@ -168,7 +168,7 @@ class MainSection(BaseSection):
         self.insert_transaction_context_content = Box(
             style=style.FILLING_VERTICAL_BOX,
             children=[
-                self.date_input_controls.full_contents,
+                self.date_input_controls.widget,
                 Box(
                     style=Pack(
                         width=const.CONTENT_WIDTH,
@@ -213,7 +213,7 @@ class MainSection(BaseSection):
                     direction=COLUMN, align_items="center", width=const.FORM_WIDTH
                 ),
                 children=[
-                    self.customer_data_form.full_contents,
+                    self.customer_data_form.widget,
                     self.customer_data_interaction_buttons,
                 ],
             )

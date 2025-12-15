@@ -34,11 +34,12 @@ class CreateCustomerSection(BaseSection):
             style=style.CONTEXT_BUTTON,
         )
         self.controls = widgets.elems.form_options_container(
+            width=self.customer_form.widget.style.width,
             children=[self.undo_button, self.confirm_button]
         )
         self.full_contents = Box(
             style=style.FULL_CONTENTS,
-            children=[self.customer_form.full_contents, self.controls],
+            children=[self.customer_form.widget, self.controls],
         )
 
     def disable_buttons(self, widget: Widget):
@@ -82,4 +83,4 @@ class CreateCustomerSection(BaseSection):
         if self.customer_form.n_cols == expected_n_cols:
             return
         self.customer_form.reshape(n_cols=expected_n_cols)
-        self.controls.style.width = self.customer_form.full_contents.style.width
+        self.controls.style.width = self.customer_form.widget.style.width

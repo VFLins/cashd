@@ -109,7 +109,7 @@ class ConfigSection(BaseSection):
             children=[
                 self.default_values_section_title,
                 Divider(style=style.SEPARATOR),
-                self.default_values_section_widgets.full_contents,
+                self.default_values_section_widgets.widget,
             ],
         )
 
@@ -121,7 +121,7 @@ class ConfigSection(BaseSection):
                 self.statistics_prefs_section_title,
                 Divider(style=style.SEPARATOR),
                 self.backup_places_list.widget,
-                self.backup_actions.full_contents,
+                self.backup_actions.widget,
             ],
         )
 

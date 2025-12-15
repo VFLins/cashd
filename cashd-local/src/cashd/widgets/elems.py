@@ -370,7 +370,7 @@ class ListOfItems(_DataInteractor):
         self.refresh()
 
 
-def form_options_container(children: list, alignment="end") -> Box:
+def form_options_container(children: list, alignment="end", width=const.CONTENT_WIDTH) -> Box:
     """
     Return a `toga.Box` containing elements that shoud be displayed under a form.
 
@@ -379,7 +379,7 @@ def form_options_container(children: list, alignment="end") -> Box:
     """
     inner_container = Box(style=style.ROW_OF_BUTTONS, children=children)
     outer_container = Box(
-        style=Pack(direction="column", align_items=alignment),
+        style=Pack(direction="column", align_items=alignment, width=width),
         children=[inner_container],
     )
     return outer_container
