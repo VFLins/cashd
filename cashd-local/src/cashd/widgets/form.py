@@ -78,7 +78,7 @@ class FormRow(Box):
         if style:
             style.direction = ROW
         else:
-            style = Pack(direction=ROW, width=const.FORM_WIDTH)
+            style = Pack(direction=ROW)
         super().__init__(id, style, children)
 
     def add(self, *children):
@@ -150,15 +150,19 @@ class FormHandler:
           be appended to the end indicating the row number.
         :param style: Common stylesheet for all rows.
         """
+        form_width = self._widget.style.width
+        if style:
+            style.width = form_width
+        else:
+            style = Pack(width=form_width)
         self.n_cols = self._get_ncols(
-            widgets=fields, row_width=self._widget.style.width
+            widgets=fields, row_width=form_width
         )
         n_rows = ceil(len(fields) / self.n_cols)
         for rn in range(n_rows):
             min_idx = rn * self.n_cols
             max_idx = min_idx + self.n_cols
             children_subset = [c for c in fields[min_idx:max_idx]]
-            print("adding fields:", children_subset)
             row = FormRow(children=children_subset, id=id, style=style)
             self._widget.add(row)
         self._save_field_refs()
