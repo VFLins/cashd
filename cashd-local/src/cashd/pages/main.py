@@ -264,6 +264,7 @@ class MainSection(BaseSection):
             self.customer_options_button,
             self.selected_customer_info,
         )
+        self.customer_selector.width = const.CONTENT_WIDTH
         self.body_block.add(self.customer_selector.widget)
         self.head.style = style.VERTICAL_BOX
         self.body.style = style.PAGE_BODY
@@ -276,8 +277,9 @@ class MainSection(BaseSection):
         self.body_block.add(
             self.customer_selector.widget, self.customer_options_section
         )
-        self.head.style = Pack(width=1010, direction="row")
-        self.body.style = Pack(width=1010, direction="row", flex=1)
+        self.customer_selector.width = const.CONTENT_WIDTH - 60
+        self.head.style = Pack(width=950, direction="row")
+        self.body.style = Pack(width=950, direction="row", flex=1)
 
     def on_customer_selection(self, widget: Selection):
         if widget.selection is None:
@@ -525,7 +527,7 @@ class MainSection(BaseSection):
 
     def rearrange_widgets(self):
         w, h = self.window_size
-        expected_layout_id = 0 if (w < 1030) else 1
+        expected_layout_id = 0 if (w < 980) else 1
         if expected_layout_id == self.layout_id:
             return
         match expected_layout_id:

@@ -58,6 +58,18 @@ class PaginatedDetailedList(_DataInteractor):
         )
         self.update_page_label()
 
+    @property
+    def width(self):
+        return self.widget.style.width
+
+    @width.setter
+    def width(self, val):
+        self.widget.style.width = val
+        self.top_controls.style.width = val
+        self.bottom_controls.style.width = val
+        self.data_widget.style.width = val-5
+        self.search_field.style.width = val-5
+
 
 class PaginatedTable(_DataInteractor):
     def __init__(
