@@ -1,11 +1,6 @@
 from .base import BaseSection
 
-from toga.dialogs import (
-    SelectFolderDialog,
-    OpenFileDialog,
-    InfoDialog,
-    ErrorDialog,
-)
+from toga.app import App
 from toga.style import Pack
 from toga.widgets.box import Box
 from toga.widgets.label import Label
@@ -16,6 +11,12 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.selection import Selection
 from toga.widgets.scrollcontainer import ScrollContainer
+from toga.dialogs import (
+    SelectFolderDialog,
+    OpenFileDialog,
+    InfoDialog,
+    ErrorDialog,
+)
 
 from cashd_core import prefs
 from cashd import const, style, backup, widgets
@@ -23,7 +24,9 @@ from cashd.widgets.elems import ListOfItems
 
 
 class ConfigSection(BaseSection):
-    def __init__(self):
+    def __init__(self, app: App):
+        super().__init__(app)
+
         self.default_values_section_title = Label(
             "Valores padrão",
             style=Pack(
@@ -33,7 +36,7 @@ class ConfigSection(BaseSection):
                 padding=(20, 5, 5, 5),
             ),
         )
-        self.default_values_section_widgets = widgets.form.FormHandler()
+        self.default_values_section_widgets = widgets.form.FormHandler(n_cols=2)
         self.default_values_section_widgets.add_fields(
             fields=[
                 widgets.form.FormField(
@@ -83,20 +86,18 @@ class ConfigSection(BaseSection):
             label_text="Locais de backup",
             style=Pack(width=const.FORM_WIDTH),
         )
-        self.backup_actions = widgets.form.FormHandler()
+        self.backup_actions = widgets.form.FormHandler(n_cols=2)
         self.backup_actions.add_fields(
             fields=[
                 widgets.form.FormField(
                     label="Ações",
-                    input_widget=Button("Carregar backup",
-                                        on_press=self.load_backup),
+                    input_widget=Button("Carregar backup", on_press=self.load_backup),
                     description="Esta operação é reversível, consulte\na documentação.",
                     id="load_backup_button",
                 ),
                 widgets.form.FormField(
                     label="",
-                    input_widget=Button(
-                        "Fazer backup", on_press=self.run_backup),
+                    input_widget=Button("Fazer backup", on_press=self.run_backup),
                     description="Backups serão salvos nos\n'Locais de backup'.",
                     id="run_backup_button",
                 ),
@@ -108,7 +109,7 @@ class ConfigSection(BaseSection):
             children=[
                 self.default_values_section_title,
                 Divider(style=style.SEPARATOR),
-                self.default_values_section_widgets.full_contents,
+                self.default_values_section_widgets.widget,
             ],
         )
 
@@ -120,7 +121,7 @@ class ConfigSection(BaseSection):
                 self.statistics_prefs_section_title,
                 Divider(style=style.SEPARATOR),
                 self.backup_places_list.widget,
-                self.backup_actions.full_contents,
+                self.backup_actions.widget,
             ],
         )
 

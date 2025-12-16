@@ -18,10 +18,14 @@ class Cashd(App):
     def startup(self):
         """Construct and show the Toga application."""
 
-        self.main_section = pages.MainSection()
-        self.stats_section = pages.StatisticsSection()
-        self.new_customer_section = pages.CreateCustomerSection()
-        self.conf_section = pages.ConfigSection()
+        self.main_section = pages.MainSection(app=self)
+        self.stats_section = pages.StatisticsSection(app=self)
+        self.new_customer_section = pages.CreateCustomerSection(app=self)
+        self.conf_section = pages.ConfigSection(app=self)
+
+        self.responsive_layout_task = self.loop.create_task(
+            coro=self.main_section.responsive_layout_listener()
+        )
 
         self.main_box = ScrollContainer(
             style=Pack(direction=ROW, flex=1, font_size=const.BIG_FONT_SIZE),
@@ -35,7 +39,7 @@ class Cashd(App):
         self.main_window = MainWindow(
             title=self.formal_name, size=const.MAIN_WINDOW_SIZE, resizable=True
         )
-        self.main_window.min_width = 600
+        self.main_window.min_size = (600, 510)
         self.main_window.content = self.main_box
         group_main = Group("Cashd", order=10)
         group_navigate = Group("Navegar", order=20)
@@ -99,8 +103,32 @@ class Cashd(App):
         self.main_box.content = current_section.full_contents
         # wait all coroutines to complete
         # https://stackoverflow.com/a/68629884
+        self.loop.create_task(self.handle_layout_listener(command=command))
         await asyncio.gather(*asyncio.all_tasks() - {asyncio.current_task()})
+
+    async def handle_layout_listener(self, command: Command):
+        coroutines = {
+            "Transações": self.main_section.responsive_layout_listener(),
+            "Novo Cliente": self.new_customer_section.responsive_layout_listener(),
+            "Estatísticas": self.stats_section.responsive_layout_listener(),
+            "Configurações": self.conf_section.responsive_layout_listener(),
+        }
+        try:
+            cancelled = self.responsive_layout_task.cancel()
+            await self.responsive_layout_task
+            if not cancelled:
+                print(
+                    f"Layout listener de {command.text} concluído: ",
+                    self.responsive_layout_task.done(),
+                )
+        except asyncio.CancelledError:
+            print(f"Layout listener de '{command.text}' interrompido.")
+        finally:
+            coro = coroutines.get(command.text)
+            print(f"Iniciando layout listener de '{command.text}'.")
+            self.responsive_layout_task = self.loop.create_task(coro)
+            await asyncio.gather(*asyncio.all_tasks() - {asyncio.current_task()})
 
 
 def main():
-    return Cashd("Cashd", "com.cashd.vflins")
+    return Cashd("Cashd", "br.com.vitorlins.cashd")

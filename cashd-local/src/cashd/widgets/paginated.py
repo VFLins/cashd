@@ -39,8 +39,7 @@ class PaginatedDetailedList(_DataInteractor):
         super().__init__(datasource=datasource, id=id, style=style, on_select=on_select)
 
     def _set_data_widget(self, id=None, style=None, on_select=None):
-        self.data_widget = DetailedList(
-            id=id, style=style, on_select=on_select)
+        self.data_widget = DetailedList(id=id, style=style, on_select=on_select)
 
     def refresh(self, widget: TextInput | None = None):
         """Fetches data and updates `self.data_widget`. Requires a data source with at
@@ -58,6 +57,18 @@ class PaginatedDetailedList(_DataInteractor):
             for r in self._datasource.current_data
         )
         self.update_page_label()
+
+    @property
+    def width(self):
+        return self.widget.style.width
+
+    @width.setter
+    def width(self, val):
+        self.widget.style.width = val
+        self.top_controls.style.width = val
+        self.bottom_controls.style.width = val
+        self.data_widget.style.width = val-5
+        self.search_field.style.width = val-5
 
 
 class PaginatedTable(_DataInteractor):

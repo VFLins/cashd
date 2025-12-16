@@ -113,8 +113,11 @@ def rename_on_db_folder(current: str, new: str, _raise: bool = False):
     except WindowsError:
         shutil.copy(path_to_current, path_to_new)
     except Exception as xpt:
-        logger.error(f"Erro renomeando {path_to_current}: {
-                     xpt}", exc_info=True)
+        logger.error(
+            f"Erro renomeando {path_to_current}: {
+                     xpt}",
+            exc_info=True,
+        )
         if _raise:
             raise xpt
 

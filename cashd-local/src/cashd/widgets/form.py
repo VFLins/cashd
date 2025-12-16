@@ -1,3 +1,5 @@
+from math import ceil
+from copy import deepcopy
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Type, Iterable, Callable
@@ -8,7 +10,7 @@ from toga.widgets.base import Widget
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.textinput import TextInput
 from toga.widgets.selection import Selection
-from toga.widgets.box import Box, StyleT, Column
+from toga.widgets.box import Box, StyleT
 from toga.widgets.label import Label
 
 from cashd_core import data
@@ -76,7 +78,7 @@ class FormRow(Box):
         if style:
             style.direction = ROW
         else:
-            style = Pack(direction=ROW, width=const.FORM_WIDTH)
+            style = Pack(direction=ROW)
         super().__init__(id, style, children)
 
     def add(self, *children):
@@ -86,14 +88,12 @@ class FormRow(Box):
     def _assert_children_amount(self, *new_children: Widget | None):
         current_children = getattr(self, "_children", [])
         n_children = len(current_children) + len(new_children)
-        assert (
-            n_children < 3
-        ), f"FormRow object can only hold up to 2 children, {n_children} given."
 
 
 class FormHandler:
     def __init__(
         self,
+        n_cols: int,
         on_change: Callable[[Widget], None] | None = None,
         on_change_required: Callable[[Widget], None] | None = None,
     ):
@@ -103,17 +103,19 @@ class FormHandler:
         :param on_change_required:  Add `on_change` handler that applies to every
           *required* `FormField` added.
         """
+        self.n_cols = n_cols
+        width = self._get_rows_width(widgets=[], n_cols=n_cols)
         self._on_change = on_change
         self._on_change_required = on_change_required
-        self._full_contents = Box(
+        self._widget = Box(
             style=Pack(
-                direction=COLUMN, width=const.CONTENT_WIDTH, align_items="center"
+                direction=COLUMN, width=width, align_items="center"
             )
         )
 
     @property
-    def full_contents(self):
-        return self._full_contents
+    def widget(self):
+        return self._widget
 
     def add_table_fields(
         self,
@@ -122,7 +124,7 @@ class FormHandler:
         style: Pack | None = None,
     ):
         """Adds multiple `cashd.widgets.form.FormRow` into this FormHandler. Each item in
-        children is added in pairs to the form rows.
+        children is added in row groups to the form rows.
 
         :param table: Declared table, child of `cashd.data.dec_base`. Each column name
           will be handled as it's `FormField.id`, and each form field can be fetched as
@@ -148,21 +150,29 @@ class FormHandler:
           be appended to the end indicating the row number.
         :param style: Common stylesheet for all rows.
         """
-        n_rows = int(len(fields) / 2 + 0.5)
+        form_width = self._widget.style.width
+        if style:
+            style.width = form_width
+        else:
+            style = Pack(width=form_width)
+        self.n_cols = self._get_ncols(
+            widgets=fields, row_width=form_width
+        )
+        n_rows = ceil(len(fields) / self.n_cols)
         for rn in range(n_rows):
-            min_idx = rn * 2
-            max_idx = min_idx + 2
+            min_idx = rn * self.n_cols
+            max_idx = min_idx + self.n_cols
             children_subset = [c for c in fields[min_idx:max_idx]]
             row = FormRow(children=children_subset, id=id, style=style)
-            self._full_contents.add(row)
+            self._widget.add(row)
         self._save_field_refs()
 
     def clear(self):
-        """Removes every FormRow of `self.full_contents` along with their `FormField`'s
+        """Removes every FormRow of `self.widget` along with their `FormField`'s
         references.
         """
         self._fields = {}
-        self._full_contents.clear()
+        self._widget.clear()
 
     def required_fields_are_filled(self) -> bool:
         """Checks if every required field in this form is not empty. Return `True` if
@@ -171,10 +181,58 @@ class FormHandler:
         return all(
             form_field.children[1].value.strip()
             not in [None, ""]  # input widget at [1]
-            for row in self.full_contents.children
+            for row in self.widget.children
             for form_field in row.children
             if form_field.is_required
         )
+
+    def reshape(self, n_cols: int):
+        """Rebuilds the form with this amount of columns requested. Does nothing if
+        this form has no fields.
+        """
+        if not self._fields:
+            return
+        fieldnames, fields = zip(*self._fields.items())
+        data: dict[str, str] = deepcopy(self.data)
+        form_width = self._get_rows_width(
+            widgets=self.fields.values(), n_cols=n_cols)
+        self._widget.style.width = form_width
+        self.clear()
+        self.add_fields(fields=fields)
+        self._write_data(**data)
+
+    def _write_data(self, **data: dict[str, str]):
+        """Write data on multiple fields by id-value pairs."""
+        for id, val in data.items():
+            self.fields[id].input.value = val
+
+    @staticmethod
+    def _get_rows_width(widgets: list[Widget], n_cols: int) -> int:
+        """Returns the expected row width for the number of columns and widget list."""
+        widths = [
+            wdg.style.width
+            for wdg in widgets
+            if wdg.style.width not in [None, "none"]
+        ]
+        if widths:
+            elem_width = max(widths)
+        else:
+            elem_width = style.user_input(TextInput).width
+        return int(n_cols * elem_width) + 20
+
+    @staticmethod
+    def _get_ncols(widgets: list[Widget], row_width: int) -> int:
+        """Returns the expected number of columns for the row width and widget list."""
+        widths = [
+            wdg.style.width
+            for wdg in widgets
+            if wdg.style.width not in [None, "none"]
+        ]
+        if widths:
+            elem_width = max(widths)
+        else:
+            elem_width = style.user_input(TextInput).width
+        return int(row_width / elem_width)
 
     @property
     def data(self) -> Dict[str, str]:
@@ -182,11 +240,11 @@ class FormHandler:
         return {wdg_id: self._fields[wdg_id].input.value for wdg_id in self._fields}
 
     def _save_field_refs(self):
-        """Populates `self.fields` with the children provided. Must be run at the end of
+        """Populates `self.fields` with the children provided. Must run at the end of
         every transforming action.
         """
         children = [
-            field for row in self.full_contents.children for field in row.children
+            field for row in self.widget.children for field in row.children
         ]
         label_names = unique_strings(lst=[ch.id for ch in children])
         self._fields = {lb: ch for lb, ch in zip(label_names, children)}
@@ -271,7 +329,7 @@ class HorizontalDateForm:
             value=value.day,
         )
 
-        self.full_contents = Box(
+        self.widget = Box(
             style=style.DATE_INPUT_CONTROLS,
             children=[
                 self.day_input.widget,
