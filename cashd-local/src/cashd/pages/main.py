@@ -69,7 +69,7 @@ class MainSection(BaseSection):
         """Button that returns the user to the context of customer selection."""
 
         ### widgets: 'select' context ###
-        self.customer_list_page_elements = PaginatedDetailedList(
+        self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.on_customer_selection,
             style=style.TABLE_OF_DATA,
@@ -228,7 +228,7 @@ class MainSection(BaseSection):
             content=[
                 ("Nova transação", self.insert_transaction_context_content),
                 ("Histórico de transações", self.transaction_history_context_content),
-                ("Informações do cliente", self.customer_data_context_content),
+                ("Informações", self.customer_data_context_content),
             ],
         )
         ### main container ###
@@ -264,7 +264,7 @@ class MainSection(BaseSection):
             self.customer_options_button,
             self.selected_customer_info,
         )
-        self.body_block.add(self.customer_list_page_elements.widget)
+        self.body_block.add(self.customer_selector.widget)
         self.head.style = style.VERTICAL_BOX
         self.body.style = style.PAGE_BODY
 
@@ -274,7 +274,7 @@ class MainSection(BaseSection):
         self.body_block.clear()
         self.header_block.add(self.selected_customer_info)
         self.body_block.add(
-            self.customer_list_page_elements.widget, self.customer_options_section
+            self.customer_selector.widget, self.customer_options_section
         )
         self.head.style = Pack(width=1010, direction="row")
         self.body.style = Pack(width=1010, direction="row", flex=1)
@@ -385,7 +385,7 @@ class MainSection(BaseSection):
                 new_child=self.return_button,
             )
             self.body_block.replace(
-                old_child=self.customer_list_page_elements.widget,
+                old_child=self.customer_selector.widget,
                 new_child=self.customer_options_section,
             )
         if widget.id == "return_button":
@@ -395,7 +395,7 @@ class MainSection(BaseSection):
             )
             self.body_block.replace(
                 old_child=self.customer_options_section,
-                new_child=self.customer_list_page_elements.widget,
+                new_child=self.customer_selector.widget,
             )
             self.update_data_widgets()
         self._refresh_navigation_buttons(selection=widget.id)
@@ -433,7 +433,7 @@ class MainSection(BaseSection):
             f"Local: {const.NA_VALUE}\n"
             f"Saldo devedor: R$ {const.NA_VALUE}"
         )
-        self.customer_list_page_elements.search_field.value = ""
+        self.customer_selector.search_field.value = ""
 
     def update_typed_transaction_amount(self, widget):
         setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
@@ -490,7 +490,7 @@ class MainSection(BaseSection):
             print(f"Alteração proibida: {str(err.args[0])}")
 
     def update_data_widgets(self):
-        self.customer_list_page_elements.refresh(self.CUSTOMER_LIST)
+        self.customer_selector.refresh(self.CUSTOMER_LIST)
 
     def insert_transac_button_click(self, widget: Button):
         transac_data = data.tbl_transacoes(
@@ -528,13 +528,10 @@ class MainSection(BaseSection):
         expected_layout_id = 0 if (w < 1030) else 1
         if expected_layout_id == self.layout_id:
             return
-        print("changing layout...")
         match expected_layout_id:
             case 0:
-                print("fetching layout 0")
                 self.set_layout_0()
             case 1:
-                print("fetching layout 1")
                 self.set_layout_1()
         self.full_contents.clear()
         self.full_contents.add(self.head)
