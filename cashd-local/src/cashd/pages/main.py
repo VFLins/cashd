@@ -71,7 +71,7 @@ class MainSection(BaseSection):
         ### widgets: 'select' context ###
         self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
-            on_select=self.on_customer_selection,
+            on_select=self.select_customer,
             style=style.TABLE_OF_DATA,
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
@@ -94,17 +94,18 @@ class MainSection(BaseSection):
             style=style.user_input(TextInput),
             placeholder="0,00",
             on_change=self.update_typed_transaction_amount,
-            on_confirm=self.insert_transac_button_click,
+            on_confirm=self.insert_transaction,
         )
         """Text input that only allows integer and decimal numbers. Receives the
         currency amount of the transaction.
         """
+        self.amount_input.enabled = False
 
         self.insert_transac_button = Button(
             "Inserir",
             style=style.CONTEXT_BUTTON,
             enabled=False,
-            on_press=self.insert_transac_button_click,
+            on_press=self.insert_transaction,
         )
         """Button to write the transaction with date and currency amount inserted
         by the user to the database.
@@ -281,13 +282,15 @@ class MainSection(BaseSection):
         self.head.style = Pack(width=950, direction="row")
         self.body.style = Pack(width=950, direction="row", flex=1)
 
-    def on_customer_selection(self, widget: Selection):
+    def select_customer(self, widget: Selection):
         if widget.selection is None:
+            self.amount_input.enabled = False
             self.customer_options_button.enabled = False
             return
         print(f"selected: {widget.selection}")
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
         self._upd_selected_info()
+        self.amount_input.enabled = True
         self.customer_options_button.enabled = True
 
     def on_click_insert(self, widget):
@@ -399,10 +402,10 @@ class MainSection(BaseSection):
                 old_child=self.customer_options_section,
                 new_child=self.customer_selector.widget,
             )
+            self._clear_customer_selection()
             self.update_data_widgets()
         self._refresh_navigation_buttons(selection=widget.id)
         self._refresh_help_message(selection=widget.id)
-        self._clear_customer_selection(selection=widget.id)
 
     def _refresh_navigation_buttons(self, selection: str):
         buttons = {
@@ -427,9 +430,12 @@ class MainSection(BaseSection):
         }
         self.help_msg.text = help_messages[selection]
 
-    def _clear_customer_selection(self, selection: str):
-        if selection != "return_button":
-            return
+    def _clear_customer_selection(self):
+        self.SELECTED_CUSTOMER.clear()
+        self.amount_input.enabled = False
+        self.insert_transac_button.enabled = False
+        self.transaction_history_table.data = None
+        self.customer_data_form.clear()
         self.selected_customer_info.text = (
             f"Nome: {const.NA_VALUE}\n"
             f"Local: {const.NA_VALUE}\n"
@@ -494,7 +500,7 @@ class MainSection(BaseSection):
     def update_data_widgets(self):
         self.customer_selector.refresh(self.CUSTOMER_LIST)
 
-    def insert_transac_button_click(self, widget: Button):
+    def insert_transaction(self, widget: Button):
         transac_data = data.tbl_transacoes(
             IdCliente=self.SELECTED_CUSTOMER.Id,
             CarimboTempo=dt.datetime.now(),
