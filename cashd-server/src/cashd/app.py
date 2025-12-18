@@ -73,17 +73,6 @@ def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
     btn_mostrar_dialogo(state, id, payload, show="edita_cliente")
 
 
-def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
-    customer = data.tbl_clientes()
-    with state as s:
-        customer.read(row_id=s.SELECTED_CUSTOMER.Id)
-        s.TRANSACS_USUARIO = [
-            LOVItem(Id=str(t["id"]), Value=f"{t['data']} | {t['valor']}")
-            for t in customer.Transacs
-        ]
-    btn_mostrar_dialogo(state, id, payload, "selec_transac")
-
-
 def btn_atualizar_listagem(state: State):
     with db.DB_ENGINE.connect() as conn, conn.begin():
         state.df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
@@ -354,9 +343,14 @@ def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
     if (state is not None) and (customer.Id is not None):
         state.SELECTED_CUSTOMER_BALANCE = customer.Saldo
         state.SELECTED_CUSTOMER_PLACE = customer.Local
-    return pd.DataFrame(data=customer.Transacs).rename(
+    df = pd.DataFrame(data=customer.Transacs).rename(
         columns={"id": "Id", "data": "Data", "valor": "Valor"}
     )
+    # NOTE: add columns if table has no data, DataFrame.rename won't do it
+    # automatically, this avoids a Taipy warning.
+    if "Id" not in df.columns:
+        return pd.DataFrame(columns=["Id", "Data", "Valor"])
+    return df
 
 
 def get_customers_datasource(state: State | None = None) -> data.CustomerListSource:
