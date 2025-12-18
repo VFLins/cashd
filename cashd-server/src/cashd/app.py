@@ -13,6 +13,7 @@ from os import path
 from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
 from cashd_core import data, prefs, backup
+from cashd_core.const import MAX_ALLOWED_VALUE
 from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
 
@@ -45,14 +46,14 @@ def btn_next_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
     selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_next_page()
-    chg_select_table_stats(state=state)
+    update_displayed_table(state=state)
 
 
 def btn_prev_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
     selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_previous_page()
-    chg_select_table_stats(state=state)
+    update_displayed_table(state=state)
 
 
 def show_dialog(state: State, id: str, payload: dict, show: str):
@@ -85,11 +86,11 @@ def btn_gerar_main_plot(state: State | None = None):
 
     if state:
         p = state.dropdown_periodo_val[0]
-        n = int(state.slider_val[0])
+        n = int(state.slider_val)
         tipo = state.dropdown_plot_type_val
     else:
         p = dropdown_periodo_val[0]
-        n = int(slider_val[0])
+        n = int(slider_val)
         tipo = dropdown_plot_type_val
 
     if tipo == "Saldo Acumulado":
@@ -186,6 +187,9 @@ def add_transaction(state: State):
         if not is_valid_currency_input(state.form_transac.Valor):
             notify(state, "error", "Valor inválido, insira apenas números")
             return
+        if int(state.form_transac.Valor) > MAX_ALLOWED_VALUE:
+            notify(state, "error", "Valor acima do permitido")
+            return
         state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
         state.form_transac.CarimboTempo = datetime.now()
         state.form_transac.write()
@@ -208,6 +212,7 @@ def add_customer(state: State):
     try:
         customer.write()
         notify(state, "success", message=f"Novo cliente adicionado: {customer.NomeCompleto}")
+        state.form_customer = data.get_default_customer()
         state.refresh("form_customer")
         state.NOMES_USUARIOS = get_customer_lov(state=state)
     except Exception as msg_erro:
@@ -615,8 +620,7 @@ show_dialog_confirm_edit_customer = False
 show_dialog_edit_customer = False
 
 # controles dos graficos
-slider_elems = list(range(10, 51)) + [None]
-slider_lov = [(str(i), str(i)) if i is not None else (i, "Tudo") for i in slider_elems]
+slider_lov = [str(i) for i in list(range(10, 51)) + ["Tudo"]]
 slider_val = slider_lov[0]
 
 dropdown_periodo_lov = [("mes", "Mensal"), ("sem", "Semanal"), ("dia", "Diário")]
