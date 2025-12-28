@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Literal
 
 from cashd import db
+from cashd_core import data
 
 
 CORES = ["#478eff", "gray"]
@@ -27,17 +28,16 @@ def _preprocessar_data(
 
 
 def _gerar_layout(
-    tbl: pd.DataFrame, periodo: Literal["mes", "sem", "dia"], date_col: str = "Data"
+    tbl: pd.DataFrame, periodo: Literal["m", "w", "d"], date_col: str = "Data"
 ) -> pg.Layout:
     """
     Retorna um `plotly.graph_objects.Layout` gerado para o conjunto de dados `tbl`
     """
     datestr = "%B de %Y"
-    if periodo == "dia":
+    if periodo == "d":
         datestr = "%d de %B de %Y"
-    elif periodo == "sem":
+    elif periodo == "w":
         datestr = "%Y, semana %W"
-
     return pg.Layout(
         margin=dict(l=0, r=0, t=0, b=0),
         template="plotly_white",
@@ -45,8 +45,8 @@ def _gerar_layout(
         hovermode="x unified",
         xaxis=dict(
             tickmode="array",
-            tickvals=[i for i in tbl[date_col]],
-            ticktext=[i.strftime(datestr) for i in tbl[date_col]],
+            tickvals=tbl[date_col],
+            ticktext=tbl[date_col],
             showticklabels=False,
         ),
         yaxis_tickprefix="R$",
@@ -126,27 +126,21 @@ def balancos(periodo, n):
 
 
 def saldo_acum(periodo, n):
-    tbl = _preprocessar_data(
-        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo
-    )
+    datasource = data.AggregatedAmountSource()
+    datasource.update_date_format(date_freq=periodo)
+    tbl = pd.DataFrame(datasource.get_data_slice([0, n]))
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
-
-    tbl["SaldoAcum"] = (tbl["Somas"] + tbl["Abatimentos"]).cumsum()
-    tbl["SaldoAcumDisplay"] = tbl["SaldoAcum"].apply(
-        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
-    )
-
-    layout = _gerar_layout(tbl, periodo)
-
+    print(tbl)
+    layout = _gerar_layout(tbl, periodo, "Date")
     fig = pg.Figure(layout=layout)
     fig.add_trace(
         pg.Scatter(
-            x=tbl["Data"],
-            y=tbl["SaldoAcum"],
+            x=tbl["Date"],
+            y=tbl["AcumBalance"],
             name="Saldo",
             mode="lines+markers",
-            customdata=tbl[["SaldoAcumDisplay"]],
+            customdata=tbl[["AcumBalance"]],
             hovertemplate="<b>R$ %{customdata[0]}</b>",
             offsetgroup=0,
             marker=dict(color=CORES[0]),

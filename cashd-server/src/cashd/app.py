@@ -92,8 +92,9 @@ def btn_gerar_main_plot(state: State | None = None):
         p = dropdown_periodo_val[0]
         n = int(slider_val)
         tipo = dropdown_plot_type_val
+    print(f"state user {get_state_id(state)} selected view {tipo}, {n=} {p=}")
 
-    if tipo == "Saldo Acumulado":
+    if tipo.lower() == "saldo acumulado":
         fig = plot.saldo_acum(periodo=p, n=n)
     else:
         fig = plot.balancos(periodo=p, n=n)
@@ -623,7 +624,7 @@ show_dialog_edit_customer = False
 slider_lov = [str(i) for i in list(range(10, 51)) + ["Tudo"]]
 slider_val = slider_lov[0]
 
-dropdown_periodo_lov = [("mes", "Mensal"), ("sem", "Semanal"), ("dia", "Diário")]
+dropdown_periodo_lov = [("m", "Mensal"), ("w", "Semanal"), ("d", "Diário")]
 dropdown_periodo_val = dropdown_periodo_lov[0]
 
 dropdown_plot_type_val = "Balanço"
