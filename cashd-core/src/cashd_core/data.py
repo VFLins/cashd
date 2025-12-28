@@ -579,7 +579,7 @@ class _DataSource:
                 self.max_idx = max_idx
 
     @property
-    def current_data(self):
+    def current_data(self) -> list:
         """Assigns the data based on the current metadata values to
         `current_data`.
         """
@@ -588,6 +588,25 @@ class _DataSource:
             stmt = stmt.limit(self.rows_per_page).offset(self.min_idx)
         with Session(self.ENGINE) as ses:
             return ses.execute(stmt).all()
+
+    def get_data_slice(self, irange: tuple[int, int] | None = None) -> list:
+        """Generator containing all rows of this source, or a range of indexes.
+        The idexes follow the same as Python's.
+        """
+        stmt = self.SELECT_STMT
+        reverse = False
+        if irange:
+            first, last = irange
+            if last < first:
+                first, last = last, first
+                reverse = True
+            stmt = stmt.limit(last-first).offset(first)
+        with Session(self.ENGINE) as ses:
+            result = ses.execute(stmt).all()
+            if reverse:
+                return list(reversed(result))
+            return result
+
 
     def is_paginated(self) -> bool:
         try:
