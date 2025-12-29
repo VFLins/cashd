@@ -1,7 +1,10 @@
 import plotly.graph_objects as pg
 import pandas as pd
+
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from typing import Literal
+from numbers import Number
 
 from cashd import db
 from cashd_core import data
@@ -10,9 +13,20 @@ from cashd_core import data
 CORES = ["#478eff", "gray"]
 
 
+def _preprocess_value(tbl: pd.DataFrame, value_cols: list[str]) -> pd.DataFrame:
+    """Retorna `tbl` com a `value_col` formatada como `Decimal` com duas casas."""
+    def handle_currency(val: str | Number):
+        return Decimal(val).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    for value_col in value_cols:
+        if tbl[value_col].dtype in ["object", "string"]:
+            tbl[value_col] = tbl[value_col].apply(
+                lambda val: handle_currency(val.replace(",", "."))
+            )
+    return tbl
+
 def _preprocessar_data(
     tbl: pd.DataFrame,
-    periodo: Literal["mes", "sem", "dia"],
+    periodo: Literal["m", "w", "d"],
     date_col: str = "Data",
 ) -> pd.DataFrame:
     """
@@ -41,6 +55,7 @@ def _gerar_layout(
     return pg.Layout(
         margin=dict(l=0, r=0, t=0, b=0),
         template="plotly_white",
+        separators=", ",
         showlegend=False,
         hovermode="x unified",
         xaxis=dict(
@@ -128,10 +143,10 @@ def balancos(periodo, n):
 def saldo_acum(periodo, n):
     datasource = data.AggregatedAmountSource()
     datasource.update_date_format(date_freq=periodo)
-    tbl = pd.DataFrame(datasource.get_data_slice([0, n]))
+    tbl = pd.DataFrame(datasource.get_data_slice([n, 0])) # 0 after to revert order
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
-    print(tbl)
+    tbl = _preprocess_value(tbl, value_cols=["AcumBalance"])
     layout = _gerar_layout(tbl, periodo, "Date")
     fig = pg.Figure(layout=layout)
     fig.add_trace(
@@ -141,7 +156,7 @@ def saldo_acum(periodo, n):
             name="Saldo",
             mode="lines+markers",
             customdata=tbl[["AcumBalance"]],
-            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            hovertemplate="<b>R$ %{customdata[0]:,.2f}</b>",
             offsetgroup=0,
             marker=dict(color=CORES[0]),
         )
