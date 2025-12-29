@@ -293,26 +293,6 @@ class MainSection(BaseSection):
         self.amount_input.enabled = True
         self.customer_options_button.enabled = True
 
-    def on_click_insert(self, widget):
-        try:
-            valor = int(self.amount_input.value)
-        except TypeError:
-            print("O campo de valor está vazio")
-            return
-        if valor == 0:
-            print("O valor não pode ser zero")
-            return
-        if valor > const.MAX_ALLOWED_VALUE:
-            print("Valor acima do permitido")
-            return
-        operation = "adicionou"
-        if valor < 0:
-            operation = "removeu"
-        print(
-            f"{self.SELECTED_CUSTOMER.NomeCompleto} "
-            f"{operation} R$ {abs(valor)/100:.2f}"
-        )
-        self.amount_input.value = None
 
     def _upd_selected_info(self):
         self.customer_options_section.current_tab = 0
@@ -445,7 +425,8 @@ class MainSection(BaseSection):
 
     def update_typed_transaction_amount(self, widget):
         setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
-        if widget.value == "":
+        amount = self.format_currency_input(self.amount_input.value)
+        if (widget.value == "") or not (self.transaction_amount_is_valid(amount)):
             self.insert_amount_label.text = f"Valor: R$ 0,00"
             self.insert_transac_button.enabled = False
             return
@@ -501,16 +482,34 @@ class MainSection(BaseSection):
         self.customer_selector.refresh(self.CUSTOMER_LIST)
 
     def insert_transaction(self, widget: Button):
+        """Register transaction data to the database."""
+        amount = self.format_currency_input(self.amount_input.value)
+        if not self.is_valid_currency(amount):
+            return
         transac_data = data.tbl_transacoes(
             IdCliente=self.SELECTED_CUSTOMER.Id,
             CarimboTempo=dt.datetime.now(),
             DataTransac=self.date_input_controls.value,
-            Valor=int(decimal.Decimal(self.amount_input.value.replace(",", ".")) * 100),
+                Valor=amount,
         )
         transac_data.write()
         self.insert_transac_button.enabled = False
         self.amount_input.value = ""
         self._upd_selected_info()
+
+    @staticmethod
+    def is_valid_currency(amount: int) -> bool:
+        if amount == 0:
+            return False
+        if amount > const.MAX_ALLOWED_VALUE:
+            return False
+        return True
+
+    @staticmethod
+    def format_currency_input(input: str) -> int:
+        if input == "":
+            return 0
+        return int(decimal.Decimal(input.replace(",", ".")) * 100)
 
     async def remove_selected_transaction(self, widget: Button):
         transac_id = self.transaction_history_table.selection.id
