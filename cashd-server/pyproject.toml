@@ -22,7 +22,7 @@ classifiers = [
     "Operating System :: Microsoft :: Windows :: Windows 11",
     "License :: OSI Approved :: MIT License"
 ]
-version = "0.3.3"
+version = "0.3.3post1"
 dependencies = [
     "cashd-core==0.3.3",
     "taipy==4.*",
