@@ -1,8 +1,9 @@
+import re
 import decimal
 import datetime as dt
-import re
 from sqlalchemy import exc
 
+from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from toga.dialogs import ConfirmDialog
@@ -27,7 +28,9 @@ class MainSection(BaseSection):
     SELECTED_CUSTOMER = data.tbl_clientes()
     CUSTOMER_LIST = data.CustomerListSource()
 
-    def __init__(self):
+    def __init__(self, app: App):
+        super().__init__(app)
+
         ### widgets: all contexts ###
         self.selected_customer_info = Label(
             f"Nome: {const.NA_VALUE}\n"
@@ -65,46 +68,15 @@ class MainSection(BaseSection):
         )
         """Button that returns the user to the context of customer selection."""
 
-        self.insert_transac_context_button = Button(
-            "Inserir transação",
-            id="add_transac_button",
-            style=style.CONTEXT_BUTTON,
-            enabled=False,
-            on_press=self.set_context_screen,
-        )
-        """Button that switches to 'Inserir transação' context, enabled only if a customer is selected."""
-
-        self.transac_history_context_button = Button(
-            "Histórico de transações",
-            id="show_transac_button",
-            style=style.CONTEXT_BUTTON,
-            enabled=False,
-            on_press=self.set_context_screen,
-        )
-        """Button that switches to 'Histórico de transações' context, enabled only if a customer is selected."""
-
-        self.customer_data_context_button = Button(
-            "Dados do cliente",
-            id="customer_data_button",
-            style=style.CONTEXT_BUTTON,
-            enabled=False,
-            on_press=self.set_context_screen,
-        )
-        """Button that switches to 'Dados do cliente' context, enabled only if
-        a customer is selected.
-        """
-
         ### widgets: 'select' context ###
-        self.customer_list_page_elements = PaginatedDetailedList(
+        self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
-            on_select=self.on_customer_selection,
+            on_select=self.select_customer,
             style=style.TABLE_OF_DATA,
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
         """
-        self.customer_list_page_elements.widget.add(
-            self.customer_options_button)
 
         ### widgets: 'insert' context ###
         self.date_input_controls = widgets.HorizontalDateForm()
@@ -122,17 +94,18 @@ class MainSection(BaseSection):
             style=style.user_input(TextInput),
             placeholder="0,00",
             on_change=self.update_typed_transaction_amount,
-            on_confirm=self.insert_transac_button_click,
+            on_confirm=self.insert_transaction,
         )
         """Text input that only allows integer and decimal numbers. Receives the
         currency amount of the transaction.
         """
+        self.amount_input.enabled = False
 
         self.insert_transac_button = Button(
             "Inserir",
             style=style.CONTEXT_BUTTON,
             enabled=False,
-            on_press=self.insert_transac_button_click,
+            on_press=self.insert_transaction,
         )
         """Button to write the transaction with date and currency amount inserted
         by the user to the database.
@@ -166,6 +139,7 @@ class MainSection(BaseSection):
 
         ### widgets: 'customer data' context ###
         self.customer_data_form = widgets.form.FormHandler(
+            n_cols=2,
             on_change=self.update_customer_data_field,
             on_change_required=self.update_customer_data_required_field,
         )
@@ -195,7 +169,7 @@ class MainSection(BaseSection):
         self.insert_transaction_context_content = Box(
             style=style.FILLING_VERTICAL_BOX,
             children=[
-                self.date_input_controls.full_contents,
+                self.date_input_controls.widget,
                 Box(
                     style=Pack(
                         width=const.CONTENT_WIDTH,
@@ -206,8 +180,7 @@ class MainSection(BaseSection):
                         self.insert_amount_label,
                         self.amount_input,
                         widgets.elems.form_options_container(
-                            children=[
-                                self.insert_transac_button], alignment="center"
+                            children=[self.insert_transac_button], alignment="center"
                         ),
                     ],
                 ),
@@ -237,105 +210,100 @@ class MainSection(BaseSection):
         )
         self.customer_data_context_content = ScrollContainer(
             content=Box(
-                style=Pack(direction=COLUMN, align_items="center",
-                           width=const.FORM_WIDTH),
+                style=Pack(
+                    direction=COLUMN, align_items="center", width=const.FORM_WIDTH
+                ),
                 children=[
-                    self.customer_data_form.full_contents,
+                    self.customer_data_form.widget,
                     self.customer_data_interaction_buttons,
                 ],
             )
         )
         ### containers: 'options' context ###
         self.customer_options_section = OptionContainer(
-            style=Pack(width=const.CONTENT_WIDTH -
-                       5, font_size=const.FONT_SIZE),
+            style=Pack(
+                width=const.CONTENT_WIDTH - 5,
+                font_size=const.FONT_SIZE,
+                padding=(0, 0, 0, 10),
+            ),
             content=[
                 ("Nova transação", self.insert_transaction_context_content),
                 ("Histórico de transações", self.transaction_history_context_content),
-                ("Informações do cliente", self.customer_data_context_content),
+                ("Informações", self.customer_data_context_content),
             ],
         )
-        ### containers: all contexts ###
-        self.context_navigation_buttons = Box(
-            style=style.ROW_OF_BUTTONS,
-            children=[
-                self.return_button,
-                self.insert_transac_context_button,
-                self.transac_history_context_button,
-                self.customer_data_context_button,
-            ],
-        )
-        self.customer_description_section = Box(
-            style=style.HORIZONTAL_BOX,
-            children=[
-                self.customer_options_button,
-                self.selected_customer_info,
-            ],
-        )
-        self.header = Box(
-            style=style.VERTICAL_BOX,
-            children=[
-                self.customer_description_section,
-            ],
+        ### main container ###
+        self.header_block = Box(style=style.HORIZONTAL_BOX)
+        """Contents on the topmost part of this section, displaying the selected
+        customer's data.
+        """
+        self.body_block = Box(style=style.HORIZONTAL_BOX)
+        """Contents of most of the interactive part of this section, including
+        all controls that interact with user data.
+        """
+        self.head = Box(
+            style=Pack(width=1010, direction="row"),
+            children=[self.header_block],
         )
         self.body = ScrollContainer(
-            style=style.PAGE_BODY,
-            content=self.customer_list_page_elements.widget,
+            style=Pack(width=1010, direction="row", flex=1),
+            content=self.body_block,
         )
-
         self.full_contents = Box(
             style=style.FULL_CONTENTS,
-            children=[
-                self.header,
-                self.body,
-            ],
+            children=[self.head, self.body],
         )
+        self.set_layout_1()
+        self.layout_id: int = 1
 
     # methods
-    def on_customer_selection(self, widget: Selection):
-        if widget.selection is None:
-            self.SELECTED_CUSTOMER.clear()
-            return
-        context_buttons = [
-            self.customer_data_context_button,
-            self.insert_transac_context_button,
-            self.transac_history_context_button,
+    def set_layout_0(self):
+        """Returns this section's widgets in a single-column layout."""
+        self.header_block.clear()
+        self.body_block.clear()
+        self.header_block.add(
             self.customer_options_button,
-        ]
-        for button in context_buttons:
-            button.enabled = True
+            self.selected_customer_info,
+        )
+        self.customer_selector.width = const.CONTENT_WIDTH
+        self.body_block.add(self.customer_selector.widget)
+        self.head.style = style.VERTICAL_BOX
+        self.body.style = style.PAGE_BODY
+
+    def set_layout_1(self):
+        """Returns this section's widgets in a two-column layout."""
+        self.header_block.clear()
+        self.body_block.clear()
+        self.header_block.add(self.selected_customer_info)
+        self.body_block.add(
+            self.customer_selector.widget, self.customer_options_section
+        )
+        self.customer_selector.width = const.CONTENT_WIDTH - 60
+        self.head.style = Pack(width=950, direction="row")
+        self.body.style = Pack(width=950, direction="row", flex=1)
+
+    def select_customer(self, widget: Selection):
+        if widget.selection is None:
+            self.amount_input.enabled = False
+            self.customer_options_button.enabled = False
+            return
         print(f"selected: {widget.selection}")
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
         self._upd_selected_info()
+        self.amount_input.enabled = True
+        self.customer_options_button.enabled = True
 
-    def on_click_insert(self, widget):
-        try:
-            valor = int(self.amount_input.value)
-        except TypeError:
-            print("O campo de valor está vazio")
-            return
-        if valor == 0:
-            print("O valor não pode ser zero")
-            return
-        if valor > const.MAX_ALLOWED_VALUE:
-            print("Valor acima do permitido")
-            return
-        operation = "adicionou"
-        if valor < 0:
-            operation = "removeu"
-        print(
-            f"{self.SELECTED_CUSTOMER.NomeCompleto} "
-            f"{operation} R$ {abs(valor)/100:.2f}"
-        )
-        self.amount_input.value = None
 
     def _upd_selected_info(self):
+        self.customer_options_section.current_tab = 0
         self.selected_customer_info.text = (
             f"Nome: {self.SELECTED_CUSTOMER.NomeCompleto}\n"
             f"Local: {self.SELECTED_CUSTOMER.Local}\n"
             f"Saldo devedor: R$ {self.SELECTED_CUSTOMER.Saldo}"
         )
         self.transaction_history_table.data = self.SELECTED_CUSTOMER.Transacs
+        self.customer_data_form.clear()
+        self.customer_data_form.add_table_fields(self.SELECTED_CUSTOMER)
 
     def _search_results(self, search: str):
         if len(search) == 0:
@@ -393,33 +361,31 @@ class MainSection(BaseSection):
         self.upd_customer_list(widget)
 
     def set_context_screen(self, widget: Button | None = None):
-        context_names = {
-            "return_button": self.customer_list_page_elements.widget,
-            "customer_options_button": self.customer_options_section,
-        }
-        if not widget:
-            return
-        context_elem = context_names.get(widget.id)
-        if not context_elem:
-            return
+        """Change between customer selection and customer data management, depending on
+        the button clicked.
+        """
         if widget.id == "customer_options_button":
-            self.customer_description_section.replace(
+            self.header_block.replace(
                 old_child=self.customer_options_button,
                 new_child=self.return_button,
             )
-            self.customer_data_form.clear()
-            self.customer_data_form.add_table_fields(self.SELECTED_CUSTOMER)
-            self.customer_options_section.current_tab = 0
+            self.body_block.replace(
+                old_child=self.customer_selector.widget,
+                new_child=self.customer_options_section,
+            )
         if widget.id == "return_button":
-            self.customer_description_section.replace(
+            self.header_block.replace(
                 old_child=self.return_button,
                 new_child=self.customer_options_button,
             )
+            self.body_block.replace(
+                old_child=self.customer_options_section,
+                new_child=self.customer_selector.widget,
+            )
+            self._clear_customer_selection()
             self.update_data_widgets()
-        self.body.content = context_elem
         self._refresh_navigation_buttons(selection=widget.id)
         self._refresh_help_message(selection=widget.id)
-        self._clear_customer_selection(selection=widget.id)
 
     def _refresh_navigation_buttons(self, selection: str):
         buttons = {
@@ -444,19 +410,23 @@ class MainSection(BaseSection):
         }
         self.help_msg.text = help_messages[selection]
 
-    def _clear_customer_selection(self, selection: str):
-        if selection != "return_button":
-            return
+    def _clear_customer_selection(self):
+        self.SELECTED_CUSTOMER.clear()
+        self.amount_input.enabled = False
+        self.insert_transac_button.enabled = False
+        self.transaction_history_table.data = None
+        self.customer_data_form.clear()
         self.selected_customer_info.text = (
             f"Nome: {const.NA_VALUE}\n"
             f"Local: {const.NA_VALUE}\n"
             f"Saldo devedor: R$ {const.NA_VALUE}"
         )
-        self.customer_list_page_elements.search_field.value = ""
+        self.customer_selector.search_field.value = ""
 
     def update_typed_transaction_amount(self, widget):
         setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
-        if widget.value == "":
+        amount = self.format_currency_input(self.amount_input.value)
+        if (widget.value == "") or not (self.transaction_amount_is_valid(amount)):
             self.insert_amount_label.text = f"Valor: R$ 0,00"
             self.insert_transac_button.enabled = False
             return
@@ -470,7 +440,8 @@ class MainSection(BaseSection):
                 amount:.2f}".replace(
                 ".", ","
             )
-            self.insert_transac_button.enabled = True
+            if self.SELECTED_CUSTOMER.required_fields_are_filled():
+                self.insert_transac_button.enabled = True
 
     def select_transaction(self, widget):
         self.remove_transaction_button.enabled = True
@@ -508,20 +479,37 @@ class MainSection(BaseSection):
             print(f"Alteração proibida: {str(err.args[0])}")
 
     def update_data_widgets(self):
-        self.customer_list_page_elements.refresh(self.CUSTOMER_LIST)
+        self.customer_selector.refresh(self.CUSTOMER_LIST)
 
-    def insert_transac_button_click(self, widget: Button):
+    def insert_transaction(self, widget: Button):
+        """Register transaction data to the database."""
+        amount = self.format_currency_input(self.amount_input.value)
+        if not self.is_valid_currency(amount):
+            return
         transac_data = data.tbl_transacoes(
             IdCliente=self.SELECTED_CUSTOMER.Id,
             CarimboTempo=dt.datetime.now(),
             DataTransac=self.date_input_controls.value,
-            Valor=int(decimal.Decimal(
-                self.amount_input.value.replace(",", ".")) * 100),
+                Valor=amount,
         )
         transac_data.write()
         self.insert_transac_button.enabled = False
         self.amount_input.value = ""
         self._upd_selected_info()
+
+    @staticmethod
+    def is_valid_currency(amount: int) -> bool:
+        if amount == 0:
+            return False
+        if amount > const.MAX_ALLOWED_VALUE:
+            return False
+        return True
+
+    @staticmethod
+    def format_currency_input(input: str) -> int:
+        if input == "":
+            return 0
+        return int(decimal.Decimal(input.replace(",", ".")) * 100)
 
     async def remove_selected_transaction(self, widget: Button):
         transac_id = self.transaction_history_table.selection.id
@@ -529,7 +517,7 @@ class MainSection(BaseSection):
         transac.read(row_id=transac_id)
         confirm = ConfirmDialog(
             title="Remover transação?",
-            message=f"Data: {transac.DataTransac}\nValor: {transac.Valor/100}"
+            message=f"Data: {transac.DataTransac}\nValor: {transac.Valor/100}",
         )
         if await widget.app.dialog(confirm):
             transac.delete()
@@ -541,3 +529,20 @@ class MainSection(BaseSection):
                 f"Removed {transac_id=} from {
                     self.SELECTED_CUSTOMER.NomeCompleto}"
             )
+
+    def rearrange_widgets(self):
+        w, h = self.window_size
+        expected_layout_id = 0 if (w < 980) else 1
+        if expected_layout_id == self.layout_id:
+            return
+        match expected_layout_id:
+            case 0:
+                self.set_layout_0()
+            case 1:
+                self.set_layout_1()
+        self.full_contents.clear()
+        self.full_contents.add(self.head)
+        self.full_contents.add(self.body)
+        self.full_contents.style = style.FULL_CONTENTS
+        self.full_contents.refresh()
+        self.layout_id = expected_layout_id

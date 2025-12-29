@@ -45,8 +45,7 @@ def form_options_container(children, alignment="end") -> Box:
     """
     inner_container = Box(style=ROW_OF_BUTTONS, children=children)
     outer_container = Box(
-        style=Pack(direction="column", align_items=alignment,
-                   width=const.FORM_WIDTH),
+        style=Pack(direction="column", align_items=alignment, width=const.FORM_WIDTH),
         children=[inner_container],
     )
     return outer_container
@@ -71,8 +70,7 @@ def input_annotation(annotation_type: Literal["label", "legend"] = "label") -> P
     elif annotation_type == "legend":
         return Pack(font_size=const.SMALL_FONT_SIZE, margin=(0, 0, 10, 5))
     else:
-        raise ValueError(
-            f"{annotation_type=}, expected one of 'label', 'legend'.")
+        raise ValueError(f"{annotation_type=}, expected one of 'label', 'legend'.")
 
 
 def number_input_width():
@@ -103,11 +101,11 @@ ROW_OF_BUTTONS = Pack(
 )
 VERTICAL_BOX = Pack(
     direction=COLUMN,
-    alignment="center",
+    align_items="center",
 )
 FILLING_VERTICAL_BOX = Pack(
     direction=COLUMN,
-    alignment="center",
+    align_items="center",
     flex=1,
 )
 HORIZONTAL_BOX = Pack(
@@ -119,19 +117,15 @@ HORIZONTAL_BOX = Pack(
     background_color=TRANSPARENT,
 )
 FULL_CONTENTS = Pack(
-    **write_args(
-        direction=COLUMN,
-        alignment="center",
-        padding=(0, 0, 20, 0),
-    )
+    direction=COLUMN,
+    align_items="center",
+    padding=(0, 0, 20, 0),
 )
 PAGE_BODY = Pack(
-    **write_args(
-        flex=1,
-        width=const.CONTENT_WIDTH + 20,
-        direction=COLUMN,
-        alignment="center",
-    )
+    flex=1,
+    width=const.CONTENT_WIDTH + 20,
+    direction=COLUMN,
+    align_items="center",
 )
 DATE_INPUT_CONTROLS = Pack(**write_args(direction=ROW, alignment="center"))
 TABLE_OF_DATA = Pack(
@@ -144,19 +138,15 @@ INLINE_LABEL = Pack(
     )
 )
 GENERIC_LABEL = Pack(
-    **write_args(
-        width=const.CONTENT_WIDTH,
-        alignment="left",
-        font_size=const.SMALL_FONT_SIZE,
-        padding=(0, 0, 22, 0),
-    )
+    width=const.CONTENT_WIDTH,
+    align_items="start",
+    font_size=const.SMALL_FONT_SIZE,
+    padding=(0, 0, 22, 0),
 )
 SHORT_FIELD = Pack(
-    **write_args(
-        padding=8,
-        width=180,
-        font_size=const.FONT_SIZE,
-    )
+    padding=8,
+    width=180,
+    font_size=const.FONT_SIZE,
 )
 VERTICAL_ALIGNED_BUTTON = Pack(
     **write_args(
