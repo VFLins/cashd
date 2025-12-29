@@ -131,4 +131,4 @@ class Cashd(App):
 
 
 def main():
-    return Cashd("Cashd", "br.com.vitorlins.cashd")
+    return Cashd(formal_name="Cashd", app_id="br.com.vitorlins.cashd", home_page="https://vitorlins.com.br/software/cashd")

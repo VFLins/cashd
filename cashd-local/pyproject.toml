@@ -16,9 +16,9 @@ dependencies = [
 
 [tool.briefcase]
 project_name = "Cashd"
-bundle = "pro.vitorlins.cashd"
+bundle = "br.com.vitorlins.cashd"
 version = "0.3.3"
-url = "https://vitorlins.pro/cashd"
+url = "https://vitorlins.com.br/software/cashd"
 license.file = "LICENSE"
 author = "Vitor F. Lins"
 author_email = "vflins@live.com"
