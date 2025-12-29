@@ -13,6 +13,7 @@ from os import path
 from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
 from cashd_core import data, prefs, backup
+from cashd_core.const import MAX_ALLOWED_VALUE
 from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
 
@@ -45,14 +46,14 @@ def btn_next_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
     selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_next_page()
-    chg_select_table_stats(state=state)
+    update_displayed_table(state=state)
 
 
 def btn_prev_page_displayed_table(state: State):
     tablename = state.dropdown_table_type_val
     selected_source = get_table_datasource(state=state, tablename=tablename)
     selected_source.fetch_previous_page()
-    chg_select_table_stats(state=state)
+    update_displayed_table(state=state)
 
 
 def show_dialog(state: State, id: str, payload: dict, show: str):
@@ -73,17 +74,6 @@ def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
     btn_mostrar_dialogo(state, id, payload, show="edita_cliente")
 
 
-def btn_mostrar_dialogo_selec_transac(state: State, id: str, payload: dict):
-    customer = data.tbl_clientes()
-    with state as s:
-        customer.read(row_id=s.SELECTED_CUSTOMER.Id)
-        s.TRANSACS_USUARIO = [
-            LOVItem(Id=str(t["id"]), Value=f"{t['data']} | {t['valor']}")
-            for t in customer.Transacs
-        ]
-    btn_mostrar_dialogo(state, id, payload, "selec_transac")
-
-
 def btn_atualizar_listagem(state: State):
     with db.DB_ENGINE.connect() as conn, conn.begin():
         state.df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
@@ -96,14 +86,15 @@ def btn_gerar_main_plot(state: State | None = None):
 
     if state:
         p = state.dropdown_periodo_val[0]
-        n = int(state.slider_val[0])
+        n = int(state.slider_val)
         tipo = state.dropdown_plot_type_val
     else:
         p = dropdown_periodo_val[0]
-        n = int(slider_val[0])
+        n = int(slider_val)
         tipo = dropdown_plot_type_val
+    print(f"state user {get_state_id(state)} selected view {tipo}, {n=} {p=}")
 
-    if tipo == "Saldo Acumulado":
+    if tipo.lower() == "saldo acumulado":
         fig = plot.saldo_acum(periodo=p, n=n)
     else:
         fig = plot.balancos(periodo=p, n=n)
@@ -197,6 +188,9 @@ def add_transaction(state: State):
         if not is_valid_currency_input(state.form_transac.Valor):
             notify(state, "error", "Valor inválido, insira apenas números")
             return
+        if int(state.form_transac.Valor) > MAX_ALLOWED_VALUE:
+            notify(state, "error", "Valor acima do permitido")
+            return
         state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
         state.form_transac.CarimboTempo = datetime.now()
         state.form_transac.write()
@@ -219,6 +213,7 @@ def add_customer(state: State):
     try:
         customer.write()
         notify(state, "success", message=f"Novo cliente adicionado: {customer.NomeCompleto}")
+        state.form_customer = data.get_default_customer()
         state.refresh("form_customer")
         state.NOMES_USUARIOS = get_customer_lov(state=state)
     except Exception as msg_erro:
@@ -354,9 +349,14 @@ def get_customer_transacs(state: State | None = None) -> pd.DataFrame:
     if (state is not None) and (customer.Id is not None):
         state.SELECTED_CUSTOMER_BALANCE = customer.Saldo
         state.SELECTED_CUSTOMER_PLACE = customer.Local
-    return pd.DataFrame(data=customer.Transacs).rename(
+    df = pd.DataFrame(data=customer.Transacs).rename(
         columns={"id": "Id", "data": "Data", "valor": "Valor"}
     )
+    # NOTE: add columns if table has no data, DataFrame.rename won't do it
+    # automatically, this avoids a Taipy warning.
+    if "Id" not in df.columns:
+        return pd.DataFrame(columns=["Id", "Data", "Valor"])
+    return df
 
 
 def get_customers_datasource(state: State | None = None) -> data.CustomerListSource:
@@ -621,11 +621,10 @@ show_dialog_confirm_edit_customer = False
 show_dialog_edit_customer = False
 
 # controles dos graficos
-slider_elems = list(range(10, 51)) + [None]
-slider_lov = [(str(i), str(i)) if i is not None else (i, "Tudo") for i in slider_elems]
+slider_lov = [str(i) for i in list(range(10, 51)) + ["Tudo"]]
 slider_val = slider_lov[0]
 
-dropdown_periodo_lov = [("mes", "Mensal"), ("sem", "Semanal"), ("dia", "Diário")]
+dropdown_periodo_lov = [("m", "Mensal"), ("w", "Semanal"), ("d", "Diário")]
 dropdown_periodo_val = dropdown_periodo_lov[0]
 
 dropdown_plot_type_val = "Balanço"

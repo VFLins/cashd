@@ -1,52 +1,53 @@
 import plotly.graph_objects as pg
 import pandas as pd
+
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from typing import Literal
+from numbers import Number
 
 from cashd import db
+from cashd_core import data
 
 
 CORES = ["#478eff", "gray"]
 
 
-def _preprocessar_data(
-    tbl: pd.DataFrame,
-    periodo: Literal["mes", "sem", "dia"],
-    date_col: str = "Data",
-) -> pd.DataFrame:
+def _preprocess_value(tbl: pd.DataFrame, value_cols: list[str]) -> pd.DataFrame:
+    """Returns `tbl` with `value_cols` formatted as `Decimal` with two decimal
+    places.
     """
-    Retorna `tbl` com a coluna de data `date_col` formatada corretamente
-    de acordo com a periodicidade em `periodo`
-    """
-    if periodo == "sem":
-        tbl[date_col] = tbl[date_col].apply(
-            lambda x: datetime.strptime(x + "-0", "%Y-%W-%w")
-        )
-    tbl[date_col] = pd.to_datetime(tbl.Data)
+    def handle_currency(val: str | Number):
+        return Decimal(val).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    for value_col in value_cols:
+        if tbl[value_col].dtype in ["object", "string"]:
+            tbl[value_col] = tbl[value_col].apply(
+                lambda val: handle_currency(val.replace(",", "."))
+            )
     return tbl
 
 
 def _gerar_layout(
-    tbl: pd.DataFrame, periodo: Literal["mes", "sem", "dia"], date_col: str = "Data"
+    tbl: pd.DataFrame, periodo: Literal["m", "w", "d"], date_col: str = "Data"
 ) -> pg.Layout:
     """
     Retorna um `plotly.graph_objects.Layout` gerado para o conjunto de dados `tbl`
     """
     datestr = "%B de %Y"
-    if periodo == "dia":
+    if periodo == "d":
         datestr = "%d de %B de %Y"
-    elif periodo == "sem":
+    elif periodo == "w":
         datestr = "%Y, semana %W"
-
     return pg.Layout(
         margin=dict(l=0, r=0, t=0, b=0),
         template="plotly_white",
+        separators=", ",
         showlegend=False,
         hovermode="x unified",
         xaxis=dict(
             tickmode="array",
-            tickvals=[i for i in tbl[date_col]],
-            ticktext=[i.strftime(datestr) for i in tbl[date_col]],
+            tickvals=tbl[date_col],
+            ticktext=tbl[date_col],
             showticklabels=False,
         ),
         yaxis_tickprefix="R$",
@@ -82,41 +83,34 @@ def mensagem(msg: str):
     return fig
 
 
-def balancos(periodo, n):
-    tbl = _preprocessar_data(
-        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo
-    )
+def balancos(periodo: Literal["m", "w", "d"], n: int) -> pg.Figure:
+    datasource = data.TransactionBalanceSource()
+    datasource.update_date_format(date_freq=periodo)
+    tbl = pd.DataFrame(datasource.get_data_slice([n, 0])) # 0 after to revert order
+    print(tbl)
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
-
-    tbl["SomasDisplay"] = tbl["Somas"].apply(
-        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
-    )
-    tbl["AbatDisplay"] = tbl["Abatimentos"].apply(
-        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
-    )
-
-    layout = _gerar_layout(tbl, periodo)
-
+    tbl = _preprocess_value(tbl, value_cols=["Sums", "Deductions"])
+    layout = _gerar_layout(tbl, periodo, date_col="Date")
     fig = pg.Figure(layout=layout)
     fig.add_trace(
         pg.Bar(
-            x=tbl["Data"],
-            y=tbl["Somas"],
+            x=tbl["Date"],
+            y=tbl["Sums"],
             name="Somas",
-            customdata=tbl[["SomasDisplay"]],
-            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            customdata=tbl[["Sums"]],
+            hovertemplate="<b>R$ %{customdata[0]:,.2f}</b>",
             offsetgroup=0,
             marker=dict(color=CORES[1]),
         )
     )
     fig.add_trace(
         pg.Bar(
-            x=tbl["Data"],
-            y=tbl["Abatimentos"],
+            x=tbl["Date"],
+            y=tbl["Deductions"],
             name="Abatimentos",
-            customdata=tbl[["AbatDisplay"]],
-            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            customdata=tbl[["Deductions"]],
+            hovertemplate="<b>R$ %{customdata[0]:,.2f}</b>",
             offsetgroup=0,
             marker=dict(color=CORES[0]),
         )
@@ -126,28 +120,22 @@ def balancos(periodo, n):
 
 
 def saldo_acum(periodo, n):
-    tbl = _preprocessar_data(
-        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo
-    )
+    datasource = data.AggregatedAmountSource()
+    datasource.update_date_format(date_freq=periodo)
+    tbl = pd.DataFrame(datasource.get_data_slice([n, 0])) # 0 after to revert order
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
-
-    tbl["SaldoAcum"] = (tbl["Somas"] + tbl["Abatimentos"]).cumsum()
-    tbl["SaldoAcumDisplay"] = tbl["SaldoAcum"].apply(
-        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
-    )
-
-    layout = _gerar_layout(tbl, periodo)
-
+    tbl = _preprocess_value(tbl, value_cols=["AcumBalance"])
+    layout = _gerar_layout(tbl, periodo, "Date")
     fig = pg.Figure(layout=layout)
     fig.add_trace(
         pg.Scatter(
-            x=tbl["Data"],
-            y=tbl["SaldoAcum"],
+            x=tbl["Date"],
+            y=tbl["AcumBalance"],
             name="Saldo",
             mode="lines+markers",
-            customdata=tbl[["SaldoAcumDisplay"]],
-            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            customdata=tbl[["AcumBalance"]],
+            hovertemplate="<b>R$ %{customdata[0]:,.2f}</b>",
             offsetgroup=0,
             marker=dict(color=CORES[0]),
         )
