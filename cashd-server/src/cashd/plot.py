@@ -14,7 +14,9 @@ CORES = ["#478eff", "gray"]
 
 
 def _preprocess_value(tbl: pd.DataFrame, value_cols: list[str]) -> pd.DataFrame:
-    """Retorna `tbl` com a `value_col` formatada como `Decimal` com duas casas."""
+    """Returns `tbl` with `value_cols` formatted as `Decimal` with two decimal
+    places.
+    """
     def handle_currency(val: str | Number):
         return Decimal(val).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     for value_col in value_cols:
@@ -22,22 +24,6 @@ def _preprocess_value(tbl: pd.DataFrame, value_cols: list[str]) -> pd.DataFrame:
             tbl[value_col] = tbl[value_col].apply(
                 lambda val: handle_currency(val.replace(",", "."))
             )
-    return tbl
-
-def _preprocessar_data(
-    tbl: pd.DataFrame,
-    periodo: Literal["m", "w", "d"],
-    date_col: str = "Data",
-) -> pd.DataFrame:
-    """
-    Retorna `tbl` com a coluna de data `date_col` formatada corretamente
-    de acordo com a periodicidade em `periodo`
-    """
-    if periodo == "sem":
-        tbl[date_col] = tbl[date_col].apply(
-            lambda x: datetime.strptime(x + "-0", "%Y-%W-%w")
-        )
-    tbl[date_col] = pd.to_datetime(tbl.Data)
     return tbl
 
 
@@ -97,41 +83,34 @@ def mensagem(msg: str):
     return fig
 
 
-def balancos(periodo, n):
-    tbl = _preprocessar_data(
-        tbl=db.saldos_transac_periodo(periodo=periodo, n=n), periodo=periodo
-    )
+def balancos(periodo: Literal["m", "w", "d"], n: int) -> pg.Figure:
+    datasource = data.TransactionBalanceSource()
+    datasource.update_date_format(date_freq=periodo)
+    tbl = pd.DataFrame(datasource.get_data_slice([n, 0])) # 0 after to revert order
+    print(tbl)
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
-
-    tbl["SomasDisplay"] = tbl["Somas"].apply(
-        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
-    )
-    tbl["AbatDisplay"] = tbl["Abatimentos"].apply(
-        lambda x: f"{x:_.2f}".replace(".", ",").replace("_", " ")
-    )
-
-    layout = _gerar_layout(tbl, periodo)
-
+    tbl = _preprocess_value(tbl, value_cols=["Sums", "Deductions"])
+    layout = _gerar_layout(tbl, periodo, date_col="Date")
     fig = pg.Figure(layout=layout)
     fig.add_trace(
         pg.Bar(
-            x=tbl["Data"],
-            y=tbl["Somas"],
+            x=tbl["Date"],
+            y=tbl["Sums"],
             name="Somas",
-            customdata=tbl[["SomasDisplay"]],
-            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            customdata=tbl[["Sums"]],
+            hovertemplate="<b>R$ %{customdata[0]:,.2f}</b>",
             offsetgroup=0,
             marker=dict(color=CORES[1]),
         )
     )
     fig.add_trace(
         pg.Bar(
-            x=tbl["Data"],
-            y=tbl["Abatimentos"],
+            x=tbl["Date"],
+            y=tbl["Deductions"],
             name="Abatimentos",
-            customdata=tbl[["AbatDisplay"]],
-            hovertemplate="<b>R$ %{customdata[0]}</b>",
+            customdata=tbl[["Deductions"]],
+            hovertemplate="<b>R$ %{customdata[0]:,.2f}</b>",
             offsetgroup=0,
             marker=dict(color=CORES[0]),
         )
