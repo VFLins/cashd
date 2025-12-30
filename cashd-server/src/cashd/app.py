@@ -12,7 +12,7 @@ from os import path
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
-from cashd_core import data, prefs, backup
+from cashd_core import data, prefs, backup, fmt
 from cashd_core.const import MAX_ALLOWED_VALUE
 from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
@@ -182,25 +182,18 @@ def add_transaction(state: State):
         )
         return
     try:
-        if is_empty_currency_input(state.form_transac.Valor):
-            notify(state, "error", "Valor não pode ser zero")
-            return
-        if not is_valid_currency_input(state.form_transac.Valor):
-            notify(state, "error", "Valor inválido, insira apenas números")
-            return
-        if int(state.form_transac.Valor) > MAX_ALLOWED_VALUE:
-            notify(state, "error", "Valor acima do permitido")
-            return
-        state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
-        state.form_transac.CarimboTempo = datetime.now()
-        state.form_transac.write()
-        print(f"state user {get_state_id(state)} added {state.form_transac}")
-        reset_transac_form_widgets(state=state)
+        if fmt.is_valid_currency(amount):
+            state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
+            state.form_transac.CarimboTempo = datetime.now()
+            state.form_transac.write()
+            print(f"state user {get_state_id(state)} added {state.form_transac}")
+            reset_transac_form_widgets(state=state)
+            notify(state, "success", "Nova transação adicionada")
+        else:
+            notify(state, "error", "O valor inserido é invalido")
     except Exception as err:
         notify(state, "error", str(err))
-        print(f"Unexpected {type(err)}: {err}")
-    else:
-        notify(state, "success", "Nova transação adicionada")
+        print(f"Erro inesperado '{type(err)}': {err}")
     finally:
         state.df_transac = get_customer_transacs(state=state)
 
@@ -287,14 +280,6 @@ def btn_mudar_minimizado():
 ####################
 # UTILS
 ####################
-
-
-def fmt_currency_input(inp: str) -> str:
-    """Formats a numeric string to currency, returns '0,00' if zeroed or invalid."""
-    try:
-        return f"{int(inp)/100:_.2f}".replace("_", " ").replace(".", ",")
-    except ValueError:
-        return "0,00"
 
 
 def is_valid_currency_input(inp: str) -> bool:
@@ -552,7 +537,8 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
 
 
 def chg_transac_valor(state: State) -> None:
-    state.display_tr_valor = fmt_currency_input(inp=state.form_transac.Valor)
+    amount = fmt.format_currency(state.form_transac.Valor)
+    state.display_tr_valor = fmt.display_currency(amount)
     state.refresh("form_transac")
     return
 
