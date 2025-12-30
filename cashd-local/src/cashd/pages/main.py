@@ -425,13 +425,12 @@ class MainSection(BaseSection):
 
     def update_typed_transaction_amount(self, widget):
         setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
-        amount: int = fmt.format_currency(value=widget.value)
-        if fmt.is_valid_currency(amount):
-            self.insert_amount_label.text = f"Valor: R$ {fmt.display_currency(amount)}"
+        amount_input = fmt.StringToCurrency(user_input=widget.value)
+        self.insert_amount_label.text = f"Valor: R$ {amount_input.display_value}"
+        if amount_input.is_valid():
             if self.SELECTED_CUSTOMER.required_fields_are_filled():
                 self.insert_transac_button.enabled = True
         else:
-            self.insert_amount_label.text = f"Valor: R$ 0,00"
             self.insert_transac_button.enabled = False
 
     def select_transaction(self, widget):
@@ -474,14 +473,14 @@ class MainSection(BaseSection):
 
     def insert_transaction(self, widget: Button):
         """Register transaction data to the database."""
-        amount = self.format_currency_input(self.amount_input.value)
-        if not fmt.is_valid_currency(amount):
+        amount_input = fmt.StringToCurrency(user_input=self.amount_input.value)
+        if not amount_input.is_valid():
             return
         transac_data = data.tbl_transacoes(
             IdCliente=self.SELECTED_CUSTOMER.Id,
             CarimboTempo=dt.datetime.now(),
             DataTransac=self.date_input_controls.value,
-                Valor=amount,
+            Valor=amount_input.value,
         )
         transac_data.write()
         self.insert_transac_button.enabled = False

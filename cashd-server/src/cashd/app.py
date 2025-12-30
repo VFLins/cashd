@@ -182,15 +182,19 @@ def add_transaction(state: State):
         )
         return
     try:
-        if fmt.is_valid_currency(amount):
-            state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
-            state.form_transac.CarimboTempo = datetime.now()
+        input_amount = fmt.StringToCurrency(user_input=state.form_transac.Valor)
+        if input_amount.is_valid():
+            state.form_transac.fill(data.tbl_transacoes(
+                IdCliente=state.SELECTED_CUSTOMER.Id,
+                CarimboTempo=datetime.now(),
+                Valor=input_amount.value,
+            ))
             state.form_transac.write()
             print(f"state user {get_state_id(state)} added {state.form_transac}")
             reset_transac_form_widgets(state=state)
             notify(state, "success", "Nova transação adicionada")
         else:
-            notify(state, "error", "O valor inserido é invalido")
+            notify(state, "error", input_amount.invalid_reason)
     except Exception as err:
         notify(state, "error", str(err))
         print(f"Erro inesperado '{type(err)}': {err}")
@@ -537,8 +541,8 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
 
 
 def chg_transac_valor(state: State) -> None:
-    amount = fmt.format_currency(state.form_transac.Valor)
-    state.display_tr_valor = fmt.display_currency(amount)
+    input_amount = fmt.StringToCurrency(user_input=state.form_transac.Valor)
+    state.display_tr_valor = input_amount.display_value
     state.refresh("form_transac")
     return
 
