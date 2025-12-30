@@ -17,7 +17,7 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.widgets.optioncontainer import OptionContainer
 
-from cashd_core import data
+from cashd_core import data, fmt
 
 from cashd import const, style, widgets
 from cashd.pages.base import BaseSection
@@ -425,23 +425,14 @@ class MainSection(BaseSection):
 
     def update_typed_transaction_amount(self, widget):
         setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
-        amount = self.format_currency_input(self.amount_input.value)
-        if (widget.value == "") or not (self.transaction_amount_is_valid(amount)):
-            self.insert_amount_label.text = f"Valor: R$ 0,00"
-            self.insert_transac_button.enabled = False
-            return
-        try:
-            amount = decimal.Decimal(re.sub(",", ".", widget.value))
-        except decimal.InvalidOperation:
-            self.insert_amount_label.text = "Insira um valor válido"
-            self.insert_transac_button.enabled = False
-        else:
-            self.insert_amount_label.text = f"Valor: R$ {
-                amount:.2f}".replace(
-                ".", ","
-            )
+        amount: int = fmt.format_currency(value=widget.value)
+        if fmt.is_valid_currency(amount):
+            self.insert_amount_label.text = f"Valor: R$ {fmt.display_currency(amount)}"
             if self.SELECTED_CUSTOMER.required_fields_are_filled():
                 self.insert_transac_button.enabled = True
+        else:
+            self.insert_amount_label.text = f"Valor: R$ 0,00"
+            self.insert_transac_button.enabled = False
 
     def select_transaction(self, widget):
         self.remove_transaction_button.enabled = True
@@ -484,7 +475,7 @@ class MainSection(BaseSection):
     def insert_transaction(self, widget: Button):
         """Register transaction data to the database."""
         amount = self.format_currency_input(self.amount_input.value)
-        if not self.is_valid_currency(amount):
+        if not fmt.is_valid_currency(amount):
             return
         transac_data = data.tbl_transacoes(
             IdCliente=self.SELECTED_CUSTOMER.Id,
@@ -496,20 +487,6 @@ class MainSection(BaseSection):
         self.insert_transac_button.enabled = False
         self.amount_input.value = ""
         self._upd_selected_info()
-
-    @staticmethod
-    def is_valid_currency(amount: int) -> bool:
-        if amount == 0:
-            return False
-        if amount > const.MAX_ALLOWED_VALUE:
-            return False
-        return True
-
-    @staticmethod
-    def format_currency_input(input: str) -> int:
-        if input == "":
-            return 0
-        return int(decimal.Decimal(input.replace(",", ".")) * 100)
 
     async def remove_selected_transaction(self, widget: Button):
         transac_id = self.transaction_history_table.selection.id
