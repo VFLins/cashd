@@ -178,8 +178,7 @@ class MainSection(BaseSection):
                         self.insert_amount_label,
                         self.amount_input,
                         widgets.elems.form_options_container(
-                            children=[
-                                self.insert_transac_button], alignment="center"
+                            children=[self.insert_transac_button], alignment="center"
                         ),
                     ],
                 ),

@@ -104,9 +104,7 @@ class FormHandler:
         width = self._get_rows_width(widgets=[], n_cols=n_cols)
         self._on_change = on_change
         self._widget = Box(
-            style=Pack(
-                direction=COLUMN, width=width, align_items="center"
-            )
+            style=Pack(direction=COLUMN, width=width, align_items="center")
         )
 
     @property
@@ -147,9 +145,7 @@ class FormHandler:
             style.width = form_width
         else:
             style = Pack(width=form_width)
-        self.n_cols = self._get_ncols(
-            widgets=fields, row_width=form_width
-        )
+        self.n_cols = self._get_ncols(widgets=fields, row_width=form_width)
         n_rows = ceil(len(fields) / self.n_cols)
         for rn in range(n_rows):
             min_idx = rn * self.n_cols
@@ -186,8 +182,7 @@ class FormHandler:
             return
         fieldnames, fields = zip(*self._fields.items())
         data: dict[str, str] = deepcopy(self.data)
-        form_width = self._get_rows_width(
-            widgets=self.fields.values(), n_cols=n_cols)
+        form_width = self._get_rows_width(widgets=self.fields.values(), n_cols=n_cols)
         self._widget.style.width = form_width
         self.clear()
         self.add_fields(fields=fields)
@@ -202,9 +197,7 @@ class FormHandler:
     def _get_rows_width(widgets: list[Widget], n_cols: int) -> int:
         """Returns the expected row width for the number of columns and widget list."""
         widths = [
-            wdg.style.width
-            for wdg in widgets
-            if wdg.style.width not in [None, "none"]
+            wdg.style.width for wdg in widgets if wdg.style.width not in [None, "none"]
         ]
         if widths:
             elem_width = max(widths)
@@ -216,9 +209,7 @@ class FormHandler:
     def _get_ncols(widgets: list[Widget], row_width: int) -> int:
         """Returns the expected number of columns for the row width and widget list."""
         widths = [
-            wdg.style.width
-            for wdg in widgets
-            if wdg.style.width not in [None, "none"]
+            wdg.style.width for wdg in widgets if wdg.style.width not in [None, "none"]
         ]
         if widths:
             elem_width = max(widths)
@@ -235,9 +226,7 @@ class FormHandler:
         """Populates `self.fields` with the children provided. Must run at the end of
         every transforming action.
         """
-        children = [
-            field for row in self.widget.children for field in row.children
-        ]
+        children = [field for row in self.widget.children for field in row.children]
         label_names = unique_strings(lst=[ch.id for ch in children])
         self._fields = {lb: ch for lb, ch in zip(label_names, children)}
 
@@ -249,10 +238,7 @@ class FormHandler:
     @property
     def on_change(self) -> Callable | None:
         """Handles `on_change` calls for every of it's `FormField`."""
-        on_change_calls = [
-            field.input.on_change
-            for field in self.fields.values()
-        ]
+        on_change_calls = [field.input.on_change for field in self.fields.values()]
         fields_are_set = all(call is not None for call in on_change_calls)
         if fields_are_set and (len(on_change_calls) > 0):
             return on_change_calls[0]
@@ -319,8 +305,7 @@ class HorizontalDateForm:
     @property
     def value(self):
         return date(
-            int(self.year_input.value), self._month_number(), int(
-                self.day_input.value)
+            int(self.year_input.value), self._month_number(), int(self.day_input.value)
         )
 
     @value.setter
@@ -388,7 +373,8 @@ def build_form_field(
 
 
 def get_form_fields(
-    table: data.dec_base, on_change: Callable | None = None,
+    table: data.dec_base,
+    on_change: Callable | None = None,
 ) -> List[FormField]:
     fieldnames = table.display_names.keys()
     return [build_form_field(table, fieldname, on_change) for fieldname in fieldnames]
