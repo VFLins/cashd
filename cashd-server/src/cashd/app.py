@@ -74,11 +74,6 @@ def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
     btn_mostrar_dialogo(state, id, payload, show="edita_cliente")
 
 
-def btn_atualizar_listagem(state: State):
-    with db.DB_ENGINE.connect() as conn, conn.begin():
-        state.df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
-
-
 def btn_gerar_main_plot(state: State | None = None):
     """
     Se `state=None` retorna um `plotly.graph_objects.Figure`, caso contrario, atualiza o valor
@@ -654,10 +649,6 @@ main_plot = btn_gerar_main_plot()
 
 # campo de pesquisa de clientes
 search_user_input_value = ""
-
-# listagem de clientes
-with db.DB_ENGINE.connect() as conn, conn.begin():
-    df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
 
 # valor inicial dos campos "Valor" e "Data" no menu "Adicionar Transacao"
 display_tr_valor = "0,00"
