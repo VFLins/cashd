@@ -20,7 +20,7 @@ para atender casos de uso diferentes:
 
 | [`cashd-local`](https://github.com/VFLins/cashd/tree/main/cashd-local) | [`cashd-server`](https://github.com/VFLins/cashd/tree/main/cashd-server)               |
 | :---                                                   | :---                                                                                                   |
-| <img alt="cashd-local-screenshot" src="https://github.com/user-attachments/assets/9cb7ccfb-35bf-4868-9d4b-a5d38de5978d" /> | <img alt="Captura de tela" src="https://github.com/user-attachments/assets/e9de059b-9ffa-4ef2-aa92-b933b0845315" /> |
+| <img alt="Captura de tela: Cashd local" src="https://github.com/user-attachments/assets/e21f483d-bd38-4d70-aa9a-dba5339c841b" /> | <img alt="Captura de tela: Cashd server" src="https://github.com/user-attachments/assets/e9de059b-9ffa-4ef2-aa92-b933b0845315" /> |
 | Instalação simples e convencional.                     | Instalação mais complexa e com mais dependências.                                                      |
 | Só pode ser usado no dispositivo em que foi instalado. | Indicado para ser hospedado em um servidor, mas também pode ser usado localmente como o `cashd-local`. |
 | Aparência nativa no sistema em que é instalado.        | Aparência de aplicativo Web, independente do dispositivo onde está sendo executado.                    |
