@@ -10,7 +10,7 @@ mesmo computador em que ele está instalado, para uma instalação mais mais ava
 possível acessar de múltiplos dispositivos simultaneamente, veja
 [`cashd-server`](https://github.com/VFLins/cashd/tree/main/cashd-server).
 
-<img width="650" alt="Captura de tela" src="https://github.com/user-attachments/assets/0c1791b2-e085-4da5-86d8-92e48ebcf3ac" />
+<img width="950" alt="Captura de tela: Cashd local" src="https://github.com/user-attachments/assets/e21f483d-bd38-4d70-aa9a-dba5339c841b" />
 
 ---
 
