@@ -830,6 +830,7 @@ def start_cashd(with_webview: bool = False):
             favicon="assets/PNG_LogoFavicon.png",
             watermark="",
             debug=debug,
+            change_delay=10,
         )
     if with_webview:
         taipy_thread = threading.Thread(target=run_taipy_gui)
