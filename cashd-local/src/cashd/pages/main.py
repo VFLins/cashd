@@ -1,13 +1,12 @@
 import re
-import decimal
 import datetime as dt
 from sqlalchemy import exc
 
 from toga.app import App
 from toga.style import Pack
-from toga.style.pack import COLUMN, ROW
+from toga.style.pack import COLUMN
 from toga.dialogs import ConfirmDialog
-from toga.widgets.box import Box, Column, Row
+from toga.widgets.box import Box
 from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
@@ -17,7 +16,7 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.widgets.optioncontainer import OptionContainer
 
-from cashd_core import data
+from cashd_core import data, fmt
 
 from cashd import const, style, widgets
 from cashd.pages.base import BaseSection
@@ -31,7 +30,7 @@ class MainSection(BaseSection):
     def __init__(self, app: App):
         super().__init__(app)
 
-        ### widgets: all contexts ###
+        # widgets: all contexts
         self.selected_customer_info = Label(
             f"Nome: {const.NA_VALUE}\n"
             f"Local: {const.NA_VALUE}\n"
@@ -68,7 +67,7 @@ class MainSection(BaseSection):
         )
         """Button that returns the user to the context of customer selection."""
 
-        ### widgets: 'select' context ###
+        # widgets: 'select' context
         self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.select_customer,
@@ -78,7 +77,7 @@ class MainSection(BaseSection):
         all registered customers.
         """
 
-        ### widgets: 'insert' context ###
+        # widgets: 'insert' context
         self.date_input_controls = widgets.HorizontalDateForm()
         """Custom date input form from 'Inserir transação' context."""
 
@@ -111,7 +110,7 @@ class MainSection(BaseSection):
         by the user to the database.
         """
 
-        ### widgets: 'transac history' context ###
+        # widgets: 'transac history' context
         self.transaction_history_table = Table(
             style=Pack(flex=1, font_size=const.FONT_SIZE),
             data=self.SELECTED_CUSTOMER.Transacs,
@@ -137,11 +136,10 @@ class MainSection(BaseSection):
         and current owed amount. This feature is aimed for thermal printers.
         """
 
-        ### widgets: 'customer data' context ###
+        # widgets: 'customer data' context
         self.customer_data_form = widgets.form.FormHandler(
             n_cols=2,
             on_change=self.update_customer_data_field,
-            on_change_required=self.update_customer_data_required_field,
         )
         """Multiple text input fields containing the current information of the
         selected customer.
@@ -165,7 +163,7 @@ class MainSection(BaseSection):
         """Button to write any changes made by the user on `customer_data_form_widgets`
         to the database. Enabled only when any information is changed."""
 
-        ### containers: 'insert' context ###
+        # containers: 'insert' context
         self.insert_transaction_context_content = Box(
             style=style.FILLING_VERTICAL_BOX,
             children=[
@@ -186,7 +184,7 @@ class MainSection(BaseSection):
                 ),
             ],
         )
-        ### containers: 'transac history' context ###
+        # containers: 'transac history' context
         self.transac_history_options = Box(
             style=Pack(direction=COLUMN, width=180, flex=1),
             children=[
@@ -201,7 +199,7 @@ class MainSection(BaseSection):
                 self.transac_history_options,
             ],
         )
-        ### containers: 'customer data' context ###
+        # containers: 'customer data' context
         self.customer_data_interaction_buttons = widgets.elems.form_options_container(
             children=[
                 self.undo_customer_data_changes_button,
@@ -219,7 +217,7 @@ class MainSection(BaseSection):
                 ],
             )
         )
-        ### containers: 'options' context ###
+        # containers: 'options' context
         self.customer_options_section = OptionContainer(
             style=Pack(
                 width=const.CONTENT_WIDTH - 5,
@@ -232,7 +230,7 @@ class MainSection(BaseSection):
                 ("Informações", self.customer_data_context_content),
             ],
         )
-        ### main container ###
+        # main container
         self.header_block = Box(style=style.HORIZONTAL_BOX)
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
@@ -256,7 +254,6 @@ class MainSection(BaseSection):
         self.set_layout_1()
         self.layout_id: int = 1
 
-    # methods
     def set_layout_0(self):
         """Returns this section's widgets in a single-column layout."""
         self.header_block.clear()
@@ -292,7 +289,6 @@ class MainSection(BaseSection):
         self._upd_selected_info()
         self.amount_input.enabled = True
         self.customer_options_button.enabled = True
-
 
     def _upd_selected_info(self):
         self.customer_options_section.current_tab = 0
@@ -425,37 +421,28 @@ class MainSection(BaseSection):
 
     def update_typed_transaction_amount(self, widget):
         setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
-        amount = self.format_currency_input(self.amount_input.value)
-        if (widget.value == "") or not (self.transaction_amount_is_valid(amount)):
-            self.insert_amount_label.text = f"Valor: R$ 0,00"
-            self.insert_transac_button.enabled = False
-            return
-        try:
-            amount = decimal.Decimal(re.sub(",", ".", widget.value))
-        except decimal.InvalidOperation:
-            self.insert_amount_label.text = "Insira um valor válido"
-            self.insert_transac_button.enabled = False
-        else:
-            self.insert_amount_label.text = f"Valor: R$ {
-                amount:.2f}".replace(
-                ".", ","
-            )
+        amount_input = fmt.StringToCurrency(user_input=widget.value)
+        self.insert_amount_label.text = f"Valor: R$ {
+            amount_input.display_value}"
+        if amount_input.is_valid():
             if self.SELECTED_CUSTOMER.required_fields_are_filled():
                 self.insert_transac_button.enabled = True
+        else:
+            self.insert_transac_button.enabled = False
 
     def select_transaction(self, widget):
         self.remove_transaction_button.enabled = True
         if widget.selection is None:
             self.remove_transaction_button.enabled = False
 
-    def update_customer_data_required_field(self, widget: Button):
+    def update_customer_data_field(self, widget):
+        """App behaviour when the user interacts with any of the fields of
+        `customer_data_form`.
+        """
         if self.customer_data_form.required_fields_are_filled():
             self.confirm_customer_data_changes_button.enabled = True
         else:
             self.confirm_customer_data_changes_button.enabled = False
-        self.update_customer_data_field(widget=widget)
-
-    def update_customer_data_field(self, widget: Button):
         self.undo_customer_data_changes_button.enabled = True
 
     def undo_customer_data_update(self, widget: Button):
@@ -483,33 +470,19 @@ class MainSection(BaseSection):
 
     def insert_transaction(self, widget: Button):
         """Register transaction data to the database."""
-        amount = self.format_currency_input(self.amount_input.value)
-        if not self.is_valid_currency(amount):
+        amount_input = fmt.StringToCurrency(user_input=self.amount_input.value)
+        if not amount_input.is_valid():
             return
         transac_data = data.tbl_transacoes(
             IdCliente=self.SELECTED_CUSTOMER.Id,
             CarimboTempo=dt.datetime.now(),
             DataTransac=self.date_input_controls.value,
-                Valor=amount,
+            Valor=amount_input.value,
         )
         transac_data.write()
         self.insert_transac_button.enabled = False
         self.amount_input.value = ""
         self._upd_selected_info()
-
-    @staticmethod
-    def is_valid_currency(amount: int) -> bool:
-        if amount == 0:
-            return False
-        if amount > const.MAX_ALLOWED_VALUE:
-            return False
-        return True
-
-    @staticmethod
-    def format_currency_input(input: str) -> int:
-        if input == "":
-            return 0
-        return int(decimal.Decimal(input.replace(",", ".")) * 100)
 
     async def remove_selected_transaction(self, widget: Button):
         transac_id = self.transaction_history_table.selection.id

@@ -12,7 +12,7 @@ from os import path
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
-from cashd_core import data, prefs, backup
+from cashd_core import data, prefs, backup, fmt
 from cashd_core.const import MAX_ALLOWED_VALUE
 from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
@@ -72,11 +72,6 @@ def btn_mostrar_dialogo_selec_cliente(state: State, id: str, payload: dict):
 
 def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
     btn_mostrar_dialogo(state, id, payload, show="edita_cliente")
-
-
-def btn_atualizar_listagem(state: State):
-    with db.DB_ENGINE.connect() as conn, conn.begin():
-        state.df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
 
 
 def btn_gerar_main_plot(state: State | None = None):
@@ -182,25 +177,22 @@ def add_transaction(state: State):
         )
         return
     try:
-        if is_empty_currency_input(state.form_transac.Valor):
-            notify(state, "error", "Valor não pode ser zero")
-            return
-        if not is_valid_currency_input(state.form_transac.Valor):
-            notify(state, "error", "Valor inválido, insira apenas números")
-            return
-        if int(state.form_transac.Valor) > MAX_ALLOWED_VALUE:
-            notify(state, "error", "Valor acima do permitido")
-            return
-        state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
-        state.form_transac.CarimboTempo = datetime.now()
-        state.form_transac.write()
-        print(f"state user {get_state_id(state)} added {state.form_transac}")
-        reset_transac_form_widgets(state=state)
+        input_amount = fmt.StringToCurrency(user_input=state.form_transac.Valor)
+        if input_amount.is_valid():
+            state.form_transac.fill(data.tbl_transacoes(
+                IdCliente=state.SELECTED_CUSTOMER.Id,
+                CarimboTempo=datetime.now(),
+                Valor=input_amount.value,
+            ))
+            state.form_transac.write()
+            print(f"state user {get_state_id(state)} added {state.form_transac}")
+            reset_transac_form_widgets(state=state)
+            notify(state, "success", "Nova transação adicionada")
+        else:
+            notify(state, "error", input_amount.invalid_reason)
     except Exception as err:
         notify(state, "error", str(err))
-        print(f"Unexpected {type(err)}: {err}")
-    else:
-        notify(state, "success", "Nova transação adicionada")
+        print(f"Erro inesperado '{type(err)}': {err}")
     finally:
         state.df_transac = get_customer_transacs(state=state)
 
@@ -287,14 +279,6 @@ def btn_mudar_minimizado():
 ####################
 # UTILS
 ####################
-
-
-def fmt_currency_input(inp: str) -> str:
-    """Formats a numeric string to currency, returns '0,00' if zeroed or invalid."""
-    try:
-        return f"{int(inp)/100:_.2f}".replace("_", " ").replace(".", ",")
-    except ValueError:
-        return "0,00"
 
 
 def is_valid_currency_input(inp: str) -> bool:
@@ -552,7 +536,8 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
 
 
 def chg_transac_valor(state: State) -> None:
-    state.display_tr_valor = fmt_currency_input(inp=state.form_transac.Valor)
+    input_amount = fmt.StringToCurrency(user_input=state.form_transac.Valor)
+    state.display_tr_valor = input_amount.display_value
     state.refresh("form_transac")
     return
 
@@ -664,10 +649,6 @@ main_plot = btn_gerar_main_plot()
 
 # campo de pesquisa de clientes
 search_user_input_value = ""
-
-# listagem de clientes
-with db.DB_ENGINE.connect() as conn, conn.begin():
-    df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
 
 # valor inicial dos campos "Valor" e "Data" no menu "Adicionar Transacao"
 display_tr_valor = "0,00"
@@ -849,6 +830,7 @@ def start_cashd(with_webview: bool = False):
             favicon="assets/PNG_LogoFavicon.png",
             watermark="",
             debug=debug,
+            change_delay=10,
         )
     if with_webview:
         taipy_thread = threading.Thread(target=run_taipy_gui)
