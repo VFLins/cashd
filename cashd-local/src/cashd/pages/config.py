@@ -18,8 +18,8 @@ from toga.dialogs import (
     ErrorDialog,
 )
 
-from cashd_core import prefs
-from cashd import const, style, backup, widgets
+from cashd_core import prefs, const
+from cashd import style, backup, widgets
 from cashd.widgets.elems import ListOfItems
 
 
@@ -40,7 +40,7 @@ class ConfigSection(BaseSection):
         self.default_values_section_widgets.add_fields(
             fields=[
                 widgets.form.FormField(
-                    label="Estado padrão",
+                    label="Estado",
                     input_widget=Selection(
                         items=const.ESTADOS,
                         value=prefs.settings.default_state,
@@ -48,12 +48,20 @@ class ConfigSection(BaseSection):
                     ),
                 ),
                 widgets.form.FormField(
-                    label="Cidade padrão",
+                    label="Cidade",
                     input_widget=TextInput(
                         value=prefs.settings.default_city,
                         style=style.user_input(TextInput),
                         on_change=self.set_default_city,
                         on_lose_focus=self.set_title_case,
+                    ),
+                ),
+                widgets.form.FormField(
+                    label="Número de DDD",
+                    input_widget=Selection(
+                        items=const.DDD,
+                        value=prefs.settings.area_code_number,
+                        on_change=self.set_default_area_code,
                     ),
                 ),
                 widgets.form.FormField(
@@ -141,8 +149,8 @@ class ConfigSection(BaseSection):
         )
 
     def set_default_city(self, widget: TextInput):
-        """Runs upon updating the 'Cidade padrão' field, writes the inserted
-        city name to `prefs.conf`.
+        """Runs upon updating the 'Valores padrão: Cidade' field, writes the
+        inserted city name to `prefs.conf`.
         """
         prefs.settings.default_city = widget.value
         print(f"Default city set to {prefs.settings.default_city}")
@@ -153,11 +161,18 @@ class ConfigSection(BaseSection):
         widget.value = value
 
     def set_default_state(self, widget: Selection):
-        """Runs upon updating the 'Estado padrão' field, writes the inserted
-        state acronym to `prefs.conf`.
+        """Runs upon updating the 'Valores padrão: Estado' field, writes the
+        inserted state acronym to `prefs.conf`.
         """
         prefs.settings.default_state = widget.value
         print(f"Default state set to {prefs.settings.default_state}")
+
+    def set_default_area_code(self, widget: Selection):
+        """Runs upon updating the 'Valores padrão: Número de DDD padrão' field,
+        writes the selected number to `prefs.conf`.
+        """
+        prefs.settings.area_code_number = widget.value
+        print(f"Default area code set to {prefs.settings.area_code_number}")
 
     def set_rows_per_page(self, widget: NumberInput):
         """Runs upon updating the 'Linhas por página' field, affects the number of rows

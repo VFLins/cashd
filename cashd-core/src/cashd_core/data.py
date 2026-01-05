@@ -411,7 +411,7 @@ class tbl_transacoes(dec_base):
 def get_default_customer() -> tbl_clientes:
     """Returns a customer filled with all current default values."""
     customer = tbl_clientes()
-    customer.Telefone = "(99) 90000-0000"
+    customer.Telefone = f"({prefs.settings.area_code_number}) 90000-0000"
     customer.Cidade = prefs.settings.default_city
     customer.Estado = prefs.settings.default_state
     return customer

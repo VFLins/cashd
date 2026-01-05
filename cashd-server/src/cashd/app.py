@@ -12,7 +12,7 @@ from os import path
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
-from cashd_core import data, prefs, backup, fmt
+from cashd_core import data, prefs, backup, fmt, const
 from cashd_core.const import MAX_ALLOWED_VALUE
 from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
@@ -212,28 +212,42 @@ def add_customer(state: State):
         notify(state, "error", str(msg_erro))
 
 
-def btn_chg_prefs_main_state(state: State):
-    val = state.dropdown_uf_val
+def update_default_state(state: State):
+    val = state.input_default_state
     try:
         prefs.settings.default_state = val
-        state.form_contas.Estado = val
-        state.refresh("form_contas")
+        refresh_new_customer_form(state)
         notify(state, "success", f"Estado preferido atualizado para {val}")
-    except Exception as xpt:
-        notify(state, "error", f"Erro inesperado: {str(xpt)}")
+    except Exception as err:
+        notify(state, "error", f"Erro inesperado: {str(err)}")
 
 
-def btn_chg_prefs_main_city(state: State):
-    val = state.input_cidade_val
+def update_default_city(state: State):
+    val = state.input_default_city
     try:
         val = val.title()
         prefs.settings.default_city = val
-        state.input_cidade_val = val
-        state.form_contas.Cidade = val
-        state.refresh("form_contas")
+        state.input_default_city = val
+        refresh_new_customer_form(state)
         notify(state, "success", f"Cidade preferida atualizada para {val}")
-    except Exception as xpt:
-        notify(state, "error", f"Erro inesperado: {str(xpt)}")
+    except Exception as err:
+        notify(state, "error", f"Erro inesperado: {str(err)}")
+
+
+def update_default_area_code(state: State):
+    val = state.input_default_area_code
+    try:
+        prefs.settings.area_code_number = val
+        refresh_new_customer_form(state)
+        notify(state, "success", f"Número de DDD padrão atualizado para {val}")
+    except Exception as err:
+        notify(state, "error", f"Erro inesperado: {str(err)}")
+
+
+def refresh_new_customer_form(state: State):
+    """Reset 'Novo cliente' form to the current default values."""
+    state.form_customer = data.get_default_customer()
+    state.refresh("form_customer")
 
 
 def btn_chg_max_highest_balances(state: State, val: int):
@@ -614,36 +628,10 @@ dropdown_periodo_val = dropdown_periodo_lov[0]
 
 dropdown_plot_type_val = "Balanço"
 
-dropdown_uf_lov = [
-    "AC",
-    "AL",
-    "AP",
-    "AM",
-    "BA",
-    "CE",
-    "DF",
-    "ES",
-    "GO",
-    "MA",
-    "MT",
-    "MS",
-    "MG",
-    "PA",
-    "PB",
-    "PE",
-    "PI",
-    "PR",
-    "RJ",
-    "RN",
-    "RO",
-    "RR",
-    "RS",
-    "SC",
-    "SE",
-    "SP",
-    "TO",
-]
-dropdown_uf_val = prefs.settings.default_state
+area_codes_lov = [str(i) for i in const.DDD]
+
+dropdown_uf_lov = const.ESTADOS
+input_default_state = prefs.settings.default_state
 
 main_plot = btn_gerar_main_plot()
 
@@ -729,8 +717,11 @@ SELECTED_CUSTOMER_PLACE = selected_customer.Local
 # valor inicial da lista de locais de backup
 df_backup_places = get_backup_places()
 
-# valor inicial do campo "cidade preferida"
-input_cidade_val = prefs.settings.default_city
+# valor inicial do campo "Cidade padrão"
+input_default_city = prefs.settings.default_city
+
+# valor inicial no campo "Número de DDD padrão"
+input_default_area_code = prefs.settings.area_code_number
 
 # valor inicial da configuracao Limite de linhas na tabela "Últimas transações"
 rows_per_page = prefs.settings.data_tables_rows_per_page
