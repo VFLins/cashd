@@ -181,6 +181,7 @@ def add_transaction(state: State):
         if input_amount.is_valid():
             state.form_transac.fill(data.tbl_transacoes(
                 IdCliente=state.SELECTED_CUSTOMER.Id,
+                DataTransac=state.form_transac.DataTransac,
                 CarimboTempo=datetime.now(),
                 Valor=input_amount.value,
             ))
