@@ -370,7 +370,7 @@ def get_customers_datasource(state: State | None = None) -> data.CustomerListSou
 def get_customer_lov(state: State | None = None) -> list[LOVItem]:
     customers = get_customers_datasource(state=state)
     return [
-        LOVItem(Id=str(c[0]), Value=f"{c[1]} - {c[2]}") for c in customers.current_data
+        LOVItem(Id=str(c[0]), Value=f"{c[1]} — {c[2]}") for c in customers.current_data
     ]
 
 
