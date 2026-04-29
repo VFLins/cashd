@@ -4,7 +4,7 @@ authors = [
     {name = "Vitor F. Lins", email = "vflins@live.com"},
 ]
 description = "Manage a simple cash flow operations on different accounts locally."
-requires-python = ">3.9, <3.13"
+requires-python = ">3.9"
 keywords = ["cash-flow", "financial", "fiado", "sale-on-credit"]
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -25,12 +25,11 @@ classifiers = [
 version = "0.3.4.post1"
 dependencies = [
     "cashd-core==0.3.4",
-    "taipy==4.*",
     "nicegui~=3.11",
-    "SQLAlchemy==2.*",
+    "SQLAlchemy~=2.0",
     "pywebview>=5.0",
     "phonenumbers>=8.13.31",
-    "pandas>=2.2.0",
+    "pandas~=3.0",
     "pyshortcuts==1.9.0",
     "plotly>=5.22.0",
     "PyGObject; sys_platform == 'linux'"
