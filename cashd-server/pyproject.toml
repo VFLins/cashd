@@ -27,7 +27,6 @@ dependencies = [
     "cashd-core==0.3.4",
     "nicegui~=3.11",
     "SQLAlchemy~=2.0",
-    "pywebview>=5.0",
     "phonenumbers>=8.13.31",
     "pandas~=3.0",
     "pyshortcuts==1.9.0",
