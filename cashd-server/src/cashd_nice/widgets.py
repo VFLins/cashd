@@ -1,3 +1,5 @@
+from pathlib import Path
+from cashd_nice.const import PROJECT_ROOT
 from nicegui import ui
 
 header_entries = [
@@ -10,6 +12,7 @@ header_entries = [
 class DefaultHeader:
     def __init__(self, ui, selected_entry: int):
         with ui.header(elevated=True).style("background-color: #cadfe7"):
+            ui.image(Path(PROJECT_ROOT, "/assets/cashd-logo.svg"))
             ui.label("Cashd").style("font-family: Saira")
             ui.space()
             for i, entry in enumerate(header_entries):

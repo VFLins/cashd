@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="200mm"
+   height="56.044998mm"
+   viewBox="0 0 200 56.044998"
+   version="1.1"
+   id="svg1"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="200"
+       height="56.044998"
+       id="page2"
+       margin="0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <rect
+       x="163.27559"
+       y="133.79527"
+       width="607.74805"
+       height="229.03937"
+       id="rect1" />
+  </defs>
+  <g
+     inkscape:label="Camada 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="opacity:1">
+    <text
+       xml:space="preserve"
+       transform="matrix(0.38868155,0,0,0.38868155,-68.089017,-64.456986)"
+       id="text1"
+       style="font-size:192px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect1);opacity:1;fill:#478eff;fill-opacity:1"><tspan
+         x="163.27539"
+         y="308.49096"
+         id="tspan3"><tspan
+           style="font-weight:600;font-family:Saira;-inkscape-font-specification:'Saira Semi-Bold'"
+           id="tspan2">Cashd</tspan></tspan></text>
+  </g>
+</svg>
