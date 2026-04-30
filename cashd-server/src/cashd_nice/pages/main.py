@@ -1,7 +1,21 @@
-from cashd_nice.widgets import DetailedList
+from cashd_nice.widgets import DefaultHeader, DetailedList
+
+
+def subpage_transac(ui):
+    ui.label("Aqui se adicionam as transações")
+
+
+def subpage_history(ui):
+    ui.label("Aqui se vê o histórico de transações")
+
+
+def subpage_info(ui):
+    ui.label("Aqui se consulta dados do cadastro do cliente")
 
 
 def page(ui):
+    ui.colors(primary="#478eff", secondary="#d3d7d9")
+    DefaultHeader(ui=ui, selected_entry=0)
     ui.label("Hello world!")
     with ui.grid(columns=2).classes("w-full h-full"):
         with ui.column().classes("col-grow overflow-hidden"):
@@ -28,10 +42,10 @@ def page(ui):
                 info = ui.tab("Informações")
             with ui.tab_panels(tabs, value=transac):
                 with ui.tab_panel(transac):
-                    ui.label("Aqui se adicionam as transações")
+                    subpage_transac(ui)
                 with ui.tab_panel(history):
-                    ui.label("Aqui se vê o histórico de transações")
+                    subpage_history(ui)
                 with ui.tab_panel(info):
-                    ui.label("Aqui se consulta dados do cadastro do cliente")
+                    subpage_info(ui)
 
 

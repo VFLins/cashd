@@ -5,13 +5,15 @@ from cashd_nice.pages import main, customer, stats, config
 
 
 parser = argparse.ArgumentParser(
-    prog="cashd-server", description="Execute o Cashd server, veja opções abaixo."
+    prog="cashd-server", description="Execute o Cashd server, veja opções abaixo.",
+    add_help=False
 )
+parser.add_argument("-h", "--help", action="help", help="Mostra esta mensagem de ajuda")
 parser.add_argument(
     "-n", "--as-native", action="store_true",
     help=(
-        "Execute o Cashd server localmente como um aplicativo, outros dispositivos não "
-        "poderão acessá-lo, e será executado em uma janela dedicada."
+        "Execute o Cashd server localmente como um aplicativo nativo, outros "
+        "dispositivos não poderão acessá-lo, e será executado em uma janela dedicada."
     )
 )
 args = parser.parse_args()
