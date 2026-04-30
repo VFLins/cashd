@@ -1,5 +1,24 @@
 from nicegui import ui
 
+header_entries = [
+    ("Transações", "/transac"),
+    ("Novo cliente", "/customer"),
+    ("Estatísticas", "/stats"),
+    ("Configurações", "/config"),
+]
+
+class DefaultHeader:
+    def __init__(self, ui, selected_entry: int):
+        with ui.header(elevated=True).style("background-color: #cadfe7"):
+            ui.label("Cashd").style("font-family: Saira")
+            ui.space()
+            for i, entry in enumerate(header_entries):
+                if i == selected_entry:
+                    ui.button(entry[0]).props("unelevated")
+                else:
+                    ui.button(entry[0], on_click=lambda: ui.navigate.to(entry[1])).props("flat text-color=black")
+
+
 class DetailedList:
     def __init__(self, ui, items, on_select=None):
         self.ui = ui
