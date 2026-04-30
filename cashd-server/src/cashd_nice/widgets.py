@@ -1,25 +1,61 @@
-from pathlib import Path
-from cashd_nice.const import PROJECT_ROOT
 from nicegui import ui
 
 header_entries = [
-    ("Transações", "/transac"),
-    ("Novo cliente", "/customer"),
-    ("Estatísticas", "/stats"),
-    ("Configurações", "/config"),
+    ("/assets/SVG_TransacaoBranco.svg", "Transações", "/transac"),
+    ("/assets/SVG_ContasBranco.svg", "Novo cliente", "/customer"),
+    ("/assets/SVG_DadosBranco.svg", "Estatísticas", "/stats"),
+    ("/assets/SVG_ConfiguracaoBranco.svg", "Configurações", "/config"),
 ]
+
 
 class DefaultHeader:
     def __init__(self, ui, selected_entry: int):
+        ui.add_css(
+            """
+            @font-face {
+                font-family: 'Saira';
+                src: url('/assets/Saira-Regular.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Saira Semibold';
+                src: url('/assets/Saira-SemiBold.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+            }
+            """
+        )
         with ui.header(elevated=True).style("background-color: #cadfe7"):
-            ui.image(Path(PROJECT_ROOT, "/assets/cashd-logo.svg"))
-            ui.label("Cashd").style("font-family: Saira")
+            (
+                ui
+                .label("Cashd")
+                .classes("text-4xl select-none")
+                .style("font-family: 'Saira Semibold'; color: #478eff")
+            )
             ui.space()
             for i, entry in enumerate(header_entries):
                 if i == selected_entry:
-                    ui.button(entry[0]).props("unelevated")
+                    with ui.button().props("unelevated") as btn:
+                        ui.image(entry[0]).classes("rounded-full size-8 mr-3 mt-1 mb-1")
+                        (
+                            ui.label(entry[1])
+                            .style("font-family: Saira; text-transform: none")
+                        )
                 else:
-                    ui.button(entry[0], on_click=lambda: ui.navigate.to(entry[1])).props("flat text-color=black")
+                    with (
+                        ui.button(on_click=self.navigate_to(ui, entry[1]))
+                        .props("flat text-color=black")
+                        .classes("m-0")
+                    ) as btn:
+                        ui.image(entry[0]).classes("rounded-full size-8 mr-3 mt-1 mb-1")
+                        (
+                            ui.label(entry[1])
+                            .style("font-family: Saira; text-transform: none")
+                        )
+
+    def navigate_to(self, ui, url: str):
+        return lambda: ui.navigate.to(url)
 
 
 class DetailedList:

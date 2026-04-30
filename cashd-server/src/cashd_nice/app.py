@@ -1,6 +1,8 @@
 import argparse
+from pathlib import Path
 
-from nicegui import ui
+from nicegui import ui, app
+from cashd_nice.const import PROJECT_ROOT
 from cashd_nice.pages import main, customer, stats, config
 
 
@@ -21,6 +23,9 @@ args = parser.parse_args()
 if hasattr(args, "help"):
     parser.print_help()
     quit()
+
+
+app.add_static_files("/assets", Path(PROJECT_ROOT, "assets"))
 
 
 @ui.page("/")
