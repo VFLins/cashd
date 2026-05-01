@@ -16,9 +16,16 @@ def subpage_info(ui):
 def page(ui):
     ui.colors(primary="#478eff", secondary="#d3d7d9")
     DefaultHeader(ui=ui, selected_entry=0)
-    ui.label("Hello world!")
+    ui.markdown(
+        f"""
+        **Cliente:** Nome do cliente selecionado<br>
+        **Local:** Endereço dele<br>
+        **Saldo devedor:** R$ 100,00
+        """
+    ).classes("text-[17px]")
     with ui.grid(columns=2).classes("w-full h-full"):
         with ui.column().classes("col-grow overflow-hidden"):
+            ui.input(label="Pesquisa").classes("w-full")
             DetailedList(
                 ui=ui,
                 items=[
@@ -31,12 +38,14 @@ def page(ui):
                     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
                 ]
             )
-            with ui.row():
+            with ui.row(align_items="center").classes("w-full"):
                 ui.label("7 itens, mostrando de 1 a 7")
-                ui.button("anterior").classes()
-                ui.button("próximo")
+                ui.space()
+                with ui.row().classes("gap-0"):
+                    ui.button("anterior").classes("text-xs").props("flat")
+                    ui.button("próximo").classes("text-xs").props("flat")
         with ui.column().classes("overflow-hidden"):
-            with ui.tabs() as tabs:
+            with ui.tabs().classes("w-full").props("no-caps") as tabs:
                 transac = ui.tab("Transação")
                 history = ui.tab("Histórico")
                 info = ui.tab("Informações")

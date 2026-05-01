@@ -54,10 +54,10 @@ class DetailedList:
         self.selected_index = None
         self.item_elements = []
 
-        with ui.scroll_area() \
-            .classes("w-full border border-gray-300 rounded-borders") as scroll:
-            scroll.style("min-height: 300px;")
-            with self.ui.list().props("separator").classes("w-full p-0 m-0"):
+        with ui.scroll_area() as scroll:
+            scroll.classes("w-full border border-gray-300 rounded-borders")
+            scroll.style("min-height: 260px; height: calc(100svh - 460px)")
+            with self.ui.list().props("separator").classes("w-full p-0 m-0 select-none"):
                 for index, item in enumerate(self.items):
                     with self.ui.item(on_click=lambda i=index: self._select_item(i)).props('clickable v-ripple') as el:
                         self.item_elements.append(el)
@@ -70,9 +70,9 @@ class DetailedList:
         DetailedList.selected_index' values accordingly.
         """
         if self.selected_index is not None:
-            self.item_elements[self.selected_index].classes(remove='bg-blue-300')
+            self.item_elements[self.selected_index].style("background-color: white; color: black")
         self.selected_index = index
-        self.item_elements[index].classes('bg-blue-300')
+        self.item_elements[index].style("background-color: #478eff; color: white")
         if self.on_select:
             self.on_select(self.items[index])
 
