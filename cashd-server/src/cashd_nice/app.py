@@ -26,6 +26,7 @@ if hasattr(args, "help"):
 
 
 app.add_static_files("/assets", Path(PROJECT_ROOT, "assets"))
+app.native.window_args["min_size"] = (850, 690)
 
 
 @ui.page("/")
