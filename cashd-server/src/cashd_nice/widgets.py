@@ -20,7 +20,9 @@ class DefaultHeader:
             }
             """
         )
-        with ui.header(elevated=True).style("background-color: #cadfe7"):
+        with ui.header(elevated=True) as header:
+            header.style("background-color: #cadfe7")
+            header.classes("gap-0")
             for i, entry in enumerate(header_entries):
                 if i == selected_entry:
                     with ui.button().props("unelevated"):
