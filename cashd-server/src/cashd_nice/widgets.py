@@ -18,25 +18,12 @@ class DefaultHeader:
                 font-weight: normal;
                 font-style: normal;
             }
-            @font-face {
-                font-family: 'Saira Semibold';
-                src: url('/assets/Saira-SemiBold.ttf') format('truetype');
-                font-weight: normal;
-                font-style: normal;
-            }
             """
         )
         with ui.header(elevated=True).style("background-color: #cadfe7"):
-            (
-                ui
-                .label("Cashd")
-                .classes("text-4xl select-none")
-                .style("font-family: 'Saira Semibold'; color: #478eff")
-            )
-            ui.space()
             for i, entry in enumerate(header_entries):
                 if i == selected_entry:
-                    with ui.button().props("unelevated") as btn:
+                    with ui.button().props("unelevated"):
                         ui.image(entry[0]).classes("rounded-full size-8 mr-3 mt-1 mb-1")
                         (
                             ui.label(entry[1])
@@ -44,13 +31,13 @@ class DefaultHeader:
                         )
                 else:
                     with (
-                        ui.button(on_click=self.navigate_to(ui, entry[1]))
-                        .props("flat text-color=black")
+                        ui.button(on_click=self.navigate_to(ui, entry[2]))
+                        .props("flat")
                         .classes("m-0")
                     ) as btn:
                         ui.image(entry[0]).classes("rounded-full size-8 mr-3 mt-1 mb-1")
                         (
-                            ui.label(entry[1])
+                            ui.label(entry[1]).style("color: black;")
                             .style("font-family: Saira; text-transform: none")
                         )
 
