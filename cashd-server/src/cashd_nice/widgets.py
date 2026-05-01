@@ -13,8 +13,8 @@ class DefaultHeader:
         ui.add_css(
             """
             @font-face {
-                font-family: 'Saira';
-                src: url('/assets/Saira-Regular.ttf') format('truetype');
+                font-family: 'Saira Semibold';
+                src: url('/assets/Saira-SemiBold.ttf') format('truetype');
                 font-weight: normal;
                 font-style: normal;
             }
@@ -27,18 +27,19 @@ class DefaultHeader:
                         ui.image(entry[0]).classes("rounded-full size-8 mr-3 mt-1 mb-1")
                         (
                             ui.label(entry[1])
-                            .style("font-family: Saira; text-transform: none")
+                            .classes("text-base")
+                            .style("font-family: 'Saira Semibold'; text-transform: none")
                         )
                 else:
                     with (
                         ui.button(on_click=self.navigate_to(ui, entry[2]))
                         .props("flat")
-                        .classes("m-0")
-                    ) as btn:
+                    ):
                         ui.image(entry[0]).classes("rounded-full size-8 mr-3 mt-1 mb-1")
                         (
-                            ui.label(entry[1]).style("color: black;")
-                            .style("font-family: Saira; text-transform: none")
+                            ui.label(entry[1])
+                            .classes("text-base")
+                            .style("font-family: 'Saira Semibold'; text-transform: none; color: black;")
                         )
 
     def navigate_to(self, ui, url: str):

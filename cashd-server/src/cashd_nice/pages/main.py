@@ -25,7 +25,7 @@ def page(ui):
                     {"title": "Fulano De Algo", "subtitle": "Rua Olá, 21"},
                     {"title": "Ciclano Felício", "subtitle": "Rua Bom Dia, 122"},
                     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-                    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
+                    {"title": "Maria de Algum Nome Desnecessariamente Comprido", "subtitle": "Rua de Morar se tiver uma casa, 121 - Cidade/AC"},
                     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
                     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
                     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
@@ -33,7 +33,7 @@ def page(ui):
             )
             with ui.row():
                 ui.label("7 itens, mostrando de 1 a 7")
-                ui.button("anterior")
+                ui.button("anterior").classes()
                 ui.button("próximo")
         with ui.column().classes("overflow-hidden"):
             with ui.tabs() as tabs:
