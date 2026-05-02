@@ -78,7 +78,7 @@ def page(ui):
             **Local:** Endereço dele<br>
             **Saldo devedor:** R$ 100,00
             """
-        ).classes("text-[17px]")
+        ).classes("text-base")
     with ui.grid().classes("w-full h-full sm:grid-cols-2"):
         with ui.column().classes("col-grow overflow-hidden"):
             ui.input(label="Pesquisa").classes("w-full")
