@@ -52,16 +52,25 @@ class DefaultHeader:
             with ui.row(align_items="center") as mobile_block:
                 mobile_block.classes("sm:hidden w-full")
                 header_image = ui.image(header_entries[selected_entry][0])
-                header_image.classes("rounded-full size-12")
+                header_image.classes("rounded-full size-12 select-none")
                 header_label = ui.label(header_entries[selected_entry][1])
-                header_label.classes("text-2xl")
+                header_label.classes("text-2xl select-none")
                 header_label.style(
                     "font-family: 'Saira Semibold'; "
                     "text-transform: none; "
                     "color: #478eff;"
                 )
                 ui.space()
-                header_hamb = ui.button(icon="menu")
+                with ui.button(icon="menu"):
+                    with ui.menu() as menu:
+                        for i, entry in enumerate(header_entries):
+                            if i == selected_entry:
+                                continue
+                            with ui.menu_item(on_click=self.navigate_to(ui, entry[2])):
+                                with ui.row().classes("items-center gap-2 no-wrap"):
+                                    ui.image(entry[0]).classes("rounded-full size-8 mr-3")
+                                    ui.label(entry[1])
+
 
 
     def navigate_to(self, ui, url: str):
