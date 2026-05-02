@@ -4,6 +4,16 @@ from cashd_core.const import ESTADOS
 from cashd_nice.widgets import DefaultHeader, DetailedList
 
 
+example_customer_data = [
+    {"title": "Fulano De Algo", "subtitle": "Rua Olá, 21"},
+    {"title": "Ciclano Felício", "subtitle": "Rua Bom Dia, 122"},
+    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
+    {"title": "Maria de Algum Nome Desnecessariamente Comprido", "subtitle": "Rua de Morar se tiver uma casa, 121 - Cidade/AC"},
+    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
+    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
+    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
+]
+
 def subpage_transac(ui):
     with ui.column(align_items="end"):
         dateinput = ui.date_input("Data", value=date.today().strftime("%d/%m/%Y"))
@@ -67,40 +77,47 @@ def subpage_info(ui):
         ui.button(icon="check").disable()
 
 
-def page(ui):
-    ui.colors(primary="#478eff", secondary="#d3d7d9")
-    DefaultHeader(ui=ui, selected_entry=0)
-    with ui.row(align_items="center"):
-        ui.button(icon="add").classes("!flex md:!hidden")
-        ui.markdown(
-            f"""
-            **Cliente:** Nome do cliente selecionado<br>
-            **Local:** Endereço dele<br>
-            **Saldo devedor:** R$ 100,00
-            """
-        ).classes("text-base")
-    with ui.grid().classes("w-full h-full sm:grid-cols-2"):
-        with ui.column().classes("col-grow overflow-hidden"):
+class page:
+    def __init__(self, ui):
+        self.ui = ui
+        ui.colors(primary="#478eff", secondary="#d3d7d9")
+        DefaultHeader(ui=ui, selected_entry=0)
+        self.top_section()
+        with ui.grid().classes("w-full h-full sm:grid-cols-2"):
+            self.left_section()
+            self.right_section()
+
+    def top_section(self):
+        ui = self.ui
+        with ui.row(align_items="center") as top_section:
+            ui.button(icon="add").classes("!flex md:!hidden")
+            ui.markdown(
+                f"""
+                **Cliente:** *Nome do cliente selecionado*<br>
+                **Local:** *Endereço dele*<br>
+                **Saldo devedor:** R$ 100,00
+                """
+            ).classes("text-base select-none")
+        return top_section
+
+    def left_section(self):
+        ui = self.ui
+        with ui.column() as left_section:
+            left_section.classes("col-grow overflow-hidden")
             ui.input(label="Pesquisa").classes("w-full")
-            DetailedList(
-                ui=ui,
-                items=[
-                    {"title": "Fulano De Algo", "subtitle": "Rua Olá, 21"},
-                    {"title": "Ciclano Felício", "subtitle": "Rua Bom Dia, 122"},
-                    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-                    {"title": "Maria de Algum Nome Desnecessariamente Comprido", "subtitle": "Rua de Morar se tiver uma casa, 121 - Cidade/AC"},
-                    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-                    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-                    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-                ]
-            )
+            DetailedList(ui,items=example_customer_data)
             with ui.row(align_items="center").classes("w-full"):
-                ui.label("7 itens, mostrando 1-7")
+                ui.label("7 itens, mostrando 1-7").classes("select-none")
                 ui.space()
                 with ui.row().classes("gap-0"):
                     ui.button("anterior").classes("text-xs").props("flat")
                     ui.button("próximo").classes("text-xs").props("flat")
-        with ui.column().classes("!hidden md:!flex w-full items-center"):
+        return left_section
+
+    def right_section(self):
+        ui = self.ui
+        with ui.column() as right_section:
+            right_section.classes("!hidden md:!flex w-full items-center")
             with ui.tabs().classes("w-full").props("no-caps") as tabs:
                 transac = ui.tab("Transação")
                 history = ui.tab("Histórico")
@@ -112,5 +129,6 @@ def page(ui):
                     subpage_history(ui)
                 with ui.tab_panel(info):
                     subpage_info(ui)
+        return right_section
 
 
