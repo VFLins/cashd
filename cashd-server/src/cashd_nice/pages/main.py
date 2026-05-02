@@ -15,11 +15,11 @@ example_customer_data = [
 ]
 
 def subpage_transac(ui):
-    with ui.column(align_items="end"):
+    with ui.column(align_items="start"):
         dateinput = ui.date_input("Data", value=date.today().strftime("%d/%m/%Y"))
         dateinput.picker.props("mask='DD/MM/YYYY'")
-        dateinput.classes("w-40")
-        ui.input("Valor", placeholder="0,00").classes("w-40")
+        dateinput.classes("w-60")
+        ui.input("Valor", placeholder="0,00").classes("w-60")
         ui.button("Inserir")
 
 
@@ -51,7 +51,7 @@ def subpage_history(ui):
         ).props(
             "rows-per-page-label='Linhas por página:' "
             ":pagination-label='langAgnosticPageIndicator'"
-        )
+        ).classes("w-80")
         with table.add_slot("body-cell-action"):
             with table.cell("action"):
                 del_button = ui.button(icon="delete").props("flat size=0.7em")
@@ -64,17 +64,18 @@ def subpage_history(ui):
 
 def subpage_info(ui):
     with ui.grid(columns=2):
-        ui.input("Nome*").classes("w-40")
-        ui.input("Sobrenome*").classes("w-40")
-        ui.input("Apelido").classes("w-40")
-        ui.input("Telefone").classes("w-40")
-        ui.input("Endereço").classes("w-40")
-        ui.input("Bairro").classes("w-40")
-        ui.input("Cidade").classes("w-40")
-        ui.select(ESTADOS, value=ESTADOS[0], label="Estado").classes("w-40")
+        elem_width = 40
+        ui.input("Nome*").classes(f"w-{elem_width}")
+        ui.input("Sobrenome*").classes(f"w-{elem_width}")
+        ui.input("Apelido").classes(f"w-{elem_width}")
+        ui.input("Telefone").classes(f"w-{elem_width}")
+        ui.input("Endereço").classes(f"w-{elem_width}")
+        ui.input("Bairro").classes(f"w-{elem_width}")
+        ui.input("Cidade").classes(f"w-{elem_width}")
+        ui.select(ESTADOS, value=ESTADOS[0], label="Estado").classes(f"w-{elem_width}")
     with ui.row():
-        ui.button(icon="refresh").disable()
-        ui.button(icon="check").disable()
+        ui.button("Salvar", icon="check").disable()
+        ui.button("Restaurar", icon="refresh").props("flat").disable()
 
 
 class page:
