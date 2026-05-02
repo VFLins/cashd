@@ -23,26 +23,46 @@ class DefaultHeader:
         with ui.header(elevated=True) as header:
             header.style("background-color: #cadfe7")
             header.classes("gap-0")
-            for i, entry in enumerate(header_entries):
-                if i == selected_entry:
-                    with ui.button().props("unelevated"):
-                        ui.image(entry[0]).classes("rounded-full size-8 mr-3 mt-1 mb-1")
-                        (
-                            ui.label(entry[1])
-                            .classes("text-base")
-                            .style("font-family: 'Saira Semibold'; text-transform: none")
-                        )
-                else:
-                    with (
-                        ui.button(on_click=self.navigate_to(ui, entry[2]))
-                        .props("flat")
-                    ):
-                        ui.image(entry[0]).classes("rounded-full size-8 mr-3 mt-1 mb-1")
-                        (
-                            ui.label(entry[1])
-                            .classes("text-base")
-                            .style("font-family: 'Saira Semibold'; text-transform: none; color: black;")
-                        )
+            with ui.row() as default_block:
+                default_block.classes("!hidden md:!flex w-full")
+                for i, entry in enumerate(header_entries):
+                    if i == selected_entry:
+                        with ui.button().props("unelevated"):
+                            btn_image = ui.image(entry[0])
+                            btn_image.classes("rounded-full size-8 mr-3 mt-1 mb-1")
+                            btn_label = ui.label(entry[1])
+                            btn_label.classes("text-base")
+                            btn_label.style(
+                                "font-family: 'Saira Semibold'; "
+                                "text-transform: none"
+                            )
+                    else:
+                        with ui.button() as enabled_button:
+                            enabled_button.on("click", self.navigate_to(ui, entry[2]))
+                            enabled_button.props("flat")
+                            btn_image = ui.image(entry[0])
+                            btn_image.classes("rounded-full size-8 mr-3 mt-1 mb-1")
+                            btn_label = ui.label(entry[1])
+                            btn_label.classes("text-base")
+                            btn_label.style(
+                                "font-family: 'Saira Semibold'; "
+                                "text-transform: none; "
+                                "color: black;"
+                            )
+            with ui.row(align_items="center") as mobile_block:
+                mobile_block.classes("sm:hidden w-full")
+                header_image = ui.image(header_entries[selected_entry][0])
+                header_image.classes("rounded-full size-12")
+                header_label = ui.label(header_entries[selected_entry][1])
+                header_label.classes("text-2xl")
+                header_label.style(
+                    "font-family: 'Saira Semibold'; "
+                    "text-transform: none; "
+                    "color: #478eff;"
+                )
+                ui.space()
+                header_hamb = ui.button(icon="menu")
+
 
     def navigate_to(self, ui, url: str):
         return lambda: ui.navigate.to(url)
