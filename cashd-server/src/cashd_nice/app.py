@@ -35,5 +35,10 @@ def main_page():
 
 
 if __name__ in {"__main__", "__mp_main__"}:
-    ui.run(title="Cashd server", show=False, native=args.as_native)
+    ui.run(
+        title="Cashd server",
+        show=False,
+        native=args.as_native,
+        favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
+    )
 

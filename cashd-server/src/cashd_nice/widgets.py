@@ -71,8 +71,6 @@ class DefaultHeader:
                                     ui.image(entry[0]).classes("rounded-full size-8 mr-3")
                                     ui.label(entry[1])
 
-
-
     def navigate_to(self, ui, url: str):
         return lambda: ui.navigate.to(url)
 
