@@ -1,3 +1,16 @@
+
+import multiprocessing
+import sys
+
+if sys.platform == 'linux':
+    multiprocessing.set_start_method('spawn', force=True)
+
+# NOTE: The above code must run before any app code. This avoids a possible Runtime Error:
+# > A SemLock created in a fork context is being shared with a process in a spawn
+# > context. This is not supported. Please use the same context to create
+# > multiprocessing objects and Process.
+# This is probably a bug in the current version of NiceGUI==3.11.1
+
 import argparse
 from pathlib import Path
 
