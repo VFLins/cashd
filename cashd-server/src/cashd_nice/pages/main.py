@@ -85,13 +85,17 @@ class page:
         DefaultHeader(ui=ui, selected_entry=0)
         self.top_section()
         with ui.grid().classes("w-full h-full sm:grid-cols-2"):
-            self.left_section()
-            self.right_section()
+            self.l_section = self.left_section()
+            self.r_section = self.right_section()
 
     def top_section(self):
         ui = self.ui
         with ui.row(align_items="center") as top_section:
-            ui.button(icon="add").classes("!flex md:!hidden")
+            self.section_switcher = ui.button(
+                icon="point_of_sale",
+                on_click=self.switch_section_mobile
+            )
+            self.section_switcher.classes("!flex md:!hidden")
             ui.markdown(
                 f"""
                 **Cliente:** *Nome do cliente selecionado*<br>
@@ -104,7 +108,6 @@ class page:
     def left_section(self):
         ui = self.ui
         with ui.column() as left_section:
-            left_section.classes("col-grow overflow-hidden")
             ui.input(label="Pesquisa").classes("w-full")
             DetailedList(ui,items=example_customer_data)
             with ui.row(align_items="center").classes("w-full"):
@@ -119,11 +122,11 @@ class page:
         ui = self.ui
         with ui.column() as right_section:
             right_section.classes("!hidden md:!flex w-full items-center")
-            with ui.tabs().classes("w-full").props("no-caps") as tabs:
+            with ui.tabs().classes("w-full").props("no-caps") as self.tabs:
                 transac = ui.tab("Transação")
                 history = ui.tab("Histórico")
                 info = ui.tab("Informações")
-            with ui.tab_panels(tabs, value=transac):
+            with ui.tab_panels(self.tabs, value=transac):
                 with ui.tab_panel(transac):
                     subpage_transac(ui)
                 with ui.tab_panel(history):
@@ -132,4 +135,18 @@ class page:
                     subpage_info(ui)
         return right_section
 
+    def switch_section_mobile(self):
+        match self.section_switcher.props["icon"]:
+            case "point_of_sale":
+                self.section_switcher.props("icon=person_search")
+                self.tabs.set_value("Transação")
+                # hide left and restore right
+                self.l_section.classes("!hidden md:!flex")
+                self.r_section.classes(remove="!hidden md:!flex")
+                self.r_section.classes("w-full items-center")
+            case "person_search":
+                self.section_switcher.props("icon=point_of_sale")
+                # hide right and restore left
+                self.r_section.classes("!hidden md:!flex")
+                self.l_section.classes(remove="!hidden md:!flex")
 

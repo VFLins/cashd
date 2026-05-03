@@ -34,6 +34,6 @@ def main_page():
     return main.page(ui=ui)
 
 
-if __name__ in ["__main__", "__mp_main__"]:
-    ui.run(title="Cashd server", native=args.as_native)
+if __name__ in {"__main__", "__mp_main__"}:
+    ui.run(title="Cashd server", show=False, native=args.as_native)
 
