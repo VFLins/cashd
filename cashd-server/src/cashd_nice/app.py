@@ -34,6 +34,11 @@ def main_page():
     return main.page(ui=ui)
 
 
+@ui.page("/customer")
+def customer_page():
+    return customer.page(ui=ui)
+
+
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(
         title="Cashd server",
