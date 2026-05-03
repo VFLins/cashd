@@ -1,7 +1,7 @@
 from nicegui import ui
 
 header_entries = [
-    ("/assets/SVG_TransacaoBranco.svg", "Transações", "/transac"),
+    ("/assets/SVG_TransacaoBranco.svg", "Transações", "/"),
     ("/assets/SVG_ContasBranco.svg", "Novo cliente", "/customer"),
     ("/assets/SVG_DadosBranco.svg", "Estatísticas", "/stats"),
     ("/assets/SVG_ConfiguracaoBranco.svg", "Configurações", "/config"),
@@ -69,7 +69,7 @@ class DefaultHeader:
                             with ui.menu_item(on_click=self.navigate_to(ui, entry[2])):
                                 with ui.row().classes("items-center gap-2 no-wrap"):
                                     ui.image(entry[0]).classes("rounded-full size-8 mr-3")
-                                    ui.label(entry[1])
+                                    ui.label(entry[1]).classes("whitespace-nowrap select-none")
 
     def navigate_to(self, ui, url: str):
         return lambda: ui.navigate.to(url)

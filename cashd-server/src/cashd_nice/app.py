@@ -39,6 +39,16 @@ def customer_page():
     return customer.page(ui=ui)
 
 
+@ui.page("/stats")
+def stats_page():
+    return stats.page(ui=ui)
+
+
+@ui.page("/config")
+def config_page():
+    return config.page(ui=ui)
+
+
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(
         title="Cashd server",
