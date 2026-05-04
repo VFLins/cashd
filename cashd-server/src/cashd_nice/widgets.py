@@ -1,4 +1,7 @@
-from nicegui import ui
+import platform
+from pathlib import Path
+
+from nicegui import ui, events
 
 header_entries = [
     ("/assets/SVG_TransacaoBranco.svg", "Transações", "/"),
@@ -50,11 +53,11 @@ class DefaultHeader:
                                 "color: black;"
                             )
             with ui.row(align_items="center") as mobile_block:
-                mobile_block.classes("sm:hidden w-full")
+                mobile_block.classes("sm:hidden w-full flex-nowrap")
                 header_image = ui.image(header_entries[selected_entry][0])
                 header_image.classes("rounded-full size-12 select-none")
                 header_label = ui.label(header_entries[selected_entry][1])
-                header_label.classes("text-2xl select-none")
+                header_label.classes("text-2xl select-none truncate")
                 header_label.style(
                     "font-family: 'Saira Semibold'; "
                     "text-transform: none; "

@@ -54,7 +54,7 @@ def subpage_history(ui):
         ).classes("w-80")
         with table.add_slot("body-cell-action"):
             with table.cell("action"):
-                del_button = ui.button(icon="delete").props("flat size=0.7em")
+                del_button = ui.button(icon="delete").props("flat size=sm dense")
                 del_button.on(
                     "click",
                     js_handler="() => emit(props.row.id)",

@@ -12,6 +12,52 @@ def h2(ui, title: str):
     ui.markdown(f"## {title}").classes("font-bold").classes("select-none")
 
 
+class DirectoryList:
+    def __init__(self, ui):
+        self.ui = ui
+
+        self.table = ui.table(
+            columns=[
+                {"name": "name", 'label': None, "field": "name", "align": "left"},
+                {"name": "action", "label": ""},
+            ],
+            rows=[{"id": i+1, "name": f"/caminho/para/pasta{i}"} for i in range(2)],
+        ).classes('w-full').props("hide-header")
+
+        with self.table.add_slot('top-right'):
+            ui.button("Adicionar", icon="add", on_click=self.add_dir).props("flat")
+        with self.table.add_slot("body-cell-action"):
+            with self.table.cell("action"):
+                del_button = ui.button(icon="delete").props("flat size=sm dense")
+                del_button.on(
+                    "click",
+                    js_handler="() => emit(props.row.id)",
+                    handler=lambda e: ui.notify(f"Excluindo local id={e.args}")
+                )
+        with ui.dialog() as self.dir_selector, ui.card():
+            ui.label("Selecione um arquivo")
+            with ui.row():
+                ui.button(
+                    "Cancelar",
+                    icon="cancel",
+                    on_click=lambda: self.dir_selector.submit(None)
+                ).props("flat")
+                ui.button(
+                    "Confirma",
+                    icon="check",
+                    on_click=lambda: self.dir_selector.submit("/caminho/para/pasta2")
+                )
+
+
+    async def add_dir(self):
+        result = await self.dir_selector
+        if result:
+            self.ui.notify(f"Diretório adicionado {result}")
+        else:
+            self.ui.notify(f"Nenhum diretório adicionado")
+
+
+
 def page(ui):
     ui.add_css(
     """
@@ -35,20 +81,21 @@ def page(ui):
     with ui.column(align_items="left").classes("self-center"):
         h1(ui, "Preferências")
         h2(ui, "Valores padrão no formulário de contas")
-        with ui.grid().classes("h-full center-items sm:grid-cols-2"):
+        with ui.grid().classes("h-full center-items sm:grid-cols-3"):
             ui.input("Estado")
             ui.input("Cidade")
             ui.select(ESTADOS, value=ESTADOS[0], label="Estado")
         h2(ui, "Linhas por página nas tabelas")
-        with ui.grid().classes("h-full center-items sm:grid-cols-2"):
+        with ui.grid().classes("h-full center-items sm:grid-cols-3"):
             ui.number(
                 label="Clientes [100]", value=100, min=20, precision=0, format="%.0f"
-            ).classes("w-32")
+            )
             ui.number(
                 label="Estatísticas [200]", value=200, min=20, precision=0, format="%.0f"
-            ).classes("w-32")
+            )
         h1(ui, "Backup")
         h2(ui, "Locais de backup")
+        DirectoryList(ui)
         h2(ui, "Ações")
 
 
