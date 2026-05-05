@@ -1,3 +1,4 @@
+from pathlib import Path
 from cashd_core.const import ESTADOS
 from cashd_nice.widgets import DefaultHeader
 
@@ -36,6 +37,22 @@ class DirectoryList:
                 )
         with ui.dialog() as self.dir_selector, ui.card():
             ui.label("Selecione um arquivo")
+            with ui.scroll_area():
+                with ui.list().props("dense separator") as dir_list:
+                    dir_list.classes("w-full")
+                    for selectable in Path("~").expanduser().iterdir():
+                        if selectable.is_dir():
+                            with ui.item(on_click=self.click_dir):
+                                with ui.item_section().props("avatar"):
+                                    ui.icon("folder").style("color: #478eff;")
+                                with ui.item_section():
+                                    ui.label(selectable.name)
+                        else:
+                            with ui.item():
+                                with ui.item_section().props("avatar"):
+                                    ui.icon("description").style("color: gray;")
+                                with ui.item_section():
+                                    ui.label(selectable.name).style("color: gray;")
             with ui.row():
                 ui.button(
                     "Cancelar",
@@ -48,6 +65,8 @@ class DirectoryList:
                     on_click=lambda: self.dir_selector.submit("/caminho/para/pasta2")
                 )
 
+    def click_dir(self):
+        pass
 
     async def add_dir(self):
         result = await self.dir_selector
