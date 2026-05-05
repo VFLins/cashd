@@ -16,6 +16,7 @@ def h2(ui, title: str):
 class DirectoryList:
     def __init__(self, ui):
         self.ui = ui
+        self.SELECTED_DIR = Path("~").expanduser()
 
         self.table = ui.table(
             columns=[
@@ -35,37 +36,60 @@ class DirectoryList:
                     js_handler="() => emit(props.row.id)",
                     handler=lambda e: ui.notify(f"Excluindo local id={e.args}")
                 )
-        with ui.dialog() as self.dir_selector, ui.card():
-            ui.label("Selecione um arquivo")
-            with ui.scroll_area():
-                with ui.list().props("dense separator") as dir_list:
-                    dir_list.classes("w-full")
-                    for selectable in Path("~").expanduser().iterdir():
-                        if selectable.is_dir():
-                            with ui.item(on_click=self.click_dir):
-                                with ui.item_section().props("avatar"):
-                                    ui.icon("folder").style("color: #478eff;")
-                                with ui.item_section():
-                                    ui.label(selectable.name)
-                        else:
-                            with ui.item():
-                                with ui.item_section().props("avatar"):
-                                    ui.icon("description").style("color: gray;")
-                                with ui.item_section():
-                                    ui.label(selectable.name).style("color: gray;")
-            with ui.row():
+        with ui.dialog() as self.dir_selector, ui.card().classes("w-full"):
+            with ui.row().classes("justify-between w-full"):
                 ui.button(
-                    "Cancelar",
+                    "Voltar",
+                    icon="drive_folder_upload",
+                    on_click=self.select_upper_dir
+                ).props("flat")
+                ui.button(
                     icon="cancel",
                     on_click=lambda: self.dir_selector.submit(None)
                 ).props("flat")
-                ui.button(
-                    "Confirma",
-                    icon="check",
-                    on_click=lambda: self.dir_selector.submit("/caminho/para/pasta2")
-                )
+            with ui.scroll_area():
+                with ui.list().props("dense separator") as self.dir_list:
+                    self.dir_list.classes("w-full")
+                    self._show_dir(self.SELECTED_DIR)
+            ui.button(
+                icon="check",
+                on_click=lambda: self.dir_selector.submit(self.SELECTED_DIR)
+            )
 
-    def click_dir(self):
+    def _show_dir(self, directory: Path = Path("~").expanduser()):
+        ui = self.ui
+        self.dir_list.clear()
+        self.selectables = []
+        for selectable in directory.iterdir():
+            if selectable.is_dir():
+                with ui.item(on_click=lambda: self.click_dir(selectable)) as list_item:
+                    self.selectables.append(list_item)
+                    if selectable == self.SELECTED_DIR:
+                        list_item.style("background-color: #478eff; color: white;")
+                    with ui.item_section().props("avatar"):
+                        ui.icon("folder").style("color: #478eff;")
+                    with ui.item_section():
+                        ui.label(selectable.name)
+            else:
+                with ui.item() as list_item:
+                    self.selectables.append(list_item)
+                    with ui.item_section().props("avatar"):
+                        ui.icon("description").style("color: gray;")
+                    with ui.item_section():
+                        ui.label(selectable.name).style("color: gray;")
+
+    def click_dir(self, directory: Path):
+        if not directory.is_dir():
+            return
+        self.ui.notify(f"Diretório '{directory}' selecionado")
+        if self.SELECTED_DIR == directory:
+            ui.notify(f"Mostrando pasta: {directory}")
+            self._show_dir(directory)
+        else:
+            sel_idx = list(self.SELECTED_DIR.iterdir()).index(directory)
+            self.selectables[sel_idx].style("background-color: #478eff; color: white;")
+
+    def select_upper_dir(self):
         pass
 
     async def add_dir(self):

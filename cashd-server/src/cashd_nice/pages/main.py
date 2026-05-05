@@ -107,7 +107,7 @@ class page:
 
     def left_section(self):
         ui = self.ui
-        with ui.column() as left_section:
+        with ui.column().classes("w-full max-w-2xl self-center mx-auto") as left_section:
             ui.input(label="Pesquisa").classes("w-full")
             DetailedList(ui,items=example_customer_data)
             with ui.row(align_items="center").classes("w-full"):

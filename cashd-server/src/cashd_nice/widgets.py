@@ -88,7 +88,7 @@ class DetailedList:
 
         with ui.scroll_area() as scroll:
             scroll.classes("w-full border border-gray-300 rounded-borders")
-            scroll.style("min-height: 260px; height: calc(100svh - 460px)")
+            scroll.style("min-height: 260px; height: calc(100svh - 460px);")
             with self.ui.list().props("separator").classes("w-full p-0 m-0 select-none"):
                 for index, item in enumerate(self.items):
                     with self.ui.item(on_click=lambda i=index: self._select_item(i)).props('clickable v-ripple') as el:
