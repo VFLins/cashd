@@ -53,12 +53,10 @@ class DirectoryList:
                     self._show_dir(self.SELECTED_DIR)
             with ui.row(align_items="center").classes("w-full h-[1rem] no-wrap whitespace-nowrap"):
                 with ui.scroll_area() as selected_dir_block:
-                    selected_dir_block.classes("w-full h-14")
+                    selected_dir_block.classes("w-full h-6 no-margin-scroll")
                     self.selected_dir_label = ui.label(str(self.SELECTED_DIR))
-                    self.selected_dir_label.classes("no-wrap")
-                    self.selected_dir_label.style(
-                        "color: #478eff; font-weight: bold; font-family: mono"
-                    )
+                    self.selected_dir_label.classes("no-wrap font-mono font-bold")
+                    self.selected_dir_label.style("color: #478eff;")
                 ui.button(
                     icon="add",
                     on_click=lambda: self.dir_selector.submit(self.SELECTED_DIR)
@@ -133,6 +131,15 @@ class DirectoryList:
 
 
 def page(ui):
+    ui.add_head_html(
+    """
+    <style>
+        .no-margin-scroll .q-scrollarea__content {
+            padding: 0 !important;
+        }
+    </style>
+    """
+    )
     ui.add_css(
     """
     .nicegui-markdown h1 {
