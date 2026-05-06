@@ -40,7 +40,7 @@ class DirectoryList:
             with ui.row().classes("justify-between w-full"):
                 ui.button(
                     "Voltar",
-                    icon="drive_folder_upload",
+                    icon="arrow_back",
                     on_click=self.select_upper_dir
                 ).props("flat")
                 ui.button(
@@ -66,21 +66,35 @@ class DirectoryList:
         ui = self.ui
         self.dir_list.clear()
         self.selectables = []
-        for selectable in directory.iterdir():
-            with ui.item() as list_item:
-                list_item.dirpath = selectable
-                self.selectables.append(list_item)
-                if selectable.is_dir():
-                    list_item.on_click(lambda s=selectable: self.click_dir(s))
+        try:
+            dirs = directory.iterdir()
+        except PermissionError:
+            with self.dir_list:
+                with ui.item():
                     with ui.item_section().props("avatar"):
-                        ui.icon("folder").style("color: #478eff;")
+                        ui.icon("block").style("color: red;")
                     with ui.item_section():
-                        ui.label(selectable.name)
-                else:
-                    with ui.item_section().props("avatar"):
-                        ui.icon("description").style("color: lightgray;")
-                    with ui.item_section():
-                        ui.label(selectable.name).style("color: lightgray;")
+                        label = ui.label(
+                            "O sistema não permite exibir o conteúdo desta pasta."
+                        )
+                        label.style("color: red;")
+            return
+        with self.dir_list:
+            for selectable in dirs:
+                with ui.item() as list_item:
+                    list_item.dirpath = selectable
+                    self.selectables.append(list_item)
+                    if selectable.is_dir():
+                        list_item.on_click(lambda s=selectable: self.click_dir(s))
+                        with ui.item_section().props("avatar"):
+                            ui.icon("folder").style("color: #478eff;")
+                        with ui.item_section():
+                            ui.label(selectable.name)
+                    else:
+                        with ui.item_section().props("avatar"):
+                            ui.icon("description").style("color: lightgray;")
+                        with ui.item_section():
+                            ui.label(selectable.name).style("color: lightgray;")
 
     def click_dir(self, directory: Path):
         ui = self.ui
@@ -121,7 +135,15 @@ class DirectoryList:
         return [row.dirpath for row in self.selectables]
 
     def select_upper_dir(self):
-        pass
+        cur, new = self.SELECTED_DIR, self.SELECTED_DIR.parent
+        if cur in self.displayed_items:
+            self._unhighlight_row(cur)
+        else:
+            self._show_dir(new)
+        if cur == new:
+            return
+        self.SELECTED_DIR = new
+        self.selected_dir_label.set_text(str(new))
 
     async def add_dir(self):
         result = await self.dir_selector
