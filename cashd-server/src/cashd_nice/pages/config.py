@@ -16,7 +16,7 @@ def h2(ui, title: str):
 class DirectoryList:
     def __init__(self, ui):
         self.ui = ui
-        self.SELECTED_DIR = Path("~").expanduser()
+        self.SELECTED_DIR: Path = Path("~").expanduser()
 
         self.table = ui.table(
             columns=[
@@ -51,7 +51,7 @@ class DirectoryList:
                 with ui.list().props("dense separator") as self.dir_list:
                     self.dir_list.classes("w-full")
                     self._show_dir(self.SELECTED_DIR)
-            with ui.row(align_items="center").classes("w-full h-[1rem] no-wrap"):
+            with ui.row(align_items="center").classes("w-full h-[1rem] no-wrap whitespace-nowrap"):
                 with ui.scroll_area() as selected_dir_block:
                     selected_dir_block.classes("w-full h-14")
                     self.selected_dir_label = ui.label(str(self.SELECTED_DIR))
@@ -69,52 +69,56 @@ class DirectoryList:
         self.dir_list.clear()
         self.selectables = []
         for selectable in directory.iterdir():
-            if selectable.is_dir():
-                with ui.item(on_click=lambda s=selectable: self.click_dir(s)) as list_item:
-                    self.selectables.append(list_item)
-                    if selectable == self.SELECTED_DIR:
-                        list_item.style("background-color: #478eff; color: white;")
+            with ui.item() as list_item:
+                self.selectables.append(list_item)
+                if selectable.is_dir():
+                    list_item.on_click(lambda s=selectable: self.click_dir(s))
                     with ui.item_section().props("avatar"):
                         ui.icon("folder").style("color: #478eff;")
                     with ui.item_section():
                         ui.label(selectable.name)
-            else:
-                with ui.item() as list_item:
-                    self.selectables.append(list_item)
+                else:
                     with ui.item_section().props("avatar"):
-                        ui.icon("description").style("color: gray;")
+                        ui.icon("description").style("color: lightgray;")
                     with ui.item_section():
-                        ui.label(selectable.name).style("color: gray;")
+                        ui.label(selectable.name).style("color: lightgray;")
 
     def click_dir(self, directory: Path):
         ui = self.ui
-        self.ui.notify(
-            f"Diretório selecionado: '{directory}' // \n"
-            f"Diretório atual: '{self.SELECTED_DIR}'"
-        )
         if self.SELECTED_DIR == directory:
-            ui.notify(f"Mostrando pasta: {directory}")
+            # open the directory if clicked on a highlighted dir
             self._show_dir(directory)
-            self.selected_dir_label.set_text(str(directory))
         else:
-            sel_idx = list(self.SELECTED_DIR.iterdir()).index(directory)
-            for i, selectable in enumerate(self.selectables):
-                with self.selectables[i] as row:
-                    if i == sel_idx:
-                        row.style("background-color: #478eff; color: white;")
-                        row.clear()
-                        with ui.item_section().props("avatar"):
-                            ui.icon("folder").style("color: white;")
-                        with ui.item_section():
-                            ui.label(directory.name).style("color: white;")
-                    #else:
-                    #    row.style("background-color: white; color: black;")
-                    #    row.clear()
-                    #    with ui.item_section().props("avatar"):
-                    #        ui.icon("folder").style("color: #478eff;")
-                    #    with ui.item_section():
-                    #        ui.label(directory.name).style("color: black;")
-            self.SELECTED_DIR = directory
+            self._upd_selection_highlight(directory)
+        self.SELECTED_DIR = directory
+        self.selected_dir_label.set_text(str(directory))
+
+    def _upd_selection_highlight(self, directory):
+        ui = self.ui
+        is_highlighted = directory.parent == self.SELECTED_DIR.parent
+        displayed_items = (
+            list(self.SELECTED_DIR.parent.iterdir()) if is_highlighted
+            else list(self.SELECTED_DIR.iterdir())
+        )
+        sel_idx = displayed_items.index(directory)
+        # highlights the clicked dir
+        with self.selectables[sel_idx] as row:
+            row.clear()
+            row.style("background-color: #478eff; color: white;")
+            with ui.item_section().props("avatar"):
+                ui.icon("folder").style("color: white;")
+            with ui.item_section():
+                ui.label(directory.name).style("color: white;")
+        # unhighlights the previously clicked dir
+        if self.SELECTED_DIR in displayed_items:
+            unsel_idx = displayed_items.index(self.SELECTED_DIR)
+            with self.selectables[unsel_idx] as row:
+                row.clear()
+                row.style("background-color: white; color: #478eff;")
+                with ui.item_section().props("avatar"):
+                    ui.icon("folder").style("color: #478eff;")
+                with ui.item_section():
+                    ui.label(self.SELECTED_DIR.name).style("color: black;")
 
     def select_upper_dir(self):
         pass
