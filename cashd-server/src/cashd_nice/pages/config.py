@@ -68,6 +68,7 @@ class DirectoryList:
         self.selectables = []
         for selectable in directory.iterdir():
             with ui.item() as list_item:
+                list_item.dirpath = selectable
                 self.selectables.append(list_item)
                 if selectable.is_dir():
                     list_item.on_click(lambda s=selectable: self.click_dir(s))
@@ -87,36 +88,37 @@ class DirectoryList:
             # open the directory if clicked on a highlighted dir
             self._show_dir(directory)
         else:
-            self._upd_selection_highlight(directory)
+            self._highlight_row(directory)
+            self._unhighlight_row(self.SELECTED_DIR)
         self.SELECTED_DIR = directory
         self.selected_dir_label.set_text(str(directory))
 
-    def _upd_selection_highlight(self, directory):
+    def _highlight_row(self, directory: Path):
         ui = self.ui
-        is_highlighted = directory.parent == self.SELECTED_DIR.parent
-        displayed_items = (
-            list(self.SELECTED_DIR.parent.iterdir()) if is_highlighted
-            else list(self.SELECTED_DIR.iterdir())
-        )
-        sel_idx = displayed_items.index(directory)
-        # highlights the clicked dir
-        with self.selectables[sel_idx] as row:
+        idx = self.displayed_items.index(directory)
+        with self.selectables[idx] as row:
             row.clear()
             row.style("background-color: #478eff; color: white;")
             with ui.item_section().props("avatar"):
                 ui.icon("folder").style("color: white;")
             with ui.item_section():
                 ui.label(directory.name).style("color: white;")
-        # unhighlights the previously clicked dir
-        if self.SELECTED_DIR in displayed_items:
-            unsel_idx = displayed_items.index(self.SELECTED_DIR)
-            with self.selectables[unsel_idx] as row:
+
+    def _unhighlight_row(self, directory: Path):
+        ui = self.ui
+        if self.SELECTED_DIR in self.displayed_items:
+            idx = self.displayed_items.index(self.SELECTED_DIR)
+            with self.selectables[idx] as row:
                 row.clear()
                 row.style("background-color: white; color: #478eff;")
                 with ui.item_section().props("avatar"):
                     ui.icon("folder").style("color: #478eff;")
                 with ui.item_section():
                     ui.label(self.SELECTED_DIR.name).style("color: black;")
+
+    @property
+    def displayed_items(self) -> list[Path]:
+        return [row.dirpath for row in self.selectables]
 
     def select_upper_dir(self):
         pass
