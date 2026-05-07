@@ -144,6 +144,7 @@ class SelectDirDialog:
                 )
 
     async def open(self) -> Path | None:
+        self.selected_dir_label.set_text(str(self.INITIAL_DIR))
         self.show_dir(self.INITIAL_DIR)
         self.selected_dir = self.INITIAL_DIR
         return await self.dir_selector
@@ -156,22 +157,29 @@ class SelectDirDialog:
         self.dir_list.clear()
         try:
             # NOTE: Transform into list to raise the permission error
-            dirs = list(directory.iterdir())
+            dirs = list(i for i in directory.iterdir() if i.is_dir())
         except PermissionError:
-            self._render_error(
-                "O sistema não permite exibir o conteúdo desta pasta.", icon="block"
+            self._render_message(
+                "O sistema não permite exibir o conteúdo desta pasta.",
+                icon="block",
+                color="red",
             )
         else:
-            self._render_dirs(rows=dirs)
+            if len(dirs) == 0:
+                self._render_message("Nenhuma pasta aqui.")
+            else:
+                self._render_dirs(rows=dirs)
 
-    def _render_error(self, text: str, icon: str = "warning"):
+    def _render_message(self, text: str, icon: str = "info", color: str = "gray"):
+        # INFO: Signals that nothing is being displayed currently
+        self.selectables = []
         with self.dir_list:
             with ui.item():
                 with ui.item_section().props("avatar"):
-                    ui.icon(icon).style("color: red;")
+                    ui.icon(icon).style(f"color: {color};")
                 with ui.item_section():
                     label = ui.label(text)
-                    label.style("color: red;")
+                    label.style(f"color: {color}; font-style: italic;")
 
     def _render_dirs(self, rows: list[Path]):
         self.selectables = []
@@ -180,12 +188,11 @@ class SelectDirDialog:
                 with ui.item() as list_item:
                     list_item.dirpath = selectable
                     self.selectables.append(list_item)
-                    if selectable.is_dir():
-                        list_item.on_click(lambda s=selectable: self.click_dir(s))
-                        with ui.item_section().props("avatar"):
-                            ui.icon("folder").style("color: #478eff;")
-                        with ui.item_section():
-                            ui.label(selectable.name)
+                    list_item.on_click(lambda s=selectable: self.click_dir(s))
+                    with ui.item_section().props("avatar"):
+                        ui.icon("folder").style("color: #478eff;")
+                    with ui.item_section():
+                        ui.label(selectable.name)
 
     def click_dir(self, directory: Path):
         ui = self.ui
@@ -226,7 +233,7 @@ class SelectDirDialog:
         if cur in self.displayed_items:
             self._unhighlight_row(cur)
         else:
-            self._show_dir(new)
+            self.show_dir(new)
         if cur == new:
             return
         self.selected_dir = new
