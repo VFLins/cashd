@@ -1,6 +1,6 @@
 from pathlib import Path
 from cashd_core.const import ESTADOS
-from cashd_nice.widgets import DefaultHeader
+from cashd_nice.widgets import DefaultHeader, SelectDirDialog
 
 
 def h1(ui, title: str):
@@ -16,7 +16,7 @@ def h2(ui, title: str):
 class DirectoryList:
     def __init__(self, ui):
         self.ui = ui
-        self.SELECTED_DIR: Path = Path("~").expanduser()
+        self.initial_dir: Path = Path("~").expanduser()
 
         self.table = ui.table(
             columns=[
@@ -34,125 +34,17 @@ class DirectoryList:
                 del_button.on(
                     "click",
                     js_handler="() => emit(props.row.id)",
-                    handler=lambda e: ui.notify(f"Excluindo local id={e.args}")
+                    handler=lambda id=id: self.rm_dir(row_id=id)
                 )
-        with ui.dialog() as self.dir_selector, ui.card().classes("w-full"):
-            with ui.row().classes("justify-between w-full"):
-                ui.button(
-                    "Voltar",
-                    icon="arrow_back",
-                    on_click=self.select_upper_dir
-                ).props("flat")
-                ui.button(
-                    icon="close",
-                    on_click=lambda: self.dir_selector.submit(None)
-                ).props("flat")
-            with ui.scroll_area():
-                with ui.list().props("dense separator") as self.dir_list:
-                    self.dir_list.classes("w-full")
-                    self._show_dir(self.SELECTED_DIR)
-            with ui.row(align_items="center").classes("w-full h-[1rem] no-wrap whitespace-nowrap"):
-                with ui.scroll_area() as selected_dir_block:
-                    selected_dir_block.classes("w-full h-6 no-margin-scroll")
-                    self.selected_dir_label = ui.label(str(self.SELECTED_DIR))
-                    self.selected_dir_label.classes("no-wrap font-mono font-bold")
-                    self.selected_dir_label.style("color: #478eff;")
-                ui.button(
-                    icon="add",
-                    on_click=lambda: self.dir_selector.submit(self.SELECTED_DIR)
-                )
-
-    def _show_dir(self, directory: Path = Path("~").expanduser()):
-        ui = self.ui
-        self.dir_list.clear()
-        self.selectables = []
-        try:
-            dirs = directory.iterdir()
-        except PermissionError:
-            with self.dir_list:
-                with ui.item():
-                    with ui.item_section().props("avatar"):
-                        ui.icon("block").style("color: red;")
-                    with ui.item_section():
-                        label = ui.label(
-                            "O sistema não permite exibir o conteúdo desta pasta."
-                        )
-                        label.style("color: red;")
-            return
-        with self.dir_list:
-            for selectable in dirs:
-                with ui.item() as list_item:
-                    list_item.dirpath = selectable
-                    self.selectables.append(list_item)
-                    if selectable.is_dir():
-                        list_item.on_click(lambda s=selectable: self.click_dir(s))
-                        with ui.item_section().props("avatar"):
-                            ui.icon("folder").style("color: #478eff;")
-                        with ui.item_section():
-                            ui.label(selectable.name)
-                    else:
-                        with ui.item_section().props("avatar"):
-                            ui.icon("description").style("color: lightgray;")
-                        with ui.item_section():
-                            ui.label(selectable.name).style("color: lightgray;")
-
-    def click_dir(self, directory: Path):
-        ui = self.ui
-        if self.SELECTED_DIR == directory:
-            # open the directory if clicked on a highlighted dir
-            self._show_dir(directory)
-        else:
-            self._highlight_row(directory)
-            self._unhighlight_row(self.SELECTED_DIR)
-        self.SELECTED_DIR = directory
-        self.selected_dir_label.set_text(str(directory))
-
-    def _highlight_row(self, directory: Path):
-        ui = self.ui
-        idx = self.displayed_items.index(directory)
-        with self.selectables[idx] as row:
-            row.clear()
-            row.style("background-color: #478eff; color: white;")
-            with ui.item_section().props("avatar"):
-                ui.icon("folder").style("color: white;")
-            with ui.item_section():
-                ui.label(directory.name).style("color: white;")
-
-    def _unhighlight_row(self, directory: Path):
-        ui = self.ui
-        if self.SELECTED_DIR in self.displayed_items:
-            idx = self.displayed_items.index(self.SELECTED_DIR)
-            with self.selectables[idx] as row:
-                row.clear()
-                row.style("background-color: white; color: #478eff;")
-                with ui.item_section().props("avatar"):
-                    ui.icon("folder").style("color: #478eff;")
-                with ui.item_section():
-                    ui.label(self.SELECTED_DIR.name).style("color: black;")
-
-    @property
-    def displayed_items(self) -> list[Path]:
-        return [row.dirpath for row in self.selectables]
-
-    def select_upper_dir(self):
-        cur, new = self.SELECTED_DIR, self.SELECTED_DIR.parent
-        if cur in self.displayed_items:
-            self._unhighlight_row(cur)
-        else:
-            self._show_dir(new)
-        if cur == new:
-            return
-        self.SELECTED_DIR = new
-        self.selected_dir_label.set_text(str(new))
+        self.dialog_add_directory = SelectDirDialog(ui=ui, initial_dir=self.initial_dir)
 
     async def add_dir(self):
-        result = await self.dir_selector
-        if result:
-            self.ui.notify(f"Diretório adicionado {result}")
-        else:
-            self.ui.notify(f"Nenhum diretório adicionado")
+        new_dir = await self.dialog_add_directory.open()
+        if new_dir:
+            self.ui.notify(f"Pasta adicionada: {new_dir}")
 
-
+    def rm_dir(self, row_id: int):
+        ui.notify(f"Excluindo local id={e.args}")
 
 def page(ui):
     ui.add_head_html(
