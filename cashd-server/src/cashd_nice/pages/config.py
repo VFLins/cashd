@@ -23,7 +23,7 @@ class DirectoryList:
                 {"name": "name", 'label': None, "field": "name", "align": "left"},
                 {"name": "action", "label": ""},
             ],
-            rows=[{"id": i+1, "name": f"/caminho/para/pasta{i}"} for i in range(2)],
+            rows=[{"name": f"/caminho/para/pasta{i}"} for i in range(2)],
         ).classes('w-full').props("hide-header")
 
         with self.table.add_slot('top-right'):
@@ -33,8 +33,8 @@ class DirectoryList:
                 del_button = ui.button(icon="delete").props("flat size=sm dense")
                 del_button.on(
                     "click",
-                    js_handler="() => emit(props.row.id)",
-                    handler=lambda id=id: self.rm_dir(row_id=id)
+                    js_handler="() => emit(props.rowIndex)",
+                    handler=self.rm_dir
                 )
         self.dialog_add_directory = SelectDirDialog(ui=ui, initial_dir=self.initial_dir)
 
@@ -43,8 +43,9 @@ class DirectoryList:
         if new_dir:
             self.ui.notify(f"Pasta adicionada: {new_dir}")
 
-    def rm_dir(self, row_id: int):
-        ui.notify(f"Excluindo local id={e.args}")
+    def rm_dir(self, payload):
+        row_index = payload.args
+        self.ui.notify(f"Excluindo local {row_index=}")
 
 def page(ui):
     ui.add_head_html(
