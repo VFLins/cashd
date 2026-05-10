@@ -54,7 +54,7 @@ class DefaultHeader:
                                 "color: black;"
                             )
             with ui.row(align_items="center") as mobile_block:
-                mobile_block.classes("sm:hidden w-full flex-nowrap")
+                mobile_block.classes("md:!hidden w-full flex-nowrap")
                 header_image = ui.image(header_entries[selected_entry][0])
                 header_image.classes("rounded-full size-12 select-none")
                 header_label = ui.label(header_entries[selected_entry][1])

@@ -92,7 +92,7 @@ class page:
         ui.colors(primary="#478eff", secondary="#d3d7d9")
         DefaultHeader(ui=ui, selected_entry=0)
         self.top_section()
-        with ui.grid().classes("w-full h-full sm:grid-cols-2"):
+        with ui.grid().classes("w-full h-full md:grid-cols-2"):
             self.l_section = self.left_section()
             self.r_section = self.right_section()
 
