@@ -89,7 +89,7 @@ class DetailedList:
 
         with ui.scroll_area() as scroll:
             scroll.classes("w-full border border-gray-300 rounded-borders")
-            scroll.style("min-height: 260px; height: calc(100svh - 460px);")
+            scroll.style("min-height: 260px; height: calc(100svh - 380px);")
             with self.ui.list().props("separator").classes("w-full p-0 m-0 select-none"):
                 for index, item in enumerate(self.items):
                     with self.ui.item(on_click=lambda i=index: self._select_item(i)).props('clickable v-ripple') as el:
@@ -156,13 +156,13 @@ class SelectDirDialog:
     def show_dir(self, directory: Path):
         self.dir_list.clear()
         try:
-            # NOTE: Transform into list to raise the permission error
+            # Transform into list to raise the permission error
             dirs = list(i for i in directory.iterdir() if i.is_dir())
         except PermissionError:
             self._render_message(
                 "O sistema não permite exibir o conteúdo desta pasta.",
                 icon="block",
-                color="red",
+                color="var(--q-negative)",
             )
         else:
             if len(dirs) == 0:
@@ -170,9 +170,8 @@ class SelectDirDialog:
             else:
                 self._render_dirs(rows=dirs)
 
-    def _render_message(self, text: str, icon: str = "info", color: str = "gray"):
-        # INFO: Signals that nothing is being displayed currently
-        self.selectables = []
+    def _render_message(self, text: str, icon: str = "info", color: str = "var(--q-info)"):
+        self.selectables = [] # Signals that nothing is being displayed currently
         with self.dir_list:
             with ui.item():
                 with ui.item_section().props("avatar"):

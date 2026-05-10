@@ -91,6 +91,7 @@ class page:
     def top_section(self):
         ui = self.ui
         with ui.row(align_items="center") as top_section:
+            top_section.classes("no-wrap w-full")
             self.section_switcher = ui.button(
                 icon="point_of_sale",
                 on_click=self.switch_section_mobile
@@ -102,7 +103,7 @@ class page:
                 **Local:** *Endereço dele*<br>
                 **Saldo devedor:** R$ 100,00
                 """
-            ).classes("text-base select-none")
+            ).classes("text-base select-none truncate")
         return top_section
 
     def left_section(self):
@@ -110,12 +111,13 @@ class page:
         with ui.column().classes("w-full max-w-2xl self-center mx-auto") as left_section:
             ui.input(label="Pesquisa").classes("w-full")
             DetailedList(ui,items=example_customer_data)
-            with ui.row(align_items="center").classes("w-full"):
-                ui.label("7 itens, mostrando 1-7").classes("select-none")
-                ui.space()
-                with ui.row().classes("gap-0"):
-                    ui.button("anterior").classes("text-xs").props("flat")
-                    ui.button("próximo").classes("text-xs").props("flat")
+            with ui.scroll_area().classes("h-fit"):
+                with ui.row(align_items="center").classes("w-full no-wrap"):
+                    ui.label("900 itens, mostrando 801-900").classes("select-none truncate")
+                    ui.space()
+                    with ui.row().classes("gap-0 no-wrap"):
+                        ui.button(icon="arrow_back").classes("text-xs").props("flat")
+                        ui.button(icon="arrow_forward").classes("text-xs").props("flat")
         return left_section
 
     def right_section(self):
