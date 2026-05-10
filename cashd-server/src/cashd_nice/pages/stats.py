@@ -39,7 +39,7 @@ def example_table(ui):
         rows=data,
         row_key="id",
         pagination=8
-    ).classes("self-center").props(
+        ).classes("self-center sm:!w-full md:!w-auto").props(
         "rows-per-page-label='Linhas por página:' "
         ":pagination-label='langAgnosticPageIndicator'"
     )

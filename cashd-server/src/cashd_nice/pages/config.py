@@ -4,13 +4,15 @@ from cashd_nice.widgets import DefaultHeader, SelectDirDialog
 
 
 def h1(ui, title: str):
-    ui.markdown(f"# {title}").style(
-    ).classes("select-none")
-    ui.separator().style("background-color: #478eff;")
+    with ui.column().classes("gap-1 w-full"):
+        ui.markdown(f"# {title}").style(
+        ).classes("select-none")
+        ui.separator().style("background-color: #478eff;")
 
 
 def h2(ui, title: str):
-    ui.markdown(f"## {title}").classes("font-bold").classes("select-none")
+    with ui.column().classes("gap-0 m-0 p-0 w-full"):
+        ui.markdown(f"## {title}").classes("font-bold mt-4 mb-0").classes("select-none")
 
 
 class DirectoryList:

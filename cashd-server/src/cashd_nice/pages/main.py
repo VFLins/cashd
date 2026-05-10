@@ -18,8 +18,8 @@ def subpage_transac(ui):
     with ui.column(align_items="start"):
         dateinput = ui.date_input("Data", value=date.today().strftime("%d/%m/%Y"))
         dateinput.picker.props("mask='DD/MM/YYYY'")
-        dateinput.classes("w-60")
-        ui.input("Valor", placeholder="0,00").classes("w-60")
+        dateinput.classes("w-full")
+        ui.input("Valor", placeholder="0,00").classes("w-full")
         ui.button("Inserir")
 
 
@@ -51,7 +51,7 @@ def subpage_history(ui):
         ).props(
             "rows-per-page-label='Linhas por página:' "
             ":pagination-label='langAgnosticPageIndicator'"
-        ).classes("w-80")
+        ).classes("w-full")
         with table.add_slot("body-cell-action"):
             with table.cell("action"):
                 del_button = ui.button(icon="delete").props("flat size=sm dense")
@@ -64,22 +64,30 @@ def subpage_history(ui):
 
 def subpage_info(ui):
     with ui.grid(columns=2):
-        elem_width = 40
-        ui.input("Nome*").classes(f"w-{elem_width}")
-        ui.input("Sobrenome*").classes(f"w-{elem_width}")
-        ui.input("Apelido").classes(f"w-{elem_width}")
-        ui.input("Telefone").classes(f"w-{elem_width}")
-        ui.input("Endereço").classes(f"w-{elem_width}")
-        ui.input("Bairro").classes(f"w-{elem_width}")
-        ui.input("Cidade").classes(f"w-{elem_width}")
-        ui.select(ESTADOS, value=ESTADOS[0], label="Estado").classes(f"w-{elem_width}")
-    with ui.row():
+        ui.input("Nome*").classes(f"w-full")
+        ui.input("Sobrenome*").classes(f"w-full")
+        ui.input("Apelido").classes(f"w-full")
+        ui.input("Telefone").classes(f"w-full")
+        ui.input("Endereço").classes(f"w-full")
+        ui.input("Bairro").classes(f"w-full")
+        ui.input("Cidade").classes(f"w-full")
+        ui.select(ESTADOS, value=ESTADOS[0], label="Estado").classes(f"w-full")
+    with ui.row().classes("no-wrap"):
         ui.button("Salvar", icon="check").disable()
         ui.button("Restaurar", icon="refresh").props("flat").disable()
 
 
 class page:
     def __init__(self, ui):
+        ui.add_head_html(
+        """
+        <style>
+            .no-margin-scroll .q-scrollarea__content {
+                padding: 0 !important;
+            }
+        </style>
+        """
+        )
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
         DefaultHeader(ui=ui, selected_entry=0)
@@ -111,10 +119,10 @@ class page:
         with ui.column().classes("w-full max-w-2xl self-center mx-auto") as left_section:
             ui.input(label="Pesquisa").classes("w-full")
             DetailedList(ui,items=example_customer_data)
-            with ui.scroll_area().classes("h-fit"):
+            with ui.scroll_area().classes("h-[2rem] no-margin-scroll w-full items-end"):
                 with ui.row(align_items="center").classes("w-full no-wrap"):
-                    ui.label("900 itens, mostrando 801-900").classes("select-none truncate")
                     ui.space()
+                    ui.label("900 itens, mostrando 801-900").classes("select-none truncate")
                     with ui.row().classes("gap-0 no-wrap"):
                         ui.button(icon="arrow_back").classes("text-xs").props("flat")
                         ui.button(icon="arrow_forward").classes("text-xs").props("flat")
