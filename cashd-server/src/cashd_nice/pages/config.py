@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Callable
 from cashd_core.const import ESTADOS
 from cashd_nice.widgets import DefaultHeader, SelectDirDialog
 
@@ -13,6 +14,12 @@ def h1(ui, title: str):
 def h2(ui, title: str):
     with ui.column().classes("gap-0 m-0 p-0 w-full"):
         ui.markdown(f"## {title}").classes("font-bold mt-4 mb-0").classes("select-none")
+
+
+def described_button(ui, label: str, description: str, on_click: Callable[[], None] | None = None, icon: str | None = None):
+    with ui.column().classes("w-full gap-1"):
+        ui.button(label, icon=icon, on_click=on_click)
+        ui.label(description).classes("text-xs mb-2")
 
 
 class DirectoryList:
@@ -85,17 +92,27 @@ def page(ui):
             ui.input("Estado")
             ui.input("Cidade")
             ui.select(ESTADOS, value=ESTADOS[0], label="Estado")
-        h2(ui, "Linhas por página nas tabelas")
+        h2(ui, "Linhas por página")
         with ui.grid().classes("h-full center-items sm:grid-cols-3"):
             ui.number(
-                label="Clientes [100]", value=100, min=20, precision=0, format="%.0f"
+                label="Seleção de clientes [100]", value=100, min=20, precision=0, format="%.0f"
             )
             ui.number(
-                label="Estatísticas [200]", value=200, min=20, precision=0, format="%.0f"
+                label="Tabelas [200]", value=200, min=20, precision=0, format="%.0f"
             )
         h1(ui, "Backup")
         h2(ui, "Locais de backup")
         DirectoryList(ui)
         h2(ui, "Ações")
-
+        with ui.grid().classes("sm:grid-cols-2"):
+            described_button(
+                ui, label="Carregar backup",
+                description="Esta operação é reversível, consulte a documentação.",
+                icon="download",
+            )
+            described_button(
+                ui, label="Fazer backup",
+                description="Backups serão salvos nos 'Locais de backup'.",
+                icon="save"
+            )
 
