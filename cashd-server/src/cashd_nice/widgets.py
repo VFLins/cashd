@@ -90,13 +90,17 @@ class DetailedList:
         with ui.scroll_area() as scroll:
             scroll.classes("w-full border border-gray-300 rounded-borders")
             scroll.style("min-height: 260px; height: calc(100svh - 380px);")
-            with self.ui.list().props("separator").classes("w-full p-0 m-0 select-none"):
+            with self.ui.list() as sel_list:
+                sel_list.props("separator dense")
+                sel_list.classes("w-full p-0 m-0 select-none")
                 for index, item in enumerate(self.items):
-                    with self.ui.item(on_click=lambda i=index: self._select_item(i)).props('clickable v-ripple') as el:
+                    with self.ui.item() as el:
+                        el.on("click", lambda i=index: self._select_item(i))
+                        el.props("clickable")
                         self.item_elements.append(el)
                         with self.ui.item_section():
-                            self.ui.item_label(item['title']).classes('text-weight-bold')
-                            self.ui.item_label(item['subtitle'])
+                            self.ui.item_label(item['title']).classes("text-weight-bold m-0")
+                            self.ui.item_label(item['subtitle']).classes("text-xs m-0")
 
     def _select_item(self, index):
         """Updates the highlighted item and updates DetailedList.selected and

@@ -35,33 +35,34 @@ def subpage_history(ui):
     )
     with ui.column(align_items="end").classes("w-60 md:w-90"):
         ui.button("Imprimir", icon="print")
-    with ui.scroll_area().classes("no-margin-scroll w-70 md:w-90") as scroll:
-        scroll.style("height: calc(100svh - 390px);")
-        table = ui.table(
-            row_key="id",
-            columns=[
-                {"name": "data", "label": "Data", "field": "data"},
-                {"name": "valor", "label": "Valor (R$)", "field": "valor"},
-                {"name": "action", "label": ""},
-            ],
-            rows=[
-                {"id": 1, "data": "12/10/2024", "valor": "223,30"},
-                {"id": 2, "data": "11/01/2025", "valor": "35,50"},
-                {"id": 3, "data": "22/03/2024", "valor": "-200,00"},
-            ],
-            pagination=5,
-        ).props(
-            "rows-per-page-label='Linhas por página:' "
-            ":pagination-label='langAgnosticPageIndicator'"
-        ).classes()
-        with table.add_slot("body-cell-action"):
-            with table.cell("action"):
-                del_button = ui.button(icon="delete").props("flat size=sm dense")
-                del_button.on(
-                    "click",
-                    js_handler="() => emit(props.row.id)",
-                    handler=lambda e: ui.notify(f"Excluindo transação id={e.args}")
-                )
+    table = ui.table(
+        row_key="id",
+        columns=[
+            {"name": "data", "label": "Data", "field": "data"},
+            {"name": "valor", "label": "Valor (R$)", "field": "valor"},
+            {"name": "action", "label": ""},
+        ],
+        rows=[
+            {"id": 1, "data": "12/10/2024", "valor": "223,30"},
+            {"id": 2, "data": "11/01/2025", "valor": "35,50"},
+            {"id": 3, "data": "22/03/2024", "valor": "-200,00"},
+        ],
+    )
+    table.props(
+        "dense "
+        "rows-per-page-label='Linhas por página:' "
+        ":pagination-label='langAgnosticPageIndicator'"
+    )
+    table.classes("self-center w-70 md:w-90")
+    table.style("height: calc(100svh - 390px);")
+    with table.add_slot("body-cell-action"):
+        with table.cell("action"):
+            del_button = ui.button(icon="delete").props("flat size=sm dense")
+            del_button.on(
+                "click",
+                js_handler="() => emit(props.row.id)",
+                handler=lambda e: ui.notify(f"Excluindo transação id={e.args}")
+            )
 
 
 def subpage_info(ui):
@@ -100,6 +101,7 @@ class page:
         </style>
         """
         )
+        ui.query('body').style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
         DefaultHeader(ui=ui, selected_entry=0)
@@ -146,7 +148,7 @@ class page:
         ui = self.ui
         with ui.column() as right_section:
             right_section.classes("!hidden md:!flex w-full items-center")
-            with ui.tabs().classes("w-full").props("no-caps") as self.tabs:
+            with ui.tabs().classes("w-full mt-2").props("no-caps") as self.tabs:
                 transac = ui.tab("Transação")
                 history = ui.tab("Histórico")
                 info = ui.tab("Informações")

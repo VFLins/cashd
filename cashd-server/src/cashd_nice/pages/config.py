@@ -84,6 +84,7 @@ def page(ui):
     """
     )
     ui.colors(primary="#478eff", secondary="#d3d7d9", warning="#d48731", info="#478eff")
+    ui.query('body').style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
     DefaultHeader(ui, selected_entry=3)
     with ui.column(align_items="left").classes("self-center"):
         h1(ui, "Preferências")

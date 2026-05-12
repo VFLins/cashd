@@ -30,25 +30,44 @@ def example_table(ui):
         }
         for i in range(100)
     ]
-    ui.table(
+    table = ui.table(
         columns=[
+            {"name": "data", "label": "Data", "field": "data"},
             {"name": "nome", "label": "Nome", "field": "nome", "align": "left"},
             {"name": "valor", "label": "Valor", "field": "valor"},
-            {"name": "data", "label": "Data", "field": "data"},
         ],
         rows=data,
         row_key="id",
-        pagination=8
-        ).classes("self-center sm:!w-full md:!w-auto").props(
+        )
+    table.classes("self-center sm:!w-full md:!w-auto").props(
+        "dense "
         "rows-per-page-label='Linhas por página:' "
         ":pagination-label='langAgnosticPageIndicator'"
     )
+    table.style("height: calc(100svh - 240px);")
+    with ui.scroll_area().classes("h-[2rem] no-margin-scroll sm:w-full md:w-96 items-end"):
+        with ui.row(align_items="center").classes("w-full no-wrap"):
+            ui.space()
+            ui.label("900 itens, mostrando 801-900").classes("select-none truncate")
+            with ui.row().classes("gap-0 no-wrap"):
+                ui.button(icon="arrow_back").classes("text-xs").props("flat")
+                ui.button(icon="arrow_forward").classes("text-xs").props("flat")
 
 
 class page:
     def __init__(self, ui):
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
+        ui.query('body').style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
+        ui.add_head_html(
+        """
+        <style>
+            .no-margin-scroll .q-scrollarea__content {
+                padding: 0 !important;
+            }
+        </style>
+        """
+        )
         DefaultHeader(ui, selected_entry=2)
         self.controls_block()
         with ui.column(align_items="center") as self.displayed_stat:

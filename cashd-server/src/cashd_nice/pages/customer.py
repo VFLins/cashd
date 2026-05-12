@@ -5,6 +5,7 @@ from cashd_nice.widgets import DefaultHeader
 
 def page(ui):
     ui.colors(primary="#478eff", secondary="#d3d7d9")
+    ui.query('body').style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
     DefaultHeader(ui=ui, selected_entry=1)
     with ui.column(align_items="center").classes("w-full"):
         with ui.grid().classes("h-full center-items sm:grid-cols-2"):
