@@ -13,10 +13,13 @@ if sys.platform == 'linux':
 
 import argparse
 from pathlib import Path
+from fastapi import Request
+from fastapi.responses import RedirectResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from nicegui import ui, app
 from cashd_nice.const import PROJECT_ROOT
-from cashd_nice.pages import main, customer, stats, config
+from cashd_nice.pages import main, customer, stats, config, login
 
 
 parser = argparse.ArgumentParser(
@@ -42,6 +45,31 @@ app.add_static_files("/assets", Path(PROJECT_ROOT, "assets"))
 app.native.window_args["min_size"] = (850, 620)
 
 
+@app.add_middleware
+class AuthMiddleware(BaseHTTPMiddleware):
+    HOST_IPS = ["127.0.0.1", "::1", "localhost"]
+
+    async def dispatch(self, request: Request, call_next):
+        """Redirects to '/login' if the user is not authenticated, and to '/'
+        if not authorized to access the requested apge. The server's host bypasses
+        any verification.
+        """
+        if self.is_host(request):
+            return await call_next(request)
+        if not app.storage.user.get("authenticated"):
+            return RedirectResponse(f"/login?redirect_to=/")
+        if not app.storage.user.get("athorized"):
+            return RedirectResponse("/")
+        return await call_next(request)
+
+    def is_host(self, request: Request) -> bool:
+        """Check if the device accessing this GUI is the server's host.
+        The host should be able to bypass any authentication step.
+        """
+        client_host = request.client.host if request.client else None
+        return client_host in self.HOST_IPS
+
+
 @ui.page("/")
 def main_page():
     return main.page(ui=ui)
@@ -62,11 +90,17 @@ def config_page():
     return config.page(ui=ui)
 
 
+@ui.page("/login")
+def login_page():
+    return login.page(ui=ui)
+
+
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(
         title="Cashd server",
         show=False,
         native=args.as_native,
+        storage_secret="test",
         favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
     )
 

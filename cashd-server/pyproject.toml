@@ -26,12 +26,13 @@ version = "0.3.4.post1"
 dependencies = [
     "cashd-core==0.3.4",
     "nicegui~=3.11",
+    "pywebview~=6.2",
     "SQLAlchemy~=2.0",
     "phonenumbers>=8.13.31",
-    "pandas~=3.0",
     "pyshortcuts==1.9.0",
     "plotly>=5.22.0",
-    "PyGObject; sys_platform == 'linux'"
+    "fastapi~=0.136",
+    "starlette~=1.0",
 ]
 
 [project.optional-dependencies]
