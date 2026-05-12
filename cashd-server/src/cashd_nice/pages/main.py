@@ -33,10 +33,10 @@ def subpage_history(ui):
         </script>
         """
     )
-    with ui.column(align_items="end").classes("w-90"):
+    with ui.column(align_items="end").classes("w-60 md:w-90"):
         ui.button("Imprimir", icon="print")
-    with ui.scroll_area().classes("no-margin-scroll") as scroll:
-        scroll.style("height: calc(100svh - 350px);")
+    with ui.scroll_area().classes("no-margin-scroll w-70 md:w-90") as scroll:
+        scroll.style("height: calc(100svh - 390px);")
         table = ui.table(
             row_key="id",
             columns=[
@@ -53,7 +53,7 @@ def subpage_history(ui):
         ).props(
             "rows-per-page-label='Linhas por página:' "
             ":pagination-label='langAgnosticPageIndicator'"
-        ).classes("w-full")
+        ).classes()
         with table.add_slot("body-cell-action"):
             with table.cell("action"):
                 del_button = ui.button(icon="delete").props("flat size=sm dense")
@@ -65,21 +65,21 @@ def subpage_history(ui):
 
 
 def subpage_info(ui):
-    with ui.row().classes("no-wrap w-90"):
+    with ui.row().classes("no-wrap w-full md:w-90"):
         ui.space()
         ui.button("Restaurar", icon="refresh").props("flat")
         ui.button("Salvar", icon="check")
     with ui.scroll_area().classes("no-margin-scroll") as scroll:
-        scroll.style("height: calc(100svh - 350px);")
-        with ui.grid(columns=2):
+        scroll.style("height: calc(100svh - 400px);")
+        with ui.grid().classes("w-full h-full md:grid-cols-2"):
             ui.input("Nome*").classes(f"w-full")
             ui.input("Sobrenome*").classes(f"w-full")
             ui.input("Apelido").classes(f"w-full")
             ui.input("Telefone").classes(f"w-full")
             ui.input("Endereço").classes(f"w-full")
             ui.input("Bairro").classes(f"w-full")
-            ui.input("Cidade").classes(f"w-full")
-            ui.select(ESTADOS, value=ESTADOS[0], label="Estado").classes(f"w-full")
+            ui.input("Cidade*").classes(f"w-full")
+            ui.select(ESTADOS, value=ESTADOS[0], label="Estado*").classes(f"w-full")
 
 
 class CustomerInfo:
@@ -112,16 +112,20 @@ class page:
     def top_section(self):
         ui = self.ui
         with ui.row(align_items="center") as top_section:
-            top_section.classes("no-wrap bg-[#e1ebf0] rounded shadow-lg px-4 py-2")
+            top_section.classes(
+                "w-full md:w-[80%] lg:w-[60%] self-center no-wrap bg-[#e1ebf0] "
+                "rounded shadow-lg px-4 py-2"
+            )
             self.section_switcher = ui.button(
                 icon="point_of_sale",
                 on_click=self.switch_section_mobile
             )
-            self.section_switcher.classes("!flex md:!hidden")
-            with ui.column().classes("gap-0"):
-                CustomerInfo(ui, field="Cliente", value="Nome Do Cliente Selecionado")
-                CustomerInfo(ui, field="Local", value="Endereço Dele")
-                CustomerInfo(ui, field="Saldo devedor", value="R$ 1000,00")
+            with ui.scroll_area().classes("no-margin-scroll w-full h-[4rem]"):
+                self.section_switcher.classes("!flex md:!hidden")
+                with ui.column().classes("gap-0"):
+                    CustomerInfo(ui, field="Cliente", value="Nome Do Cliente Selecionado")
+                    CustomerInfo(ui, field="Local", value="Endereço Dele")
+                    CustomerInfo(ui, field="Saldo devedor", value="R$ 1000,00")
         return top_section
 
     def left_section(self):
@@ -149,9 +153,9 @@ class page:
             with ui.tab_panels(self.tabs, value=transac):
                 with ui.tab_panel(transac):
                     subpage_transac(ui)
-                with ui.tab_panel(history).classes("w-full"):
+                with ui.tab_panel(history):
                     subpage_history(ui)
-                with ui.tab_panel(info).classes("w-full"):
+                with ui.tab_panel(info):
                     subpage_info(ui)
         return right_section
 
