@@ -47,25 +47,32 @@ app.native.window_args["min_size"] = (850, 620)
 
 @app.add_middleware
 class AuthMiddleware(BaseHTTPMiddleware):
-    HOST_IPS = ["127.0.0.1", "::1", "localhost"]
+    HOST_IPS = ["127.0.0.1", "localhost"]
+    UNRESTRICTED_ROUTES = {"/assets", "/login"}
 
     async def dispatch(self, request: Request, call_next):
         """Redirects to '/login' if the user is not authenticated, and to '/'
-        if not authorized to access the requested apge. The server's host bypasses
+        if not authorized to access the requested page. The server's host bypasses
         any verification.
         """
-        if self.is_host(request):
+        path = request.url.path
+        if await self.is_host(request) or await self.is_safe_route(request):
             return await call_next(request)
-        if not app.storage.user.get("authenticated"):
-            return RedirectResponse(f"/login?redirect_to=/")
-        if not app.storage.user.get("athorized"):
+        if not app.storage.user.get("authenticated", False):
+            return RedirectResponse(f"/login")
+        if not app.storage.user.get("authorized", False):
             return RedirectResponse("/")
         return await call_next(request)
 
-    def is_host(self, request: Request) -> bool:
-        """Check if the device accessing this GUI is the server's host.
-        The host should be able to bypass any authentication step.
-        """
+    async def is_safe_route(self, request: Request) -> bool:
+        """Check if the request's path is safe for anyone to access."""
+        path = request.url.path
+        is_from_module = path.startswith("/_nicegui")
+        is_safe = path in self.UNRESTRICTED_ROUTES
+        return is_safe or is_from_module
+
+    async def is_host(self, request: Request) -> bool:
+        """Check if the device accessing this GUI is the server's host."""
         client_host = request.client.host if request.client else None
         return client_host in self.HOST_IPS
 
@@ -92,6 +99,9 @@ def config_page():
 
 @ui.page("/login")
 def login_page():
+    if app.storage.user.get("authenticated"):
+        return RedirectResponse("/")
+
     return login.page(ui=ui)
 
 
