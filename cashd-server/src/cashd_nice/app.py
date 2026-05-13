@@ -1,6 +1,7 @@
 
 import multiprocessing
 import sys
+import os
 
 if sys.platform == 'linux':
     multiprocessing.set_start_method('spawn', force=True)
@@ -110,7 +111,7 @@ if __name__ in {"__main__", "__mp_main__"}:
         title="Cashd server",
         show=False,
         native=args.as_native,
-        storage_secret="test",
+        storage_secret=os.urandom(16).hex(),
         favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
     )
 
