@@ -17,15 +17,11 @@ from sqlalchemy.orm import (
     Session,
     DeclarativeBase,
     Mapped,
-)
-
-
-from cashd_core.data import (
-    delete,
     relationship,
     Mapped,
-    DATA_PATH,
 )
+
+from cashd_core.data import DATA_PATH, _DataSource
 
 
 DB_ENGINE = create_engine(f"sqlite:///{Path(DATA_PATH, 'auth.db')}", echo=False)
@@ -205,4 +201,20 @@ def store_login(role_id: int, username: str, password: str):
     hashed = ph.hash(password)
     user = User(RoleId=role_id, username=username, HashStr=hashed)
     user.write()
+
+
+class UserRoleSource(_DataSource):
+    def __init__(self, engine: Engine = DB_ENGINE):
+        stmt = select(
+            User.Id.label("Id"),
+            User.Username.label("Username"),
+            User.Role.label("Role")
+        )
+        super().__init__(
+            select_stmt=stmt,
+            paginated=True,
+            searchable=True,
+            search_colnames=["Username", "Role"],
+            engine=engine,
+        )
 

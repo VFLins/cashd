@@ -39,7 +39,10 @@ class page:
             warn_block.classes("bg-(--q-warning) p-2 w-40 md:w-full")
             warn_block.classes("rounded gap-2 no-wrap border shadow")
             ui.icon("priority_high").classes("text-xl")
-            ui.label("Não perca a senha, o Cashd não pode informar sua senha depois de criada.").classes("text-xs text-bold")
+            ui.label(
+                "Não perca a senha, o Cashd não pode informar a "
+                "senha deste usuário depois de criada."
+            ).classes("text-xs text-bold")
         ui.button("Criar", icon="add")
 
     def existing_user(self, ui):
@@ -50,9 +53,9 @@ class page:
             {"name": "upd_pass", "label": ""},
         ]
         rows = [
-            {"id": 1, "username": "martadecassia", "role": "Operador"},
-            {"id": 2, "username": "marcuslima", "role": "Operador"},
-            {"id": 4, "username": "joaomateus", "role": "Desligado"},
+            {"username": "martadecassia", "role": "Operador"},
+            {"username": "marcuslima", "role": "Operador"},
+            {"username": "joaomateus", "role": "Desligado"},
         ]
         table = ui.table(columns=cols, rows=rows).props("dense")
         table.style("height: calc(100svh - 140px);")
