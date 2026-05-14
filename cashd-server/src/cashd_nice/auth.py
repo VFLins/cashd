@@ -200,16 +200,20 @@ def store_login(role_id: int, username: str, password: str):
     _ = Role().read(row_id=role_id) # Raises the expected ValueError
     ph = PasswordHasher()
     hashed = ph.hash(password)
-    user = User(RoleId=role_id, username=username, HashStr=hashed)
+    user = User(RoleId=role_id, Username=username, HashStr=hashed)
     user.write()
 
 
 class UserRoleSource(_DataSource):
     def __init__(self, engine: Engine = DB_ENGINE):
-        stmt = select(
-            User.Id.label("Id"),
-            User.Username.label("Username"),
-            User.Role.label("Role")
+        stmt = (
+            select(
+                User.Id.label("Id"),
+                User.Username.label("Username"),
+                Role.RoleName.label("Role")
+            )
+            .join(Role, User.RoleId == Role.Id)
+            .order_by(Role.RoleName.desc())
         )
         super().__init__(
             select_stmt=stmt,
