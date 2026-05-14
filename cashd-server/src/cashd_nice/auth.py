@@ -161,6 +161,7 @@ AuthTable.metadata.create_all(DB_ENGINE)
 
 
 DEFAULT_ROLES = (
+    Role(RoleName="Desligado", ForbiddenPages="/;/customer;/stats;/config"),
     Role(RoleName="Operador", ForbiddenPages="/stats;/config"),
     Role(RoleName="Supervisor", ForbiddenPages="/config"),
 )
