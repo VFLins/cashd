@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any, List
+from argon2 import PasswordHasher
 from sqlalchemy import (
     create_engine,
     Engine,
@@ -60,8 +61,7 @@ class AuthTable(DeclarativeBase):
         }
 
     def read(self, row_id: int, engine: Engine = DB_ENGINE):
-        """
-        Fetches one row of data from the database and loads into this instance.
+        """Fetches one row of data from the database and loads into this instance.
 
         :param row_id: Primary key integer value to look for in the table.
         :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
@@ -117,7 +117,33 @@ class User(AuthTable):
     UserRoleRelation: Mapped["Role"] = relationship()
     RoleId = Column("RoleId", RequiredText, ForeignKey("roles.Id"), nullable=False)
     Username = Column("Username", RequiredText, nullable=False, unique=True)
-    HashedPwd = Column("HashedPwd", RequiredText)
+    HashStr = Column("HashStr", RequiredText, nullable=False)
+
+    def read_user(self, username: str, engine: Engine = DB_ENGINE):
+        """Fetches one row of data from the database and loads into this instance.
+
+        :param username: Username to bo looked for in the database.
+        :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
+
+        :raises ValueError: If `row_id` is not present in the table.
+        """
+        stmt = select(User).where(User.Username == username)
+        with Session(bind=engine) as ses:
+            res = ses.execute(stmt).first()
+            if res is None:
+                raise ValueError(f"'{username}' not present in the database")
+            row = res[0]
+            for col in self.__table__.columns:
+                value = getattr(row, col.name, None)
+                setattr(self, col.name, value)
+
+    @property
+    def ForbiddenPages(self) -> list[str] | None:
+        role_id = getattr(self, "RoleId", None)
+        if type(role_id) is int:
+            role = Role()
+            role.read(row_id=role_id)
+            return role.ForbiddenPages.split(";")
 
     def __repr__(self):
         RoleId, Username = self.RoleId, self.Username
@@ -145,4 +171,38 @@ DEFAULT_ROLES = (
 for role in DEFAULT_ROLES:
     if not role.exists():
         role.write()
+
+
+def verify_login(username: str, password: str) -> User:
+    """Verify if the username+password combination is valid.
+
+    :param username: Public username provided by the user.
+    :param password: Private password to be verified by the algorithm.
+
+    :returns: If the login is valid, a `User` object, containing user information.
+    :raises ValueError: If the username provided does not exist.
+    :raises argon2.exceptions.VerifyMismatchError: If the password is not correct.
+    """
+    user = User()
+    user.read_user(username)
+    ph = PasswordHasher()
+    _ = ph.verify(user.HashStr, password)
+    return user
+ 
+
+def store_login(role_id: int, username: str, password: str):
+    """Writes a new user to the database.
+
+    :param role_id: Identifier of this user's role.
+    :param username: New user's username.
+    :param password: New user's password.
+
+    :raises ValueError: If the `role_id` does not exist.
+    :raises sqlalchemy.exc.IntegrityError: If the username already exists.
+    """
+    _ = Role().read(row_id=role_id) # Raises the expected ValueError
+    ph = PasswordHasher()
+    hashed = ph.hash(password)
+    user = User(RoleId=role_id, username=username, HashStr=hashed)
+    user.write()
 
