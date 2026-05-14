@@ -20,7 +20,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from nicegui import ui, app
 from cashd_nice.const import PROJECT_ROOT
-from cashd_nice.pages import main, customer, stats, config, login
+from cashd_nice.pages import main, customer, stats, config, login, user
 
 
 parser = argparse.ArgumentParser(
@@ -102,9 +102,12 @@ def config_page():
 def login_page():
     if app.storage.user.get("authenticated"):
         return RedirectResponse("/")
-
     return login.page(ui=ui)
 
+
+@ui.page("/user")
+def user_page():
+    return user.page(ui=ui)
 
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(

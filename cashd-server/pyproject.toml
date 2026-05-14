@@ -33,6 +33,7 @@ dependencies = [
     "plotly>=5.22.0",
     "fastapi~=0.136",
     "starlette~=1.0",
+    "argon2-cffi",
 ]
 
 [project.optional-dependencies]
