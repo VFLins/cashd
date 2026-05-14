@@ -88,19 +88,26 @@ class AuthTable(DeclarativeBase):
             ses.execute(stmt)
             ses.commit()
 
-    def exists(self, engine: Engine = DB_ENGINE) -> bool:
+    def exists(
+            self,
+            column_names: list[str] | None = None,
+            engine: Engine = DB_ENGINE,
+        ) -> bool:
         """Checks if the data in this instance is already present in the database.
-        Ignores the 'Id' column and always return False if a value is None or not set.
 
+        :param column_names: Column names to check for identical values, if `None`,
+          will check for every column, except 'Id'.
         :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
 
-        :returns: A boolean value indicating if this instance's data is present in the
-          database.
+        :returns: A boolean value indicating if this instance's checked data is present
+          in the database, or `False` if any checked value is `None` or not set.
         """
         cls = type(self)
         with Session(bind=engine) as ses:
             stmt = select(cls)
             for colname, val in self.data.items():
+                if (column_names is not None) and (colname not in column_names):
+                    continue
                 if val is None:
                     return False
                 col = self.__table__.columns[colname]
@@ -118,7 +125,7 @@ class User(AuthTable):
     def read_user(self, username: str, engine: Engine = DB_ENGINE):
         """Fetches one row of data from the database and loads into this instance.
 
-        :param username: Username to bo looked for in the database.
+        :param username: Username to be looked for in the database.
         :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
 
         :raises ValueError: If `row_id` is not present in the table.
@@ -161,9 +168,9 @@ AuthTable.metadata.create_all(DB_ENGINE)
 
 
 DEFAULT_ROLES = (
-    Role(RoleName="Desligado", ForbiddenPages="/;/customer;/stats;/config"),
-    Role(RoleName="Operador", ForbiddenPages="/stats;/config"),
     Role(RoleName="Supervisor", ForbiddenPages="/config"),
+    Role(RoleName="Operador", ForbiddenPages="/stats;/config"),
+    Role(RoleName="Desligado", ForbiddenPages="/;/customer;/stats;/config"),
 )
 for role in DEFAULT_ROLES:
     if not role.exists():
@@ -194,6 +201,8 @@ def store_login(role_id: int, username: str, password: str):
     :param username: New user's username.
     :param password: New user's password.
 
+    :returns: If the data valid and the transaction is successful, a `User` object,
+      containing user information.
     :raises ValueError: If the `role_id` does not exist.
     :raises sqlalchemy.exc.IntegrityError: If the username already exists.
     """
@@ -202,6 +211,7 @@ def store_login(role_id: int, username: str, password: str):
     hashed = ph.hash(password)
     user = User(RoleId=role_id, Username=username, HashStr=hashed)
     user.write()
+    return user
 
 
 class UserRoleSource(_DataSource):
@@ -223,3 +233,18 @@ class UserRoleSource(_DataSource):
             engine=engine,
         )
 
+
+class RoleSource(_DataSource):
+    def __init__(self, engine: Engine = DB_ENGINE):
+        stmt = select(
+            Role.Id.label("Id"),
+            Role.RoleName.label("RoleName"),
+            Role.ForbiddenPages.label("ForbiddenPages"),
+        )
+        super().__init__(
+            select_stmt=stmt,
+            paginated=False,
+            searchable=False,
+            search_colnames=[],
+            engine=engine,
+        )
