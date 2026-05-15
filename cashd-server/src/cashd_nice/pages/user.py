@@ -79,18 +79,27 @@ class page:
         self.table.style("max-height: calc(100svh - 140px);")
         with self.table.add_slot("body-cell-upd_role"):
             with self.table.cell("upd_role"):
-                ui.button(icon="assignment_ind").props("flat dense").on(
+                btn = ui.button(icon="assignment_ind")
+                btn.props("flat dense")
+                btn.tooltip("Alterar cargo")
+                btn.on(
                     "click",
                     js_handler='() => emit(props.row.id)',
                     handler=lambda e: ui.notify(e.args),
                 )
+                with ui.tooltip():
+                    ui.label("Alterar cargo")
         with self.table.add_slot("body-cell-upd_pass"):
             with self.table.cell("upd_pass"):
-                ui.button(icon="password").props("flat dense").on(
+                btn = ui.button(icon="password")
+                btn.props("flat dense")
+                btn.on(
                     "click",
                     js_handler='() => emit(props.row.id)',
                     handler=lambda e: ui.notify(e.args),
                 )
+                with ui.tooltip():
+                    ui.label("Alterar senha")
 
     @property
     def users(self) -> list[dict[str, str]]:
