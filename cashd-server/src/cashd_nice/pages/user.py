@@ -28,15 +28,15 @@ class page:
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
 
-        with ui.tabs().classes("self-center") as tabs:
-            new = ui.tab("Novo")
+        with ui.tabs().classes("self-center").props("no-caps") as tabs:
             existing = ui.tab("Cadastrados")
-        with ui.tab_panels(tabs, value=new) as tab_panels:
+            new = ui.tab("Novo")
+        with ui.tab_panels(tabs, value=existing) as tab_panels:
             tab_panels.classes("self-center w-full md:w-96")
-            with ui.tab_panel(new).classes("items-center"):
-                self.new_user(ui)
             with ui.tab_panel(existing).classes("items-center w-full"):
                 self.existing_user(ui)
+            with ui.tab_panel(new).classes("items-center"):
+                self.new_user(ui)
 
     def new_user(self, ui):
         with ui.grid().classes("md:grid-cols-2"):
@@ -74,7 +74,8 @@ class page:
             {"name": "upd_role", "label": ""},
             {"name": "upd_pass", "label": ""},
         ]
-        self.table = ui.table(columns=cols, rows=self.users).props("dense")
+        self.table = ui.table(columns=cols, rows=self.users)
+        self.table.props("dense no-data-label='Nenhum usuário cadastrado'")
         self.table.style("max-height: calc(100svh - 140px);")
         with self.table.add_slot("body-cell-upd_role"):
             with self.table.cell("upd_role"):

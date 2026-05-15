@@ -51,7 +51,8 @@ def subpage_history(ui):
     table.props(
         "dense "
         "rows-per-page-label='Linhas por página:' "
-        ":pagination-label='langAgnosticPageIndicator'"
+        ":pagination-label='langAgnosticPageIndicator' "
+        "no-data-label='Nenhuma transação para este cliente'"
     )
     table.classes("self-center w-70 md:w-90")
     table.style("height: calc(100svh - 390px);")
