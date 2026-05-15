@@ -116,7 +116,7 @@ class page:
 
     def _refresh_user_table(self):
         """Fetch the current user data and replaces the data in the user table."""
-        self.table.rows = self.USER_ROLES_SOURCE.current_data
+        self.table.rows = self.users
 
     def add_user(self):
         ui = self.ui
