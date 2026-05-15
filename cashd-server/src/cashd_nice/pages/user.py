@@ -29,8 +29,8 @@ class page:
         ui.colors(primary="#478eff", secondary="#d3d7d9")
 
         with ui.tabs().classes("self-center").props("no-caps") as tabs:
-            existing = ui.tab("Cadastrados")
-            new = ui.tab("Novo")
+            existing = ui.tab("Usuários")
+            new = ui.tab("Cadastrar usuário")
         with ui.tab_panels(tabs, value=existing) as tab_panels:
             tab_panels.classes("self-center w-full md:w-96")
             with ui.tab_panel(existing).classes("items-center w-full"):
