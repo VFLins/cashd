@@ -28,9 +28,15 @@ class page:
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
 
-        with ui.tabs().classes("self-center").props("no-caps") as tabs:
-            existing = ui.tab("Usuários")
-            new = ui.tab("Cadastrar usuário")
+        with ui.tabs().classes("self-center") as tabs:
+            tabs.props(
+                "no-caps active-color='primary' indicator-color='transparent' "
+                "active-bg-color=blue-1 dense"
+            )
+            existing = ui.tab("Usuários").classes("bg-gray-100 text-gray-700")
+            new = ui.tab("Cadastrar usuário").classes("bg-gray-100 text-gray-700")
+            existing.style("border-top-left-radius: 8px; border-bottom-left-radius: 8px;")
+            new.style("border-top-right-radius: 8px; border-bottom-right-radius: 8px;")
         with ui.tab_panels(tabs, value=existing) as tab_panels:
             tab_panels.classes("self-center w-full md:w-96")
             with ui.tab_panel(existing).classes("items-center w-full"):

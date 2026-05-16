@@ -149,10 +149,16 @@ class page:
         ui = self.ui
         with ui.column() as right_section:
             right_section.classes("!hidden md:!flex w-full items-center")
-            with ui.tabs().classes("w-full mt-2").props("no-caps") as self.tabs:
-                transac = ui.tab("Transação")
-                history = ui.tab("Histórico")
-                info = ui.tab("Informações")
+            with ui.tabs().classes("w-full mt-4") as self.tabs:
+                self.tabs.props(
+                    "no-caps active-color='primary' indicator-color='transparent' "
+                    "active-bg-color=blue-1 dense"
+                )
+                transac = ui.tab("Transação").classes("bg-gray-100 text-gray-700")
+                history = ui.tab("Histórico").classes("bg-gray-100 text-gray-700")
+                info = ui.tab("Informações").classes("bg-gray-100 text-gray-700")
+                transac.style("border-top-left-radius: 8px; border-bottom-left-radius: 8px;")
+                info.style("border-top-right-radius: 8px; border-bottom-right-radius: 8px;")
             with ui.tab_panels(self.tabs, value=transac):
                 with ui.tab_panel(transac):
                     subpage_transac(ui)
