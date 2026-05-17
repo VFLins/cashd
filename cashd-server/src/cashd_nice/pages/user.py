@@ -29,7 +29,7 @@ class AddUserDialog:
                 )
                 self.pass_input.classes("w-40")
                 self.pass2_input = ui.input(
-                    label="Repita a senha", password=True, password_toggle_button=True
+                    label="Repita a senha", password=True, password_toggle_button=True,
                 )
                 self.pass2_input.classes("w-40")
             with ui.row() as warn_block:
@@ -63,6 +63,9 @@ class AddUserDialog:
         password = self.pass_input.value
         if (username is None) or (username.strip() == ""):
             notify_error(ui, "Insira um nome de usuário")
+            return
+        if (password is None) or (password.strip() == ""):
+            notify_error(ui, "Insira uma senha")
             return
         if self.pass_input.value != self.pass2_input.value:
             notify_error(ui, "As senhas informadas não são iguais")
