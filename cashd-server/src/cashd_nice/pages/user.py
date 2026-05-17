@@ -20,16 +20,18 @@ class AddUserDialog:
             with ui.grid().classes("md:grid-cols-2"):
                 self.username_input = ui.input(label="Nome de usuário").classes("w-40")
                 self.userrole_input = ui.select(
-                    label="Tipo de usuário",
-                    value=self.roles[0],
-                    options=self.roles
+                    label="Tipo de usuário", value=self.roles[0], options=self.roles
                 ).classes("w-40")
                 self.pass_input = ui.input(
-                    label="Senha", password=True, password_toggle_button=True,
+                    label="Senha",
+                    password=True,
+                    password_toggle_button=True,
                 )
                 self.pass_input.classes("w-40")
                 self.pass2_input = ui.input(
-                    label="Repita a senha", password=True, password_toggle_button=True,
+                    label="Repita a senha",
+                    password=True,
+                    password_toggle_button=True,
                 )
                 self.pass2_input.classes("w-40")
             with ui.row() as warn_block:
@@ -105,11 +107,15 @@ class UpdateRoleDialog:
     def __init__(self, ui, user_id):
         self.user_id = user_id
         with ui.dialog() as self.dialog, ui.card():
+            title = ui.markdown(f"Cargo de *`{self.user_name}`*")
+            title.classes("text-lg")
             self.userrole_input = ui.select(
-                label="Tipo de usuário",
-                value=self.roles[0],
-                options=self.roles
-            ).classes("w-40")
+                label="Cargo", value=self.roles[0], options=self.roles
+            ).classes("w-full")
+            with ui.row() as buttons_block:
+                buttons_block.classes("self-end justify-end")
+                ui.button("Cancelar", icon="close", on_click=self.cancel).props("flat")
+                ui.button("Confimar", icon="check", on_click=self.set_role)
 
     @property
     def roles(self) -> list[str]:
@@ -118,10 +124,16 @@ class UpdateRoleDialog:
     @property
     def user_role(self) -> str:
         user = auth.User()
-        user.read(row_id=user_id)
+        user.read(row_id=self.user_id)
         role = auth.Role()
         role.read(row_id=user.RoleId)
         return role.RoleName
+
+    @property
+    def user_name(self) -> str:
+        user = auth.User()
+        user.read(row_id=self.user_id)
+        return user.Username
 
     async def open(self) -> None:
         self.userrole_input.set_options(self.roles, value=self.user_role)
@@ -132,6 +144,46 @@ class UpdateRoleDialog:
 
     def cancel():
         pass
+
+
+class UpdatePassDialog:
+    def __init__(self, ui, user_id):
+        self.user_id = user_id
+        with ui.dialog() as self.dialog, ui.card():
+            title = ui.markdown(f"Nova senha para *`{self.user_name}`*")
+            title.classes("text-lg")
+            self.pass_input = ui.input(
+                label="Nova senha",
+                password=True,
+                password_toggle_button=True,
+            )
+            self.pass_input.classes("w-full")
+            self.pass2_input = ui.input(
+                label="Repita a senha",
+                password=True,
+                password_toggle_button=True,
+            )
+            self.pass2_input.classes("w-full")
+            with ui.row() as buttons_block:
+                buttons_block.classes("self-end justify-end")
+                ui.button("Cancelar", icon="close", on_click=self.cancel).props("flat")
+                ui.button("Confimar", icon="check", on_click=self.set_pass)
+
+    @property
+    def user_name(self) -> str:
+        user = auth.User()
+        user.read(row_id=self.user_id)
+        return user.Username
+
+    async def open(self) -> None:
+        return await self.dialog
+
+    def cancel(self):
+        pass
+
+    def set_pass(self):
+        pass
+
 
 class page:
     USER_ROLES_SOURCE = auth.UserRoleSource()
@@ -144,16 +196,14 @@ class page:
     ]
 
     def __init__(self, ui):
-        ui.add_head_html(
-        """
+        ui.add_head_html("""
         <style>
             .no-margin-scroll .q-scrollarea__content {
                 padding: 0 !important;
             }
         </style>
-        """
-        )
-        ui.query('body').style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
+        """)
+        ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
         self.user_dialog = AddUserDialog(ui)
@@ -168,11 +218,10 @@ class page:
             with self.table.cell("upd_role"):
                 btn = ui.button(icon="assignment_ind")
                 btn.props("flat dense")
-                btn.tooltip("Alterar cargo")
                 btn.on(
                     "click",
-                    js_handler='() => emit(props.row.id)',
-                    handler=lambda e: ui.notify(e.args),
+                    js_handler="() => emit(props.row.id)",
+                    handler=lambda e: self.upd_role(e.args),
                 )
                 with ui.tooltip():
                     ui.label("Alterar cargo")
@@ -182,13 +231,15 @@ class page:
                 btn.props("flat dense")
                 btn.on(
                     "click",
-                    js_handler='() => emit(props.row.id)',
-                    handler=lambda e: ui.notify(e.args),
+                    js_handler="() => emit(props.row.id)",
+                    handler=lambda e: self.upd_pass(e.args),
                 )
                 with ui.tooltip():
                     ui.label("Alterar senha")
-        with self.table.add_slot('top-right'):
-            ui.button("Novo usuário", icon="person_add", on_click=self.add_user).props("flat")
+        with self.table.add_slot("top-right"):
+            ui.button("Novo usuário", icon="person_add", on_click=self.add_user).props(
+                "flat"
+            )
 
     @property
     def users(self) -> list[dict[str, str]]:
@@ -201,7 +252,15 @@ class page:
         await self.user_dialog.open()
         self._refresh_user_table()
 
+    async def upd_role(self, user_id):
+        dialog = UpdateRoleDialog(ui=self.ui, user_id=user_id)
+        await dialog.open()
+        self._refresh_user_table()
+
+    async def upd_pass(self, user_id):
+        dialog = UpdatePassDialog(ui=self.ui, user_id=user_id)
+        await dialog.open()
+
     def _refresh_user_table(self):
         """Fetch the current user data and replaces the data in the user table."""
         self.table.rows = self.users
-
