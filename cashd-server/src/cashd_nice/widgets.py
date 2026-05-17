@@ -99,7 +99,7 @@ class DetailedList:
                         el.props("clickable")
                         self.item_elements.append(el)
                         with self.ui.item_section():
-                            self.ui.item_label(item['title']).classes("text-weight-bold m-0")
+                            self.ui.item_label(item['title']).classes("my-1")
                             self.ui.item_label(item['subtitle']).classes("text-xs m-0")
 
     def _select_item(self, index):
