@@ -1,4 +1,4 @@
-from cashd_nice.widgets import DefaultHeader
+from cashd_nice.widgets.parts import DefaultHeader
 
 
 import plotly.graph_objects as go

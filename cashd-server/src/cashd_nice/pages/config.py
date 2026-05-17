@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Callable
 from cashd_core.const import ESTADOS
-from cashd_nice.widgets import DefaultHeader, SelectDirDialog
+from cashd_nice.widgets.parts import DefaultHeader
+from cashd_nice.widgets.dialogs import SelectDirDialog
 
 
 def h1(ui, title: str):

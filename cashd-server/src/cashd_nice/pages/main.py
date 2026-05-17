@@ -1,7 +1,7 @@
 from datetime import date
 
 from cashd_core.const import ESTADOS
-from cashd_nice.widgets import DefaultHeader, DetailedList
+from cashd_nice.widgets.parts import DefaultHeader, DetailedList
 
 example_customer_data = [
     {"title": "Fulano De Algo", "subtitle": "Rua Olá, 21"},

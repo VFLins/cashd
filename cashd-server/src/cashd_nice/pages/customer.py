@@ -1,6 +1,6 @@
 from cashd_core.const import ESTADOS
 
-from cashd_nice.widgets import DefaultHeader
+from cashd_nice.widgets.parts import DefaultHeader
 
 
 def page(ui):
