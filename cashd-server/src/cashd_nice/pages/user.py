@@ -61,7 +61,7 @@ class AddUserDialog:
         role_name = self.userrole_input.value
         username = self.username_input.value
         password = self.pass_input.value
-        if username.strip() == "":
+        if (username is None) or (username.strip() == ""):
             notify_error(ui, "Insira um nome de usuário")
             return
         if self.pass_input.value != self.pass2_input.value:
@@ -96,9 +96,49 @@ class AddUserDialog:
         self.pass2_input.set_value(None)
 
 
+class UpdateRoleDialog:
+    ROLES_SOURCE = auth.RoleSource()
+
+    def __init__(self, ui, user_id):
+        self.user_id = user_id
+        with ui.dialog() as self.dialog, ui.card():
+            self.userrole_input = ui.select(
+                label="Tipo de usuário",
+                value=self.roles[0],
+                options=self.roles
+            ).classes("w-40")
+
+    @property
+    def roles(self) -> list[str]:
+        return [r.RoleName for r in self.ROLES_SOURCE.current_data]
+
+    @property
+    def user_role(self) -> str:
+        user = auth.User()
+        user.read(row_id=user_id)
+        role = auth.Role()
+        role.read(row_id=user.RoleId)
+        return role.RoleName
+
+    async def open(self) -> None:
+        self.userrole_input.set_options(self.roles, value=self.user_role)
+        return await self.dialog
+
+    def set_role():
+        pass
+
+    def cancel():
+        pass
+
 class page:
     USER_ROLES_SOURCE = auth.UserRoleSource()
     ROLES_SOURCE = auth.RoleSource()
+    COLS = [
+        {"name": "username", "label": "Usuário", "field": "username"},
+        {"name": "role", "label": "Cargo", "field": "role"},
+        {"name": "upd_role", "label": ""},
+        {"name": "upd_pass", "label": ""},
+    ]
 
     def __init__(self, ui):
         ui.add_head_html(
@@ -117,13 +157,7 @@ class page:
         self.existing_user(ui)
 
     def existing_user(self, ui):
-        cols = [
-            {"name": "username", "label": "Usuário", "field": "username"},
-            {"name": "role", "label": "Cargo", "field": "role"},
-            {"name": "upd_role", "label": ""},
-            {"name": "upd_pass", "label": ""},
-        ]
-        self.table = ui.table(columns=cols, rows=self.users)
+        self.table = ui.table(columns=self.COLS, rows=self.users)
         self.table.props("dense no-data-label='Nenhum usuário cadastrado'")
         self.table.classes("self-center")
         self.table.style("max-height: calc(100svh - 40px);")
