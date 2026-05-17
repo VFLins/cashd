@@ -14,16 +14,14 @@ header_entries = [
 
 class DefaultHeader:
     def __init__(self, ui, selected_entry: int):
-        ui.add_css(
-            """
+        ui.add_css("""
             @font-face {
                 font-family: 'Saira Semibold';
                 src: url('/assets/Saira-SemiBold.ttf') format('truetype');
                 font-weight: normal;
                 font-style: normal;
             }
-            """
-        )
+            """)
         with ui.header(elevated=True) as header:
             header.style("background-color: #cadfe7")
             header.classes("gap-0")
@@ -37,8 +35,7 @@ class DefaultHeader:
                             btn_label = ui.label(entry[1])
                             btn_label.classes("text-base")
                             btn_label.style(
-                                "font-family: 'Saira Semibold'; "
-                                "text-transform: none"
+                                "font-family: 'Saira Semibold'; " "text-transform: none"
                             )
                     else:
                         with ui.button() as enabled_button:
@@ -72,8 +69,12 @@ class DefaultHeader:
                                 continue
                             with ui.menu_item(on_click=self.navigate_to(ui, entry[2])):
                                 with ui.row().classes("items-center gap-2 no-wrap"):
-                                    ui.image(entry[0]).classes("rounded-full size-8 mr-3")
-                                    ui.label(entry[1]).classes("whitespace-nowrap select-none")
+                                    ui.image(entry[0]).classes(
+                                        "rounded-full size-8 mr-3"
+                                    )
+                                    ui.label(entry[1]).classes(
+                                        "whitespace-nowrap select-none"
+                                    )
 
     def navigate_to(self, ui, url: str):
         return lambda: ui.navigate.to(url)
@@ -99,15 +100,17 @@ class DetailedList:
                         el.props("clickable")
                         self.item_elements.append(el)
                         with self.ui.item_section():
-                            self.ui.item_label(item['title']).classes("my-1")
-                            self.ui.item_label(item['subtitle']).classes("text-xs m-0")
+                            self.ui.item_label(item["title"]).classes("my-1")
+                            self.ui.item_label(item["subtitle"]).classes("text-xs m-0")
 
     def _select_item(self, index):
         """Updates the highlighted item and updates DetailedList.selected and
         DetailedList.selected_index' values accordingly.
         """
         if self.selected_index is not None:
-            self.item_elements[self.selected_index].style("background-color: white; color: black")
+            self.item_elements[self.selected_index].style(
+                "background-color: white; color: black"
+            )
         self.selected_index = index
         self.item_elements[index].style("background-color: #478eff; color: white")
         if self.on_select:
@@ -144,7 +147,7 @@ class SelectDirDialog:
                     self.selected_dir_label.style("color: #478eff;")
                 ui.button(
                     icon="add",
-                    on_click=lambda: self.dir_selector.submit(self.selected_dir)
+                    on_click=lambda: self.dir_selector.submit(self.selected_dir),
                 )
 
     async def open(self) -> Path | None:
@@ -174,8 +177,10 @@ class SelectDirDialog:
             else:
                 self._render_dirs(rows=dirs)
 
-    def _render_message(self, text: str, icon: str = "info", color: str = "var(--q-info)"):
-        self.selectables = [] # Signals that nothing is being displayed currently
+    def _render_message(
+        self, text: str, icon: str = "info", color: str = "var(--q-info)"
+    ):
+        self.selectables = []  # Signals that nothing is being displayed currently
         with self.dir_list:
             with ui.item():
                 with ui.item_section().props("avatar"):

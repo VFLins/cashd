@@ -12,15 +12,13 @@ def example_plot(ui):
 
 
 def example_table(ui):
-    ui.add_head_html(
-        """
+    ui.add_head_html("""
         <script>
         function langAgnosticPageIndicator(firstRowIndex, endRowIndex, rowsNumber) {
             return firstRowIndex + '-' + endRowIndex + ' [' + rowsNumber + ']';
         }
         </script>
-        """
-    )
+        """)
     data = [
         {
             "id": i,
@@ -38,14 +36,16 @@ def example_table(ui):
         ],
         rows=data,
         row_key="id",
-        )
+    )
     table.classes("self-center sm:!w-full md:!w-auto").props(
         "dense "
         "rows-per-page-label='Linhas por página:' "
         ":pagination-label='langAgnosticPageIndicator'"
     )
     table.style("height: calc(100svh - 240px);")
-    with ui.scroll_area().classes("h-[2rem] no-margin-scroll sm:w-full md:w-96 items-end"):
+    with ui.scroll_area().classes(
+        "h-[2rem] no-margin-scroll sm:w-full md:w-96 items-end"
+    ):
         with ui.row(align_items="center").classes("w-full no-wrap"):
             ui.space()
             ui.label("900 itens, mostrando 801-900").classes("select-none truncate")
@@ -58,16 +58,14 @@ class page:
     def __init__(self, ui):
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
-        ui.query('body').style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
-        ui.add_head_html(
-        """
+        ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
+        ui.add_head_html("""
         <style>
             .no-margin-scroll .q-scrollarea__content {
                 padding: 0 !important;
             }
         </style>
-        """
-        )
+        """)
         DefaultHeader(ui, selected_entry=2)
         self.controls_block()
         with ui.column(align_items="center") as self.displayed_stat:
@@ -88,7 +86,7 @@ class page:
                     "Balanço",
                     "Balanço acumulado",
                     "Maiores saldos devedores",
-                    "Clientes inativos"
+                    "Clientes inativos",
                 ],
                 value="Últimas transações",
             ).classes("w-48")
@@ -110,7 +108,9 @@ class page:
                 "value",
                 backward=lambda v: v in ["Balanço", "Balanço acumulado"],
             )
-            refresh_button = ui.button(icon="refresh", on_click=self.current_stat).props("flat")
+            refresh_button = ui.button(
+                icon="refresh", on_click=self.current_stat
+            ).props("flat")
         return controls_block
 
     def current_stat(self):
@@ -120,7 +120,6 @@ class page:
                 example_plot(self.ui)
             else:
                 example_table(self.ui)
-
 
     def change_displayed_freq(self):
         self.rename_freq_amount()
@@ -132,5 +131,5 @@ class page:
             case "Semanal":
                 self.freq_amount.label = "Semanas"
             case _:
-                self.freq_amount.label="Meses"
+                self.freq_amount.label = "Meses"
         self.freq_amount.update()

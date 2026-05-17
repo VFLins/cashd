@@ -3,16 +3,19 @@ from datetime import date
 from cashd_core.const import ESTADOS
 from cashd_nice.widgets import DefaultHeader, DetailedList
 
-
 example_customer_data = [
     {"title": "Fulano De Algo", "subtitle": "Rua Olá, 21"},
     {"title": "Ciclano Felício", "subtitle": "Rua Bom Dia, 122"},
     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-    {"title": "Maria de Algum Nome Desnecessariamente Comprido", "subtitle": "Rua de Morar se tiver uma casa, 121 - Cidade/AC"},
+    {
+        "title": "Maria de Algum Nome Desnecessariamente Comprido",
+        "subtitle": "Rua de Morar se tiver uma casa, 121 - Cidade/AC",
+    },
     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
     {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
 ]
+
 
 def subpage_transac(ui):
     with ui.column(align_items="start"):
@@ -24,15 +27,13 @@ def subpage_transac(ui):
 
 
 def subpage_history(ui):
-    ui.add_head_html(
-        """
+    ui.add_head_html("""
         <script>
         function langAgnosticPageIndicator(firstRowIndex, endRowIndex, rowsNumber) {
             return firstRowIndex + '-' + endRowIndex + ' [' + rowsNumber + ']';
         }
         </script>
-        """
-    )
+        """)
     with ui.column(align_items="end").classes("w-60 md:w-90"):
         ui.button("Imprimir", icon="print")
     table = ui.table(
@@ -62,7 +63,7 @@ def subpage_history(ui):
             del_button.on(
                 "click",
                 js_handler="() => emit(props.row.id)",
-                handler=lambda e: ui.notify(f"Excluindo transação id={e.args}")
+                handler=lambda e: ui.notify(f"Excluindo transação id={e.args}"),
             )
 
 
@@ -93,16 +94,14 @@ class CustomerInfo:
 
 class page:
     def __init__(self, ui):
-        ui.add_head_html(
-        """
+        ui.add_head_html("""
         <style>
             .no-margin-scroll .q-scrollarea__content {
                 padding: 0 !important;
             }
         </style>
-        """
-        )
-        ui.query('body').style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
+        """)
+        ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
         DefaultHeader(ui=ui, selected_entry=0)
@@ -120,26 +119,31 @@ class page:
                 "rounded shadow-lg px-4 py-2"
             )
             self.section_switcher = ui.button(
-                icon="point_of_sale",
-                on_click=self.switch_section_mobile
+                icon="point_of_sale", on_click=self.switch_section_mobile
             )
             with ui.scroll_area().classes("no-margin-scroll w-full h-[4rem]"):
                 self.section_switcher.classes("!flex md:!hidden")
                 with ui.column().classes("gap-0"):
-                    CustomerInfo(ui, field="Cliente", value="Nome Do Cliente Selecionado")
+                    CustomerInfo(
+                        ui, field="Cliente", value="Nome Do Cliente Selecionado"
+                    )
                     CustomerInfo(ui, field="Local", value="Endereço Dele")
                     CustomerInfo(ui, field="Saldo devedor", value="R$ 1000,00")
         return top_section
 
     def left_section(self):
         ui = self.ui
-        with ui.column().classes("w-full max-w-2xl self-center mx-auto") as left_section:
+        with ui.column().classes(
+            "w-full max-w-2xl self-center mx-auto"
+        ) as left_section:
             ui.input(label="Pesquisa").classes("w-full")
-            DetailedList(ui,items=example_customer_data)
+            DetailedList(ui, items=example_customer_data)
             with ui.scroll_area().classes("h-[2rem] no-margin-scroll w-full items-end"):
                 with ui.row(align_items="center").classes("w-full no-wrap"):
                     ui.space()
-                    ui.label("900 itens, mostrando 801-900").classes("select-none truncate")
+                    ui.label("900 itens, mostrando 801-900").classes(
+                        "select-none truncate"
+                    )
                     with ui.row().classes("gap-0 no-wrap"):
                         ui.button(icon="arrow_back").classes("text-xs").props("flat")
                         ui.button(icon="arrow_forward").classes("text-xs").props("flat")
@@ -157,8 +161,12 @@ class page:
                 transac = ui.tab("Transação").classes("bg-gray-100 text-gray-700")
                 history = ui.tab("Histórico").classes("bg-gray-100 text-gray-700")
                 info = ui.tab("Informações").classes("bg-gray-100 text-gray-700")
-                transac.style("border-top-left-radius: 8px; border-bottom-left-radius: 8px;")
-                info.style("border-top-right-radius: 8px; border-bottom-right-radius: 8px;")
+                transac.style(
+                    "border-top-left-radius: 8px; border-bottom-left-radius: 8px;"
+                )
+                info.style(
+                    "border-top-right-radius: 8px; border-bottom-right-radius: 8px;"
+                )
             with ui.tab_panels(self.tabs, value=transac):
                 with ui.tab_panel(transac):
                     subpage_transac(ui)
@@ -182,4 +190,3 @@ class page:
                 # hide right and restore left
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
-

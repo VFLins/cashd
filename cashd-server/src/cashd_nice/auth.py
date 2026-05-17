@@ -23,7 +23,6 @@ from sqlalchemy.orm import (
 
 from cashd_core.data import DATA_PATH, _DataSource
 
-
 DB_ENGINE = create_engine(f"sqlite:///{Path(DATA_PATH, 'auth.db')}", echo=False)
 
 
@@ -32,6 +31,7 @@ class RequiredText(types.TypeDecorator):
     This custom type coerces the value to a stripped string and raises an error when
     the resulting string is empty.
     """
+
     impl = String
     cache_ok = True
 
@@ -69,9 +69,7 @@ class AuthTable(DeclarativeBase):
         with Session(bind=engine) as ses:
             res = ses.execute(stmt).first()
             if res is None:
-                raise ValueError(
-                    f"{row_id=} not present in '{self.__tablename__}.Id'."
-                )
+                raise ValueError(f"{row_id=} not present in '{self.__tablename__}.Id'.")
             row = res[0]
             for col in self.__table__.columns:
                 value = getattr(row, col.name, None)
@@ -89,10 +87,10 @@ class AuthTable(DeclarativeBase):
             ses.commit()
 
     def exists(
-            self,
-            column_names: list[str] | None = None,
-            engine: Engine = DB_ENGINE,
-        ) -> bool:
+        self,
+        column_names: list[str] | None = None,
+        engine: Engine = DB_ENGINE,
+    ) -> bool:
         """Checks if the data in this instance is already present in the database.
 
         :param column_names: Column names to check for identical values, if `None`,
@@ -155,7 +153,9 @@ class User(AuthTable):
 
 class Role(AuthTable):
     __tablename__ = "roles"
-    RoleUsersRelation: Mapped[List["User"]] = relationship(back_populates="UserRoleRelation")
+    RoleUsersRelation: Mapped[List["User"]] = relationship(
+        back_populates="UserRoleRelation"
+    )
     RoleName = Column("RoleName", RequiredText, nullable=False, unique=True)
     ForbiddenPages = Column("ForbiddenPages", RequiredText, nullable=False, default="")
 
@@ -192,7 +192,7 @@ def verify_login(username: str, password: str) -> User:
     ph = PasswordHasher()
     _ = ph.verify(user.HashStr, password)
     return user
- 
+
 
 def store_login(role_id: int, username: str, password: str):
     """Writes a new user to the database.
@@ -206,7 +206,7 @@ def store_login(role_id: int, username: str, password: str):
     :raises ValueError: If the `role_id` does not exist.
     :raises sqlalchemy.exc.IntegrityError: If the username already exists.
     """
-    _ = Role().read(row_id=role_id) # Raises the expected ValueError
+    _ = Role().read(row_id=role_id)  # Raises the expected ValueError
     ph = PasswordHasher()
     hashed = ph.hash(password)
     user = User(RoleId=role_id, Username=username, HashStr=hashed)
@@ -220,7 +220,7 @@ class UserRoleSource(_DataSource):
             select(
                 User.Id.label("Id"),
                 User.Username.label("Username"),
-                Role.RoleName.label("Role")
+                Role.RoleName.label("Role"),
             )
             .join(Role, User.RoleId == Role.Id)
             .order_by(Role.RoleName.desc())

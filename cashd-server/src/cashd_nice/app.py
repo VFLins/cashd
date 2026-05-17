@@ -1,10 +1,9 @@
-
 import multiprocessing
 import sys
 import os
 
-if sys.platform == 'linux':
-    multiprocessing.set_start_method('spawn', force=True)
+if sys.platform == "linux":
+    multiprocessing.set_start_method("spawn", force=True)
 
 # NOTE: The above code must run before any app code. This avoids a possible Runtime Error:
 # > A SemLock created in a fork context is being shared with a process in a spawn
@@ -22,18 +21,20 @@ from nicegui import ui, app
 from cashd_nice.const import PROJECT_ROOT
 from cashd_nice.pages import main, customer, stats, config, login, user
 
-
 parser = argparse.ArgumentParser(
-    prog="cashd-server", description="Execute o Cashd server, veja opções abaixo.",
-    add_help=False
+    prog="cashd-server",
+    description="Execute o Cashd server, veja opções abaixo.",
+    add_help=False,
 )
 parser.add_argument("-h", "--help", action="help", help="Mostra esta mensagem de ajuda")
 parser.add_argument(
-    "-n", "--as-native", action="store_true",
+    "-n",
+    "--as-native",
+    action="store_true",
     help=(
         "Execute o Cashd server localmente como um aplicativo nativo, outros "
         "dispositivos não poderão acessá-lo, e será executado em uma janela dedicada."
-    )
+    ),
 )
 args = parser.parse_args()
 
@@ -109,6 +110,7 @@ def login_page():
 def user_page():
     return user.page(ui=ui)
 
+
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(
         title="Cashd server",
@@ -117,4 +119,3 @@ if __name__ in {"__main__", "__mp_main__"}:
         storage_secret=os.urandom(16).hex(),
         favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
     )
-
