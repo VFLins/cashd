@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any
 from sqlalchemy.exc import IntegrityError
+from cashd_nice.widgets.parts import notify_success, notify_error
 from cashd_nice import auth
 
 class CustomDialog:
@@ -143,15 +144,15 @@ class SelectDirDialog(CustomDialog):
 
     def _unhighlight_row(self, directory: Path):
         ui = self.ui
-        if self.selected_dir in self.displayed_items:
-            idx = self.displayed_items.index(self.selected_dir)
+        if directory in self.displayed_items:
+            idx = self.displayed_items.index(directory)
             with self.selectables[idx] as row:
                 row.clear()
                 row.style("background-color: white; color: #478eff;")
                 with ui.item_section().props("avatar"):
                     ui.icon("folder").style("color: #478eff;")
                 with ui.item_section():
-                    ui.label(self.selected_dir.name).style("color: black;")
+                    ui.label(directory.name).style("color: black;")
 
     def select_upper_dir(self):
         cur, new = self.selected_dir, self.selected_dir.parent
@@ -179,7 +180,7 @@ class UserDataDialog:
 
 class AddUserDialog(CustomDialog, UserDataDialog):
     def _render_content(self, ui):
-        with ui.grid().classes("md:grid-cols-2 self-center"):
+        with ui.grid().classes("sm:grid-cols-2 self-center"):
             self.username_input = ui.input(label="Nome de usuário").classes("w-40")
             self.userrole_input = ui.select(
                 label="Tipo de usuário", value=self.roles[0], options=self.roles
@@ -198,7 +199,7 @@ class AddUserDialog(CustomDialog, UserDataDialog):
             self.pass2_input.classes("w-40")
         with ui.row() as warn_block:
             warn_block.classes(
-                "bg-(--q-warning) p-2 w-40 md:w-85 self-center "
+                "bg-(--q-warning) p-2 w-40 sm:w-85 self-center "
                 "rounded gap-2 no-wrap border shadow"
             )
             ui.icon("priority_high").classes("text-xl")
@@ -236,7 +237,6 @@ class AddUserDialog(CustomDialog, UserDataDialog):
         except ValueError:
             notify_error(ui, f"Id de cargo {role_id} não encontrado no banco de dados")
         else:
-            self._clear_fields()
             notify_success(ui, f"Usuário '{user.Username}' criado com sucesso")
             self.dialog.submit(None)
 
@@ -262,13 +262,13 @@ class UpdateRoleDialog(CustomDialog, UserDataDialog):
         return role.RoleName
 
     @property
-    def user_name(self) -> str:
+    def username(self) -> str:
         user = auth.User()
         user.read(row_id=self.user_id)
         return user.Username
 
     def _render_content(self, ui):
-        title = ui.markdown(f"Cargo de *`{self.user_name}`*")
+        title = ui.markdown(f"Cargo de *`{self.username}`*")
         title.classes("text-lg")
         self.userrole_input = ui.select(
             label="Cargo", value=self.roles[0], options=self.roles
@@ -281,9 +281,71 @@ class UpdateRoleDialog(CustomDialog, UserDataDialog):
     def _initial_state(self):
         self.userrole_input.set_options(self.roles, value=self.user_role)
 
-    def set_role():
-        user = User()
-        user.read(user_id)
-        role_id = self.role_ids[self.userrole_input.value]
-        user.set_role(role_id)
-        self.dialog.submit(None)
+    def set_role(self):
+        user = auth.User()
+        user.read(self.user_id)
+        role_name: str = self.userrole_input.value
+        role_id = self.role_ids[role_name]
+        try:
+            user.update_role(role_id)
+        except Exception as err:
+            notify_error(self.ui, f"Erro ao mudar o cargo de {self.username}.")
+            raise err
+        else:
+            notify_success(self.ui, f"Cargo de {self.username} alterado para {role_name}")
+        finally:
+            self.dialog.submit(None)
+
+
+class UpdatePassDialog(CustomDialog):
+    def __init__(self, ui, user_id):
+        self.user_id = user_id
+        super().__init__(ui)
+
+    def _render_content(self, ui):
+        title = ui.markdown(f"Nova senha para *`{self.username}`*")
+        title.classes("text-lg")
+        self.pass_input = ui.input(
+            label="Nova senha",
+            password=True,
+            password_toggle_button=True,
+        )
+        self.pass_input.classes("w-full")
+        self.pass2_input = ui.input(
+            label="Repita a senha",
+            password=True,
+            password_toggle_button=True,
+        )
+        self.pass2_input.classes("w-full")
+        with ui.row() as buttons_block:
+            buttons_block.classes("self-end justify-end")
+            ui.button("Cancelar", icon="close", on_click=self.cancel).props("flat")
+            ui.button("Confimar", icon="check", on_click=self.set_pass)
+
+    @property
+    def username(self) -> str:
+        user = auth.User()
+        user.read(row_id=self.user_id)
+        return user.Username
+
+    def set_pass(self):
+        ui = self.ui
+        user = auth.User()
+        user.read(self.user_id)
+        passwd1, passwd2 = self.pass_input.value, self.pass2_input.value
+        if (passwd1 is None) or (passwd1.strip() == ""):
+            notify_error(ui, "Insira uma senha")
+            return
+        if passwd1 != passwd2:
+            notify_error(ui, "As senhas informadas não são iguais")
+            return
+        try:
+            user.update_password(password=passwd1)
+        except Exception as err:
+            notify_error(ui, "Erro inesperado ao alterar a senha")
+            raise err
+        else:
+            notify_success(ui, f"Senha de '{self.username}' alterada com sucesso")
+        finally:
+            self.dialog.submit(None)
+

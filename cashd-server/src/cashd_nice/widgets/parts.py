@@ -12,6 +12,14 @@ header_entries = [
 ]
 
 
+def notify_error(ui, message: str):
+    ui.notify(message, color="negative", icon="cancel", position="bottom-left")
+
+
+def notify_success(ui, message: str):
+    ui.notify(message, color="positive", icon="check", position="bottom-left")
+
+
 class DefaultHeader:
     def __init__(self, ui, selected_entry: int):
         ui.add_css("""

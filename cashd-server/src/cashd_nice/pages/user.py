@@ -1,53 +1,7 @@
 from cashd_nice import auth
-from cashd_nice.widgets.dialogs import AddUserDialog, UpdateRoleDialog
+from cashd_nice.widgets.parts import notify_success, notify_error
+from cashd_nice.widgets.dialogs import AddUserDialog, UpdateRoleDialog, UpdatePassDialog
 from sqlalchemy.exc import IntegrityError
-
-
-def notify_error(ui, message: str):
-    ui.notify(message, color="negative", icon="cancel", position="bottom-left")
-
-
-def notify_success(ui, message: str):
-    ui.notify(message, color="positive", icon="check", position="bottom-left")
-
-
-class UpdatePassDialog:
-    def __init__(self, ui, user_id):
-        self.user_id = user_id
-        with ui.dialog() as self.dialog, ui.card():
-            title = ui.markdown(f"Nova senha para *`{self.user_name}`*")
-            title.classes("text-lg")
-            self.pass_input = ui.input(
-                label="Nova senha",
-                password=True,
-                password_toggle_button=True,
-            )
-            self.pass_input.classes("w-full")
-            self.pass2_input = ui.input(
-                label="Repita a senha",
-                password=True,
-                password_toggle_button=True,
-            )
-            self.pass2_input.classes("w-full")
-            with ui.row() as buttons_block:
-                buttons_block.classes("self-end justify-end")
-                ui.button("Cancelar", icon="close", on_click=self.cancel).props("flat")
-                ui.button("Confimar", icon="check", on_click=self.set_pass)
-
-    @property
-    def user_name(self) -> str:
-        user = auth.User()
-        user.read(row_id=self.user_id)
-        return user.Username
-
-    async def open(self) -> None:
-        return await self.dialog
-
-    def cancel(self):
-        pass
-
-    def set_pass(self):
-        pass
 
 
 class page:
@@ -72,9 +26,9 @@ class page:
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
         self.user_dialog = AddUserDialog(ui)
-        self.existing_user(ui)
+        self._render_contents(ui)
 
-    def existing_user(self, ui):
+    def _render_contents(self, ui):
         self.table = ui.table(columns=self.COLS, rows=self.users)
         self.table.props("dense no-data-label='Nenhum usuário cadastrado'")
         self.table.classes("self-center")
@@ -124,8 +78,9 @@ class page:
 
     async def upd_pass(self, user_id):
         dialog = UpdatePassDialog(ui=self.ui, user_id=user_id)
-        await dialog.open()
+        await dialog.show()
 
     def _refresh_user_table(self):
         """Fetch the current user data and replaces the data in the user table."""
         self.table.rows = self.users
+

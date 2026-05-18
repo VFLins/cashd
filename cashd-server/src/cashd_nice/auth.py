@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     insert,
     select,
+    update,
     exists,
 )
 from sqlalchemy.orm import (
@@ -138,7 +139,7 @@ class User(AuthTable):
                 value = getattr(row, col.name, None)
                 setattr(self, col.name, value)
 
-    def update_role(self, role_id, engine: Engine = DB_ENGINE):
+    def update_role(self, role_id: int, engine: Engine = DB_ENGINE):
         """Updates this user's role.
 
         :param role_id: ID number of this user's new role.
@@ -151,7 +152,24 @@ class User(AuthTable):
             raise ValueError(f"Role ID '{role_id}' does not exist.")
         if type(self.Id) is not int:
             raise AttributeError("This object doesn't reflect a user in the database.")
-        stmt = update(User).where(User.RoleID == self.RoleId).values(RoleId=role_id)
+        stmt = update(User).where(User.RoleId == self.RoleId).values(RoleId=role_id)
+        with Session(bind=engine) as ses:
+            ses.execute(stmt)
+            ses.commit()
+
+    def update_password(self, password: str, engine: Engine = DB_ENGINE):
+        """Updates an existing user's password.
+
+        :param password: The new password.
+        :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
+
+        :raises AttributeError: If this instance did not set a valid ID number.
+        """
+        if type(self.Id) is not int:
+            raise AttributeError("This object doesn't reflect a user in the database.")
+        ph = PasswordHasher()
+        hashed = ph.hash(password)
+        stmt = update(User).where(User.RoleId == self.RoleId).values(HashStr=hashed)
         with Session(bind=engine) as ses:
             ses.execute(stmt)
             ses.commit()
@@ -195,7 +213,7 @@ for role in DEFAULT_ROLES:
         role.write()
 
 
-def valid_role_id(self, engine: Engine = DB_ENGINE) -> bool:
+def valid_role_id(role_id: int, engine: Engine = DB_ENGINE) -> bool:
     """Check if this instance's `User.RoleId` exists in the database.
 
     :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
@@ -249,18 +267,6 @@ def store_login(role_id: int, username: str, password: str, engine: Engine = DB_
     user = User(RoleId=role_id, Username=username, HashStr=hashed)
     user.write(engine=engine)
     return user
-
-
-def set_role(user_id: int, role_id: int, engine: Engine = DB_ENGINE):
-    """Updates an existing user's role.
-
-    :param user_id: ID number of the User that will have it's role updated.
-    :param role_id: ID number of the role to be assigned to this user.
-    :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
-    """
-    user = User()
-    user.read(user_id, engine=engine)
-
 
 
 class UserRoleSource(_DataSource):
