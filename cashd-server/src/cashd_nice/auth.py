@@ -152,7 +152,7 @@ class User(AuthTable):
             raise ValueError(f"Role ID '{role_id}' does not exist.")
         if type(self.Id) is not int:
             raise AttributeError("This object doesn't reflect a user in the database.")
-        stmt = update(User).where(User.RoleId == self.RoleId).values(RoleId=role_id)
+        stmt = update(User).where(User.Id == self.Id).values(RoleId=role_id)
         with Session(bind=engine) as ses:
             ses.execute(stmt)
             ses.commit()
@@ -169,7 +169,7 @@ class User(AuthTable):
             raise AttributeError("This object doesn't reflect a user in the database.")
         ph = PasswordHasher()
         hashed = ph.hash(password)
-        stmt = update(User).where(User.RoleId == self.RoleId).values(HashStr=hashed)
+        stmt = update(User).where(User.Id == self.Id).values(HashStr=hashed)
         with Session(bind=engine) as ses:
             ses.execute(stmt)
             ses.commit()
