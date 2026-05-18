@@ -1,5 +1,7 @@
 from pathlib import Path
-from typing import Any, override
+from typing import Any
+from sqlalchemy.exc import IntegrityError
+from cashd_nice import auth
 
 class CustomDialog:
     """Base class for any custom dialog."""
@@ -7,6 +9,7 @@ class CustomDialog:
     def __init__(self, ui):
         self.ui = ui
         with ui.dialog() as self.dialog, ui.card().classes("w-full"):
+            self.dialog.on("hide", self.cancel)
             self._render_content(ui)
 
     def _render_content(self, ui):
@@ -160,4 +163,85 @@ class SelectDirDialog(CustomDialog):
             return
         self.selected_dir = new
         self.selected_dir_label.set_text(str(new))
+
+
+class AddUserDialog:
+    ROLES_SOURCE = auth.RoleSource()
+
+    def _render_content(self, ui):
+        with ui.grid().classes("md:grid-cols-2"):
+            self.username_input = ui.input(label="Nome de usuário").classes("w-40")
+            self.userrole_input = ui.select(
+                label="Tipo de usuário", value=self.roles[0], options=self.roles
+            ).classes("w-40")
+            self.pass_input = ui.input(
+                label="Senha",
+                password=True,
+                password_toggle_button=True,
+            )
+            self.pass_input.classes("w-40")
+            self.pass2_input = ui.input(
+                label="Repita a senha",
+                password=True,
+                password_toggle_button=True,
+            )
+            self.pass2_input.classes("w-40")
+        with ui.row() as warn_block:
+            warn_block.classes(
+                "bg-(--q-warning) p-2 w-40 md:w-85 "
+                "rounded gap-2 no-wrap border shadow"
+            )
+            ui.icon("priority_high").classes("text-xl")
+            label = ui.label(
+                "Não perca a senha, o Cashd não pode informar a "
+                "senha deste usuário depois de criada."
+            )
+            label.classes("text-xs text-bold")
+        with ui.row() as buttons_block:
+            buttons_block.classes("self-end justify-end")
+            ui.button("Cancelar", icon="close", on_click=self.cancel).props("flat")
+            ui.button("Criar", icon="add", on_click=self.add_user)
+
+    @property
+    def roles(self) -> list[str]:
+        return [r.RoleName for r in self.ROLES_SOURCE.current_data]
+
+    @property
+    def role_ids(self) -> list[dict[str, int]]:
+        return {r.RoleName: r.Id for r in self.ROLES_SOURCE.current_data}
+
+    def add_user(self):
+        ui = self.ui
+        role_name = self.userrole_input.value
+        username = self.username_input.value
+        password = self.pass_input.value
+        if (username is None) or (username.strip() == ""):
+            notify_error(ui, "Insira um nome de usuário")
+            return
+        if (password is None) or (password.strip() == ""):
+            notify_error(ui, "Insira uma senha")
+            return
+        if self.pass_input.value != self.pass2_input.value:
+            notify_error(ui, "As senhas informadas não são iguais")
+            return
+        try:
+            role_id = self.role_ids[role_name]
+            user = auth.store_login(role_id, username, password)
+        except IntegrityError:
+            notify_error(ui, "O nome de usuário informado já existe")
+        except KeyError:
+            notify_error(ui, f"Nenhum cargo com nome '{role_name}' no banco de dados")
+        except ValueError:
+            notify_error(ui, f"Id de cargo {role_id} não encontrado no banco de dados")
+        else:
+            self._clear_fields()
+            notify_success(ui, f"Usuário '{user.Username}' criado com sucesso")
+            self.dialog.submit(None)
+
+    def _clear_fields(self):
+        """Returns the original values of the user form."""
+        self.username_input.set_value(None)
+        self.userrole_input.set_options(self.roles, value=self.roles[0])
+        self.pass_input.set_value(None)
+        self.pass2_input.set_value(None)
 
