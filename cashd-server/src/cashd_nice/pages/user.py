@@ -1,5 +1,5 @@
 from cashd_nice import auth
-from cashd_nice.widgets.dialogs import AddUserDialog
+from cashd_nice.widgets.dialogs import AddUserDialog, UpdateRoleDialog
 from sqlalchemy.exc import IntegrityError
 
 
@@ -9,51 +9,6 @@ def notify_error(ui, message: str):
 
 def notify_success(ui, message: str):
     ui.notify(message, color="positive", icon="check", position="bottom-left")
-
-
-class UpdateRoleDialog:
-    ROLES_SOURCE = auth.RoleSource()
-
-    def __init__(self, ui, user_id):
-        self.user_id = user_id
-        with ui.dialog() as self.dialog, ui.card():
-            title = ui.markdown(f"Cargo de *`{self.user_name}`*")
-            title.classes("text-lg")
-            self.userrole_input = ui.select(
-                label="Cargo", value=self.roles[0], options=self.roles
-            ).classes("w-full")
-            with ui.row() as buttons_block:
-                buttons_block.classes("self-end justify-end")
-                ui.button("Cancelar", icon="close", on_click=self.cancel).props("flat")
-                ui.button("Confimar", icon="check", on_click=self.set_role)
-
-    @property
-    def roles(self) -> list[str]:
-        return [r.RoleName for r in self.ROLES_SOURCE.current_data]
-
-    @property
-    def user_role(self) -> str:
-        user = auth.User()
-        user.read(row_id=self.user_id)
-        role = auth.Role()
-        role.read(row_id=user.RoleId)
-        return role.RoleName
-
-    @property
-    def user_name(self) -> str:
-        user = auth.User()
-        user.read(row_id=self.user_id)
-        return user.Username
-
-    async def open(self) -> None:
-        self.userrole_input.set_options(self.roles, value=self.user_role)
-        return await self.dialog
-
-    def set_role():
-        pass
-
-    def cancel():
-        pass
 
 
 class UpdatePassDialog:
@@ -164,7 +119,7 @@ class page:
 
     async def upd_role(self, user_id):
         dialog = UpdateRoleDialog(ui=self.ui, user_id=user_id)
-        await dialog.open()
+        await dialog.show()
         self._refresh_user_table()
 
     async def upd_pass(self, user_id):

@@ -165,7 +165,7 @@ class SelectDirDialog(CustomDialog):
         self.selected_dir_label.set_text(str(new))
 
 
-class AddUserDialog(CustomDialog):
+class UserDataDialog:
     ROLES_SOURCE = auth.RoleSource()
 
     @property
@@ -176,6 +176,8 @@ class AddUserDialog(CustomDialog):
     def role_ids(self) -> list[dict[str, int]]:
         return {r.RoleName: r.Id for r in self.ROLES_SOURCE.current_data}
 
+
+class AddUserDialog(CustomDialog, UserDataDialog):
     def _render_content(self, ui):
         with ui.grid().classes("md:grid-cols-2 self-center"):
             self.username_input = ui.input(label="Nome de usuário").classes("w-40")
@@ -244,3 +246,44 @@ class AddUserDialog(CustomDialog):
         self.userrole_input.set_options(self.roles, value=self.roles[0])
         self.pass_input.set_value(None)
         self.pass2_input.set_value(None)
+
+
+class UpdateRoleDialog(CustomDialog, UserDataDialog):
+    def __init__(self, ui, user_id):
+        self.user_id = user_id
+        super().__init__(ui)
+
+    @property
+    def user_role(self) -> str:
+        user = auth.User()
+        user.read(row_id=self.user_id)
+        role = auth.Role()
+        role.read(row_id=user.RoleId)
+        return role.RoleName
+
+    @property
+    def user_name(self) -> str:
+        user = auth.User()
+        user.read(row_id=self.user_id)
+        return user.Username
+
+    def _render_content(self, ui):
+        title = ui.markdown(f"Cargo de *`{self.user_name}`*")
+        title.classes("text-lg")
+        self.userrole_input = ui.select(
+            label="Cargo", value=self.roles[0], options=self.roles
+        ).classes("w-40 md:w-60")
+        with ui.row() as buttons_block:
+            buttons_block.classes("self-end justify-end")
+            ui.button("Cancelar", icon="close", on_click=self.cancel).props("flat")
+            ui.button("Confimar", icon="check", on_click=self.set_role)
+
+    def _initial_state(self):
+        self.userrole_input.set_options(self.roles, value=self.user_role)
+
+    def set_role():
+        user = User()
+        user.read(user_id)
+        role_id = self.role_ids[self.userrole_input.value]
+        user.set_role(role_id)
+        self.dialog.submit(None)

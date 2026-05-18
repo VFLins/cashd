@@ -138,6 +138,24 @@ class User(AuthTable):
                 value = getattr(row, col.name, None)
                 setattr(self, col.name, value)
 
+    def update_role(self, role_id, engine: Engine = DB_ENGINE):
+        """Updates this user's role.
+
+        :param role_id: ID number of this user's new role.
+        :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
+
+        :raises ValueError: If the role ID does not exist.
+        :raises AttributeError: If this instance did not set a valid ID number.
+        """
+        if not valid_role_id(role_id, engine):
+            raise ValueError(f"Role ID '{role_id}' does not exist.")
+        if type(self.Id) is not int:
+            raise AttributeError("This object doesn't reflect a user in the database.")
+        stmt = update(User).where(User.RoleID == self.RoleId).values(RoleId=role_id)
+        with Session(bind=engine) as ses:
+            ses.execute(stmt)
+            ses.commit()
+
     @property
     def ForbiddenPages(self) -> list[str] | None:
         role_id = getattr(self, "RoleId", None)
@@ -177,41 +195,72 @@ for role in DEFAULT_ROLES:
         role.write()
 
 
-def verify_login(username: str, password: str) -> User:
+def valid_role_id(self, engine: Engine = DB_ENGINE) -> bool:
+    """Check if this instance's `User.RoleId` exists in the database.
+
+    :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
+
+    :return: A boolean value indicating if the role exist.
+    """
+    try:
+        _ = Role()
+        _.read(row_id=role_id, engine=engine)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def verify_login(username: str, password: str, engine: Engine = DB_ENGINE) -> User:
     """Verify if the username+password combination is valid.
 
     :param username: Public username provided by the user.
     :param password: Private password to be verified by the algorithm.
+    :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
 
     :returns: If the login is valid, a `User` object, containing user information.
     :raises ValueError: If the username provided does not exist.
     :raises argon2.exceptions.VerifyMismatchError: If the password is not correct.
     """
     user = User()
-    user.read_user(username)
+    user.read_user(username, engine=engine)
     ph = PasswordHasher()
     _ = ph.verify(user.HashStr, password)
     return user
 
 
-def store_login(role_id: int, username: str, password: str):
+def store_login(role_id: int, username: str, password: str, engine: Engine = DB_ENGINE):
     """Writes a new user to the database.
 
     :param role_id: Identifier of this user's role.
     :param username: New user's username.
     :param password: New user's password.
+    :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
 
     :returns: If the data valid and the transaction is successful, a `User` object,
       containing user information.
     :raises ValueError: If the `role_id` does not exist.
     :raises sqlalchemy.exc.IntegrityError: If the username already exists.
     """
-    _ = Role().read(row_id=role_id)  # Raises the expected ValueError
+    if not valid_role_id(role_id, engine):
+        raise ValueError(f"Role ID {role_id} does not exist.")
     ph = PasswordHasher()
     hashed = ph.hash(password)
     user = User(RoleId=role_id, Username=username, HashStr=hashed)
-    user.write()
+    user.write(engine=engine)
     return user
+
+
+def set_role(user_id: int, role_id: int, engine: Engine = DB_ENGINE):
+    """Updates an existing user's role.
+
+    :param user_id: ID number of the User that will have it's role updated.
+    :param role_id: ID number of the role to be assigned to this user.
+    :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
+    """
+    user = User()
+    user.read(user_id, engine=engine)
+
 
 
 class UserRoleSource(_DataSource):
