@@ -12,21 +12,21 @@ class CustomDialog:
             self.dialog.on("hide", self.cancel)
             self._render_content(ui)
 
-    def _render_content(self, ui):
-        """Use this function to render the dialog's content."""
-
-    async def open(self) -> Any:
-        """Called to display the dialog to the user"""
+    async def show(self) -> Any:
+        """Called to display the dialog to the user, returns the submitted value."""
         self._initial_state()
         return await self.dialog
-
-    def _initial_state(self):
-        """Use this to set the initial state of the dialog."""
 
     async def cancel(self):
         """Called when the user leaves the dialog without committing the operation."""
         self.dialog.submit(None)
         self._cleanup()
+
+    def _render_content(self, ui):
+        """Use this function to render the dialog's content."""
+
+    def _initial_state(self):
+        """Use this to set the initial state of the dialog."""
 
     def _cleanup(self):
         """Use this to perform any necessary cleanup after the dialog is closed."""
@@ -165,11 +165,19 @@ class SelectDirDialog(CustomDialog):
         self.selected_dir_label.set_text(str(new))
 
 
-class AddUserDialog:
+class AddUserDialog(CustomDialog):
     ROLES_SOURCE = auth.RoleSource()
 
+    @property
+    def roles(self) -> list[str]:
+        return [r.RoleName for r in self.ROLES_SOURCE.current_data]
+
+    @property
+    def role_ids(self) -> list[dict[str, int]]:
+        return {r.RoleName: r.Id for r in self.ROLES_SOURCE.current_data}
+
     def _render_content(self, ui):
-        with ui.grid().classes("md:grid-cols-2"):
+        with ui.grid().classes("md:grid-cols-2 self-center"):
             self.username_input = ui.input(label="Nome de usuário").classes("w-40")
             self.userrole_input = ui.select(
                 label="Tipo de usuário", value=self.roles[0], options=self.roles
@@ -188,7 +196,7 @@ class AddUserDialog:
             self.pass2_input.classes("w-40")
         with ui.row() as warn_block:
             warn_block.classes(
-                "bg-(--q-warning) p-2 w-40 md:w-85 "
+                "bg-(--q-warning) p-2 w-40 md:w-85 self-center "
                 "rounded gap-2 no-wrap border shadow"
             )
             ui.icon("priority_high").classes("text-xl")
@@ -201,14 +209,6 @@ class AddUserDialog:
             buttons_block.classes("self-end justify-end")
             ui.button("Cancelar", icon="close", on_click=self.cancel).props("flat")
             ui.button("Criar", icon="add", on_click=self.add_user)
-
-    @property
-    def roles(self) -> list[str]:
-        return [r.RoleName for r in self.ROLES_SOURCE.current_data]
-
-    @property
-    def role_ids(self) -> list[dict[str, int]]:
-        return {r.RoleName: r.Id for r in self.ROLES_SOURCE.current_data}
 
     def add_user(self):
         ui = self.ui
@@ -238,10 +238,9 @@ class AddUserDialog:
             notify_success(ui, f"Usuário '{user.Username}' criado com sucesso")
             self.dialog.submit(None)
 
-    def _clear_fields(self):
+    def _cleanup(self):
         """Returns the original values of the user form."""
         self.username_input.set_value(None)
         self.userrole_input.set_options(self.roles, value=self.roles[0])
         self.pass_input.set_value(None)
         self.pass2_input.set_value(None)
-

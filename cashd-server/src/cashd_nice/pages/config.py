@@ -58,7 +58,7 @@ class DirectoryList:
         self.dialog_add_directory = SelectDirDialog(ui=ui, initial_dir=self.initial_dir)
 
     async def add_dir(self):
-        new_dir = await self.dialog_add_directory.open()
+        new_dir = await self.dialog_add_directory.show()
         if new_dir:
             self.ui.notify(f"Pasta adicionada: {new_dir}")
 
