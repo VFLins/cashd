@@ -1,9 +1,10 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
+from cashd_core.fmt import StringToCurrency
 from cashd_core.const import ESTADOS
-from cashd_core.data import CustomerListSource, tbl_clientes
-from cashd_nice.widgets.parts import DefaultHeader
+from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
+from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd_nice.widgets.custom import DetailedList
 
 example_customer_data = [
@@ -20,13 +21,25 @@ example_customer_data = [
 ]
 
 
-def subpage_transac(ui):
-    with ui.column(align_items="start"):
-        dateinput = ui.date_input("Data", value=date.today().strftime("%d/%m/%Y"))
-        dateinput.picker.props("mask='DD/MM/YYYY' minimal")
-        dateinput.props("outlined dense").classes("w-full")
-        ui.input("Valor", placeholder="0,00").classes("w-full").props("outlined dense")
-        ui.button("Inserir")
+class subpage_transac:
+    def __init__(self, ui, on_add = None):
+        with ui.column(align_items="start"):
+            self.date_input = ui.date_input("Data", value=date.today().strftime("%d/%m/%Y"))
+            self.date_input.picker.props("mask='DD/MM/YYYY' minimal")
+            self.date_input.props("outlined dense").classes("w-full")
+            self.value_input = ui.input("Valor", placeholder="0,00")
+            self.value_input.props("outlined dense").classes("w-full")
+            self.buton = ui.button("Inserir", on_click=on_add)
+
+    @property
+    def date(self) -> date:
+        value = self.date_input.value
+        dt = datetime.strptime(value, "%d/%m/%Y")
+        return date(dt.year, dt.month, dt.day)
+
+    @date.setter
+    def date(self, value: date):
+        self.date_input.value = date.strftime("%d/%m/%Y")
 
 
 def subpage_history(ui):
@@ -183,7 +196,7 @@ class page:
                 )
             with ui.tab_panels(self.tabs, value=transac):
                 with ui.tab_panel(transac):
-                    subpage_transac(ui)
+                    self.transac = subpage_transac(ui, on_add=self.on_add_transac)
                 with ui.tab_panel(history):
                     subpage_history(ui)
                 with ui.tab_panel(info):
@@ -211,3 +224,25 @@ class page:
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)
         self.selected_customer_debt.set_value(f"R$ {customer.Saldo}")
+
+    def on_add_transac(self):
+        date = self.transac.date
+        value = StringToCurrency(self.transac.value_input.value)
+        if not value.is_valid():
+            notify_error(self.ui, value.invalid_reason)
+            return
+        try:
+            transaction = tbl_transacoes(
+                IdCliente=self.selected_customer.Id,
+                CarimboTempo=datetime.now(),
+                DataTransac=date,
+                Valor= value.value
+            )
+            transaction.write()
+        except Exception as err:
+            notify_error(self.ui, "Erro inesperado, verifique o arquivo de log.")
+        else:
+            notify_success(self.ui, f"Transação adicionada com sucesso")
+            self.transac.date = date.today()
+            self.transac.value_input.set_value("")
+        self.on_select_customer(data=self.customer_list.selected_data)
