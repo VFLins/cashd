@@ -91,7 +91,7 @@ class DetailedList:
             item = self.displayed_items[idx]
             item.style("background-color: #478eff; color: white")
         if self.on_select:
-            self.on_select(self.current_data[index])
+            self.on_select(self.selected_data)
 
     def _next_page(self):
         """When available, renders the next page of data."""

@@ -1,7 +1,8 @@
 from datetime import date
+from typing import Any
 
 from cashd_core.const import ESTADOS
-from cashd_core.data import CustomerListSource
+from cashd_core.data import CustomerListSource, tbl_clientes
 from cashd_nice.widgets.parts import DefaultHeader
 from cashd_nice.widgets.custom import DetailedList
 
@@ -97,9 +98,14 @@ class CustomerInfo:
             self.field = ui.label(f"{field}:").classes("select-none font-bold")
             self.value = ui.label(value).classes("select-none text-nowrap tuncate")
 
+    def set_value(self, text: str):
+        """Shorthand to replace the text in `CustomerInfo.value` label."""
+        self.value.set_text(text)
+
 
 class page:
     CUSTOMERS_SOURCE = CustomerListSource()
+    selected_customer = tbl_clientes()
 
     def __init__(self, ui):
         ui.add_head_html(
@@ -134,18 +140,27 @@ class page:
             with ui.scroll_area().classes("no-margin-scroll w-full h-[4rem]"):
                 self.section_switcher.classes("!flex md:!hidden")
                 with ui.column().classes("gap-0"):
-                    CustomerInfo(
-                        ui, field="Cliente", value="Nome Do Cliente Selecionado"
+                    self.selected_customer_name = CustomerInfo(
+                        ui, field="Cliente", value="N/S"
                     )
-                    CustomerInfo(ui, field="Local", value="Endereço Dele")
-                    CustomerInfo(ui, field="Saldo devedor", value="R$ 1000,00")
+                    self.selected_customer_place = CustomerInfo(
+                        ui, field="Local", value="N/S"
+                    )
+                    self.selected_customer_debt = CustomerInfo(
+                        ui, field="Saldo devedor", value="R$ 0,00"
+                    )
         return top_section
 
     def left_section(self):
         ui = self.ui
         with ui.column() as left_section:
             left_section.classes("w-full max-w-2xl self-center mx-auto")
-            DetailedList(ui, datasource=self.CUSTOMERS_SOURCE, keys=["Name", "Place"])
+            self.customer_list = DetailedList(
+                ui,
+                datasource=self.CUSTOMERS_SOURCE,
+                keys=["Name", "Place"],
+                on_select=self.on_select_customer,
+            )
         return left_section
 
     def right_section(self):
@@ -189,3 +204,10 @@ class page:
                 # hide right and restore left
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
+
+    def on_select_customer(self, data: dict[str, Any]):
+        customer = self.selected_customer
+        customer.read(row_id=data["Id"])
+        self.selected_customer_name.set_value(customer.NomeCompleto)
+        self.selected_customer_place.set_value(customer.Local)
+        self.selected_customer_debt.set_value(f"R$ {customer.Saldo}")
