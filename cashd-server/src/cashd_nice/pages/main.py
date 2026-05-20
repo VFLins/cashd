@@ -1,7 +1,9 @@
 from datetime import date
 
 from cashd_core.const import ESTADOS
-from cashd_nice.widgets.parts import DefaultHeader, DetailedList
+from cashd_core.data import CustomerListSource
+from cashd_nice.widgets.parts import DefaultHeader
+from cashd_nice.widgets.custom import DetailedList
 
 example_customer_data = [
     {"title": "Fulano De Algo", "subtitle": "Rua Olá, 21"},
@@ -93,6 +95,8 @@ class CustomerInfo:
 
 
 class page:
+    CUSTOMERS_SOURCE = CustomerListSource()
+
     def __init__(self, ui):
         ui.add_head_html("""
         <style>
@@ -133,20 +137,9 @@ class page:
 
     def left_section(self):
         ui = self.ui
-        with ui.column().classes(
-            "w-full max-w-2xl self-center mx-auto"
-        ) as left_section:
-            ui.input(label="Pesquisa").classes("w-full")
-            DetailedList(ui, items=example_customer_data)
-            with ui.scroll_area().classes("h-[2rem] no-margin-scroll w-full items-end"):
-                with ui.row(align_items="center").classes("w-full no-wrap"):
-                    ui.space()
-                    ui.label("900 itens, mostrando 801-900").classes(
-                        "select-none truncate"
-                    )
-                    with ui.row().classes("gap-0 no-wrap"):
-                        ui.button(icon="arrow_back").classes("text-xs").props("flat")
-                        ui.button(icon="arrow_forward").classes("text-xs").props("flat")
+        with ui.column() as left_section:
+            left_section.classes("w-full max-w-2xl self-center mx-auto")
+            DetailedList(ui, datasource=self.CUSTOMERS_SOURCE, keys=["Name", "Place"])
         return left_section
 
     def right_section(self):

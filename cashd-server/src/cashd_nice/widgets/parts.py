@@ -1,8 +1,3 @@
-import platform
-from pathlib import Path
-from typing import Callable, Any
-
-from nicegui import ui, events
 
 header_entries = [
     ("/assets/SVG_TransacaoBranco.svg", "Transações", "/"),
@@ -86,42 +81,4 @@ class DefaultHeader:
 
     def navigate_to(self, ui, url: str):
         return lambda: ui.navigate.to(url)
-
-
-class DetailedList:
-    def __init__(self, ui, items, on_select=None):
-        self.ui = ui
-        self.items = items
-        self.on_select = on_select
-        self.selected_index = None
-        self.item_elements = []
-
-        with ui.scroll_area() as scroll:
-            scroll.classes("w-full border border-gray-300 rounded-borders no-margin-scroll")
-            scroll.style("min-height: 260px; height: calc(100svh - 380px);")
-            with self.ui.list() as sel_list:
-                sel_list.props("separator dense")
-                sel_list.classes("w-full p-0 m-0 select-none")
-                for index, item in enumerate(self.items):
-                    with self.ui.item() as el:
-                        el.on("click", lambda i=index: self._select_item(i))
-                        el.props("clickable")
-                        self.item_elements.append(el)
-                        with self.ui.item_section():
-                            self.ui.item_label(item["title"]).classes("mt-1 font-medium")
-                            self.ui.item_label(item["subtitle"]).classes("text-xs mb-1")
-
-    def _select_item(self, index):
-        """Updates the highlighted item and updates DetailedList.selected and
-        DetailedList.selected_index' values accordingly.
-        """
-        if self.selected_index is not None:
-            self.item_elements[self.selected_index].style(
-                "background-color: white; color: black"
-            )
-        self.selected_index = index
-        self.item_elements[index].style("background-color: #478eff; color: white")
-        if self.on_select:
-            self.on_select(self.items[index])
-
 
