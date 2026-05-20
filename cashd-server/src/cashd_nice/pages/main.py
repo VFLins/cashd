@@ -61,7 +61,7 @@ def subpage_history(ui):
         "no-data-label='Nenhuma transação para este cliente'"
     )
     table.classes("self-center w-70 md:w-90")
-    table.style("height: calc(100svh - 390px);")
+    table.style("height: calc(100svh - 410px);")
     with table.add_slot("body-cell-action"):
         with table.cell("action"):
             del_button = ui.button(icon="delete").props("flat size=sm dense")
@@ -73,12 +73,12 @@ def subpage_history(ui):
 
 
 def subpage_info(ui):
-    with ui.row().classes("no-wrap w-full md:w-90"):
+    with ui.row().classes("no-wrap w-70 md:w-90"):
         ui.space()
         ui.button("Restaurar", icon="refresh").props("flat")
         ui.button("Salvar", icon="check")
     with ui.scroll_area().classes("no-margin-scroll") as scroll:
-        scroll.style("height: calc(100svh - 400px);")
+        scroll.style("height: calc(100svh - 410px);")
         with ui.grid().classes("w-full h-full md:grid-cols-2"):
             ui.input("Nome*").props("outlined dense").classes(f"w-full")
             ui.input("Sobrenome*").props("outlined dense").classes(f"w-full")
