@@ -22,7 +22,7 @@ example_customer_data = [
 def subpage_transac(ui):
     with ui.column(align_items="start"):
         dateinput = ui.date_input("Data", value=date.today().strftime("%d/%m/%Y"))
-        dateinput.picker.props("mask='DD/MM/YYYY'")
+        dateinput.picker.props("mask='DD/MM/YYYY' minimal")
         dateinput.props("outlined dense").classes("w-full")
         ui.input("Valor", placeholder="0,00").classes("w-full").props("outlined dense")
         ui.button("Inserir")
