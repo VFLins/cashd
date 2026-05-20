@@ -1,6 +1,7 @@
 from typing import Any
 from cashd_core.data import _DataSource
 
+
 class DetailedList:
     def __init__(self, ui, datasource: _DataSource, keys: list[str], on_select=None):
         self.title_key, self.subtitle_key = keys[:2]
@@ -27,7 +28,9 @@ class DetailedList:
 
     def _selection(self, ui):
         with ui.scroll_area() as scroll:
-            scroll.classes("w-full border border-gray-300 rounded-borders no-margin-scroll")
+            scroll.classes(
+                "w-full border border-gray-300 rounded-borders no-margin-scroll"
+            )
             scroll.style("min-height: 260px; height: calc(100svh - 380px);")
             self._render_list_items()
 
@@ -68,8 +71,12 @@ class DetailedList:
                     self.displayed_data.append(data)
                     self.displayed_items.append(item)
                     with self.ui.item_section():
-                        self.ui.item_label(data[self.title_key]).classes("font-medium mt-1")
-                        self.ui.item_label(data[self.subtitle_key]).classes("text-xs mb-1")
+                        self.ui.item_label(data[self.title_key]).classes(
+                            "font-medium mt-1"
+                        )
+                        self.ui.item_label(data[self.subtitle_key]).classes(
+                            "text-xs mb-1"
+                        )
         self._select_item(self.selected_data)
 
     def _select_item(self, data: dict[str, Any]):

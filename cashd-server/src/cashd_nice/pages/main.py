@@ -29,13 +29,15 @@ def subpage_transac(ui):
 
 
 def subpage_history(ui):
-    ui.add_head_html("""
+    ui.add_head_html(
+        """
         <script>
         function langAgnosticPageIndicator(firstRowIndex, endRowIndex, rowsNumber) {
             return firstRowIndex + '-' + endRowIndex + ' [' + rowsNumber + ']';
         }
         </script>
-        """)
+        """
+    )
     with ui.column(align_items="end").classes("w-60 md:w-90"):
         ui.button("Imprimir", icon="print")
     table = ui.table(
@@ -84,7 +86,9 @@ def subpage_info(ui):
             ui.input("Endereço").props("outlined dense").classes(f"w-full")
             ui.input("Bairro").props("outlined dense").classes(f"w-full")
             ui.input("Cidade*").props("outlined dense").classes(f"w-full")
-            ui.select(ESTADOS, value=ESTADOS[0], label="Estado*").props("outlined dense").classes(f"w-full")
+            ui.select(ESTADOS, value=ESTADOS[0], label="Estado*").props(
+                "outlined dense"
+            ).classes(f"w-full")
 
 
 class CustomerInfo:
@@ -98,13 +102,15 @@ class page:
     CUSTOMERS_SOURCE = CustomerListSource()
 
     def __init__(self, ui):
-        ui.add_head_html("""
+        ui.add_head_html(
+            """
         <style>
             .no-margin-scroll .q-scrollarea__content {
                 padding: 0 !important;
             }
         </style>
-        """)
+        """
+        )
         ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")

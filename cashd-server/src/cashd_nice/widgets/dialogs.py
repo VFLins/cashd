@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from cashd_nice.widgets.parts import notify_success, notify_error
 from cashd_nice import auth
 
+
 class CustomDialog:
     """Base class for any custom dialog."""
 
@@ -33,7 +34,6 @@ class CustomDialog:
         """Use this to perform any necessary cleanup after the dialog is closed."""
 
 
-
 class SelectDirDialog(CustomDialog):
     def __init__(
         self,
@@ -49,9 +49,9 @@ class SelectDirDialog(CustomDialog):
             ui.button(
                 "Voltar", icon="arrow_back", on_click=self.select_upper_dir
             ).props("flat")
-            ui.button(
-                icon="close", on_click=lambda: self.dialog.submit(None)
-            ).props("flat")
+            ui.button(icon="close", on_click=lambda: self.dialog.submit(None)).props(
+                "flat"
+            )
         with ui.scroll_area().classes("w-full"):
             with ui.list().props("dense separator select-none") as self.dir_list:
                 self.dir_list.classes("w-full")
@@ -292,7 +292,9 @@ class UpdateRoleDialog(CustomDialog, UserDataDialog):
             notify_error(self.ui, f"Erro ao mudar o cargo de {self.username}.")
             raise err
         else:
-            notify_success(self.ui, f"Cargo de {self.username} alterado para {role_name}")
+            notify_success(
+                self.ui, f"Cargo de {self.username} alterado para {role_name}"
+            )
         finally:
             self.dialog.submit(None)
 
@@ -348,4 +350,3 @@ class UpdatePassDialog(CustomDialog):
             notify_success(ui, f"Senha de '{self.username}' alterada com sucesso")
         finally:
             self.dialog.submit(None)
-
