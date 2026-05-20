@@ -97,9 +97,9 @@ def page(ui):
         h1(ui, "Preferências")
         h2(ui, "Valores padrão no formulário de contas")
         with ui.grid().classes("h-full center-items sm:grid-cols-3"):
-            ui.input("Estado")
-            ui.input("Cidade")
-            ui.select(ESTADOS, value=ESTADOS[0], label="Estado")
+            ui.input("Estado").props("outlined dense")
+            ui.input("Cidade").props("outlined dense")
+            ui.select(ESTADOS, value=ESTADOS[0], label="Estado").props("outlined dense")
         h2(ui, "Linhas por página")
         with ui.grid().classes("h-full center-items sm:grid-cols-3"):
             ui.number(
@@ -108,10 +108,10 @@ def page(ui):
                 min=20,
                 precision=0,
                 format="%.0f",
-            )
+            ).props("outlined dense")
             ui.number(
                 label="Tabelas [200]", value=200, min=20, precision=0, format="%.0f"
-            )
+            ).props("outlined dense")
         h1(ui, "Backup")
         h2(ui, "Locais de backup")
         DirectoryList(ui)

@@ -23,8 +23,8 @@ def subpage_transac(ui):
     with ui.column(align_items="start"):
         dateinput = ui.date_input("Data", value=date.today().strftime("%d/%m/%Y"))
         dateinput.picker.props("mask='DD/MM/YYYY'")
-        dateinput.classes("w-full")
-        ui.input("Valor", placeholder="0,00").classes("w-full")
+        dateinput.props("outlined dense").classes("w-full")
+        ui.input("Valor", placeholder="0,00").classes("w-full").props("outlined dense")
         ui.button("Inserir")
 
 
@@ -77,14 +77,14 @@ def subpage_info(ui):
     with ui.scroll_area().classes("no-margin-scroll") as scroll:
         scroll.style("height: calc(100svh - 400px);")
         with ui.grid().classes("w-full h-full md:grid-cols-2"):
-            ui.input("Nome*").classes(f"w-full")
-            ui.input("Sobrenome*").classes(f"w-full")
-            ui.input("Apelido").classes(f"w-full")
-            ui.input("Telefone").classes(f"w-full")
-            ui.input("Endereço").classes(f"w-full")
-            ui.input("Bairro").classes(f"w-full")
-            ui.input("Cidade*").classes(f"w-full")
-            ui.select(ESTADOS, value=ESTADOS[0], label="Estado*").classes(f"w-full")
+            ui.input("Nome*").props("outlined dense").classes(f"w-full")
+            ui.input("Sobrenome*").props("outlined dense").classes(f"w-full")
+            ui.input("Apelido").props("outlined dense").classes(f"w-full")
+            ui.input("Telefone").props("outlined dense").classes(f"w-full")
+            ui.input("Endereço").props("outlined dense").classes(f"w-full")
+            ui.input("Bairro").props("outlined dense").classes(f"w-full")
+            ui.input("Cidade*").props("outlined dense").classes(f"w-full")
+            ui.select(ESTADOS, value=ESTADOS[0], label="Estado*").props("outlined dense").classes(f"w-full")
 
 
 class CustomerInfo:
@@ -120,7 +120,7 @@ class page:
         with ui.row(align_items="center") as top_section:
             top_section.classes(
                 "w-full md:w-[80%] lg:w-[60%] self-center no-wrap bg-[#e1ebf0] "
-                "rounded shadow-lg px-4 py-2"
+                "rounded shadow px-4 py-2"
             )
             self.section_switcher = ui.button(
                 icon="point_of_sale", on_click=self.switch_section_mobile

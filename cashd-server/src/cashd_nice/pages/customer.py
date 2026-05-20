@@ -10,15 +10,17 @@ def page(ui):
     with ui.column(align_items="center").classes("w-full"):
         with ui.grid().classes("h-full center-items sm:grid-cols-2"):
             elem_width = 72
-            ui.input("Nome*").classes(f"w-{elem_width}")
-            ui.input("Sobrenome*").classes(f"w-{elem_width}")
-            ui.input("Apelido").classes(f"w-{elem_width}")
-            ui.input("Telefone").classes(f"w-{elem_width}")
-            ui.input("Endereço").classes(f"w-{elem_width}")
-            ui.input("Bairro").classes(f"w-{elem_width}")
-            ui.input("Cidade").classes(f"w-{elem_width}")
-            ui.select(ESTADOS, value=ESTADOS[0], label="Estado").classes(
-                f"w-{elem_width}"
+            ui.input("Nome*").props("outlined dense").classes(f"w-{elem_width}")
+            ui.input("Sobrenome*").props("outlined dense").classes(f"w-{elem_width}")
+            ui.input("Apelido").props("outlined dense").classes(f"w-{elem_width}")
+            ui.input("Telefone").props("outlined dense").classes(f"w-{elem_width}")
+            ui.input("Endereço").props("outlined dense").classes(f"w-{elem_width}")
+            ui.input("Bairro").props("outlined dense").classes(f"w-{elem_width}")
+            ui.input("Cidade").props("outlined dense").classes(f"w-{elem_width}")
+            (
+                ui.select(ESTADOS, value=ESTADOS[0], label="Estado")
+                .props("outlined dense")
+                .classes(f"w-{elem_width}")
             )
         with ui.row().classes("w-72 md:w-144"):
             ui.space()
