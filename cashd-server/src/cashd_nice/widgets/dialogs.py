@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Any
 from sqlalchemy.exc import IntegrityError
+from cashd_core.data import tbl_clientes, tbl_transacoes
+from cashd_core.const import NA_VALUE
 from cashd_nice.widgets.parts import notify_success, notify_error
 from cashd_nice import auth
 
@@ -350,3 +352,42 @@ class UpdatePassDialog(CustomDialog):
             notify_success(ui, f"Senha de '{self.username}' alterada com sucesso")
         finally:
             self.dialog.submit(None)
+
+
+class RemoveTransactionDialog(CustomDialog):
+    def _render_content(self, ui):
+        self.content_block = ui.column()
+        with ui.row() as self.actions_block:
+            ui.button(
+                "Cancelar",
+                icon="cancel",
+                on_click=lambda: self.dialog.submit(None)
+            )
+            ui.button("Confirmar", icon="check", on_click=self.delete_transaction)
+
+    def _initial_state(self):
+        customer = tbl_clientes()
+        customer.read(self.transaction.IdCliente)
+        with self.content_block:
+            ui.markdown(f"Confirme a exclusão desta transação de `{customer.NomeCompleto}`")
+            ui.markdown(f"**Data:** `{self.transaction.DataTransac}`")
+            ui.markdown(f"**Valor:** R$ `{self.transaction.Valor / 100}`")
+
+    def _cleanup(self):
+        self.content_block.clear()
+
+    def delete_transaction(self):
+        try:
+            self.transaction.delete()
+        except Exception as err:
+            notify_error(self.ui, "Erro inesperado ao excluir transação, verifique o log.")
+        else:
+            notify_success(self.ui, "Transação removida com sucesso.")
+        finally:
+            self.dialog.submit(None)
+
+    async def show(self, transaction: tbl_transacoes) -> Any:
+        """Called to display the dialog to the user, returns the submitted value."""
+        self.transaction = transaction
+        super().show()
+
