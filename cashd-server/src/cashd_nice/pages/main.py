@@ -42,47 +42,37 @@ class subpage_transac:
         self.date_input.value = date.strftime("%d/%m/%Y")
 
 
-def subpage_history(ui):
-    ui.add_head_html(
-        """
-        <script>
-        function langAgnosticPageIndicator(firstRowIndex, endRowIndex, rowsNumber) {
-            return firstRowIndex + '-' + endRowIndex + ' [' + rowsNumber + ']';
-        }
-        </script>
-        """
-    )
-    with ui.column(align_items="end").classes("w-60 md:w-90"):
-        ui.button("Imprimir", icon="print")
-    table = ui.table(
-        row_key="id",
-        columns=[
-            {"name": "data", "label": "Data", "field": "data"},
-            {"name": "valor", "label": "Valor (R$)", "field": "valor"},
-            {"name": "action", "label": ""},
-        ],
-        rows=[
-            {"id": 1, "data": "12/10/2024", "valor": "223,30"},
-            {"id": 2, "data": "11/01/2025", "valor": "35,50"},
-            {"id": 3, "data": "22/03/2024", "valor": "-200,00"},
-        ],
-    )
-    table.props(
-        "dense "
-        "rows-per-page-label='Linhas por página:' "
-        ":pagination-label='langAgnosticPageIndicator' "
-        "no-data-label='Nenhuma transação para este cliente'"
-    )
-    table.classes("self-center w-70 md:w-90")
-    table.style("height: calc(100svh - 410px);")
-    with table.add_slot("body-cell-action"):
-        with table.cell("action"):
-            del_button = ui.button(icon="delete").props("flat size=sm dense")
-            del_button.on(
-                "click",
-                js_handler="() => emit(props.row.id)",
-                handler=lambda e: ui.notify(f"Excluindo transação id={e.args}"),
+class subpage_history:
+    def __init__(self, ui, customer: tbl_clientes):
+        self.customer = customer
+        with ui.column(align_items="end").classes("w-60 md:w-90"):
+            ui.button("Imprimir", icon="print")
+            self.table = ui.table(
+                row_key="id",
+                columns=[
+                    {"name": "action", "label": ""},
+                    {"name": "data", "label": "Data", "field": "data"},
+                    {"name": "valor", "label": "Valor (R$)", "field": "valor"},
+                ],
+                rows=list(customer.Transacs),
             )
+            self.table.props(
+                "dense no-data-label='Nenhuma transação para este cliente'"
+            )
+            self.table.classes("self-center w-70 md:w-90")
+            self.table.style("max-height: calc(100svh - 410px);")
+            with self.table.add_slot("body-cell-action"):
+                with self.table.cell("action"):
+                    del_button = ui.button(icon="delete").props("flat size=sm dense")
+                    del_button.on(
+                        "click",
+                        js_handler="() => emit(props.row.id)",
+                        handler=lambda e: ui.notify(f"Excluindo transação id={e.args}"),
+                    )
+
+    def change_customer(self, customer: tbl_clientes):
+        self.customer = customer
+        self.table.rows = list(customer.Transacs)
 
 
 def subpage_info(ui):
@@ -172,7 +162,7 @@ class page:
                 ui,
                 datasource=self.CUSTOMERS_SOURCE,
                 keys=["Name", "Place"],
-                on_select=self.on_select_customer,
+                on_select=self.load_selected_customer,
             )
         return left_section
 
@@ -198,7 +188,7 @@ class page:
                 with ui.tab_panel(transac):
                     self.transac = subpage_transac(ui, on_add=self.on_add_transac)
                 with ui.tab_panel(history):
-                    subpage_history(ui)
+                    self.history = subpage_history(ui, customer=self.selected_customer)
                 with ui.tab_panel(info):
                     subpage_info(ui)
         return right_section
@@ -218,12 +208,16 @@ class page:
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
 
-    def on_select_customer(self, data: dict[str, Any]):
+    def load_selected_customer(self, data: dict[str, Any]):
         customer = self.selected_customer
         customer.read(row_id=data["Id"])
+        # Update selected user indicator
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)
         self.selected_customer_debt.set_value(f"R$ {customer.Saldo}")
+        # Update transaction history
+        if getattr(self, "history", None) is not None:
+            self.history.change_customer(self.selected_customer)
 
     def on_add_transac(self):
         date = self.transac.date
@@ -245,4 +239,4 @@ class page:
             notify_success(self.ui, f"Transação adicionada com sucesso")
             self.transac.date = date.today()
             self.transac.value_input.set_value("")
-        self.on_select_customer(data=self.customer_list.selected_data)
+        self.load_selected_customer(data=self.customer_list.selected_data)
