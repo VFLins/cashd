@@ -144,7 +144,7 @@ class page:
         ui = self.ui
         with ui.row(align_items="center") as top_section:
             top_section.classes(
-                "w-full md:w-[80%] lg:w-[60%] self-center no-wrap bg-[#e1ebf0] "
+                "w-full md:w-[80%] lg:w-[60%] self-center no-wrap bg-blue-1 "
                 "rounded shadow px-4 py-2"
             )
             self.section_switcher = ui.button(

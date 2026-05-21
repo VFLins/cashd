@@ -79,42 +79,42 @@ class page:
     def controls_block(self):
         ui = self.ui
         with ui.row(align_items="center") as controls_block:
-            controls_block.classes(
-                "self-center justify-center rounded border-[primary] "
-                "shadow-lg pb-1 px-4"
-            )
-            controls_block.style("background-color: #e1ebf0;")
-            self.stat_selector = ui.select(
-                options=[
-                    "Últimas transações",
-                    "Balanço",
-                    "Balanço acumulado",
-                    "Maiores saldos devedores",
-                    "Clientes inativos",
-                ],
-                value="Últimas transações",
-            ).classes("w-48")
-            self.freq_selector = ui.select(
-                options=["Mensal", "Semanal", "Diário"],
-                value="Mensal",
-                on_change=self.change_displayed_freq,
-            ).classes("w-24")
-            self.freq_selector.bind_visibility_from(
-                self.stat_selector,
-                "value",
-                backward=lambda v: v in ["Balanço", "Balanço acumulado"],
-            )
-            self.freq_amount = ui.number(
-                label="Meses", value=8, min=3, precision=0, format="%.0f"
-            ).classes("w-14")
-            self.freq_amount.bind_visibility_from(
-                self.stat_selector,
-                "value",
-                backward=lambda v: v in ["Balanço", "Balanço acumulado"],
-            )
+            controls_block.classes("self-center justify-center")
+            with ui.row(align_items="center") as options_block:
+                options_block.classes(
+                    "rounded border-[primary] shadow py-2 px-4 bg-blue-1"
+                )
+                self.stat_selector = ui.select(
+                    options=[
+                        "Últimas transações",
+                        "Balanço",
+                        "Balanço acumulado",
+                        "Maiores saldos devedores",
+                        "Clientes inativos",
+                    ],
+                    value="Últimas transações",
+                ).props("outlined dense").classes("w-48")
+                self.freq_selector = ui.select(
+                    options=["Mensal", "Semanal", "Diário"],
+                    value="Mensal",
+                    on_change=self.change_displayed_freq,
+                ).props("outlined dense").classes("w-28")
+                self.freq_selector.bind_visibility_from(
+                    self.stat_selector,
+                    "value",
+                    backward=lambda v: v in ["Balanço", "Balanço acumulado"],
+                )
+                self.freq_amount = ui.number(
+                    label="Meses", value=8, min=3, precision=0, format="%.0f"
+                ).props("outlined dense").classes("w-18")
+                self.freq_amount.bind_visibility_from(
+                    self.stat_selector,
+                    "value",
+                    backward=lambda v: v in ["Balanço", "Balanço acumulado"],
+                )
             refresh_button = ui.button(
                 icon="refresh", on_click=self.current_stat
-            ).props("flat")
+            )
         return controls_block
 
     def current_stat(self):
