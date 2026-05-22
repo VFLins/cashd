@@ -354,24 +354,36 @@ class UpdatePassDialog(CustomDialog):
             self.dialog.submit(None)
 
 
-class RemoveTransactionDialog(CustomDialog):
+class DeleteTransactionDialog(CustomDialog):
     def _render_content(self, ui):
-        self.content_block = ui.column()
+        self.content_block = ui.column().classes("w-full")
         with ui.row() as self.actions_block:
+            self.actions_block.classes("self-end")
             ui.button(
                 "Cancelar",
                 icon="cancel",
                 on_click=lambda: self.dialog.submit(None)
-            )
+            ).props("flat")
             ui.button("Confirmar", icon="check", on_click=self.delete_transaction)
 
     def _initial_state(self):
+        ui = self.ui
         customer = tbl_clientes()
         customer.read(self.transaction.IdCliente)
         with self.content_block:
-            ui.markdown(f"Confirme a exclusão desta transação de `{customer.NomeCompleto}`")
-            ui.markdown(f"**Data:** `{self.transaction.DataTransac}`")
-            ui.markdown(f"**Valor:** R$ `{self.transaction.Valor / 100}`")
+            ui.label(f"Confirme a exclusão desta transação").classes("text-xl")
+            ui.markdown(
+                f"**Cliente:** `{customer.NomeCompleto}`<br>"
+                f"**Data:** `{self.transaction.DataTransac}`<br>"
+                f"**Valor:** R$ `{self.transaction.Valor / 100}`".replace(".", ",")
+            )
+            with ui.row() as warn_block:
+                warn_block.classes(
+                    "bg-(--q-warning) p-2 w-40 sm:w-85 self-center "
+                    "rounded gap-2 no-wrap border shadow"
+                )
+                ui.icon("priority_high").classes("text-xl")
+                label = ui.label("Esta operação não pode ser desfeita")
 
     def _cleanup(self):
         self.content_block.clear()
@@ -381,13 +393,13 @@ class RemoveTransactionDialog(CustomDialog):
             self.transaction.delete()
         except Exception as err:
             notify_error(self.ui, "Erro inesperado ao excluir transação, verifique o log.")
+            raise err
         else:
             notify_success(self.ui, "Transação removida com sucesso.")
         finally:
             self.dialog.submit(None)
 
     async def show(self, transaction: tbl_transacoes) -> Any:
-        """Called to display the dialog to the user, returns the submitted value."""
         self.transaction = transaction
-        super().show()
+        await super().show()
 

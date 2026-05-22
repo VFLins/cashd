@@ -6,6 +6,7 @@ from cashd_core.const import ESTADOS
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
 from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd_nice.widgets.custom import DetailedList
+from cashd_nice.widgets.dialogs import DeleteTransactionDialog
 
 example_customer_data = [
     {"title": "Fulano De Algo", "subtitle": "Rua Olá, 21"},
@@ -43,17 +44,21 @@ class subpage_transac:
 
 
 class subpage_history:
-    def __init__(self, ui, customer: tbl_clientes):
+    def __init__(self, ui, customer: tbl_clientes, on_delete=None):
         self.customer = customer
+        self.delete_transaction_dialog = DeleteTransactionDialog(ui)
+        cols = [
+            {"name": "data", "label": "Data", "field": "data"},
+            {"name": "valor", "label": "Valor (R$)", "field": "valor"},
+        ]
+        if on_delete is not None:
+            cols = [{"name": "action", "label": ""}] + cols
+
         with ui.column(align_items="end").classes("w-60 md:w-90"):
             ui.button("Imprimir", icon="print")
             self.table = ui.table(
                 row_key="id",
-                columns=[
-                    {"name": "action", "label": ""},
-                    {"name": "data", "label": "Data", "field": "data"},
-                    {"name": "valor", "label": "Valor (R$)", "field": "valor"},
-                ],
+                columns=cols,
                 rows=list(customer.Transacs),
             )
             self.table.props(
@@ -61,14 +66,15 @@ class subpage_history:
             )
             self.table.classes("self-center w-70 md:w-90")
             self.table.style("max-height: calc(100svh - 410px);")
-            with self.table.add_slot("body-cell-action"):
-                with self.table.cell("action"):
-                    del_button = ui.button(icon="delete").props("flat size=sm dense")
-                    del_button.on(
-                        "click",
-                        js_handler="() => emit(props.row.id)",
-                        handler=lambda e: ui.notify(f"Excluindo transação id={e.args}"),
-                    )
+            if on_delete is not None:
+                with self.table.add_slot("body-cell-action"):
+                    with self.table.cell("action"):
+                        del_button = ui.button(icon="delete").props("flat size=sm dense")
+                        del_button.on(
+                            "click",
+                            js_handler="() => emit(props.row.id)",
+                            handler=lambda e: on_delete(e.args),
+                        )
 
     def change_customer(self, customer: tbl_clientes):
         self.customer = customer
@@ -186,9 +192,9 @@ class page:
                 )
             with ui.tab_panels(self.tabs, value=transac):
                 with ui.tab_panel(transac):
-                    self.transac = subpage_transac(ui, on_add=self.on_add_transac)
+                    self.transac = subpage_transac(ui, on_add=self.add_transaction)
                 with ui.tab_panel(history):
-                    self.history = subpage_history(ui, customer=self.selected_customer)
+                    self.history = subpage_history(ui, customer=self.selected_customer, on_delete=self.del_transaction)
                 with ui.tab_panel(info):
                     subpage_info(ui)
         return right_section
@@ -219,7 +225,7 @@ class page:
         if getattr(self, "history", None) is not None:
             self.history.change_customer(self.selected_customer)
 
-    def on_add_transac(self):
+    def add_transaction(self):
         date = self.transac.date
         value = StringToCurrency(self.transac.value_input.value)
         if not value.is_valid():
@@ -239,4 +245,12 @@ class page:
             notify_success(self.ui, f"Transação adicionada com sucesso")
             self.transac.date = date.today()
             self.transac.value_input.set_value("")
+        finally:
+            self.load_selected_customer(data=self.customer_list.selected_data)
+
+    async def del_transaction(self, transac_id: int):
+        transaction = tbl_transacoes()
+        transaction.read(row_id=transac_id)
+        await self.history.delete_transaction_dialog.show(transaction)
         self.load_selected_customer(data=self.customer_list.selected_data)
+
