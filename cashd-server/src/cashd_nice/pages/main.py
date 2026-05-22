@@ -81,24 +81,49 @@ class subpage_history:
         self.table.rows = list(customer.Transacs)
 
 
-def subpage_info(ui):
-    with ui.row().classes("no-wrap w-70 md:w-90"):
-        ui.space()
-        ui.button("Restaurar", icon="refresh").props("flat")
-        ui.button("Salvar", icon="check")
-    with ui.scroll_area().classes("no-margin-scroll") as scroll:
-        scroll.style("height: calc(100svh - 410px);")
-        with ui.grid().classes("w-full h-full md:grid-cols-2"):
-            ui.input("Nome*").props("outlined dense").classes(f"w-full")
-            ui.input("Sobrenome*").props("outlined dense").classes(f"w-full")
-            ui.input("Apelido").props("outlined dense").classes(f"w-full")
-            ui.input("Telefone").props("outlined dense").classes(f"w-full")
-            ui.input("Endereço").props("outlined dense").classes(f"w-full")
-            ui.input("Bairro").props("outlined dense").classes(f"w-full")
-            ui.input("Cidade*").props("outlined dense").classes(f"w-full")
-            ui.select(ESTADOS, value=ESTADOS[0], label="Estado*").props(
-                "outlined dense"
-            ).classes(f"w-full")
+class subpage_info:
+    def __init__(self, ui):
+        with ui.row().classes("no-wrap w-70 md:w-90"):
+            ui.space()
+            ui.button("Restaurar", icon="refresh").props("flat")
+            ui.button("Salvar", icon="check")
+        with ui.scroll_area().classes("no-margin-scroll") as scroll:
+            scroll.style("height: calc(100svh - 410px);")
+            with ui.grid().classes("w-full h-full md:grid-cols-2"):
+                self.firstname = ui.input("Nome*").props("outlined dense").classes(f"w-full")
+                self.lastname = ui.input("Sobrenome*").props("outlined dense").classes(f"w-full")
+                self.nickname = ui.input("Apelido").props("outlined dense").classes(f"w-full")
+                self.phonenumber = ui.input("Telefone").props("outlined dense").classes(f"w-full")
+                self.address = ui.input("Endereço").props("outlined dense").classes(f"w-full")
+                self.district = ui.input("Bairro").props("outlined dense").classes(f"w-full")
+                self.city = ui.input("Cidade*").props("outlined dense").classes(f"w-full")
+                self.state = ui.select(ESTADOS, value=ESTADOS[0], label="Estado*").props(
+                    "outlined dense"
+                ).classes(f"w-full")
+
+    def load(self, customer: tbl_clientes):
+        self.customer = customer
+        self.firstname.set_value(customer.PrimeiroNome)
+        self.lastname.set_value(customer.Sobrenome)
+        self.nickname.set_value(customer.Apelido)
+        self.phonenumber.set_value(customer.Telefone)
+        self.address.set_value(customer.Endereco)
+        self.district.set_value(customer.Bairro)
+        self.city.set_value(customer.Cidade)
+        self.state.set_vcalue(customer.Estado)
+
+    def update(self):
+        self.customer = tbl_clientes(
+            PrimeiroNome=self.firstname.value,
+            Sobrenome=self.lastname.value,
+            Apelido=self.nickname.value,
+            Telefone=self.phonenumber.value,
+            Endereco=self.address.value,
+            Bairro=self.district.value,
+            Cidade=self.city.value,
+            Estado=self.state.value,
+        )
+        self.customer.update()
 
 
 class CustomerInfo:
