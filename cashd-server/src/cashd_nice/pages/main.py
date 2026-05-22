@@ -40,7 +40,7 @@ class subpage_transac:
 
     @date.setter
     def date(self, value: date):
-        self.date_input.value = date.strftime("%d/%m/%Y")
+        self.date_input.value = value.strftime("%d/%m/%Y")
 
 
 class subpage_history:
@@ -243,8 +243,8 @@ class page:
             notify_error(self.ui, "Erro inesperado, verifique o arquivo de log.")
         else:
             notify_success(self.ui, f"Transação adicionada com sucesso")
-            self.transac.date = date.today()
             self.transac.value_input.set_value("")
+            self.transac.date = date.today()
         finally:
             self.load_selected_customer(data=self.customer_list.selected_data)
 
