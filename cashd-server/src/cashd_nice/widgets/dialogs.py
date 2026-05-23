@@ -1,5 +1,8 @@
+import time
+import asyncio
 from pathlib import Path
 from typing import Any
+from contextlib import contextmanager
 from sqlalchemy.exc import IntegrityError
 from cashd_core.data import tbl_clientes, tbl_transacoes
 from cashd_core.const import NA_VALUE
@@ -364,10 +367,14 @@ class DeleteTransactionDialog(CustomDialog):
                 icon="cancel",
                 on_click=lambda: self.dialog.submit(None)
             ).props("flat")
-            ui.button("Confirmar", icon="check", on_click=self.delete_transaction)
+            self.confirm_button = ui.button(
+                "Confirmar (5)", icon="check", on_click=self.delete_transaction
+            )
+        self.confirm_button.disable()
 
     def _initial_state(self):
         ui = self.ui
+        self.confirm_timer = ui.timer(1, self.update_timer, once=True)
         customer = tbl_clientes()
         customer.read(self.transaction.IdCliente)
         with self.content_block:
@@ -376,10 +383,10 @@ class DeleteTransactionDialog(CustomDialog):
                 f"**Cliente:** `{customer.NomeCompleto}`<br>"
                 f"**Data:** `{self.transaction.DataTransac}`<br>"
                 f"**Valor:** R$ `{self.transaction.Valor / 100}`".replace(".", ",")
-            )
+            ).classes("min-w-60 sm:min-w-85 self-center")
             with ui.row() as warn_block:
                 warn_block.classes(
-                    "bg-(--q-warning) p-2 w-40 sm:w-85 self-center "
+                    "bg-(--q-warning) p-2 w-60 sm:w-85 self-center "
                     "rounded gap-2 no-wrap border shadow"
                 )
                 ui.icon("priority_high").classes("text-xl")
@@ -387,6 +394,15 @@ class DeleteTransactionDialog(CustomDialog):
 
     def _cleanup(self):
         self.content_block.clear()
+        self.confirm_button.disable()
+        self.confirm_button.set_text("Confirmar (5)")
+
+    async def update_timer(self):
+        for i in range(4, 0, -1):
+            self.confirm_button.set_text(f"Confirmar ({i})")
+            await asyncio.sleep(1)
+        self.confirm_button.set_text("Confirmar")
+        self.confirm_button.enable()
 
     def delete_transaction(self):
         try:
