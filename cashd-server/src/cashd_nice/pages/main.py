@@ -86,11 +86,11 @@ class subpage_history:
 
 
 class subpage_info:
-    def __init__(self, ui):
+    def __init__(self, ui, customer: tbl_clientes | None = None, on_update=None):
         with ui.row().classes("no-wrap w-70 md:w-90"):
             ui.space()
-            ui.button("Restaurar", icon="refresh").props("flat")
-            ui.button("Salvar", icon="check")
+            ui.button("Restaurar", icon="refresh", on_click=self.reset).props("flat")
+            ui.button("Salvar", icon="check", on_click=on_update)
         with ui.scroll_area().classes("no-margin-scroll") as scroll:
             scroll.style("height: calc(100svh - 410px);")
             with ui.grid().classes("w-full h-full md:grid-cols-2"):
@@ -120,6 +120,9 @@ class subpage_info:
                     .props("outlined dense")
                     .classes(f"w-full")
                 )
+        if customer is not None:
+            self.customer = customer
+            self.load(customer)
 
     def load(self, customer: tbl_clientes):
         self.customer = customer
@@ -130,20 +133,11 @@ class subpage_info:
         self.address.set_value(customer.Endereco)
         self.district.set_value(customer.Bairro)
         self.city.set_value(customer.Cidade)
-        self.state.set_vcalue(customer.Estado)
+        self.state.set_value(customer.Estado)
 
-    def update(self):
-        self.customer = tbl_clientes(
-            PrimeiroNome=self.firstname.value,
-            Sobrenome=self.lastname.value,
-            Apelido=self.nickname.value,
-            Telefone=self.phonenumber.value,
-            Endereco=self.address.value,
-            Bairro=self.district.value,
-            Cidade=self.city.value,
-            Estado=self.state.value,
-        )
-        self.customer.update()
+    def reset(self):
+        if self.customer is not None:
+            self.load(self.customer)
 
 
 class CustomerInfo:
@@ -243,7 +237,11 @@ class page:
                         on_delete=self.del_transaction,
                     )
                 with ui.tab_panel(info):
-                    subpage_info(ui)
+                    self.info = subpage_info(
+                        ui,
+                        customer=self.selected_customer,
+                        on_update=self.update_selected_customer,
+                    )
         return right_section
 
     def switch_section_mobile(self):
@@ -264,6 +262,9 @@ class page:
     def load_selected_customer(self, data: dict[str, Any]):
         customer = self.selected_customer
         customer.read(row_id=data["Id"])
+        # Update customer list items
+        if getattr(self, "customer_list", None) is not None:
+            self.customer_list._render_list_items(no_callback=True)
         # Update selected user indicator
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)
@@ -271,6 +272,33 @@ class page:
         # Update transaction history
         if getattr(self, "history", None) is not None:
             self.history.change_customer(self.selected_customer)
+        # Update customer information
+        if getattr(self, "info", None) is not None:
+            self.info.load(customer)
+
+    def update_selected_customer(self):
+        try:
+            self.selected_customer.PrimeiroNome = self.info.firstname.value
+            self.selected_customer.Sobrenome = self.info.lastname.value
+            self.selected_customer.Apelido = self.info.nickname.value
+            self.selected_customer.Telefone = self.info.phonenumber.value
+            self.selected_customer.Endereco = self.info.address.value
+            self.selected_customer.Bairro = self.info.district.value
+            self.selected_customer.Cidade = self.info.city.value
+            self.selected_customer.Estado = self.info.state.value
+            self.selected_customer.update()
+        except Exception as err:
+            notify_error(
+                self.ui, "Erro ao alterar dados do cliente, verifique os logs."
+            )
+            raise err
+        else:
+            notify_success(
+                self.ui,
+                f"Dados de {self.selected_customer.NomeCompleto} alterados com sucesso",
+            )
+        finally:
+            self.load_selected_customer(data=self.customer_list.selected_data)
 
     def add_transaction(self):
         date = self.transac.date
@@ -288,8 +316,9 @@ class page:
             transaction.write()
         except Exception as err:
             notify_error(self.ui, "Erro inesperado, verifique o arquivo de log.")
+            raise err
         else:
-            notify_success(self.ui, f"Transação adicionada com sucesso")
+            notify_success(self.ui, f"Transação adicionada com sucesso.")
             self.transac.value_input.set_value("")
             self.transac.date = date.today()
         finally:

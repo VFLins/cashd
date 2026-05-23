@@ -52,7 +52,7 @@ class DetailedList:
                         .props("flat")
                     )
 
-    def _render_list_items(self):
+    def _render_list_items(self, no_callback: bool = False):
         """Refreshes the selection list to reflect the current state of the
         `DetailedList.SOURCE`.
         """
@@ -77,9 +77,9 @@ class DetailedList:
                         self.ui.item_label(data[self.subtitle_key]).classes(
                             "text-xs mb-1"
                         )
-        self._select_item(self.selected_data)
+        self._select_item(self.selected_data, no_callback)
 
-    def _select_item(self, data: dict[str, Any]):
+    def _select_item(self, data: dict[str, Any], no_callback: bool = False):
         """Updates the highlighted item and updates DetailedList.selected and
         DetailedList.selected_index' values accordingly.
         """
@@ -90,7 +90,7 @@ class DetailedList:
             idx = self.displayed_data.index(self.selected_data)
             item = self.displayed_items[idx]
             item.style("background-color: #478eff; color: white")
-        if self.on_select:
+        if self.on_select and not no_callback:
             self.on_select(self.selected_data)
 
     def _next_page(self):
