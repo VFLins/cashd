@@ -12,15 +12,13 @@ def example_plot(ui):
 
 
 def example_table(ui):
-    ui.add_head_html(
-        """
+    ui.add_head_html("""
         <script>
         function langAgnosticPageIndicator(firstRowIndex, endRowIndex, rowsNumber) {
             return firstRowIndex + '-' + endRowIndex + ' [' + rowsNumber + ']';
         }
         </script>
-        """
-    )
+        """)
     data = [
         {
             "id": i,
@@ -61,15 +59,13 @@ class page:
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
         ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
-        ui.add_head_html(
-            """
+        ui.add_head_html("""
         <style>
             .no-margin-scroll .q-scrollarea__content {
                 padding: 0 !important;
             }
         </style>
-        """
-        )
+        """)
         DefaultHeader(ui, selected_entry=2)
         self.controls_block()
         with ui.column(align_items="center") as self.displayed_stat:
@@ -84,37 +80,45 @@ class page:
                 options_block.classes(
                     "rounded border-[primary] shadow py-2 px-4 bg-blue-1"
                 )
-                self.stat_selector = ui.select(
-                    options=[
-                        "Últimas transações",
-                        "Balanço",
-                        "Balanço acumulado",
-                        "Maiores saldos devedores",
-                        "Clientes inativos",
-                    ],
-                    value="Últimas transações",
-                ).props("outlined dense").classes("w-48")
-                self.freq_selector = ui.select(
-                    options=["Mensal", "Semanal", "Diário"],
-                    value="Mensal",
-                    on_change=self.change_displayed_freq,
-                ).props("outlined dense").classes("w-28")
+                self.stat_selector = (
+                    ui.select(
+                        options=[
+                            "Últimas transações",
+                            "Balanço",
+                            "Balanço acumulado",
+                            "Maiores saldos devedores",
+                            "Clientes inativos",
+                        ],
+                        value="Últimas transações",
+                    )
+                    .props("outlined dense")
+                    .classes("w-48")
+                )
+                self.freq_selector = (
+                    ui.select(
+                        options=["Mensal", "Semanal", "Diário"],
+                        value="Mensal",
+                        on_change=self.change_displayed_freq,
+                    )
+                    .props("outlined dense")
+                    .classes("w-28")
+                )
                 self.freq_selector.bind_visibility_from(
                     self.stat_selector,
                     "value",
                     backward=lambda v: v in ["Balanço", "Balanço acumulado"],
                 )
-                self.freq_amount = ui.number(
-                    label="Meses", value=8, min=3, precision=0, format="%.0f"
-                ).props("outlined dense").classes("w-18")
+                self.freq_amount = (
+                    ui.number(label="Meses", value=8, min=3, precision=0, format="%.0f")
+                    .props("outlined dense")
+                    .classes("w-18")
+                )
                 self.freq_amount.bind_visibility_from(
                     self.stat_selector,
                     "value",
                     backward=lambda v: v in ["Balanço", "Balanço acumulado"],
                 )
-            refresh_button = ui.button(
-                icon="refresh", on_click=self.current_stat
-            )
+            refresh_button = ui.button(icon="refresh", on_click=self.current_stat)
         return controls_block
 
     def current_stat(self):

@@ -363,9 +363,7 @@ class DeleteTransactionDialog(CustomDialog):
         with ui.row() as self.actions_block:
             self.actions_block.classes("self-end")
             ui.button(
-                "Cancelar",
-                icon="cancel",
-                on_click=lambda: self.dialog.submit(None)
+                "Cancelar", icon="cancel", on_click=lambda: self.dialog.submit(None)
             ).props("flat")
             self.confirm_button = ui.button(
                 "Confirmar (5)", icon="check", on_click=self.delete_transaction
@@ -408,7 +406,9 @@ class DeleteTransactionDialog(CustomDialog):
         try:
             self.transaction.delete()
         except Exception as err:
-            notify_error(self.ui, "Erro inesperado ao excluir transação, verifique o log.")
+            notify_error(
+                self.ui, "Erro inesperado ao excluir transação, verifique o log."
+            )
             raise err
         else:
             notify_success(self.ui, "Transação removida com sucesso.")
@@ -418,4 +418,3 @@ class DeleteTransactionDialog(CustomDialog):
     async def show(self, transaction: tbl_transacoes) -> Any:
         self.transaction = transaction
         await super().show()
-

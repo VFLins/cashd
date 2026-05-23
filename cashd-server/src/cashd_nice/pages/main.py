@@ -23,9 +23,11 @@ example_customer_data = [
 
 
 class subpage_transac:
-    def __init__(self, ui, on_add = None):
+    def __init__(self, ui, on_add=None):
         with ui.column(align_items="start"):
-            self.date_input = ui.date_input("Data", value=date.today().strftime("%d/%m/%Y"))
+            self.date_input = ui.date_input(
+                "Data", value=date.today().strftime("%d/%m/%Y")
+            )
             self.date_input.picker.props("mask='DD/MM/YYYY' minimal")
             self.date_input.props("outlined dense").classes("w-full")
             self.value_input = ui.input("Valor", placeholder="0,00")
@@ -69,7 +71,9 @@ class subpage_history:
             if on_delete is not None:
                 with self.table.add_slot("body-cell-action"):
                     with self.table.cell("action"):
-                        del_button = ui.button(icon="delete").props("flat size=sm dense")
+                        del_button = ui.button(icon="delete").props(
+                            "flat size=sm dense"
+                        )
                         del_button.on(
                             "click",
                             js_handler="() => emit(props.row.id)",
@@ -90,16 +94,32 @@ class subpage_info:
         with ui.scroll_area().classes("no-margin-scroll") as scroll:
             scroll.style("height: calc(100svh - 410px);")
             with ui.grid().classes("w-full h-full md:grid-cols-2"):
-                self.firstname = ui.input("Nome*").props("outlined dense").classes(f"w-full")
-                self.lastname = ui.input("Sobrenome*").props("outlined dense").classes(f"w-full")
-                self.nickname = ui.input("Apelido").props("outlined dense").classes(f"w-full")
-                self.phonenumber = ui.input("Telefone").props("outlined dense").classes(f"w-full")
-                self.address = ui.input("Endereço").props("outlined dense").classes(f"w-full")
-                self.district = ui.input("Bairro").props("outlined dense").classes(f"w-full")
-                self.city = ui.input("Cidade*").props("outlined dense").classes(f"w-full")
-                self.state = ui.select(ESTADOS, value=ESTADOS[0], label="Estado*").props(
-                    "outlined dense"
-                ).classes(f"w-full")
+                self.firstname = (
+                    ui.input("Nome*").props("outlined dense").classes(f"w-full")
+                )
+                self.lastname = (
+                    ui.input("Sobrenome*").props("outlined dense").classes(f"w-full")
+                )
+                self.nickname = (
+                    ui.input("Apelido").props("outlined dense").classes(f"w-full")
+                )
+                self.phonenumber = (
+                    ui.input("Telefone").props("outlined dense").classes(f"w-full")
+                )
+                self.address = (
+                    ui.input("Endereço").props("outlined dense").classes(f"w-full")
+                )
+                self.district = (
+                    ui.input("Bairro").props("outlined dense").classes(f"w-full")
+                )
+                self.city = (
+                    ui.input("Cidade*").props("outlined dense").classes(f"w-full")
+                )
+                self.state = (
+                    ui.select(ESTADOS, value=ESTADOS[0], label="Estado*")
+                    .props("outlined dense")
+                    .classes(f"w-full")
+                )
 
     def load(self, customer: tbl_clientes):
         self.customer = customer
@@ -142,15 +162,13 @@ class page:
     selected_customer = tbl_clientes()
 
     def __init__(self, ui):
-        ui.add_head_html(
-            """
+        ui.add_head_html("""
         <style>
             .no-margin-scroll .q-scrollarea__content {
                 padding: 0 !important;
             }
         </style>
-        """
-        )
+        """)
         ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
@@ -219,7 +237,11 @@ class page:
                 with ui.tab_panel(transac):
                     self.transac = subpage_transac(ui, on_add=self.add_transaction)
                 with ui.tab_panel(history):
-                    self.history = subpage_history(ui, customer=self.selected_customer, on_delete=self.del_transaction)
+                    self.history = subpage_history(
+                        ui,
+                        customer=self.selected_customer,
+                        on_delete=self.del_transaction,
+                    )
                 with ui.tab_panel(info):
                     subpage_info(ui)
         return right_section
@@ -261,7 +283,7 @@ class page:
                 IdCliente=self.selected_customer.Id,
                 CarimboTempo=datetime.now(),
                 DataTransac=date,
-                Valor= value.value
+                Valor=value.value,
             )
             transaction.write()
         except Exception as err:
@@ -278,4 +300,3 @@ class page:
         transaction.read(row_id=transac_id)
         await self.history.delete_transaction_dialog.show(transaction)
         self.load_selected_customer(data=self.customer_list.selected_data)
-
