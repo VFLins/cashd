@@ -1,8 +1,92 @@
+from cashd_core.data import _DataSource, LastTransactionsSource
 from cashd_nice.widgets.parts import DefaultHeader
-
-
 import plotly.graph_objects as go
 from nicegui import ui
+
+
+CURRENCY_COLNAMES = ["Valor", "OwedAmount", "Sums", "Deductions", "Balance", "AcumBalance"]
+DATE_COLNAMES = ["Data", "LastTransac"]
+DISPLAY_NAMES = {
+    "Valor": "Valor",
+    "OwedAmount": "Saldo devedor",
+    "Sums": "Compras",
+    "Deductions": "Abatimentos",
+    "Balance": "Saldo",
+    "AcumBalance": "Saldo acumulado",
+    "Data": "Data",
+    "LastTransac": "Última transação",
+}
+
+
+class Table:
+    @property
+    def data(self) -> list[dict[str, str]]:
+        colnames: list[str] = self.source.SELECT_STMT.selected_columns.keys()
+        return [{col: getattr(row, col) for col in colnames} for row in self.source.current_data]
+
+    @property
+    def columns(self) -> list[dict[str, str]]:
+        colnames: list[str] = self.source.SELECT_STMT.selected_columns.keys()
+        columns = []
+        for name in colnames:
+            label = DISPLAY_NAMES.get(name, name)
+            key = name.lower()
+            if name in CURRENCY_COLNAMES:
+                columns.append(
+                    {"name": key, "label": label, "field": name, "align": "right"}
+                )
+            else:
+                columns.append(
+                    {"name": key, "label": label, "field": name, "align": "left"}
+                )
+        return columns
+
+    @property
+    def pagination_text(self) -> str:
+        return (
+            f"{self.source.nrows} itens, mostrando {self.source.min_idx + 1} "
+            f"até {self.source.max_idx}"
+        )
+
+    def next_page(self):
+        self.source.fetch_next_page()
+        self.table.rows = self.data
+        self.pagination_label.set_text(self.pagination_text)
+
+    def previous_page(self):
+        self.source.fetch_previous_page()
+        self.table.rows = self.data
+        self.pagination_label.set_text(self.pagination_text)
+
+    def change_source(self, source: _DataSource):
+        self.source = source
+        self.table.columns = self.columns
+        self.table.rows = self.data
+        self.pagination_label.set_text(self.pagination_text)
+
+    def __init__(self, ui, source: _DataSource):
+        self.source = source
+        self.table = ui.table(columns=self.columns, rows=self.data)
+        self.table.classes("self-center !w-full md:!max-w-160").props("dense")
+        self.table.style("height: calc(100svh - 240px);")
+        with ui.scroll_area().classes("h-[2rem] no-margin-scroll w-full items-end"):
+            with ui.row(align_items="center") as pagination_block:
+                pagination_block.classes(
+                    "w-full md:max-w-160 no-wrap self-center justify-end"
+                )
+                self.pagination_label = ui.label(self.pagination_text)
+                self.pagination_label.classes("select-none truncate")
+                with ui.row().classes("gap-0 no-wrap"):
+                    (
+                        ui.button(icon="arrow_back", on_click=self.previous_page)
+                        .classes("text-xs")
+                        .props("flat")
+                    )
+                    (
+                        ui.button(icon="arrow_forward", on_click=self.next_page)
+                        .classes("text-xs")
+                        .props("flat")
+                    )
 
 
 def example_plot(ui):
@@ -55,6 +139,9 @@ def example_table(ui):
 
 
 class page:
+    LAST_TRANSACTIONS_SOURCE = LastTransactionsSource()
+    current_source = LAST_TRANSACTIONS_SOURCE
+
     def __init__(self, ui):
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
@@ -70,7 +157,7 @@ class page:
         self.controls_block()
         with ui.column(align_items="center") as self.displayed_stat:
             self.displayed_stat.classes("w-full h-full")
-            example_table(self.ui)
+            Table(ui, self.current_source)
 
     def controls_block(self):
         ui = self.ui
@@ -141,3 +228,16 @@ class page:
             case _:
                 self.freq_amount.label = "Meses"
         self.freq_amount.update()
+
+    def update_view(self):
+        match self.stat_selector.value:
+            case _:
+                self.current_source = self.LAST_TRANSACTIONS_SOURCE
+
+    def next_page(self):
+        self.current_source.fetch_next_page()
+        self.update_view()
+
+    def previous_page(self):
+        self.current_source.fetch_previous_page()
+        self.update_view()

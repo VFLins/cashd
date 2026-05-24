@@ -708,7 +708,7 @@ class LastTransactionsSource(_DataSource):
         select_stmt = (
             select(
                 tbl_transacoes.DataTransac.label("Data"),
-                FORMATTED_FULL_CUSTOMER_NAME,
+                FORMATTED_FULL_CUSTOMER_NAME.label("Nome"),
                 query_currency(tbl_transacoes.Valor, label="Valor"),
             )
             .join(tbl_clientes, tbl_transacoes.IdCliente == tbl_clientes.Id)
