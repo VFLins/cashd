@@ -1,4 +1,11 @@
-from cashd_core.data import _DataSource, LastTransactionsSource
+from cashd_core.data import (
+    _DataSource,
+    LastTransactionsSource,
+    TransactionBalanceSource,
+    AggregatedAmountSource,
+    HighestAmountsSource,
+    InactiveCustomersSource,
+)
 from cashd_nice.widgets.parts import DefaultHeader
 import plotly.graph_objects as go
 from nicegui import ui
@@ -7,14 +14,14 @@ from nicegui import ui
 CURRENCY_COLNAMES = ["Valor", "OwedAmount", "Sums", "Deductions", "Balance", "AcumBalance"]
 DATE_COLNAMES = ["Data", "LastTransac"]
 DISPLAY_NAMES = {
-    "Valor": "Valor",
-    "OwedAmount": "Saldo devedor",
-    "Sums": "Compras",
-    "Deductions": "Abatimentos",
-    "Balance": "Saldo",
-    "AcumBalance": "Saldo acumulado",
-    "Data": "Data",
-    "LastTransac": "Última transação",
+    "Valor": "Valor (R$)",
+    "OwedAmount": "Saldo devedor (R$)",
+    "Sums": "Compras (R$)",
+    "Deductions": "Abatimentos (R$)",
+    "Balance": "Saldo (R$)",
+    "AcumBalance": "Saldo acumulado (R$)",
+    "Date": "Data",
+    "LastTransac": "Última transação (R$)",
 }
 
 
@@ -48,21 +55,22 @@ class Table:
             f"até {self.source.max_idx}"
         )
 
-    def next_page(self):
-        self.source.fetch_next_page()
-        self.table.rows = self.data
-        self.pagination_label.set_text(self.pagination_text)
-
-    def previous_page(self):
-        self.source.fetch_previous_page()
-        self.table.rows = self.data
-        self.pagination_label.set_text(self.pagination_text)
-
-    def change_source(self, source: _DataSource):
-        self.source = source
+    def refresh(self):
         self.table.columns = self.columns
         self.table.rows = self.data
         self.pagination_label.set_text(self.pagination_text)
+
+    def next_page(self):
+        self.source.fetch_next_page()
+        self.refresh()
+
+    def previous_page(self):
+        self.source.fetch_previous_page()
+        self.refresh()
+
+    def change_source(self, source: _DataSource):
+        self.source = source
+        self.refresh()
 
     def __init__(self, ui, source: _DataSource):
         self.source = source
@@ -95,51 +103,12 @@ def example_plot(ui):
     return ui.plotly(example_plot).classes("h-[100%] w-[90%] center-self")
 
 
-def example_table(ui):
-    ui.add_head_html("""
-        <script>
-        function langAgnosticPageIndicator(firstRowIndex, endRowIndex, rowsNumber) {
-            return firstRowIndex + '-' + endRowIndex + ' [' + rowsNumber + ']';
-        }
-        </script>
-        """)
-    data = [
-        {
-            "id": i,
-            "nome": "0, Nome Completo Do Cliente",
-            "valor": f"{(i+1)**0.99:.0f},00",
-            "data": f"{i**0.7+1:.0f}/12/2025",
-        }
-        for i in range(100)
-    ]
-    table = ui.table(
-        columns=[
-            {"name": "data", "label": "Data", "field": "data"},
-            {"name": "nome", "label": "Nome", "field": "nome", "align": "left"},
-            {"name": "valor", "label": "Valor", "field": "valor"},
-        ],
-        rows=data,
-        row_key="id",
-    )
-    table.classes("self-center sm:!w-full md:!w-auto").props(
-        "dense "
-        "rows-per-page-label='Linhas por página:' "
-        ":pagination-label='langAgnosticPageIndicator'"
-    )
-    table.style("height: calc(100svh - 240px);")
-    with ui.scroll_area().classes(
-        "h-[2rem] no-margin-scroll sm:w-full md:w-96 items-end"
-    ):
-        with ui.row(align_items="center").classes("w-full no-wrap"):
-            ui.space()
-            ui.label("900 itens, mostrando 801-900").classes("select-none truncate")
-            with ui.row().classes("gap-0 no-wrap"):
-                ui.button(icon="arrow_back").classes("text-xs").props("flat")
-                ui.button(icon="arrow_forward").classes("text-xs").props("flat")
-
-
 class page:
     LAST_TRANSACTIONS_SOURCE = LastTransactionsSource()
+    TRANSACTION_BALANCE_SOURCE = TransactionBalanceSource()
+    AGGREGATED_AMOUNT_SOURCE = AggregatedAmountSource()
+    HIGHEST_AMOUNTS_SOURCE = HighestAmountsSource()
+    INACTIVE_CUSTOMER_SOURCE = InactiveCustomersSource()
     current_source = LAST_TRANSACTIONS_SOURCE
 
     def __init__(self, ui):
@@ -157,7 +126,7 @@ class page:
         self.controls_block()
         with ui.column(align_items="center") as self.displayed_stat:
             self.displayed_stat.classes("w-full h-full")
-            Table(ui, self.current_source)
+            self.View = Table(ui, self.current_source)
 
     def controls_block(self):
         ui = self.ui
@@ -177,6 +146,7 @@ class page:
                             "Clientes inativos",
                         ],
                         value="Últimas transações",
+                        on_change=self.update_view,
                     )
                     .props("outlined dense")
                     .classes("w-48")
@@ -185,7 +155,7 @@ class page:
                     ui.select(
                         options=["Mensal", "Semanal", "Diário"],
                         value="Mensal",
-                        on_change=self.change_displayed_freq,
+                        on_change=self.update_freq,
                     )
                     .props("outlined dense")
                     .classes("w-28")
@@ -195,44 +165,55 @@ class page:
                     "value",
                     backward=lambda v: v in ["Balanço", "Balanço acumulado"],
                 )
-                self.freq_amount = (
-                    ui.number(label="Meses", value=8, min=3, precision=0, format="%.0f")
-                    .props("outlined dense")
-                    .classes("w-18")
-                )
-                self.freq_amount.bind_visibility_from(
-                    self.stat_selector,
-                    "value",
-                    backward=lambda v: v in ["Balanço", "Balanço acumulado"],
-                )
-            refresh_button = ui.button(icon="refresh", on_click=self.current_stat)
+                # self.freq_amount = (
+                #     ui.number(label="Meses", value=8, min=3, precision=0, format="%.0f")
+                #     .props("outlined dense")
+                #     .classes("w-18")
+                # )
+                # self.freq_amount.bind_visibility_from(
+                #     self.stat_selector,
+                #     "value",
+                #     backward=lambda v: v in ["Balanço", "Balanço acumulado"],
+                # )
+            # ui.button(icon="refresh", on_click=self.current_stat)
         return controls_block
-
-    def current_stat(self):
-        self.displayed_stat.clear()
-        with self.displayed_stat:
-            if self.stat_selector.value in ["Balanço", "Balanço acumulado"]:
-                example_plot(self.ui)
-            else:
-                example_table(self.ui)
 
     def change_displayed_freq(self):
         self.rename_freq_amount()
 
-    def rename_freq_amount(self):
-        match self.freq_selector.value:
-            case "Diário":
-                self.freq_amount.label = "Dias"
-            case "Semanal":
-                self.freq_amount.label = "Semanas"
-            case _:
-                self.freq_amount.label = "Meses"
-        self.freq_amount.update()
+    # def rename_freq_amount(self):
+    #     match self.freq_selector.value:
+    #         case "Diário":
+    #             self.freq_amount.label = "Dias"
+    #         case "Semanal":
+    #             self.freq_amount.label = "Semanas"
+    #         case _:
+    #             self.freq_amount.label = "Meses"
+    #     self.freq_amount.update()
 
     def update_view(self):
         match self.stat_selector.value:
+            case "Clientes inativos":
+                self.current_source = self.INACTIVE_CUSTOMER_SOURCE
+            case "Maiores saldos devedores":
+                self.current_source = self.HIGHEST_AMOUNTS_SOURCE
+            case "Balanço acumulado":
+                self.current_source = self.AGGREGATED_AMOUNT_SOURCE
+            case "Balanço":
+                self.current_source = self.TRANSACTION_BALANCE_SOURCE
             case _:
                 self.current_source = self.LAST_TRANSACTIONS_SOURCE
+        self.View.change_source(self.current_source)
+
+    def update_freq(self):
+        match self.freq_selector.value:
+            case "Diário":
+                self.current_source.update_date_format("d")
+            case "Semanal":
+                self.current_source.update_date_format("w")
+            case _:
+                self.current_source.update_date_format("m")
+        self.View.refresh()
 
     def next_page(self):
         self.current_source.fetch_next_page()

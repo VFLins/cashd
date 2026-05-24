@@ -32,7 +32,7 @@ class page:
         with ui.column(align_items="center") as form_block:
             form_block.classes(
                 "sm:w-149 absolute sm:top-1/2 left-1/2 transform "
-                "-translate-x-1/2 sm:-translate-y-1/2"
+                "-translate-x-1/2 sm:-translate-y-2/3"
             )
             with ui.grid().classes("h-full center-items sm:grid-cols-2"):
                 self.firstname = self.default_input("Nome", required=True)
