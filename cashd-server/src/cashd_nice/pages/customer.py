@@ -29,7 +29,11 @@ class page:
         ui.colors(primary="#478eff", secondary="#d3d7d9")
         ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         DefaultHeader(ui=ui, selected_entry=1)
-        with ui.column(align_items="center").classes("w-full"):
+        with ui.column(align_items="center") as form_block:
+            form_block.classes(
+                "sm:w-149 absolute sm:top-1/2 left-1/2 transform "
+                "-translate-x-1/2 sm:-translate-y-1/2"
+            )
             with ui.grid().classes("h-full center-items sm:grid-cols-2"):
                 self.firstname = self.default_input("Nome", required=True)
                 self.lastname = self.default_input("Sobrenome", required=True)
@@ -39,8 +43,7 @@ class page:
                 self.district = self.default_input("Bairro")
                 self.city = self.default_input("Cidade", required=True)
                 self.state = self.select_input(options=ESTADOS, label="Estado")
-            with ui.row().classes("w-72 md:w-144"):
-                ui.space()
+            with ui.row().classes("w-72 md:w-144 self-end justify-end"):
                 ui.button("Restaurar", icon="refresh", on_click=self.reset).props(
                     "flat"
                 )
@@ -97,7 +100,6 @@ class page:
         form_is_ready = all(
             (f.value is not None) and (len(f.value) > 0) for f in required_fields
         )
-        print(form_is_ready)
         if getattr(self, "insert_button", None) is not None:
             if form_is_ready:
                 self.insert_button.enable()
