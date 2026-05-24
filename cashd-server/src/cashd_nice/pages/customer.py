@@ -4,14 +4,24 @@ from cashd_nice.widgets.parts import DefaultHeader, notify_success, notify_error
 
 
 class page:
-    def default_input(self, label: str):
-        return self.ui.input(label, on_change=self.enable_insert).props("outlined dense").classes("w-72")
+    def default_input(self, label: str, required=False):
+        validation = (
+            {"Não pode ficar vazio": lambda v: (v is None) or (len(v) > 0)}
+            if required
+            else {}
+        )
+        field = (
+            self.ui.input(label, on_change=self.enable_insert, validation=validation)
+            .props("outlined dense")
+            .classes("w-72")
+        )
+        if required:
+            field.required = True
+        return field
 
     def select_input(self, options: list[str], label: str):
         return (
-            self.ui.select(options, label=label)
-            .props("outlined dense")
-            .classes("w-72")
+            self.ui.select(options, label=label).props("outlined dense").classes("w-72")
         )
 
     def __init__(self, ui):
@@ -21,18 +31,22 @@ class page:
         DefaultHeader(ui=ui, selected_entry=1)
         with ui.column(align_items="center").classes("w-full"):
             with ui.grid().classes("h-full center-items sm:grid-cols-2"):
-                self.firstname = self.default_input("Nome*")
-                self.lastname = self.default_input("Sobrenome*")
+                self.firstname = self.default_input("Nome", required=True)
+                self.lastname = self.default_input("Sobrenome", required=True)
                 self.nickname = self.default_input("Apelido")
-                self.phonenumber = self.default_input("Telefone")
+                self.phonenumber = self.default_input("Telefone", required=True)
                 self.address = self.default_input("Endereço")
                 self.district = self.default_input("Bairro")
-                self.city = self.default_input("Cidade")
+                self.city = self.default_input("Cidade", required=True)
                 self.state = self.select_input(options=ESTADOS, label="Estado")
             with ui.row().classes("w-72 md:w-144"):
                 ui.space()
-                ui.button("Restaurar", icon="refresh", on_click=self.reset).props("flat")
-                self.insert_button = ui.button("Criar", icon="add", on_click=self.add_customer)
+                ui.button("Restaurar", icon="refresh", on_click=self.reset).props(
+                    "flat"
+                )
+                self.insert_button = ui.button(
+                    "Criar", icon="add", on_click=self.add_customer
+                )
         self.reset()
 
     def add_customer(self):
@@ -50,7 +64,8 @@ class page:
             customer.write()
         except Exception as err:
             notify_error(
-                self.ui, f"Erro ao criar cliente {customer.NomeCompleto}, verifique os logs."
+                self.ui,
+                f"Erro ao criar cliente {customer.NomeCompleto}, verifique os logs.",
             )
             raise err
         else:
@@ -72,12 +87,19 @@ class page:
         self.state.set_value(customer.Estado)
 
     def enable_insert(self):
-        required_fields = [self.firstname, self.lastname, self.phonenumber, self.city, self.state]
-        form_is_ready = all((f.value is not None) and (len(f.value) > 0) for f in required_fields)
+        required_fields = [
+            self.firstname,
+            self.lastname,
+            self.phonenumber,
+            self.city,
+            self.state,
+        ]
+        form_is_ready = all(
+            (f.value is not None) and (len(f.value) > 0) for f in required_fields
+        )
         print(form_is_ready)
         if getattr(self, "insert_button", None) is not None:
             if form_is_ready:
                 self.insert_button.enable()
             else:
                 self.insert_button.disable()
-
