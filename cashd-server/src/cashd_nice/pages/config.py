@@ -177,6 +177,7 @@ class page:
                     label="Fazer backup",
                     description="Backups serão salvos nos 'Locais de backup'.",
                     icon="save",
+                    on_click=self.run_backup
                 )
 
     def set_config(self, config_name: str, input_name: str):
@@ -186,9 +187,18 @@ class page:
         except TypeError:
             getattr(self, input_name).value = getattr(settings, config_name)
         except Exception as err:
-            notify_error(self.ui, "Erro ao definir valor padrão, verifique os logs.")
+            notify_error(self.ui, "Erro ao definir valor padrão, verifique os logs")
             raise err
         else:
             if type(val) is float:
                 val = int(val)
             notify_success(self.ui, f"Valor padrão definido: {val}")
+
+    def run_backup(self):
+        try:
+            backup.run(force=True, _raise=True)
+        except Exception as err:
+            notify_error(self.ui, "Erro ao realizar backup, verifique os logs")
+            raise err
+        else:
+            notify_success(self.ui, "Backup realizado com sucesso")
