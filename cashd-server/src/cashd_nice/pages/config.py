@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Callable
 from cashd_core.prefs import settings
-from cashd_core.const import ESTADOS
+from cashd_core.const import ESTADOS,DDD
 from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd_nice.widgets.dialogs import SelectDirDialog
 
@@ -105,11 +105,20 @@ class page:
                         ESTADOS,
                         value=settings.default_state,
                         label="Estado",
-                        on_change=self.set_default_state,
+                        on_change=lambda: self.set_config("default_state", "state"),
                     )
                     .props("outlined dense")
                 )
                 ui.input("Cidade").props("outlined dense")
+                self.area_code = (
+                    ui.select(
+                        DDD,
+                        value=settings.area_code_number,
+                        label="Número do DDD",
+                        on_change=lambda: self.set_config("area_code_number", "area_code"),
+                    )
+                    .props("outlined dense")
+                )
             h2(ui, "Linhas por página")
             with ui.grid().classes("h-full center-items sm:grid-cols-3"):
                 ui.number(
@@ -140,12 +149,12 @@ class page:
                     icon="save",
                 )
 
-    def set_default_state(self):
-        val: str = self.state.value
+    def set_config(self, config_name: str, input_name: str):
+        val: str = getattr(self, input_name).value
         try:
-            settings.default_state = val
+            setattr(settings, config_name, val)
         except Exception as err:
-            notify_error(self.ui, "Erro ao definir estado padrão, verifique os logs.")
+            notify_error(self.ui, "Erro ao definir valor padrão, verifique os logs.")
             raise err
         else:
-            notify_success(self.ui, f"Estado padrão definido: {val}")
+            notify_success(self.ui, f"Valor padrão definido: {val}")
