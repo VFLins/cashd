@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Callable
+from cashd_core.prefs import settings
 from cashd_core.const import ESTADOS
-from cashd_nice.widgets.parts import DefaultHeader
+from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd_nice.widgets.dialogs import SelectDirDialog
 
 
@@ -67,65 +68,84 @@ class DirectoryList:
         self.ui.notify(f"Excluindo local {row_index=}")
 
 
-def page(ui):
-    ui.add_head_html("""
-    <style>
-        .no-margin-scroll .q-scrollarea__content {
-            padding: 0 !important;
+class page:
+    def __init__(self, ui):
+        self.ui = ui
+        ui.add_head_html("""
+        <style>
+            .no-margin-scroll .q-scrollarea__content {
+                padding: 0 !important;
+            }
+        </style>
+        """)
+        ui.add_css("""
+        .nicegui-markdown h1 {
+            margin: 16px 0px 0px 0px;
+            width: 100%;
+            font-size: 20px;
+            font-family: 'Saira Semibold';
+            color: #478eff;
         }
-    </style>
-    """)
-    ui.add_css("""
-    .nicegui-markdown h1 {
-        margin: 16px 0px 0px 0px;
-        width: 100%;
-        font-size: 20px;
-        font-family: 'Saira Semibold';
-        color: #478eff;
-    }
-    .nicegui-markdown h2 {
-        margin: 8px 0px 0px 0px;
-        margin: 0px;
-        font-size: 16px;
-        font-weight: bold;
-    }
-    """)
-    ui.colors(primary="#478eff", secondary="#d3d7d9", warning="#d48731", info="#478eff")
-    ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
-    DefaultHeader(ui, selected_entry=3)
-    with ui.column(align_items="left").classes("self-center"):
-        h1(ui, "Preferências")
-        h2(ui, "Valores padrão no formulário de contas")
-        with ui.grid().classes("h-full center-items sm:grid-cols-3"):
-            ui.input("Estado").props("outlined dense")
-            ui.input("Cidade").props("outlined dense")
-            ui.select(ESTADOS, value=ESTADOS[0], label="Estado").props("outlined dense")
-        h2(ui, "Linhas por página")
-        with ui.grid().classes("h-full center-items sm:grid-cols-3"):
-            ui.number(
-                label="Seleção de clientes [100]",
-                value=100,
-                min=20,
+        .nicegui-markdown h2 {
+            margin: 8px 0px 0px 0px;
+            margin: 0px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        """)
+        ui.colors(primary="#478eff", secondary="#d3d7d9", warning="#d48731", info="#478eff")
+        ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
+        DefaultHeader(ui, selected_entry=3)
+        with ui.column(align_items="left").classes("self-center"):
+            h1(ui, "Preferências")
+            h2(ui, "Valores padrão no formulário de contas")
+            with ui.grid().classes("h-full center-items sm:grid-cols-3"):
+                self.state = (
+                    ui.select(
+                        ESTADOS,
+                        value=settings.default_state,
+                        label="Estado",
+                        on_change=self.set_default_state,
+                    )
+                    .props("outlined dense")
+                )
+                ui.input("Cidade").props("outlined dense")
+            h2(ui, "Linhas por página")
+            with ui.grid().classes("h-full center-items sm:grid-cols-3"):
+                ui.number(
+                    label="Seleção de clientes [100]",
+                    value=100,
+                    min=20,
                 precision=0,
                 format="%.0f",
             ).props("outlined dense")
             ui.number(
                 label="Tabelas [200]", value=200, min=20, precision=0, format="%.0f"
             ).props("outlined dense")
-        h1(ui, "Backup")
-        h2(ui, "Locais de backup")
-        DirectoryList(ui)
-        h2(ui, "Ações")
-        with ui.grid().classes("sm:grid-cols-2"):
-            described_button(
-                ui,
-                label="Carregar backup",
-                description="Esta operação é reversível, consulte a documentação.",
-                icon="download",
-            )
-            described_button(
-                ui,
-                label="Fazer backup",
-                description="Backups serão salvos nos 'Locais de backup'.",
-                icon="save",
-            )
+            h1(ui, "Backup")
+            h2(ui, "Locais de backup")
+            DirectoryList(ui)
+            h2(ui, "Ações")
+            with ui.grid().classes("sm:grid-cols-2"):
+                described_button(
+                    ui,
+                    label="Carregar backup",
+                    description="Esta operação é reversível, consulte a documentação.",
+                    icon="download",
+                )
+                described_button(
+                    ui,
+                    label="Fazer backup",
+                    description="Backups serão salvos nos 'Locais de backup'.",
+                    icon="save",
+                )
+
+    def set_default_state(self):
+        val: str = self.state.value
+        try:
+            settings.default_state = val
+        except Exception as err:
+            notify_error(self.ui, "Erro ao definir estado padrão, verifique os logs.")
+            raise err
+        else:
+            notify_success(self.ui, f"Estado padrão definido: {val}")
