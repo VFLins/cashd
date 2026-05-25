@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Callable
+from cashd_core import backup
 from cashd_core.prefs import settings
 from cashd_core.const import ESTADOS,DDD
 from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
@@ -30,6 +31,10 @@ def described_button(
 
 
 class DirectoryList:
+    @property
+    def data(self) -> list[dict[str, str]]:
+        return [{"name": place} for place in backup.settings.read_backup_places()]
+
     def __init__(self, ui):
         self.ui = ui
         self.initial_dir: Path = Path("~").expanduser()
@@ -40,9 +45,9 @@ class DirectoryList:
                     {"name": "name", "label": None, "field": "name", "align": "left"},
                     {"name": "action", "label": ""},
                 ],
-                rows=[{"name": f"/caminho/para/pasta{i}"} for i in range(2)],
+                rows=self.data,
             )
-            .classes("w-full")
+            .classes("w-100 md:w-full")
             .props("hide-header")
         )
 
@@ -60,12 +65,21 @@ class DirectoryList:
 
     async def add_dir(self):
         new_dir = await self.dialog_add_directory.show()
-        if new_dir:
-            self.ui.notify(f"Pasta adicionada: {new_dir}")
+        if not new_dir:
+            return
+        try:
+            backup.settings.add_backup_place(new_dir)
+        except Exception as err:
+            notify_error(self.ui, "Erro ao adicionar local de backup, verifique o log")
+            raise err
+        self.table.rows = self.data
 
     def rm_dir(self, payload):
         row_index = payload.args
-        self.ui.notify(f"Excluindo local {row_index=}")
+        try:
+            backup.settings.rm_backup_place(idx=row_index)
+        finally:
+            self.table.rows = self.data
 
 
 class page:
@@ -99,7 +113,7 @@ class page:
         with ui.column(align_items="left").classes("self-center"):
             h1(ui, "Preferências")
             h2(ui, "Valores padrão no formulário de contas")
-            with ui.grid().classes("h-full center-items sm:grid-cols-3"):
+            with ui.grid().classes("h-full center-items md:grid-cols-3"):
                 self.state = (
                     ui.select(
                         ESTADOS,
@@ -127,7 +141,7 @@ class page:
                     .props("outlined dense")
                 )
             h2(ui, "Linhas por página")
-            with ui.grid().classes("h-full center-items sm:grid-cols-3"):
+            with ui.grid().classes("h-full center-items md:grid-cols-3"):
                 self.data_tables_rownumber = (
                     ui.number(
                         label="Tabelas de dados",
@@ -149,9 +163,9 @@ class page:
                     button.props("flat dense")
             h1(ui, "Backup")
             h2(ui, "Locais de backup")
-            DirectoryList(ui)
+            self.backup_places = DirectoryList(ui)
             h2(ui, "Ações")
-            with ui.grid().classes("sm:grid-cols-2"):
+            with ui.grid().classes("md:grid-cols-2"):
                 described_button(
                     ui,
                     label="Carregar backup",
@@ -166,7 +180,7 @@ class page:
                 )
 
     def set_config(self, config_name: str, input_name: str):
-        val: str = getattr(self, input_name).value
+        val: str | float = getattr(self, input_name).value
         try:
             setattr(settings, config_name, val)
         except TypeError:
