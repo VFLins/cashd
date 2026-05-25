@@ -109,7 +109,14 @@ class page:
                     )
                     .props("outlined dense")
                 )
-                ui.input("Cidade").props("outlined dense")
+                self.city = (
+                    ui.input(
+                        "Cidade",
+                        value=settings.default_city,
+                        on_change=lambda: self.set_config("default_city", "city")
+                    )
+                    .props("outlined dense debounce=800") # debounce will delay the on_change call
+                )
                 self.area_code = (
                     ui.select(
                         DDD,
@@ -121,16 +128,25 @@ class page:
                 )
             h2(ui, "Linhas por página")
             with ui.grid().classes("h-full center-items sm:grid-cols-3"):
-                ui.number(
-                    label="Seleção de clientes [100]",
-                    value=100,
-                    min=20,
-                precision=0,
-                format="%.0f",
-            ).props("outlined dense")
-            ui.number(
-                label="Tabelas [200]", value=200, min=20, precision=0, format="%.0f"
-            ).props("outlined dense")
+                self.data_tables_rownumber = (
+                    ui.number(
+                        label="Tabelas de dados",
+                        value=settings.data_tables_rows_per_page,
+                        min=20,
+                        max=500,
+                        precision=0,
+                        format="%.0f",
+                        on_change=lambda: self.set_config("data_tables_rows_per_page", "data_tables_rownumber")
+                    )
+                    .props("outlined dense debounce=800")
+                )
+                self.data_tables_rownumber.classes("w-51")
+                with self.data_tables_rownumber.add_slot("append"):
+                    button = ui.button(
+                        icon="refresh",
+                        on_click=lambda: self.data_tables_rownumber.set_value(200)
+                    )
+                    button.props("flat dense")
             h1(ui, "Backup")
             h2(ui, "Locais de backup")
             DirectoryList(ui)
@@ -153,8 +169,12 @@ class page:
         val: str = getattr(self, input_name).value
         try:
             setattr(settings, config_name, val)
+        except TypeError:
+            getattr(self, input_name).value = getattr(settings, config_name)
         except Exception as err:
             notify_error(self.ui, "Erro ao definir valor padrão, verifique os logs.")
             raise err
         else:
+            if type(val) is float:
+                val = int(val)
             notify_success(self.ui, f"Valor padrão definido: {val}")
