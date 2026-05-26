@@ -8,19 +8,6 @@ from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd_nice.widgets.custom import DetailedList
 from cashd_nice.widgets.dialogs import DeleteTransactionDialog
 
-example_customer_data = [
-    {"title": "Fulano De Algo", "subtitle": "Rua Olá, 21"},
-    {"title": "Ciclano Felício", "subtitle": "Rua Bom Dia, 122"},
-    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-    {
-        "title": "Maria de Algum Nome Desnecessariamente Comprido",
-        "subtitle": "Rua de Morar se tiver uma casa, 121 - Cidade/AC",
-    },
-    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-    {"title": "Beltrano Demisclio", "subtitle": "Rua Tchau, 121"},
-]
-
 
 class subpage_transac:
     def __init__(self, ui, on_add=None):
