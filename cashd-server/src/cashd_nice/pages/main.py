@@ -224,6 +224,7 @@ class page:
             with ui.tab_panels(self.tabs, value=transac):
                 with ui.tab_panel(transac):
                     self.transac = subpage_transac(ui, on_add=self.add_transaction)
+                    self.transac.value_input.on("keydown.enter", self.add_transaction)
                 with ui.tab_panel(history):
                     self.history = subpage_history(
                         ui,
