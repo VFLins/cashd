@@ -19,6 +19,7 @@ class subpage_transac:
             self.date_input.props("outlined dense").classes("w-full")
             self.value_input = ui.input("Valor", placeholder="0,00")
             self.value_input.props("outlined dense").classes("w-full")
+            self.value_input.bind_label_from(self.value_input, "value", self.upd_value_input_label)
             self.buton = ui.button("Inserir", on_click=on_add)
 
     @property
@@ -30,6 +31,12 @@ class subpage_transac:
     @date.setter
     def date(self, value: date):
         self.date_input.value = value.strftime("%d/%m/%Y")
+
+    def upd_value_input_label(self, value: str):
+        if value == "":
+            return "Valor"
+        fmt = StringToCurrency(value)
+        return f"Valor: {fmt.display_value}"
 
 
 class subpage_history:
