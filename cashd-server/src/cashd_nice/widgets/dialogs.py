@@ -46,16 +46,18 @@ class SelectDirDialog(CustomDialog):
         initial_dir: Path,
     ):
         self.INITIAL_DIR, self.selected_item, self.displayed_dir = (
-            initial_dir, initial_dir, initial_dir
+            initial_dir,
+            initial_dir,
+            initial_dir,
         )
         super().__init__(ui)
 
     def _render_content(self, ui):
         with ui.row() as top_block:
             top_block.classes("justify-between w-full")
-            ui.button(
-                "Voltar", icon="arrow_back", on_click=self.go_to_parent
-            ).props("flat")
+            ui.button("Voltar", icon="arrow_back", on_click=self.go_to_parent).props(
+                "flat"
+            )
             ui.button(icon="close", on_click=lambda: self.dialog.submit(None)).props(
                 "flat"
             )
