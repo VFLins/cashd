@@ -85,17 +85,14 @@ class DirectoryList:
 class page:
     def __init__(self, ui):
         self.ui = ui
-        ui.add_head_html(
-            """
+        ui.add_head_html("""
         <style>
             .no-margin-scroll .q-scrollarea__content {
                 padding: 0 !important;
             }
         </style>
-        """
-        )
-        ui.add_css(
-            """
+        """)
+        ui.add_css("""
         .nicegui-markdown h1 {
             margin: 16px 0px 0px 0px;
             width: 100%;
@@ -109,8 +106,7 @@ class page:
             font-size: 16px;
             font-weight: bold;
         }
-        """
-        )
+        """)
         ui.colors(
             primary="#478eff", secondary="#d3d7d9", warning="#d48731", info="#478eff"
         )
