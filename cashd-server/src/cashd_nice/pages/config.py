@@ -166,7 +166,7 @@ class page:
                     label="Carregar backup",
                     description="Esta operação é reversível, consulte a documentação.",
                     icon="download",
-                    on_click=self.file_dialog.show,
+                    on_click=self.restore_backup,
                 )
                 described_button(
                     ui,
@@ -198,3 +198,16 @@ class page:
             raise err
         else:
             notify_success(self.ui, "Backup realizado com sucesso")
+
+    async def restore_backup(self):
+        filepath = await self.file_dialog.show()
+        if not filepath:
+            return
+        try:
+            backup.load(file=filepath, _raise=True)
+        except Exception as err:
+            notify_error(self.ui, "Erro ao restaurar backup, verifique os logs")
+            raise err
+        else:
+            notify_success(self.ui, "Backup restaurado com sucesso")
+
