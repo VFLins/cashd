@@ -45,14 +45,16 @@ class SelectDirDialog(CustomDialog):
         ui,
         initial_dir: Path,
     ):
-        self.INITIAL_DIR, self.selected_dir = initial_dir, initial_dir
+        self.INITIAL_DIR, self.selected_item, self.displayed_dir = (
+            initial_dir, initial_dir, initial_dir
+        )
         super().__init__(ui)
 
     def _render_content(self, ui):
         with ui.row() as top_block:
             top_block.classes("justify-between w-full")
             ui.button(
-                "Voltar", icon="arrow_back", on_click=self.select_upper_dir
+                "Voltar", icon="arrow_back", on_click=self.go_to_parent
             ).props("flat")
             ui.button(icon="close", on_click=lambda: self.dialog.submit(None)).props(
                 "flat"
@@ -63,26 +65,27 @@ class SelectDirDialog(CustomDialog):
                 self.show_dir(self.INITIAL_DIR)
         with ui.row(align_items="center") as bottom_block:
             bottom_block.classes("w-full h-[1rem] no-wrap whitespace-nowrap")
-            with ui.scroll_area() as selected_dir_block:
-                selected_dir_block.classes("w-full h-6 no-margin-scroll")
-                self.selected_dir_label = ui.label(str(self.selected_dir))
-                self.selected_dir_label.classes("no-wrap font-mono font-bold")
-                self.selected_dir_label.style("color: #478eff;")
-            ui.button(
-                icon="add",
-                on_click=lambda: self.dialog.submit(self.selected_dir),
+            with ui.scroll_area() as selected_item_block:
+                selected_item_block.classes("w-full h-6 no-margin-scroll")
+                self.selected_item_label = ui.label(str(self.selected_item))
+                self.selected_item_label.classes("no-wrap font-mono font-bold")
+                self.selected_item_label.style("color: #478eff;")
+            self.confirm_button = ui.button(
+                icon="check",
+                on_click=lambda: self.dialog.submit(self.selected_item),
             )
 
     def _initial_state(self):
-        self.selected_dir_label.set_text(str(self.INITIAL_DIR))
+        self.selected_item_label.set_text(str(self.INITIAL_DIR))
         self.show_dir(self.INITIAL_DIR)
-        self.selected_dir = self.INITIAL_DIR
+        self.selected_item = self.INITIAL_DIR
 
     @property
     def displayed_items(self) -> list[Path]:
         return [row.dirpath for row in self.selectables]
 
     def show_dir(self, directory: Path):
+        self.displayed_dir = directory
         self.dir_list.clear()
         try:
             # Transform into list to raise the permission error
@@ -127,14 +130,14 @@ class SelectDirDialog(CustomDialog):
                         ui.label(selectable.name)
 
     def click_dir(self, directory: Path):
-        if self.selected_dir == directory:
+        if self.selected_item == directory:
             # open the directory if clicked on a highlighted dir
             self.show_dir(directory)
         else:
             self._highlight_row(directory)
-            self._unhighlight_row(self.selected_dir)
-        self.selected_dir = directory
-        self.selected_dir_label.set_text(str(directory))
+            self._unhighlight_row(self.selected_item)
+        self.selected_item = directory
+        self.selected_item_label.set_text(str(directory))
 
     def _highlight_row(self, directory: Path):
         ui = self.ui
@@ -159,28 +162,28 @@ class SelectDirDialog(CustomDialog):
                 with ui.item_section():
                     ui.label(directory.name).style("color: black;")
 
-    def select_upper_dir(self):
-        cur, new = self.selected_dir, self.selected_dir.parent
-        if cur in self.displayed_items:
-            self._unhighlight_row(cur)
+    def go_to_parent(self):
+        if self.displayed_dir == self.displayed_dir.parent:
+            return
+        new = self.selected_item.parent
+        if self.selected_item in self.displayed_items:
+            self._unhighlight_row(self.selected_item)
+            self.selected_item = self.displayed_dir
         else:
             self.show_dir(new)
-        if cur == new:
-            return
-        self.selected_dir = new
-        self.selected_dir_label.set_text(str(new))
+        self.selected_item = new
+        self.selected_item_label.set_text(str(new))
 
 
 class SelectFileDialog(SelectDirDialog):
-    def __init__(
-        self,
-        ui,
-        initial_dir: Path,
-    ):
-        super().__init__(ui, initial_dir)
-        self.INITIAL_DIR, self.selected_dir = initial_dir, None
+    def _initial_state(self):
+        self.selected_item_label.set_text("Selecione um arquivo válido")
+        self.show_dir(self.INITIAL_DIR)
+        self.selected_item = None
+        self.confirm_button.disable()
 
     def show_dir(self, directory: Path):
+        self.displayed_dir = directory
         self.dir_list.clear()
         try:
             # Transform into list to raise the permission error
@@ -215,21 +218,43 @@ class SelectFileDialog(SelectDirDialog):
                             ui.icon("folder").style("color: gray;")
                     with ui.item_section():
                         ui.label(selectable.name)
+        if self.selected_item in rows:
+            self._highlight_row(self.selected_item)
 
-    def click_file(self, directory: Path):
-        self._highlight_row(directory)
-        self._unhighlight_row(self.selected_dir)
-        self.selected_dir = directory
-        self.selected_dir_label.set_text(str(directory))
-
-    def select_upper_dir(self):
-        cur, new = self.selected_dir, self.selected_dir.parent
-        if cur in self.displayed_items:
-            self.show_dir(new.parent)
-        else:
-            self.show_dir(new)
-        if cur == new:
+    def click_file(self, filepath: Path):
+        if filepath == self.selected_item:
             return
+        self._highlight_row(filepath)
+        self._unhighlight_row(self.selected_item)
+        self.selected_item = filepath
+        self.selected_item_label.set_text(str(filepath))
+        self.confirm_button.enable()
+
+    def go_to_parent(self):
+        self.show_dir(self.displayed_dir.parent)
+
+    def _highlight_row(self, directory: Path | None):
+        ui = self.ui
+        idx = self.displayed_items.index(directory)
+        with self.selectables[idx] as row:
+            row.clear()
+            row.style("background-color: #478eff; color: white;")
+            with ui.item_section().props("avatar"):
+                ui.icon("description").style("color: white;")
+            with ui.item_section():
+                ui.label(directory.name).style("color: white;")
+
+    def _unhighlight_row(self, directory: Path):
+        ui = self.ui
+        if directory in self.displayed_items:
+            idx = self.displayed_items.index(directory)
+            with self.selectables[idx] as row:
+                row.clear()
+                row.style("background-color: white; color: #478eff;")
+                with ui.item_section().props("avatar"):
+                    ui.icon("description").style("color: #478eff;")
+                with ui.item_section():
+                    ui.label(directory.name).style("color: black;")
 
 
 class UserDataDialog:
