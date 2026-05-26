@@ -97,7 +97,7 @@ class SelectDirDialog(CustomDialog):
             if len(dirs) == 0:
                 self._render_message("Nenhuma pasta aqui.")
             else:
-                self._render_dirs(rows=dirs)
+                self._render_items(rows=dirs)
 
     def _render_message(
         self, text: str, icon: str = "info", color: str = "var(--q-info)"
@@ -112,7 +112,7 @@ class SelectDirDialog(CustomDialog):
                     label = ui.label(text)
                     label.style(f"color: {color}; font-style: italic;")
 
-    def _render_dirs(self, rows: list[Path]):
+    def _render_items(self, rows: list[Path]):
         ui = self.ui
         self.selectables = []
         with self.dir_list:
@@ -169,6 +169,53 @@ class SelectDirDialog(CustomDialog):
             return
         self.selected_dir = new
         self.selected_dir_label.set_text(str(new))
+
+
+class SelectFileDialog(SelectDirDialog):
+    def __init__(self):
+        self.INITIAL_DIR, self.selected_dir = initial_dir, initial_dir
+
+    def show_dir(self, directory: Path):
+        self.dir_list.clear()
+        try:
+            # Transform into list to raise the permission error
+            items = list(i for i in directory.iterdir())
+        except PermissionError:
+            self._render_message(
+                "O sistema não permite exibir o conteúdo desta pasta.",
+                icon="block",
+                color="var(--q-negative)",
+            )
+        else:
+            if len(items) == 0:
+                self._render_message("Nenhuma pasta aqui.")
+            else:
+                self._render_items(rows=items)
+
+    def _render_items(self, rows: list[Path]):
+        ui = self.ui
+        self.selectables = []
+        with self.dir_list:
+            for selectable in rows:
+                with ui.item() as list_item:
+                    list_item.dirpath = selectable
+                    self.selectables.append(list_item)
+                    if selectable.is_file():
+                        list_item.on_click(lambda s=selectable: self.click_file(s))
+                        with ui.item_section().props("avatar"):
+                            ui.icon("draft").style("color: #478eff;")
+                    else:
+                        list_item.on_click(lambda s=selectable: self.show_dir(s))
+                        with ui.item_section().props("avatar"):
+                            ui.icon("folder").style("color: black;")
+                    with ui.item_section():
+                        ui.label(selectable.name)
+
+    def click_file(self, directory: Path):
+        self._highlight_row(directory)
+        self._unhighlight_row(self.selected_dir)
+        self.selected_dir = directory
+        self.selected_dir_label.set_text(str(directory))
 
 
 class UserDataDialog:
