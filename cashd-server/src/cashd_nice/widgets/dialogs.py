@@ -172,8 +172,13 @@ class SelectDirDialog(CustomDialog):
 
 
 class SelectFileDialog(SelectDirDialog):
-    def __init__(self):
-        self.INITIAL_DIR, self.selected_dir = initial_dir, initial_dir
+    def __init__(
+        self,
+        ui,
+        initial_dir: Path,
+    ):
+        super().__init__(ui, initial_dir)
+        self.INITIAL_DIR, self.selected_dir = initial_dir, None
 
     def show_dir(self, directory: Path):
         self.dir_list.clear()
@@ -203,11 +208,11 @@ class SelectFileDialog(SelectDirDialog):
                     if selectable.is_file():
                         list_item.on_click(lambda s=selectable: self.click_file(s))
                         with ui.item_section().props("avatar"):
-                            ui.icon("draft").style("color: #478eff;")
+                            ui.icon("description").style("color: #478eff;")
                     else:
                         list_item.on_click(lambda s=selectable: self.show_dir(s))
                         with ui.item_section().props("avatar"):
-                            ui.icon("folder").style("color: black;")
+                            ui.icon("folder").style("color: gray;")
                     with ui.item_section():
                         ui.label(selectable.name)
 
@@ -216,6 +221,15 @@ class SelectFileDialog(SelectDirDialog):
         self._unhighlight_row(self.selected_dir)
         self.selected_dir = directory
         self.selected_dir_label.set_text(str(directory))
+
+    def select_upper_dir(self):
+        cur, new = self.selected_dir, self.selected_dir.parent
+        if cur in self.displayed_items:
+            self.show_dir(new.parent)
+        else:
+            self.show_dir(new)
+        if cur == new:
+            return
 
 
 class UserDataDialog:

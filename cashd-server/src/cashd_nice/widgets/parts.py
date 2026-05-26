@@ -16,14 +16,16 @@ def notify_success(ui, message: str):
 
 class DefaultHeader:
     def __init__(self, ui, selected_entry: int):
-        ui.add_css("""
+        ui.add_css(
+            """
             @font-face {
                 font-family: 'Saira Semibold';
                 src: url('/assets/Saira-SemiBold.ttf') format('truetype');
                 font-weight: normal;
                 font-style: normal;
             }
-            """)
+            """
+        )
         with ui.header(elevated=True) as header:
             header.style("background-color: #cadfe7")
             header.classes("gap-0")

@@ -179,12 +179,14 @@ def add_transaction(state: State):
     try:
         input_amount = fmt.StringToCurrency(user_input=state.form_transac.Valor)
         if input_amount.is_valid():
-            state.form_transac.fill(data.tbl_transacoes(
-                IdCliente=state.SELECTED_CUSTOMER.Id,
-                DataTransac=state.form_transac.DataTransac,
-                CarimboTempo=datetime.now(),
-                Valor=input_amount.value,
-            ))
+            state.form_transac.fill(
+                data.tbl_transacoes(
+                    IdCliente=state.SELECTED_CUSTOMER.Id,
+                    DataTransac=state.form_transac.DataTransac,
+                    CarimboTempo=datetime.now(),
+                    Valor=input_amount.value,
+                )
+            )
             state.form_transac.write()
             print(f"state user {get_state_id(state)} added {state.form_transac}")
             reset_transac_form_widgets(state=state)
@@ -205,7 +207,11 @@ def add_customer(state: State):
         return
     try:
         customer.write()
-        notify(state, "success", message=f"Novo cliente adicionado: {customer.NomeCompleto}")
+        notify(
+            state,
+            "success",
+            message=f"Novo cliente adicionado: {customer.NomeCompleto}",
+        )
         state.form_customer = data.get_default_customer()
         state.refresh("form_customer")
         state.NOMES_USUARIOS = get_customer_lov(state=state)
@@ -454,7 +460,13 @@ def rm_transaction(state: State, var_name: str, payload: dict):
             rm_transac_data: dict = tuple(selected_customer.Transacs)[table_row_id]
             selected_transaction.read(row_id=rm_transac_data["id"])
             selected_transaction.delete()
-            notify(s, "success", f"Transação de R$ {selected_transaction.Valor/100} removida".replace(".", ","))
+            notify(
+                s,
+                "success",
+                f"Transação de R$ {selected_transaction.Valor/100} removida".replace(
+                    ".", ","
+                ),
+            )
             print(f"state user {get_state_id(s)} removed {selected_transaction}")
     except Exception as err:
         notify(s, "error", f"Erro inesperado removendo esta transação: {str(err)}")
@@ -487,18 +499,26 @@ def dialog_edit_customer_action(state: State, id: str, payload: dict):
         # click 'save changes' button
         case 0:
             if not customer.required_fields_are_filled():
-                notify(state, "error", "Algum campo obrigatório (*) ainda não foi preenchido")
+                notify(
+                    state,
+                    "error",
+                    "Algum campo obrigatório (*) ainda não foi preenchido",
+                )
                 btn_edit_customer(state=state)
             else:
-                show_dialog(state=state, id=id, payload=payload, show="confirm_edit_customer")
+                show_dialog(
+                    state=state, id=id, payload=payload, show="confirm_edit_customer"
+                )
 
 
 def dialog_confirm_edit_customer_action(state: State, id: str, payload: dict):
     match payload["args"][0]:
         # click 'x' button
-        case -1: state.show_dialog_confirm_edit_customer = False
+        case -1:
+            state.show_dialog_confirm_edit_customer = False
         # click 'return' button
-        case 0: show_dialog(state=state, id=id, payload=payload, show="edit_customer")
+        case 0:
+            show_dialog(state=state, id=id, payload=payload, show="edit_customer")
         # click 'confirm' button
         case 1:
             state.selected_customer_handler.update()
@@ -769,7 +789,7 @@ elem_analise = Gui.add_partial(app, analise.ELEM_TABLES)
 
 # dial_selec_cliente = Gui.add_partial(app, dialogo.SELECIONAR_CLIENTE_ETAPA)
 dialog_edit_customer = Gui.add_partial(app, dialogo.FORM_EDITAR_CLIENTE)
-dialog_confirm_edit_customer= Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
+dialog_confirm_edit_customer = Gui.add_partial(app, dialogo.CONFIRMAR_CONTA)
 
 part_stats_displayed_table = Gui.add_partial(app, analise.ELEM_TABLE_TRANSAC_HIST)
 
@@ -824,6 +844,7 @@ def start_cashd(with_webview: bool = False):
             debug=debug,
             change_delay=10,
         )
+
     if with_webview:
         taipy_thread = threading.Thread(target=run_taipy_gui)
         taipy_thread.start()

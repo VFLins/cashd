@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Callable
 from cashd_core import backup
 from cashd_core.prefs import settings
-from cashd_core.const import ESTADOS,DDD
+from cashd_core.const import ESTADOS, DDD
 from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
-from cashd_nice.widgets.dialogs import SelectDirDialog
+from cashd_nice.widgets.dialogs import SelectDirDialog, SelectFileDialog
 
 
 def h1(ui, title: str):
@@ -85,14 +85,17 @@ class DirectoryList:
 class page:
     def __init__(self, ui):
         self.ui = ui
-        ui.add_head_html("""
+        ui.add_head_html(
+            """
         <style>
             .no-margin-scroll .q-scrollarea__content {
                 padding: 0 !important;
             }
         </style>
-        """)
-        ui.add_css("""
+        """
+        )
+        ui.add_css(
+            """
         .nicegui-markdown h1 {
             margin: 16px 0px 0px 0px;
             width: 100%;
@@ -106,59 +109,55 @@ class page:
             font-size: 16px;
             font-weight: bold;
         }
-        """)
-        ui.colors(primary="#478eff", secondary="#d3d7d9", warning="#d48731", info="#478eff")
+        """
+        )
+        ui.colors(
+            primary="#478eff", secondary="#d3d7d9", warning="#d48731", info="#478eff"
+        )
         ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         DefaultHeader(ui, selected_entry=3)
+        self.file_dialog = SelectFileDialog(ui, initial_dir=Path("~").expanduser())
         with ui.column(align_items="left").classes("self-center"):
             h1(ui, "Preferências")
             h2(ui, "Valores padrão no formulário de contas")
             with ui.grid().classes("h-full center-items md:grid-cols-3"):
-                self.state = (
-                    ui.select(
-                        ESTADOS,
-                        value=settings.default_state,
-                        label="Estado",
-                        on_change=lambda: self.set_config("default_state", "state"),
-                    )
-                    .props("outlined dense")
-                )
-                self.city = (
-                    ui.input(
-                        "Cidade",
-                        value=settings.default_city,
-                        on_change=lambda: self.set_config("default_city", "city")
-                    )
-                    .props("outlined dense debounce=800") # debounce will delay the on_change call
-                )
-                self.area_code = (
-                    ui.select(
-                        DDD,
-                        value=settings.area_code_number,
-                        label="Número do DDD",
-                        on_change=lambda: self.set_config("area_code_number", "area_code"),
-                    )
-                    .props("outlined dense")
-                )
+                self.state = ui.select(
+                    ESTADOS,
+                    value=settings.default_state,
+                    label="Estado",
+                    on_change=lambda: self.set_config("default_state", "state"),
+                ).props("outlined dense")
+                self.city = ui.input(
+                    "Cidade",
+                    value=settings.default_city,
+                    on_change=lambda: self.set_config("default_city", "city"),
+                ).props(
+                    "outlined dense debounce=800"
+                )  # debounce will delay the on_change call
+                self.area_code = ui.select(
+                    DDD,
+                    value=settings.area_code_number,
+                    label="Número do DDD",
+                    on_change=lambda: self.set_config("area_code_number", "area_code"),
+                ).props("outlined dense")
             h2(ui, "Linhas por página")
             with ui.grid().classes("h-full center-items md:grid-cols-3"):
-                self.data_tables_rownumber = (
-                    ui.number(
-                        label="Tabelas de dados",
-                        value=settings.data_tables_rows_per_page,
-                        min=20,
-                        max=500,
-                        precision=0,
-                        format="%.0f",
-                        on_change=lambda: self.set_config("data_tables_rows_per_page", "data_tables_rownumber")
-                    )
-                    .props("outlined dense debounce=800")
-                )
+                self.data_tables_rownumber = ui.number(
+                    label="Tabelas de dados",
+                    value=settings.data_tables_rows_per_page,
+                    min=20,
+                    max=500,
+                    precision=0,
+                    format="%.0f",
+                    on_change=lambda: self.set_config(
+                        "data_tables_rows_per_page", "data_tables_rownumber"
+                    ),
+                ).props("outlined dense debounce=800")
                 self.data_tables_rownumber.classes("w-51")
                 with self.data_tables_rownumber.add_slot("append"):
                     button = ui.button(
                         icon="refresh",
-                        on_click=lambda: self.data_tables_rownumber.set_value(200)
+                        on_click=lambda: self.data_tables_rownumber.set_value(200),
                     )
                     button.props("flat dense")
             h1(ui, "Backup")
@@ -171,13 +170,14 @@ class page:
                     label="Carregar backup",
                     description="Esta operação é reversível, consulte a documentação.",
                     icon="download",
+                    on_click=self.file_dialog.show,
                 )
                 described_button(
                     ui,
                     label="Fazer backup",
                     description="Backups serão salvos nos 'Locais de backup'.",
                     icon="save",
-                    on_click=self.run_backup
+                    on_click=self.run_backup,
                 )
 
     def set_config(self, config_name: str, input_name: str):

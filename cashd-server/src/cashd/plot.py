@@ -17,8 +17,10 @@ def _preprocess_value(tbl: pd.DataFrame, value_cols: list[str]) -> pd.DataFrame:
     """Returns `tbl` with `value_cols` formatted as `Decimal` with two decimal
     places.
     """
+
     def handle_currency(val: str | Number):
         return Decimal(val).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
     for value_col in value_cols:
         if tbl[value_col].dtype in ["object", "string"]:
             tbl[value_col] = tbl[value_col].apply(
@@ -86,7 +88,7 @@ def mensagem(msg: str):
 def balancos(periodo: Literal["m", "w", "d"], n: int) -> pg.Figure:
     datasource = data.TransactionBalanceSource()
     datasource.update_date_format(date_freq=periodo)
-    tbl = pd.DataFrame(datasource.get_data_slice([n, 0])) # 0 after to revert order
+    tbl = pd.DataFrame(datasource.get_data_slice([n, 0]))  # 0 after to revert order
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
     tbl = _preprocess_value(tbl, value_cols=["Sums", "Deductions"])
@@ -121,7 +123,7 @@ def balancos(periodo: Literal["m", "w", "d"], n: int) -> pg.Figure:
 def saldo_acum(periodo, n):
     datasource = data.AggregatedAmountSource()
     datasource.update_date_format(date_freq=periodo)
-    tbl = pd.DataFrame(datasource.get_data_slice([n, 0])) # 0 after to revert order
+    tbl = pd.DataFrame(datasource.get_data_slice([n, 0]))  # 0 after to revert order
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
     tbl = _preprocess_value(tbl, value_cols=["AcumBalance"])
