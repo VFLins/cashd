@@ -150,16 +150,7 @@ class page:
     selected_customer = tbl_clientes()
 
     def __init__(self, ui):
-        ui.add_head_html("""
-        <style>
-            .no-margin-scroll .q-scrollarea__content {
-                padding: 0 !important;
-            }
-        </style>
-        """)
-        ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         self.ui = ui
-        ui.colors(primary="#478eff", secondary="#d3d7d9")
         DefaultHeader(ui=ui, selected_entry=0)
         with ui.column().classes("w-full gap-0"):
             self.top_section()

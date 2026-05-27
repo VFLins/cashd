@@ -122,15 +122,6 @@ class page:
 
     def __init__(self, ui):
         self.ui = ui
-        ui.colors(primary="#478eff", secondary="#d3d7d9")
-        ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
-        ui.add_head_html("""
-        <style>
-            .no-margin-scroll .q-scrollarea__content {
-                padding: 0 !important;
-            }
-        </style>
-        """)
         DefaultHeader(ui, selected_entry=2)
         self.controls_block()
         with ui.column(align_items="center") as self.displayed_stat:
