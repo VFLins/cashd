@@ -212,6 +212,7 @@ class page:
                     "no-caps active-color='primary' indicator-color='transparent' "
                     "active-bg-color=blue-1 dense"
                 )
+                self.tabs.style("font-family: 'Saira Semibold';")
                 transac = ui.tab("Transação").classes("bg-gray-100 text-gray-700")
                 history = ui.tab("Histórico").classes("bg-gray-100 text-gray-700")
                 info = ui.tab("Informações").classes("bg-gray-100 text-gray-700")
