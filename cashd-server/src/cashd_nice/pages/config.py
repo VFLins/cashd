@@ -185,9 +185,10 @@ class page:
             notify_error(self.ui, "Erro ao restaurar backup, verifique os logs")
             raise err
         else:
-            notify_success(self.ui, "Backup restaurado com sucesso, reiniciando serviço...")
+            notify_success(
+                self.ui, "Backup restaurado com sucesso, reiniciando serviço..."
+            )
             await asyncio.sleep(5)
             # Restarts the server
             # https://github.com/zauberzeug/nicegui/discussions/1719
             os.utime(Path(__file__).resolve())
-

@@ -19,7 +19,9 @@ class subpage_transac:
             self.date_input.props("outlined dense").classes("w-full")
             self.value_input = ui.input("Valor", placeholder="0,00")
             self.value_input.props("outlined dense").classes("w-full")
-            self.value_input.bind_label_from(self.value_input, "value", self.upd_value_input_label)
+            self.value_input.bind_label_from(
+                self.value_input, "value", self.upd_value_input_label
+            )
             self.buton = ui.button("Inserir", on_click=on_add)
 
     @property
