@@ -12,6 +12,8 @@ if sys.platform == "linux":
 # This is probably a bug in the current version of NiceGUI==3.11.1
 
 import argparse
+import asyncio
+from multiprocessing import freeze_support
 from pathlib import Path
 from fastapi import Request
 from fastapi.responses import RedirectResponse
@@ -21,30 +23,29 @@ from nicegui import ui, app
 from cashd.const import PROJECT_ROOT
 from cashd.pages import main, customer, stats, config, login, user
 
-parser = argparse.ArgumentParser(
-    prog="cashd-server",
-    description="Execute o Cashd server, veja opções abaixo.",
-    add_help=False,
-)
-parser.add_argument("-h", "--help", action="help", help="Mostra esta mensagem de ajuda")
-parser.add_argument(
-    "-n",
-    "--as-native",
-    action="store_true",
-    help=(
-        "Execute o Cashd server localmente como um aplicativo nativo, outros "
-        "dispositivos não poderão acessá-lo, e será executado em uma janela dedicada."
-    ),
-)
-args = parser.parse_args()
 
-if hasattr(args, "help"):
-    parser.print_help()
-    quit()
-
-
+MIN_WINDOW_SIZE = (850, 620)
 app.add_static_files("/assets", Path(PROJECT_ROOT, "assets"))
-app.native.window_args["min_size"] = (850, 620)
+app.native.window_args["min_size"] = MIN_WINDOW_SIZE
+
+
+def get_argparser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="cashd-server",
+        description="Execute o Cashd server, veja opções abaixo.",
+        add_help=False,
+    )
+    parser.add_argument("-h", "--help", action="help", help="Mostra esta mensagem de ajuda")
+    parser.add_argument(
+        "-n",
+        "--as-native",
+        action="store_true",
+        help=(
+            "Execute o Cashd server localmente como um aplicativo nativo, outros "
+            "dispositivos não poderão acessá-lo, e será executado em uma janela dedicada."
+        ),
+    )
+    return parser
 
 
 @app.add_middleware
@@ -112,13 +113,19 @@ def user_page():
 
 
 def run():
+    freeze_support()
+    parser = get_argparser()
+    args, _ = parser.parse_known_args()
+    if hasattr(args, "help"):
+        parser.print_help()
+        quit()
     try:
         ui.run(
             title="Cashd server",
             language="pt-BR",
             show=False,
-            reload=False,
             native=args.as_native,
+            reload=False,
             storage_secret=os.urandom(16).hex(),
             favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
         )
