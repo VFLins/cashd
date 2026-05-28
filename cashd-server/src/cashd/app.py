@@ -111,12 +111,19 @@ def user_page():
     return user.page(ui=ui)
 
 
+def run():
+    try:
+        ui.run(
+            title="Cashd server",
+            language="pt-BR",
+            show=False,
+            reload=False,
+            native=args.as_native,
+            storage_secret=os.urandom(16).hex(),
+            favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
+        )
+    except KeyboardInterrupt:
+        print("\nInterrupção solicitada, encerrando servidor...")
+
 if __name__ in {"__main__", "__mp_main__"}:
-    ui.run(
-        title="Cashd server",
-        language="pt-BR",
-        show=False,
-        native=args.as_native,
-        storage_secret=os.urandom(16).hex(),
-        favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
-    )
+    run()

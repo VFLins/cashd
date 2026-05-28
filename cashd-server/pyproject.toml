@@ -49,7 +49,7 @@ requires = ["setuptools", "setuptools-scm", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-cashd-server = "cashd.app:start_cashd"
+cashd-server = "cashd.app:run"
 
 [tool.pytest.ini_options]
 testpaths = "tests"
