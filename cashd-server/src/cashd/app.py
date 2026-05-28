@@ -125,5 +125,6 @@ def run():
     except KeyboardInterrupt:
         print("\nInterrupção solicitada, encerrando servidor...")
 
+
 if __name__ in {"__main__", "__mp_main__"}:
     run()
