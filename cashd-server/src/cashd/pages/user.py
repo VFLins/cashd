@@ -1,6 +1,6 @@
-from cashd_nice import auth
-from cashd_nice.widgets.parts import notify_success, notify_error
-from cashd_nice.widgets.dialogs import AddUserDialog, UpdateRoleDialog, UpdatePassDialog
+from cashd import auth
+from cashd.widgets.parts import notify_success, notify_error
+from cashd.widgets.dialogs import AddUserDialog, UpdateRoleDialog, UpdatePassDialog
 from sqlalchemy.exc import IntegrityError
 
 

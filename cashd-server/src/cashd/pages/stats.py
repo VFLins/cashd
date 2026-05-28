@@ -6,7 +6,7 @@ from cashd_core.data import (
     HighestAmountsSource,
     InactiveCustomersSource,
 )
-from cashd_nice.widgets.parts import DefaultHeader
+from cashd.widgets.parts import DefaultHeader
 import plotly.graph_objects as go
 from nicegui import ui
 

@@ -6,8 +6,8 @@ from contextlib import contextmanager
 from sqlalchemy.exc import IntegrityError
 from cashd_core.data import tbl_clientes, tbl_transacoes
 from cashd_core.const import NA_VALUE
-from cashd_nice.widgets.parts import notify_success, notify_error
-from cashd_nice import auth
+from cashd.widgets.parts import notify_success, notify_error
+from cashd import auth
 
 
 class CustomDialog:

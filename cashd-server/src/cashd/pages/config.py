@@ -5,8 +5,8 @@ from typing import Callable
 from cashd_core import backup
 from cashd_core.prefs import settings
 from cashd_core.const import ESTADOS, DDD
-from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
-from cashd_nice.widgets.dialogs import SelectDirDialog, SelectFileDialog
+from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
+from cashd.widgets.dialogs import SelectDirDialog, SelectFileDialog
 
 
 def h1(ui, title: str):

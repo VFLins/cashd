@@ -1,1 +1,1 @@
-from . import app
+from cashd import app

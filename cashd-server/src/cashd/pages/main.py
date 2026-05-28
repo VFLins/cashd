@@ -4,9 +4,9 @@ from typing import Any
 from cashd_core.fmt import StringToCurrency
 from cashd_core.const import ESTADOS
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
-from cashd_nice.widgets.parts import DefaultHeader, notify_error, notify_success
-from cashd_nice.widgets.custom import DetailedList
-from cashd_nice.widgets.dialogs import DeleteTransactionDialog
+from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
+from cashd.widgets.custom import DetailedList
+from cashd.widgets.dialogs import DeleteTransactionDialog
 
 
 class subpage_transac:

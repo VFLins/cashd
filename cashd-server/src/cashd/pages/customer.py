@@ -1,6 +1,6 @@
 from cashd_core.const import ESTADOS
 from cashd_core.data import tbl_clientes, get_default_customer
-from cashd_nice.widgets.parts import DefaultHeader, notify_success, notify_error
+from cashd.widgets.parts import DefaultHeader, notify_success, notify_error
 
 
 class page:
