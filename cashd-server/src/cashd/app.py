@@ -24,7 +24,7 @@ from cashd.const import PROJECT_ROOT
 from cashd.pages import main, customer, stats, config, login, user
 
 
-MIN_WINDOW_SIZE = (850, 620)
+MIN_WINDOW_SIZE = (450, 620) if sys.platform == "win32" else (450, 660)
 app.add_static_files("/assets", Path(PROJECT_ROOT, "assets"))
 app.native.window_args["min_size"] = MIN_WINDOW_SIZE
 
