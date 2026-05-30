@@ -12,7 +12,7 @@ from os import path
 
 from taipy.gui import Gui, notify, State, navigate, Icon, builder, get_state_id
 
-from cashd_core import data, prefs, backup
+from cashd_core import data, prefs, backup, fmt, const
 from cashd_core.const import MAX_ALLOWED_VALUE
 from cashd import plot, db
 from cashd.pages import transac, contas, analise, configs, dialogo
@@ -72,11 +72,6 @@ def btn_mostrar_dialogo_selec_cliente(state: State, id: str, payload: dict):
 
 def btn_mostrar_dialogo_edita_cliente(state: State, id: str, payload: dict):
     btn_mostrar_dialogo(state, id, payload, show="edita_cliente")
-
-
-def btn_atualizar_listagem(state: State):
-    with db.DB_ENGINE.connect() as conn, conn.begin():
-        state.df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
 
 
 def btn_gerar_main_plot(state: State | None = None):
@@ -182,25 +177,23 @@ def add_transaction(state: State):
         )
         return
     try:
-        if is_empty_currency_input(state.form_transac.Valor):
-            notify(state, "error", "Valor não pode ser zero")
-            return
-        if not is_valid_currency_input(state.form_transac.Valor):
-            notify(state, "error", "Valor inválido, insira apenas números")
-            return
-        if int(state.form_transac.Valor) > MAX_ALLOWED_VALUE:
-            notify(state, "error", "Valor acima do permitido")
-            return
-        state.form_transac.IdCliente = state.SELECTED_CUSTOMER.Id
-        state.form_transac.CarimboTempo = datetime.now()
-        state.form_transac.write()
-        print(f"state user {get_state_id(state)} added {state.form_transac}")
-        reset_transac_form_widgets(state=state)
+        input_amount = fmt.StringToCurrency(user_input=state.form_transac.Valor)
+        if input_amount.is_valid():
+            state.form_transac.fill(data.tbl_transacoes(
+                IdCliente=state.SELECTED_CUSTOMER.Id,
+                DataTransac=state.form_transac.DataTransac,
+                CarimboTempo=datetime.now(),
+                Valor=input_amount.value,
+            ))
+            state.form_transac.write()
+            print(f"state user {get_state_id(state)} added {state.form_transac}")
+            reset_transac_form_widgets(state=state)
+            notify(state, "success", "Nova transação adicionada")
+        else:
+            notify(state, "error", input_amount.invalid_reason)
     except Exception as err:
         notify(state, "error", str(err))
-        print(f"Unexpected {type(err)}: {err}")
-    else:
-        notify(state, "success", "Nova transação adicionada")
+        print(f"Erro inesperado '{type(err)}': {err}")
     finally:
         state.df_transac = get_customer_transacs(state=state)
 
@@ -220,28 +213,42 @@ def add_customer(state: State):
         notify(state, "error", str(msg_erro))
 
 
-def btn_chg_prefs_main_state(state: State):
-    val = state.dropdown_uf_val
+def update_default_state(state: State):
+    val = state.input_default_state
     try:
         prefs.settings.default_state = val
-        state.form_contas.Estado = val
-        state.refresh("form_contas")
+        refresh_new_customer_form(state)
         notify(state, "success", f"Estado preferido atualizado para {val}")
-    except Exception as xpt:
-        notify(state, "error", f"Erro inesperado: {str(xpt)}")
+    except Exception as err:
+        notify(state, "error", f"Erro inesperado: {str(err)}")
 
 
-def btn_chg_prefs_main_city(state: State):
-    val = state.input_cidade_val
+def update_default_city(state: State):
+    val = state.input_default_city
     try:
         val = val.title()
         prefs.settings.default_city = val
-        state.input_cidade_val = val
-        state.form_contas.Cidade = val
-        state.refresh("form_contas")
+        state.input_default_city = val
+        refresh_new_customer_form(state)
         notify(state, "success", f"Cidade preferida atualizada para {val}")
-    except Exception as xpt:
-        notify(state, "error", f"Erro inesperado: {str(xpt)}")
+    except Exception as err:
+        notify(state, "error", f"Erro inesperado: {str(err)}")
+
+
+def update_default_area_code(state: State):
+    val = state.input_default_area_code
+    try:
+        prefs.settings.area_code_number = val
+        refresh_new_customer_form(state)
+        notify(state, "success", f"Número de DDD padrão atualizado para {val}")
+    except Exception as err:
+        notify(state, "error", f"Erro inesperado: {str(err)}")
+
+
+def refresh_new_customer_form(state: State):
+    """Reset 'Novo cliente' form to the current default values."""
+    state.form_customer = data.get_default_customer()
+    state.refresh("form_customer")
 
 
 def btn_chg_max_highest_balances(state: State, val: int):
@@ -287,14 +294,6 @@ def btn_mudar_minimizado():
 ####################
 # UTILS
 ####################
-
-
-def fmt_currency_input(inp: str) -> str:
-    """Formats a numeric string to currency, returns '0,00' if zeroed or invalid."""
-    try:
-        return f"{int(inp)/100:_.2f}".replace("_", " ").replace(".", ",")
-    except ValueError:
-        return "0,00"
 
 
 def is_valid_currency_input(inp: str) -> bool:
@@ -372,7 +371,7 @@ def get_customers_datasource(state: State | None = None) -> data.CustomerListSou
 def get_customer_lov(state: State | None = None) -> list[LOVItem]:
     customers = get_customers_datasource(state=state)
     return [
-        LOVItem(Id=str(c[0]), Value=f"{c[1]} - {c[2]}") for c in customers.current_data
+        LOVItem(Id=str(c[0]), Value=f"{c[1]} — {c[2]}") for c in customers.current_data
     ]
 
 
@@ -552,7 +551,8 @@ def chg_dialog_confirma_cliente(state: State, id: str, payload: dict):
 
 
 def chg_transac_valor(state: State) -> None:
-    state.display_tr_valor = fmt_currency_input(inp=state.form_transac.Valor)
+    input_amount = fmt.StringToCurrency(user_input=state.form_transac.Valor)
+    state.display_tr_valor = input_amount.display_value
     state.refresh("form_transac")
     return
 
@@ -629,45 +629,15 @@ dropdown_periodo_val = dropdown_periodo_lov[0]
 
 dropdown_plot_type_val = "Balanço"
 
-dropdown_uf_lov = [
-    "AC",
-    "AL",
-    "AP",
-    "AM",
-    "BA",
-    "CE",
-    "DF",
-    "ES",
-    "GO",
-    "MA",
-    "MT",
-    "MS",
-    "MG",
-    "PA",
-    "PB",
-    "PE",
-    "PI",
-    "PR",
-    "RJ",
-    "RN",
-    "RO",
-    "RR",
-    "RS",
-    "SC",
-    "SE",
-    "SP",
-    "TO",
-]
-dropdown_uf_val = prefs.settings.default_state
+area_codes_lov = [str(i) for i in const.DDD]
+
+dropdown_uf_lov = const.ESTADOS
+input_default_state = prefs.settings.default_state
 
 main_plot = btn_gerar_main_plot()
 
 # campo de pesquisa de clientes
 search_user_input_value = ""
-
-# listagem de clientes
-with db.DB_ENGINE.connect() as conn, conn.begin():
-    df_clientes = pd.read_sql_query("SELECT * FROM clientes", con=conn)
 
 # valor inicial dos campos "Valor" e "Data" no menu "Adicionar Transacao"
 display_tr_valor = "0,00"
@@ -748,8 +718,11 @@ SELECTED_CUSTOMER_PLACE = selected_customer.Local
 # valor inicial da lista de locais de backup
 df_backup_places = get_backup_places()
 
-# valor inicial do campo "cidade preferida"
-input_cidade_val = prefs.settings.default_city
+# valor inicial do campo "Cidade padrão"
+input_default_city = prefs.settings.default_city
+
+# valor inicial no campo "Número de DDD padrão"
+input_default_area_code = prefs.settings.area_code_number
 
 # valor inicial da configuracao Limite de linhas na tabela "Últimas transações"
 rows_per_page = prefs.settings.data_tables_rows_per_page
@@ -849,6 +822,7 @@ def start_cashd(with_webview: bool = False):
             favicon="assets/PNG_LogoFavicon.png",
             watermark="",
             debug=debug,
+            change_delay=10,
         )
     if with_webview:
         taipy_thread = threading.Thread(target=run_taipy_gui)

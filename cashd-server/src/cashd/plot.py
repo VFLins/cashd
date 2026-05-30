@@ -87,7 +87,6 @@ def balancos(periodo: Literal["m", "w", "d"], n: int) -> pg.Figure:
     datasource = data.TransactionBalanceSource()
     datasource.update_date_format(date_freq=periodo)
     tbl = pd.DataFrame(datasource.get_data_slice([n, 0])) # 0 after to revert order
-    print(tbl)
     if tbl.shape[0] == 0:
         return mensagem("Sem dados para exibir")
     tbl = _preprocess_value(tbl, value_cols=["Sums", "Deductions"])

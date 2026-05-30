@@ -29,12 +29,12 @@ jobs:
                 briefcase package windows --adhoc-sign
 
             - name: Upload Windows installer to release
-              shell: cmd
+              shell: pwsh
               env: 
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
               run: |
                 cd D:\a\cashd\cashd\cashd-local\dist\
-                tar.exe -c -f cashd-windows-installer-x86_64.zip *.msi
+                Compress-Archive -Path *.msi -DestinationPath cashd-windows-installer-x86_64.zip -Force
                 gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
 
     build-ubuntu:
@@ -66,7 +66,7 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
               run: |
                 cd $GITHUB_WORKSPACE/cashd-local/dist/
-                zip cashd-deb-installer-x86_64.zip *.deb
+                zip -X cashd-deb-installer-x86_64.zip *.deb
                 gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
 
     build-fedora:
@@ -98,5 +98,5 @@ jobs:
               run: |
                 cd $GITHUB_WORKSPACE/cashd-local/dist/
                 git config --global --add safe.directory $GITHUB_WORKSPACE
-                zip cashd-rpm-installer-x86_64.zip *.rpm
+                zip -X cashd-rpm-installer-x86_64.zip *.rpm
                 gh release upload ${{ github.event.release.tag_name }} *.zip --clobber

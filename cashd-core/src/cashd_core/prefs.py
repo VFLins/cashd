@@ -52,7 +52,7 @@ class SettingsHandler:
 
         # config parser
         self.conf = configparser.ConfigParser()
-        self.conf.read(self.config_file, "utf-8")
+        self.conf.read(self.config_file)
         try:
             self.conf.add_section("default")
         except configparser.DuplicateSectionError:
@@ -105,7 +105,7 @@ class SettingsHandler:
             self.conf.set(sect, key, val)
             with open(self.config_file, "w") as newconfig:
                 self.conf.write(newconfig)
-            self.conf.read(self.config_file, "utf-8")
+            self.conf.read(self.config_file)
             self.logger.info(
                 f"Valor atualizado em {
                     self.config_file}: [{sect}] {key} = {val}"
@@ -152,9 +152,9 @@ class SettingsHandler:
         new_list = current_list + [val]
 
         self.conf.set(sect, key, self.parse_list_to_config(new_list))
-        with open(self.config_file, "w") as newconfig:
+        with open(self.config_file, "w", encoding="utf-8") as newconfig:
             self.conf.write(newconfig)
-        self.conf.read(self.config_file, "utf-8")
+        self.conf.read(self.config_file)
 
     def _rm_from_list(self, sect: str, key: str, idx: int):
         """Retira o `idx`-esimo item da lista, não faz nada se `idx` for inválido."""
@@ -246,6 +246,23 @@ class PreferencesHandler(SettingsHandler):
     def default_city(self, value: str):
         value = value.title()
         self._write("default", "city", value)
+
+    @property
+    def area_code_number(self) -> int:
+        """The default first two digits displayed in the 'phone number' field when
+        creating a new customer.
+        """
+        value = self._read("default", "area_code_number", convert_to="int")
+        if value is None:
+            default_value = "99"
+            self._write("default", "area_code_number", default_value)
+            return default_value
+        return value
+
+    @area_code_number.setter
+    def area_code_number(self, value: int):
+        value = int(value)
+        self._write("default", "area_code_number", str(value))
 
 
 class BackupPrefsHandler(SettingsHandler):

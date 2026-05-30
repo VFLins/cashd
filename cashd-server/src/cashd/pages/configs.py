@@ -70,9 +70,11 @@ __Valores padrão no formulário:__
 
 <|layout|columns=1 1|columns[mobile]=1 1|class_name=container
 
-<|{dropdown_uf_val}|selector|label=Estado padrão|lov={dropdown_uf_lov}|dropdown|on_change=btn_chg_prefs_main_state|>
+<|{input_default_state}|selector|dropdown|label=Estado|lov={dropdown_uf_lov}|on_change=update_default_state|>
 
-<|{input_cidade_val}|input|label=Cidade padrão|change_delay=1200|on_change=btn_chg_prefs_main_city|>
+<|{input_default_city}|input|label=Cidade|change_delay=1200|on_change=update_default_city|>
+
+<|{input_default_area_code}|selector|dropdown|label=Número de DDD|lov={area_codes_lov}|on_change=update_default_area_code|>
 
 |>
 
