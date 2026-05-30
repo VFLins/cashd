@@ -27,4 +27,7 @@ class page:
         )
         ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
 
-        ui.label("Esta é a página de login...")
+        with ui.column() as main_block:
+            main_block.classes("self-center")
+            ui.image("/assets/PNG_LogoIcone.png")
+            ui.label("Cashd").classes("text-2xl").style("font-family: 'Saira Semibold'; color: #47eff")
