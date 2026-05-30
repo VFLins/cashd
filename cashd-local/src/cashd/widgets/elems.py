@@ -8,7 +8,7 @@ from toga.widgets.base import Widget
 from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
-from toga.widgets.selection import Selection, SourceT
+from toga.widgets.selection import Selection, ListSourceT
 from toga.widgets.textinput import TextInput
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.detailedlist import DetailedList
@@ -159,7 +159,7 @@ class LabeledSelection(_LabeledInput):
         return self.input.items
 
     @items.setter
-    def items(self, items: SourceT | Iterable | None):
+    def items(self, items: ListSourceT | Iterable | None):
         self.input.items = items
 
 
