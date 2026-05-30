@@ -9,7 +9,7 @@ name = "cashd"
 dependencies = [
     "cashd-core==0.3.2",
     "briefcase",
-    "toga==0.5.2",
+    "toga==0.5.4",
     "sqlalchemy==2.*",
     "phonenumbers",
 ]
@@ -19,7 +19,8 @@ project_name = "Cashd"
 bundle = "br.com.vitorlins.cashd"
 version = "0.3.3"
 url = "https://vitorlins.com.br/software/cashd"
-license.file = "LICENSE"
+license = "MIT"
+license-files = ["LICENSE"]
 author = "Vitor F. Lins"
 author_email = "vflins@live.com"
 
