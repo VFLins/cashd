@@ -71,7 +71,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         """Check if the request's path is safe for anyone to access."""
         path = request.url.path
         is_from_module = path.startswith("/_nicegui")
-        is_safe = path in self.UNRESTRICTED_ROUTES
+        is_safe = any(path.startswith(r) for r in self.UNRESTRICTED_ROUTES)
         return is_safe or is_from_module
 
     async def is_host(self, request: Request) -> bool:
