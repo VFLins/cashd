@@ -45,11 +45,6 @@ def get_argparser() -> argparse.ArgumentParser:
             "dispositivos não poderão acessá-lo, e será executado em uma janela dedicada."
         ),
     )
-    parser.add_argument(
-        "--dev",
-        action="store_true",
-        help="Execute o Cashd em modo de desenvolvimento.",
-    )
     return parser
 
 
@@ -124,14 +119,13 @@ def run():
     if hasattr(args, "help"):
         parser.print_help()
         quit()
-    print(args)
     try:
         ui.run(
             title="Cashd server",
             language="pt-BR",
             show=False,
             native=args.as_native,
-            reload=args.dev,
+            reload=False,
             storage_secret=os.urandom(16).hex(),
             favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
         )
