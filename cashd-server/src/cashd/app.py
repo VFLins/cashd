@@ -86,8 +86,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         user, role = auth.User(), auth.Role()
         path = request.url.path
         user.read(row_id=app.storage.user["userid"])
-        role.read(row_id=user.RoleId)
-        forbidden_routes = role.ForbiddenPages.split(";")
+        forbidden_routes = user.forbidden_pages()
         if path not in forbidden_routes:
             return await call_next(path)
         elif "/" not in forbidden_routes:
@@ -98,22 +97,22 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
 @ui.page("/")
 def main_page():
-    return main.page(ui=ui)
+    return main.page(ui=ui, app=app)
 
 
 @ui.page("/customer")
 def customer_page():
-    return customer.page(ui=ui)
+    return customer.page(ui=ui, app=app)
 
 
 @ui.page("/stats")
 def stats_page():
-    return stats.page(ui=ui)
+    return stats.page(ui=ui, app=app)
 
 
 @ui.page("/config")
 def config_page():
-    return config.page(ui=ui)
+    return config.page(ui=ui, app=app)
 
 
 @ui.page("/login")

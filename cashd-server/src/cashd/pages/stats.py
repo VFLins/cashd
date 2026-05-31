@@ -7,6 +7,7 @@ from cashd_core.data import (
     InactiveCustomersSource,
 )
 from cashd.widgets.parts import DefaultHeader
+from cashd import auth
 import plotly.graph_objects as go
 from nicegui import ui
 
@@ -119,17 +120,23 @@ class page:
     HIGHEST_AMOUNTS_SOURCE = HighestAmountsSource()
     INACTIVE_CUSTOMER_SOURCE = InactiveCustomersSource()
     current_source = LAST_TRANSACTIONS_SOURCE
+    STATS_OPTIONS = [
+        "Últimas transações",
+        "Maiores saldos devedores",
+        "Clientes inativos",
+        "Balanço",
+        "Balanço acumulado",
+    ]
 
-    def __init__(self, ui):
-        self.ui = ui
-        DefaultHeader(ui, selected_entry=2)
-        self.controls_block()
+    def __init__(self, ui, app):
+        self.ui, self.app = ui, app
+        DefaultHeader(ui, app, selected_entry=2)
+        self.controls_block(ui)
         with ui.column(align_items="center") as self.displayed_stat:
             self.displayed_stat.classes("w-full h-full")
             self.View = Table(ui, self.current_source)
 
-    def controls_block(self):
-        ui = self.ui
+    def controls_block(self, ui):
         with ui.row(align_items="center") as controls_block:
             controls_block.classes("self-center justify-center")
             with ui.row(align_items="center") as options_block:
@@ -138,13 +145,7 @@ class page:
                 )
                 self.stat_selector = (
                     ui.select(
-                        options=[
-                            "Últimas transações",
-                            "Balanço",
-                            "Balanço acumulado",
-                            "Maiores saldos devedores",
-                            "Clientes inativos",
-                        ],
+                        options=self.allowed_stats(),
                         value="Últimas transações",
                         on_change=self.update_view,
                     )
@@ -177,6 +178,22 @@ class page:
                 # )
             # ui.button(icon="refresh", on_click=self.current_stat)
         return controls_block
+
+    def allowed_stats(self):
+        user_id: int | None = self.app.storage.user.get("userid", None)
+        if user_id is None:
+            return self.STATS_OPTIONS
+        user = auth.User()
+        user.read(row_id=user_id)
+        user_role = user.role_name()
+        match user_role:
+            case "Desligado":
+                return []
+            case "Operador" | "Assistente":
+                return self.STATS_OPTIONS[:3]
+            case _:
+                return self.STATS_OPTIONS
+
 
     def change_displayed_freq(self):
         self.rename_freq_amount()

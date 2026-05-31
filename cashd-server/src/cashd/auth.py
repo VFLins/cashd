@@ -141,7 +141,7 @@ class User(AuthTable):
 
     def role_name(self, engine: Engine = DB_ENGINE):
         role = Role()
-        role.read(row_id=self.RoleId)
+        role.read(row_id=self.RoleId, engine=engine)
         return role.RoleName
 
 
@@ -180,12 +180,13 @@ class User(AuthTable):
             ses.execute(stmt)
             ses.commit()
 
-    @property
-    def ForbiddenPages(self) -> list[str] | None:
+    def forbidden_pages(self, engine: Engine = DB_ENGINE) -> list[str]:
         role_id = getattr(self, "RoleId", None)
-        if type(role_id) is int:
+        if role_id is None:
+            return []
+        else:
             role = Role()
-            role.read(row_id=role_id)
+            role.read(row_id=role_id, engine=engine)
             return role.ForbiddenPages.split(";")
 
     def __repr__(self):
@@ -211,7 +212,8 @@ AuthTable.metadata.create_all(DB_ENGINE)
 
 DEFAULT_ROLES = (
     Role(RoleName="Supervisor", ForbiddenPages="/config"),
-    Role(RoleName="Operador", ForbiddenPages="/stats;/config"),
+    Role(RoleName="Operador", ForbiddenPages="/config"),
+    Role(RoleName="Assistente", ForbiddenPages="/customer;/config"),
     Role(RoleName="Desligado", ForbiddenPages="/;/customer;/stats;/config"),
 )
 for role in DEFAULT_ROLES:

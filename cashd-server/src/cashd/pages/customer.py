@@ -24,9 +24,9 @@ class page:
             self.ui.select(options, label=label).props("outlined dense").classes("w-72")
         )
 
-    def __init__(self, ui):
+    def __init__(self, ui, app):
         self.ui = ui
-        DefaultHeader(ui=ui, selected_entry=1)
+        DefaultHeader(ui, app, selected_entry=1)
         with ui.column(align_items="center") as form_block:
             form_block.classes(
                 "sm:w-149 absolute sm:top-1/2 left-1/2 transform "

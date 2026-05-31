@@ -151,9 +151,9 @@ class page:
     CUSTOMERS_SOURCE = CustomerListSource()
     selected_customer = tbl_clientes()
 
-    def __init__(self, ui):
+    def __init__(self, ui, app):
         self.ui = ui
-        DefaultHeader(ui=ui, selected_entry=0)
+        DefaultHeader(ui, app, selected_entry=0)
         with ui.column().classes("w-full gap-0"):
             self.top_section()
             with ui.grid().classes("w-full h-full md:grid-cols-2"):

@@ -79,14 +79,11 @@ class DefaultHeader:
 
     def allowed_entries(self) -> list[tuple[str, str, str]]:
         user_id: int | None = self.app.storage.user.get("userid", None)
+        if user_id is None:
+            return self.HEADER_ENTRIES
         user = auth.User()
         user.read(row_id=user_id)
-        user_role = user.role_name()
-        match user_role:
-            case "Operador" | "Supervisor":
-                return self.HEADER_ENTRIES[:3]
-            case _:
-                return self.HEADER_ENTRIES
+        return [entry for entry in self.HEADER_ENTRIES if entry[2] not in user.forbidden_pages()]
 
 
 def default_frontmatter(ui):
