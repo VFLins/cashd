@@ -20,6 +20,7 @@ from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from nicegui import ui, app
+from cashd import auth
 from cashd.const import PROJECT_ROOT
 from cashd.pages import main, customer, stats, config, login, user
 
@@ -45,11 +46,6 @@ def get_argparser() -> argparse.ArgumentParser:
             "dispositivos não poderão acessá-lo, e será executado em uma janela dedicada."
         ),
     )
-    parser.add_argument(
-        "--dev",
-        action="store_true",
-        help="Execute o Cashd em modo de desenvolvimento.",
-    )
     return parser
 
 
@@ -66,23 +62,38 @@ class AuthMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         if await self.is_host(request) or await self.is_safe_route(request):
             return await call_next(request)
-        if not app.storage.user.get("authenticated", False):
-            return RedirectResponse(f"/login")
-        if not app.storage.user.get("authorized", False):
-            return RedirectResponse("/")
-        return await call_next(request)
+        if app.storage.user.get("userid", None):
+            return await self.redirect_to_allowed(request, call_next)
+        else:
+            return RedirectResponse("/login")
 
     async def is_safe_route(self, request: Request) -> bool:
         """Check if the request's path is safe for anyone to access."""
         path = request.url.path
         is_from_module = path.startswith("/_nicegui")
-        is_safe = path in self.UNRESTRICTED_ROUTES
+        is_safe = any(path.startswith(r) for r in self.UNRESTRICTED_ROUTES)
         return is_safe or is_from_module
 
     async def is_host(self, request: Request) -> bool:
         """Check if the device accessing this GUI is the server's host."""
         client_host = request.client.host if request.client else None
         return client_host in self.HOST_IPS
+
+    async def redirect_to_allowed(self, request: Request, call_next):
+        """Send user to the requested page if allowed, or to an allowed page
+        otherwise.
+        """
+        user, role = auth.User(), auth.Role()
+        path = request.url.path
+        user.read(row_id=app.storage.user["userid"])
+        role.read(row_id=user.RoleId)
+        forbidden_routes = role.ForbiddenPages.split(";")
+        if path not in forbidden_routes:
+            return await call_next(path)
+        elif "/" not in forbidden_routes:
+            return RedirectResponse("/")
+        else:
+            return RedirectResponse("/login")
 
 
 @ui.page("/")
@@ -109,7 +120,7 @@ def config_page():
 def login_page():
     if app.storage.user.get("authenticated"):
         return RedirectResponse("/")
-    return login.page(ui=ui)
+    return login.page(ui=ui, app=app)
 
 
 @ui.page("/user")
@@ -124,20 +135,16 @@ def run():
     if hasattr(args, "help"):
         parser.print_help()
         quit()
-    print(args)
     try:
-        run_args = dict(
+        ui.run(
             title="Cashd server",
             language="pt-BR",
             show=False,
             native=args.as_native,
+            reload=False,
             storage_secret=os.urandom(16).hex(),
             favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
         )
-        if args.dev:
-            ui.run(reload=True, **run_args)
-        else: 
-            ui.run(reload=False, **run_args)
     except KeyboardInterrupt:
         print("\nInterrupção solicitada, encerrando servidor...")
 
