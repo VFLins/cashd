@@ -1,3 +1,6 @@
+from cashd import auth
+
+
 def notify_error(ui, message: str):
     ui.notify(message, color="negative", icon="cancel", position="bottom-left")
 
@@ -14,14 +17,15 @@ class DefaultHeader:
         ("/assets/SVG_ConfiguracaoBranco.svg", "Configurações", "/config"),
     ]
 
-    def __init__(self, ui, selected_entry: int):
+    def __init__(self, ui, app, selected_entry: int):
+        self.app = app
         default_frontmatter(ui)
         with ui.header(elevated=True) as header:
             header.style("background-color: #cadfe7")
             header.classes("gap-0")
             with ui.row() as default_block:
                 default_block.classes("!hidden md:!flex w-full")
-                for i, entry in enumerate(self.HEADER_ENTRIES):
+                for i, entry in enumerate(self.allowed_entries()):
                     if i == selected_entry:
                         with ui.button().props("unelevated"):
                             btn_image = ui.image(entry[0])
@@ -72,6 +76,17 @@ class DefaultHeader:
 
     def navigate_to(self, ui, url: str):
         return lambda: ui.navigate.to(url)
+
+    def allowed_entries(self) -> list[tuple[str, str, str]]:
+        user_id: int | None = self.app.storage.user.get("userid", None)
+        user = auth.User()
+        user.read(row_id=user_id)
+        user_role = user.role_name()
+        match user_role:
+            case "Operador" | "Supervisor":
+                return self.HEADER_ENTRIES[:3]
+            case _:
+                return self.HEADER_ENTRIES
 
 
 def default_frontmatter(ui):

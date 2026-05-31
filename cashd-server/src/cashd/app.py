@@ -126,15 +126,18 @@ def run():
         quit()
     print(args)
     try:
-        ui.run(
+        run_args = dict(
             title="Cashd server",
             language="pt-BR",
             show=False,
             native=args.as_native,
-            reload=args.dev,
             storage_secret=os.urandom(16).hex(),
             favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
         )
+        if args.dev:
+            ui.run(reload=True, **run_args)
+        else: 
+            ui.run(reload=False, **run_args)
     except KeyboardInterrupt:
         print("\nInterrupção solicitada, encerrando servidor...")
 

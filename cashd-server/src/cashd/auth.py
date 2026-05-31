@@ -139,6 +139,12 @@ class User(AuthTable):
                 value = getattr(row, col.name, None)
                 setattr(self, col.name, value)
 
+    def role_name(self, engine: Engine = DB_ENGINE):
+        role = Role()
+        role.read(row_id=self.RoleId)
+        return role.RoleName
+
+
     def update_role(self, role_id: int, engine: Engine = DB_ENGINE):
         """Updates this user's role.
 
