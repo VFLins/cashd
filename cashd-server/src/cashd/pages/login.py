@@ -1,16 +1,12 @@
+from argon2.exceptions import VerifyMismatchError
+from cashd.widgets.parts import default_frontmatter, notify_error
+from cashd import auth
+
+
 class page:
-    def __init__(self, ui):
-        ui.add_head_html("""
-        <style>
-            .no-margin-scroll .q-scrollarea__content {
-                padding: 0 !important;
-            }
-        </style>
-        """)
-        ui.colors(
-            primary="#478eff", secondary="#d3d7d9", warning="#d48731", info="#478eff"
-        )
-        ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
+    def __init__(self, ui, app):
+        self.ui, self.app = ui, app
+        default_frontmatter(ui)
 
         with ui.row(align_items="center") as logo_block:
             logo_block.classes("self-center flex-nowrap")
@@ -22,9 +18,24 @@ class page:
         with ui.column() as input_block:
             input_block.classes(
                 "absolute top-1/2 left-1/2 transform "
-                "-translate-x-1/2 -translate-y-2/3"
+                "-translate-x-1/2 -translate-y-1/2"
             )
             ui.label("Faça login para acessar o sistema")
-            ui.input(label="Usuário").props("outlined dense")
-            ui.input(label="Senha", password=True).props("outlined dense")
-            ui.button("Entrar").classes("self-end")
+            self.user = ui.input(label="Usuário").props("outlined dense")
+            self.password = ui.input(label="Senha", password=True).props("outlined dense")
+            ui.button("Entrar", on_click=self.login).classes("self-end")
+
+    def login(self):
+        usr, pwd = self.user.value, self.password.value
+        try:
+            user = auth.verify_login(username=usr, password=pwd)
+            role = auth.Role()
+            role.read(row_id=user.RoleId)
+            if role.RoleName == "Desligado":
+                notify_error(self.ui, "Este usuário não tem mais acesso ao Cashd")
+                return
+        except (ValueError, VerifyMismatchError):
+            notify_error(self.ui, "Usuário ou senha incorretos")
+        else:
+            self.app.storage.user["userid"] = user.Id
+            self.ui.navigate.to("/")
