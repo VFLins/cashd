@@ -17,8 +17,10 @@ class DefaultHeader:
         ("/assets/SVG_ConfiguracaoBranco.svg", "Configurações", "/config"),
     ]
 
-    def __init__(self, ui, app, selected_entry: int):
+    def __init__(self, ui, app, selected_entry: str):
         self.app = app
+        selected_idx = [e for e in self.HEADER_ENTRIES if selected_entry in e][0]
+        selected_idx = self.HEADER_ENTRIES.index(selected_idx)
         default_frontmatter(ui)
         with ui.header(elevated=True) as header:
             header.style("background-color: #cadfe7")
@@ -26,7 +28,7 @@ class DefaultHeader:
             with ui.row() as default_block:
                 default_block.classes("!hidden md:!flex w-full")
                 for i, entry in enumerate(self.allowed_entries()):
-                    if i == selected_entry:
+                    if entry[1] == selected_entry:
                         with ui.button().props("unelevated"):
                             btn_image = ui.image(entry[0])
                             btn_image.classes("rounded-full size-8 mr-3 mt-1 mb-1")
@@ -48,11 +50,12 @@ class DefaultHeader:
                                 "text-transform: none; "
                                 "color: black;"
                             )
+
             with ui.row(align_items="center") as mobile_block:
                 mobile_block.classes("md:!hidden w-full flex-nowrap")
-                header_image = ui.image(self.HEADER_ENTRIES[selected_entry][0])
+                header_image = ui.image(self.HEADER_ENTRIES[selected_idx][0])
                 header_image.classes("rounded-full size-12 select-none")
-                header_label = ui.label(self.HEADER_ENTRIES[selected_entry][1])
+                header_label = ui.label(self.HEADER_ENTRIES[selected_idx][1])
                 header_label.classes("text-2xl select-none truncate")
                 header_label.style(
                     "font-family: 'Saira Semibold'; "
@@ -62,8 +65,8 @@ class DefaultHeader:
                 ui.space()
                 with ui.button(icon="menu"):
                     with ui.menu() as menu:
-                        for i, entry in enumerate(self.HEADER_ENTRIES):
-                            if i == selected_entry:
+                        for i, entry in enumerate(self.allowed_entries()):
+                            if entry[1] == selected_entry:
                                 continue
                             with ui.menu_item(on_click=self.navigate_to(ui, entry[2])):
                                 with ui.row().classes("items-center gap-2 no-wrap"):

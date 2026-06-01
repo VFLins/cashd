@@ -26,7 +26,7 @@ class page:
 
     def __init__(self, ui, app):
         self.ui = ui
-        DefaultHeader(ui, app, selected_entry=1)
+        DefaultHeader(ui, app, selected_entry="Novo cliente")
         with ui.column(align_items="center") as form_block:
             form_block.classes(
                 "sm:w-149 absolute sm:top-1/2 left-1/2 transform "

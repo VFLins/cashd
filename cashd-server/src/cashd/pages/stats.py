@@ -130,7 +130,7 @@ class page:
 
     def __init__(self, ui, app):
         self.ui, self.app = ui, app
-        DefaultHeader(ui, app, selected_entry=2)
+        DefaultHeader(ui, app, selected_entry="Estatísticas")
         self.controls_block(ui)
         with ui.column(align_items="center") as self.displayed_stat:
             self.displayed_stat.classes("w-full h-full")

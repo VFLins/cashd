@@ -87,7 +87,7 @@ class DirectoryList:
 class page:
     def __init__(self, ui, app):
         self.ui = ui
-        DefaultHeader(ui, app, selected_entry=3)
+        DefaultHeader(ui, app, selected_entry="Configurações")
         self.file_dialog = SelectFileDialog(ui, initial_dir=Path("~").expanduser())
         with ui.column(align_items="left").classes("self-center"):
             h1(ui, "Preferências")

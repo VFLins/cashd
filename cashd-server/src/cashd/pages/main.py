@@ -153,7 +153,7 @@ class page:
 
     def __init__(self, ui, app):
         self.ui = ui
-        DefaultHeader(ui, app, selected_entry=0)
+        DefaultHeader(ui, app, selected_entry="Transações")
         with ui.column().classes("w-full gap-0"):
             self.top_section()
             with ui.grid().classes("w-full h-full md:grid-cols-2"):
