@@ -52,9 +52,11 @@ build-backend = "setuptools.build_meta"
 cashd-server = "cashd.app:run"
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
+main_file = "app.py"
+addopts = ["-p", "nicegui.testing.user_plugin", "--cov=src", "--cov-report", "html"]
 testpaths = "tests"
 pythonpath = "src"
-addopts = "--cov=src --cov-report html"
 
 [tool.setuptools.packages.find]
 where = ["src"]
