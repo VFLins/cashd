@@ -206,6 +206,7 @@ class page:
                     "active-bg-color=blue-1 dense"
                 )
                 self.tabs.style("font-family: 'Saira Semibold';")
+                self.tabs.on_value_change(lambda p: self.handle_tab_change(payload=p))
                 transac = ui.tab("Transação").classes("bg-gray-100 text-gray-700")
                 history = ui.tab("Histórico").classes("bg-gray-100 text-gray-700")
                 info = ui.tab("Informações").classes("bg-gray-100 text-gray-700")
@@ -237,7 +238,6 @@ class page:
         match self.section_switcher.props["icon"]:
             case "point_of_sale":
                 self.section_switcher.props("icon=person_search")
-                self.tabs.set_value("Transação")
                 # hide left and restore right
                 self.l_section.classes("!hidden md:!flex")
                 self.r_section.classes(remove="!hidden md:!flex")
@@ -248,12 +248,15 @@ class page:
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
 
-    def load_selected_customer(self, data: dict[str, Any]):
+    def load_selected_customer(self, data: dict[str, Any], update_list: bool = False):
         customer = self.selected_customer
         customer.read(row_id=data["Id"])
+        if getattr(self, "tabs", None) is not None:
+            self.tabs.set_value("Transação")
         # Update customer list items
-        if getattr(self, "customer_list", None) is not None:
-            self.customer_list._render_list_items(no_callback=True)
+        if update_list:
+            if getattr(self, "customer_list", None) is not None:
+                self.customer_list._render_list_items(no_callback=True)
         # Update selected user indicator
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)
@@ -261,21 +264,24 @@ class page:
         # Update transaction history
         if getattr(self, "history", None) is not None:
             self.history.change_customer(self.selected_customer)
-        # Update customer information
-        if getattr(self, "info", None) is not None:
-            self.info.load(customer)
+
+    def handle_tab_change(self, payload):
+        match payload.value:
+            case "Informações":
+                self.info.load(self.selected_customer)
 
     def update_selected_customer(self):
+        customer = self.selected_customer
         try:
-            self.selected_customer.PrimeiroNome = self.info.firstname.value
-            self.selected_customer.Sobrenome = self.info.lastname.value
-            self.selected_customer.Apelido = self.info.nickname.value
-            self.selected_customer.Telefone = self.info.phonenumber.value
-            self.selected_customer.Endereco = self.info.address.value
-            self.selected_customer.Bairro = self.info.district.value
-            self.selected_customer.Cidade = self.info.city.value
-            self.selected_customer.Estado = self.info.state.value
-            self.selected_customer.update()
+            customer.PrimeiroNome = self.info.firstname.value
+            customer.Sobrenome = self.info.lastname.value
+            customer.Apelido = self.info.nickname.value
+            customer.Telefone = self.info.phonenumber.value
+            customer.Endereco = self.info.address.value
+            customer.Bairro = self.info.district.value
+            customer.Cidade = self.info.city.value
+            customer.Estado = self.info.state.value
+            customer.update()
         except Exception as err:
             notify_error(
                 self.ui, "Erro ao alterar dados do cliente, verifique os logs."
@@ -283,11 +289,10 @@ class page:
             raise err
         else:
             notify_success(
-                self.ui,
-                f"Dados de {self.selected_customer.NomeCompleto} alterados com sucesso",
+                self.ui, f"Dados de {customer.NomeCompleto} alterados com sucesso"
             )
         finally:
-            self.load_selected_customer(data=self.customer_list.selected_data)
+            self.load_selected_customer(data=self.customer_list.selected_data, update_list=True)
 
     def add_transaction(self):
         date = self.transac.date
