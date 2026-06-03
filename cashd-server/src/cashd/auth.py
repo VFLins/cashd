@@ -255,7 +255,7 @@ def verify_login(username: str, password: str, engine: Engine = DB_ENGINE) -> Us
     return user
 
 
-def store_login(role_id: int, username: str, password: str, engine: Engine = DB_ENGINE):
+def store_login(role_id: int, username: str, password: str, engine: Engine = DB_ENGINE) -> User:
     """Writes a new user to the database.
 
     :param role_id: Identifier of this user's role.
