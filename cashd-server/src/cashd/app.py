@@ -21,7 +21,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from nicegui import ui, app
 from cashd import auth
-from cashd.const import PROJECT_ROOT
+from cashd.const import PROJECT_ROOT, PORT
 from cashd.pages import main, customer, stats, config, login, user
 
 
@@ -138,6 +138,7 @@ def run():
         ui.run(
             title="Cashd server",
             language="pt-BR",
+            port=PORT,
             show=False,
             native=args.as_native,
             reload=False,
