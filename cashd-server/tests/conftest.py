@@ -12,17 +12,17 @@ def local_ip():
     """Fixture to programmatically find the local network IP (192.168.X.X)."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(('8.8.8.8', 80))
+        s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
     except Exception:
-        ip = '127.0.0.1'
+        pytest.skip("No local network IP found.")
     finally:
         s.close()
     return ip
 
 
 def is_server_running() -> bool:
-    """Helper to check if a port is being used."""
+    """Helper to check if Cashd is being served on localhost."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(0.5)
         return s.connect_ex(("127.0.0.1", PORT)) == 0
@@ -35,7 +35,7 @@ def start_server() -> Popen:
     """
     # add env variables required by NiceGUI
     env = os.environ.copy()
-    env['NICEGUI_SCREEN_TEST_PORT'] = str(PORT)
+    env["NICEGUI_SCREEN_TEST_PORT"] = str(PORT)
     process = Popen(
         [sys.executable, PROJECT_ROOT / "app.py"],
         stdout=sys.stdout,
@@ -54,9 +54,8 @@ def start_server() -> Popen:
 
 @pytest.fixture(scope="session", autouse=True)
 def ensure_nicegui_server():
-    """Ensures NiceGUI is running before tests start and kills the server on teardown
-    but only if this fixture started it. This requires Cashd to be installed as a
-    package in the current environment.
+    """Ensures NiceGUI is running before tests start and kills the server on teardown,
+    but only if this fixture started it.
     """
     process = None
     if not is_server_running():
