@@ -10,7 +10,7 @@ from typing import Literal, Generator, Callable, Iterator
 from sqlalchemy import delete
 from nicegui.testing import User, Screen
 from cashd import auth
-from cashd.const import PORT
+from cashd.const import PORT, ADMIN_ROUTES
 
 
 def delete_user(user_id: int):
@@ -43,10 +43,8 @@ def mock_user() -> Callable[[str], AbstractContextManager[auth.User]]:
         role = get_role_by_name(role_name)
         username = os.urandom(16).hex()
         user = auth.store_login(role_id=role.Id, username=username, password="test")
-        try:
-            yield user
-        finally:
-            delete_user(user_id=user.Id)
+        yield user
+        delete_user(user_id=user.Id)
 
     yield _temp_user
 
@@ -73,6 +71,14 @@ def test_admin_redirect():
     assert response.url == url
 
 
+@pytest.mark.parametrize("page", ["/", "/customer", "/stats", "/config", "/user"])
+async def test_admin_access(page: str, user: User):
+    """Tests if pages are correctly not being restricted from localhost."""
+    # NiceGUI's user run from localhost by default
+    await user.open(page)
+    assert user.client.page.path == page
+
+
 @pytest.mark.parametrize("user_role", ["Supervisor", "Operador", "Assistente"])
 def test_forbidden_pages_redirect(
     user_role: str,
@@ -80,6 +86,7 @@ def test_forbidden_pages_redirect(
     local_ip: str,
     screen: Screen,
 ):
+    """Tests if users are correctly being redirected out of forbidden pages."""
     url = f"http://{local_ip}:{PORT}"
     with mock_user(user_role) as login:
         screen.selenium.get(url + "/login")
@@ -89,11 +96,29 @@ def test_forbidden_pages_redirect(
         screen.type(Keys.TAB)  # to focus on the second input
         screen.type("test")
         screen.click("Entrar")
-        for page in ["/customer", "/stats", "/config"]:
+        restricted_pages = login.forbidden_pages() + list(ADMIN_ROUTES)
+        for page in restricted_pages:
             screen.selenium.get(url + page)
-            if page in login.forbidden_pages():
-                (
-                    WebDriverWait(driver=screen.selenium, timeout=5)
-                    .until(expected_conditions.url_to_be(url + "/"))
-                )
+            (
+                WebDriverWait(driver=screen.selenium, timeout=5)
+                .until(expected_conditions.url_to_be(url + "/"))
+            )
 
+
+def test_dismissed_user_restriction(screen: Screen, local_ip: str, mock_user: Callable[[str], AbstractContextManager[auth.User]]):
+    """Test if the dismissed user is unable to login."""
+    url = f"http://{local_ip}:{PORT}"
+    with mock_user("Desligado") as login:
+        screen.selenium.get(url + "/login")
+        screen.should_contain("Faça login para acessar o sistema")
+        screen.type(Keys.TAB)
+        screen.type(login.Username)
+        screen.type(Keys.TAB)
+        screen.type("test")
+        screen.click("Entrar")
+        screen.should_contain("Este usuário não pode acessar o Cashd")
+
+
+def test_dismissed_user_pages_redirect():
+    """Test if the dismissed user is redirected to login page when dismissed (not implemented yet)."""
+    pytest.skip("Not implemented yet.")

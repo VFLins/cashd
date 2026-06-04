@@ -32,7 +32,7 @@ class page:
             role = auth.Role()
             role.read(row_id=user.RoleId)
             if role.RoleName == "Desligado":
-                notify_error(self.ui, "Este usuário não tem mais acesso ao Cashd")
+                notify_error(self.ui, "Este usuário não pode acessar o Cashd")
                 return
         except (ValueError, VerifyMismatchError):
             notify_error(self.ui, "Usuário ou senha incorretos")
