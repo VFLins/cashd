@@ -38,10 +38,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev=[
+    "pytest~=9.0",
     "pytest-cov>=5.0.0",
+    "pytest-asyncio",
+    "requests~=2.34",
     "black>=24.4.2",
-    "ipykernel",
-    "nbformat"
 ]
 
 [build-system]
@@ -53,7 +54,7 @@ cashd-server = "cashd.app:run"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-main_file = "app.py"
+main_file = "src/cashd/app.py"
 addopts = ["-p", "nicegui.testing.user_plugin", "--cov=src", "--cov-report", "html"]
 testpaths = "tests"
 pythonpath = "src"
