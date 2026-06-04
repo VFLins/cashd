@@ -3,8 +3,10 @@ import pytest
 import asyncio
 import requests
 from selenium.webdriver.common.keys import Keys
-from contextlib import contextmanager
-from typing import Literal, Generator, Callable
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
+from contextlib import contextmanager, AbstractContextManager
+from typing import Literal, Generator, Callable, Iterator
 from sqlalchemy import delete
 from nicegui.testing import User, Screen
 from cashd import auth
@@ -29,21 +31,18 @@ def get_role_by_name(role_name: str) -> auth.Role:
 
 
 @pytest.fixture
-def mock_user():
+def mock_user() -> Callable[[str], AbstractContextManager[auth.User]]:
     """Yields a factory that creates a temporary user to test it's permission
     boundaries.
     """
 
     @contextmanager
     def _temp_user(
-        role_name: Literal["Supervisor", "Operador", "Assistente", "Desligado"],
-    ):
+        role_name: Literal["Supervisor" | "Operador" | "Assistente" | "Desligado"],
+    ) -> Iterator[auth.User]:
         role = get_role_by_name(role_name)
-        user = auth.store_login(
-            role_id=role.Id,
-            username=os.urandom(16).hex(),
-            password="test",
-        )
+        username = os.urandom(16).hex()
+        user = auth.store_login(role_id=role.Id, username=username, password="test")
         try:
             yield user
         finally:
@@ -77,13 +76,13 @@ def test_admin_redirect():
 @pytest.mark.parametrize("user_role", ["Supervisor", "Operador", "Assistente"])
 def test_forbidden_pages_redirect(
     user_role: str,
-    mock_user: Generator[str, Callable[str, auth.User], None],
+    mock_user: Callable[[str], AbstractContextManager[auth.User]],
     local_ip: str,
     screen: Screen,
 ):
-    root_url = f"http://{local_ip}:{PORT}"
+    url = f"http://{local_ip}:{PORT}"
     with mock_user(user_role) as login:
-        screen.selenium.get(root_url + "/login")
+        screen.selenium.get(url + "/login")
         screen.should_contain("Faça login para acessar o sistema")
         screen.type(Keys.TAB)  # to focus on the first input
         screen.type(login.Username)
@@ -91,9 +90,10 @@ def test_forbidden_pages_redirect(
         screen.type("test")
         screen.click("Entrar")
         for page in ["/customer", "/stats", "/config"]:
-            screen.selenium.get(root_url + page)
-            current_url = str(screen.selenium.current_url)
+            screen.selenium.get(url + page)
             if page in login.forbidden_pages():
-                assert current_url == root_url + "/"
-            else:
-                assert current_url == root_url + page
+                (
+                    WebDriverWait(driver=screen.selenium, timeout=5)
+                    .until(expected_conditions.url_to_be(url + "/"))
+                )
+
