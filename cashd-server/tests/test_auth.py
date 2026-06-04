@@ -42,13 +42,23 @@ def operator_user():
 
 def test_non_admin_redirect(local_ip: str):
     """Tests if the user is correctly being redirected from '/' to '/login' for
-    authentication.
+    authentication when connecting from IP address.
     """
     if local_ip == "127.0.0.1":
         pytest.skip("No local network IP found.")
-    url = f"http://{local_ip}:{PORT}"
+    url = f"http://{local_ip}:{PORT}/"
     response = requests.get(url)
     assert response.status_code == 200
     assert "Faça login para acessar o sistema" in response.text
-    assert response.url == f"http://{local_ip}:{PORT}/login"
+    assert response.url == f"{url}login"
 
+
+def test_admin_redirect():
+    """Tests if the admin is correctly *not* redirected from '/'. The admin is
+    identified by the connection from 'http://127.0.0.1/' or 'http://localhost/'.
+    """
+    url = f"http://127.0.0.1:{PORT}/"
+    response = requests.get(url)
+    assert response.status_code == 200
+    assert "Faça login para acessar o sistema" not in response.text
+    assert response.url == url
