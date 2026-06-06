@@ -248,9 +248,10 @@ class page:
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
 
-    def load_selected_customer(self, data: dict[str, Any], update_list: bool = False):
+    def load_selected_customer(self, data: dict[str, Any] | None, update_list: bool = False):
         customer = self.selected_customer
-        customer.read(row_id=data["Id"])
+        if data is not None:
+            customer.read(row_id=data["Id"])
         if getattr(self, "tabs", None) is not None:
             self.tabs.set_value("Transação")
         # Update customer list items

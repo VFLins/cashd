@@ -9,7 +9,7 @@ class DetailedList:
         self.ui = ui
         self.on_select = on_select
         self.selected_item = None
-        self.selected_data = self.current_data[0]
+        self.selected_data = None
         self.displayed_items = []
         self.displayed_data = []
         self.search_bar = ui.input(label="Pesquisa", on_change=self._change_search)
@@ -24,6 +24,8 @@ class DetailedList:
     @property
     def pagination_text(self) -> str:
         min_idx, max_idx = self.SOURCE.min_idx + 1, self.SOURCE.max_idx
+        if self.SOURCE.nrows == 0:
+            return "0 itens"
         return f"{self.SOURCE.nrows} itens, mostrando {min_idx} até {max_idx}"
 
     def _selection(self, ui):
