@@ -1,4 +1,5 @@
 from argon2.exceptions import VerifyMismatchError
+from nicegui.events import KeyEventArguments
 from cashd.widgets.parts import default_frontmatter, notify_error
 from cashd import auth
 
@@ -21,8 +22,11 @@ class page:
                 "-translate-x-1/2 -translate-y-1/2"
             )
             ui.label("Faça login para acessar o sistema")
-            self.user = ui.input(label="Usuário").props("outlined dense")
-            self.password = ui.input(label="Senha", password=True).props("outlined dense")
+            self.user = ui.input(label="Usuário")
+            self.user.props("outlined dense")
+            self.password = ui.input(label="Senha", password=True)
+            self.password.props("outlined dense")
+            self.password.on("keydown.enter", self.login)
             ui.button("Entrar", on_click=self.login).classes("self-end")
 
     def login(self):
