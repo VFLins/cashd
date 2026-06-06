@@ -1,4 +1,5 @@
 from argon2.exceptions import VerifyMismatchError
+from sqlalchemy.exc import StatementError
 from nicegui.events import KeyEventArguments
 from cashd.widgets.parts import default_frontmatter, notify_error
 from cashd import auth
@@ -38,7 +39,7 @@ class page:
             if role.RoleName == "Desligado":
                 notify_error(self.ui, "Este usuário não pode acessar o Cashd")
                 return
-        except (ValueError, VerifyMismatchError):
+        except (StatementError, ValueError, VerifyMismatchError):
             notify_error(self.ui, "Usuário ou senha incorretos")
         else:
             self.app.storage.user["userid"] = user.Id
