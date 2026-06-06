@@ -128,7 +128,7 @@ class User(AuthTable):
         :param engine: `sqlalchemy.Engine` reflecting the database that will be read.
 
         :raises ValueError: If `row_id` is not present in the table.
-        :raises StatementError: If Username does not exist or is not set.
+        :raises sqlalchemy.exc.StatementError: If Username does not exist or isn't set.
         """
         stmt = select(User).where(User.Username == username)
         with Session(bind=engine) as ses:
@@ -248,7 +248,7 @@ def verify_login(username: str, password: str, engine: Engine = DB_ENGINE) -> Us
     :returns: If the login is valid, a `User` object, containing user information.
     :raises ValueError: If the username provided does not exist.
     :raises argon2.exceptions.VerifyMismatchError: If the password is not correct.
-    :raises StatementError: If Username does not exist or is not set.
+    :raises sqlalchemy.exc.StatementError: If Username does not exist or isn't set.
     """
     user = User()
     user.read_user(username, engine=engine)
