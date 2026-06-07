@@ -187,17 +187,18 @@ class page:
                         "Entre em contato", "https://vitorlins.com.br", new_tab=True
                     )
 
-            h1(ui, "Atalho")
-            ui.button(
-                "Atalho para o modo nativo",
-                icon="computer",
-                on_click=self.native_mode_shortcut,
-            ).props("flat")
-            ui.button(
-                "Atalho para o modo servidor",
-                icon="dns",
-                on_click=self.server_mode_shortcut,
-            ).props("flat")
+            h1(ui, "Criar atalho")
+            with ui.row():
+                ui.button(
+                    "Para executar como aplicativo",
+                    icon="computer",
+                    on_click=self.native_mode_shortcut,
+                ).props("flat")
+                ui.button(
+                    "Para executar como servidor",
+                    icon="dns",
+                    on_click=self.server_mode_shortcut,
+                ).props("flat")
 
     def set_config(self, config_name: str, input_name: str):
         val: str | float = getattr(self, input_name).value
@@ -234,22 +235,32 @@ class page:
 
     def native_mode_shortcut(self):
         """Creates shortcuts to start Cashd Server in native mode."""
-        make_shortcut(
-            " --as-native",
-            name=r"Cashd Server - modo nativo",
-            description="Execute como um aplicativo sem servi-lo para a rede local",
-            icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
-            terminal=False,
-            executable=str(EXECUTABLE_PATH),
-        )
+        try:
+            make_shortcut(
+                f"{EXECUTABLE_PATH} --as-native",
+                name=r"Cashd Server app",
+                description="Execute como um aplicativo sem servi-lo para a rede local",
+                icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
+                terminal=False,
+                executable="",
+            )
+        except Exception:
+            notify_error(self.ui, "Algo deu errado ao criar atalho, verifique os logs")
+        else:
+            notify_success(self.ui, "Atalho criado com sucesso")
 
     def server_mode_shortcut(self):
         """Creates shortcuts to start Cashd Server in server mode."""
-        make_shortcut(
-            "",
-            name=r"Cashd Server",
-            description="Inicie o serviço do Cashd Server",
-            icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
-            terminal=False,
-            executable=str(EXECUTABLE_PATH),
-        )
+        try:
+            make_shortcut(
+                str(EXECUTABLE_PATH),
+                name=r"Cashd Server",
+                description="Inicie o serviço do Cashd Server",
+                icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
+                terminal=True,
+                executable="",
+            )
+        except Exception:
+            notify_error(self.ui, "Algo deu errado ao criar atalho, verifique os logs")
+        else:
+            notify_success(self.ui, "Atalho criado com sucesso")
