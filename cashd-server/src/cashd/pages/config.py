@@ -183,7 +183,7 @@ class page:
                 ).classes("size-14 rounded-lg")
                 with ui.column().classes("gap-0"):
                     ui.label("Vitor Lins").classes("text-lg text-bold")
-                    ui.link("Entre em contato", "https://vitorlins.com.br")
+                    ui.link("Entre em contato", "https://vitorlins.com.br", new_tab=True)
 
     def set_config(self, config_name: str, input_name: str):
         val: str | float = getattr(self, input_name).value
