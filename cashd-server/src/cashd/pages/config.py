@@ -2,6 +2,7 @@ import os
 import asyncio
 from pathlib import Path
 from typing import Callable
+from importlib.metadata import version
 from cashd_core import backup
 from cashd_core.prefs import settings
 from cashd_core.const import ESTADOS, DDD
@@ -90,6 +91,7 @@ class page:
         DefaultHeader(ui, app, selected_entry="Configurações")
         self.file_dialog = SelectFileDialog(ui, initial_dir=Path("~").expanduser())
         with ui.column(align_items="left").classes("self-center"):
+
             h1(ui, "Preferências")
             h2(ui, "Valores padrão no formulário de contas")
             with ui.grid().classes("h-full center-items md:grid-cols-3"):
@@ -132,6 +134,7 @@ class page:
                         on_click=lambda: self.data_tables_rownumber.set_value(200),
                     )
                     button.props("flat dense")
+
             h1(ui, "Backup")
             h2(ui, "Locais de backup")
             self.backup_places = DirectoryList(ui)
@@ -151,6 +154,36 @@ class page:
                     icon="save",
                     on_click=self.run_backup,
                 )
+
+            h1(ui, "Sobre")
+            h2(ui, "Software")
+            version_data = [
+                ("Cashd Server", version("cashd")),
+                ("Cashd Core", version("cashd_core")),
+                ("NiceGUI", version("cashd")),
+            ]
+            with ui.row().classes("gap-10"):
+                for data in version_data:
+                    with ui.column().classes("gap-0"):
+                        name = ui.label(data[0])
+                        if "Cashd" in data[0]:
+                            name.style("font-family: 'Saira Semibold';")
+                        else:
+                            name.style("font-weight: bold;")
+                        ui.label(data[1])
+            h2(ui, "Sessão atual")
+            ui.label(f"Disponível nos endereços:")
+            with ui.column().style("row-gap: 4px; "):
+                for link in app.urls:
+                    ui.link(link, link, new_tab=True)
+            h2(ui, "Desenvolvedor")
+            with ui.row():
+                ui.image(
+                    "https://avatars.githubusercontent.com/u/42384822?v=4"
+                ).classes("size-14 rounded-lg")
+                with ui.column().classes("gap-0"):
+                    ui.label("Vitor Lins").classes("text-lg text-bold")
+                    ui.link("Entre em contato", "https://vitorlins.com.br")
 
     def set_config(self, config_name: str, input_name: str):
         val: str | float = getattr(self, input_name).value
