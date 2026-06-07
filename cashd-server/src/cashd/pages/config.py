@@ -172,10 +172,11 @@ class page:
                         name.style("font-weight: bold;")
                         ui.label(data[1])
             h2(ui, "Sessão atual")
-            ui.label(f"Disponível nos endereços:")
-            with ui.column().style("row-gap: 4px; "):
+            with ui.list().props("border rounded dense separator"):
                 for link in app.urls:
-                    ui.link(link, link, new_tab=True)
+                    with ui.item():
+                        with ui.item_section():
+                            ui.link(link, link, new_tab=True)
             h2(ui, "Desenvolvedor")
             with ui.row():
                 ui.image(
