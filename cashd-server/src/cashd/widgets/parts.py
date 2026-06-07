@@ -86,7 +86,11 @@ class DefaultHeader:
             return self.HEADER_ENTRIES
         user = auth.User()
         user.read(row_id=user_id)
-        return [entry for entry in self.HEADER_ENTRIES if entry[2] not in user.forbidden_pages()]
+        return [
+            entry
+            for entry in self.HEADER_ENTRIES
+            if entry[2] not in user.forbidden_pages()
+        ]
 
 
 def default_frontmatter(ui):

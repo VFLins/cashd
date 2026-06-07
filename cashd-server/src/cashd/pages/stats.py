@@ -194,7 +194,6 @@ class page:
             case _:
                 return self.STATS_OPTIONS
 
-
     def change_displayed_freq(self):
         self.rename_freq_amount()
 

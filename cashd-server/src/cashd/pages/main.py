@@ -248,7 +248,9 @@ class page:
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
 
-    def load_selected_customer(self, data: dict[str, Any] | None, update_list: bool = False):
+    def load_selected_customer(
+        self, data: dict[str, Any] | None, update_list: bool = False
+    ):
         customer = self.selected_customer
         if data is not None:
             customer.read(row_id=data["Id"])
@@ -293,7 +295,9 @@ class page:
                 self.ui, f"Dados de {customer.NomeCompleto} alterados com sucesso"
             )
         finally:
-            self.load_selected_customer(data=self.customer_list.selected_data, update_list=True)
+            self.load_selected_customer(
+                data=self.customer_list.selected_data, update_list=True
+            )
 
     def add_transaction(self):
         date = self.transac.date

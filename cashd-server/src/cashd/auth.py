@@ -145,7 +145,6 @@ class User(AuthTable):
         role.read(row_id=self.RoleId, engine=engine)
         return role.RoleName
 
-
     def update_role(self, role_id: int, engine: Engine = DB_ENGINE):
         """Updates this user's role.
 
@@ -257,7 +256,9 @@ def verify_login(username: str, password: str, engine: Engine = DB_ENGINE) -> Us
     return user
 
 
-def store_login(role_id: int, username: str, password: str, engine: Engine = DB_ENGINE) -> User:
+def store_login(
+    role_id: int, username: str, password: str, engine: Engine = DB_ENGINE
+) -> User:
     """Writes a new user to the database.
 
     :param role_id: Identifier of this user's role.

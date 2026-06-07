@@ -1,11 +1,14 @@
 import os
+import sys
 import asyncio
+from pyshortcuts import make_shortcut
 from pathlib import Path
 from typing import Callable
 from importlib.metadata import version
 from cashd_core import backup
 from cashd_core.prefs import settings
 from cashd_core.const import ESTADOS, DDD
+from cashd.const import EXECUTABLE_PATH, PYTHON_PATH, PROJECT_ROOT
 from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd.widgets.dialogs import SelectDirDialog, SelectFileDialog
 
@@ -160,16 +163,13 @@ class page:
             version_data = [
                 ("Cashd Server", version("cashd")),
                 ("Cashd Core", version("cashd_core")),
-                ("NiceGUI", version("cashd")),
+                ("NiceGUI", version("nicegui")),
             ]
             with ui.row().classes("gap-10"):
                 for data in version_data:
                     with ui.column().classes("gap-0"):
                         name = ui.label(data[0])
-                        if "Cashd" in data[0]:
-                            name.style("font-family: 'Saira Semibold';")
-                        else:
-                            name.style("font-weight: bold;")
+                        name.style("font-weight: bold;")
                         ui.label(data[1])
             h2(ui, "Sessão atual")
             ui.label(f"Disponível nos endereços:")
@@ -183,7 +183,21 @@ class page:
                 ).classes("size-14 rounded-lg")
                 with ui.column().classes("gap-0"):
                     ui.label("Vitor Lins").classes("text-lg text-bold")
-                    ui.link("Entre em contato", "https://vitorlins.com.br", new_tab=True)
+                    ui.link(
+                        "Entre em contato", "https://vitorlins.com.br", new_tab=True
+                    )
+
+            h1(ui, "Atalho")
+            ui.button(
+                "Atalho para o modo nativo",
+                icon="computer",
+                on_click=self.native_mode_shortcut,
+            ).props("flat")
+            ui.button(
+                "Atalho para o modo servidor",
+                icon="dns",
+                on_click=self.server_mode_shortcut,
+            ).props("flat")
 
     def set_config(self, config_name: str, input_name: str):
         val: str | float = getattr(self, input_name).value
@@ -217,11 +231,25 @@ class page:
         except Exception as err:
             notify_error(self.ui, "Erro ao restaurar backup, verifique os logs")
             raise err
-        else:
-            notify_success(
-                self.ui, "Backup restaurado com sucesso, reiniciando serviço..."
-            )
-            await asyncio.sleep(5)
-            # Restarts the server
-            # https://github.com/zauberzeug/nicegui/discussions/1719
-            os.utime(Path(__file__).resolve())
+
+    def native_mode_shortcut(self):
+        """Creates shortcuts to start Cashd Server in native mode."""
+        make_shortcut(
+            " --as-native",
+            name=r"Cashd Server - modo nativo",
+            description="Execute como um aplicativo sem servi-lo para a rede local",
+            icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
+            terminal=False,
+            executable=str(EXECUTABLE_PATH),
+        )
+
+    def server_mode_shortcut(self):
+        """Creates shortcuts to start Cashd Server in server mode."""
+        make_shortcut(
+            "",
+            name=r"Cashd Server",
+            description="Inicie o serviço do Cashd Server",
+            icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
+            terminal=False,
+            executable=str(EXECUTABLE_PATH),
+        )

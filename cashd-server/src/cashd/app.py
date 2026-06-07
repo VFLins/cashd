@@ -24,7 +24,6 @@ from cashd import auth
 from cashd.const import PROJECT_ROOT, PORT, ADMIN_ROUTES, UNRESTRICTED_ROUTES, HOST_IPS
 from cashd.pages import main, customer, stats, config, login, user
 
-
 MIN_WINDOW_SIZE = (450, 620) if sys.platform == "win32" else (450, 660)
 app.add_static_files("/assets", Path(PROJECT_ROOT, "assets"))
 app.native.window_args["min_size"] = MIN_WINDOW_SIZE
@@ -36,7 +35,9 @@ def get_argparser() -> argparse.ArgumentParser:
         description="Execute o Cashd server, veja opções abaixo.",
         add_help=False,
     )
-    parser.add_argument("-h", "--help", action="help", help="Mostra esta mensagem de ajuda")
+    parser.add_argument(
+        "-h", "--help", action="help", help="Mostra esta mensagem de ajuda"
+    )
     parser.add_argument(
         "-n",
         "--as-native",
@@ -141,7 +142,7 @@ def run():
             native=args.as_native,
             reload=False,
             storage_secret=os.urandom(16).hex(),
-            favicon=PROJECT_ROOT / "assets/ICO_LogoIcone.ico",
+            favicon=PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico",
         )
     except KeyboardInterrupt:
         print("\nInterrupção solicitada, encerrando servidor...")
