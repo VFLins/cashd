@@ -51,8 +51,11 @@ dev=[
 requires = ["setuptools", "setuptools-scm", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[project.gui-scripts]
+[project.scripts]
 cashd-server = "cashd.app:run"
+
+[project.gui-scripts]
+cashd-serverd = "cashd.app:run"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

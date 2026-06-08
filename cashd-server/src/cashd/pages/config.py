@@ -8,7 +8,7 @@ from importlib.metadata import version
 from cashd_core import backup
 from cashd_core.prefs import settings
 from cashd_core.const import ESTADOS, DDD
-from cashd.const import EXECUTABLE_PATH, PYTHON_PATH, PROJECT_ROOT
+from cashd.const import EXECUTABLE_PATH, DEAMON_PATH, PYTHON_PATH, PROJECT_ROOT
 from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd.widgets.dialogs import SelectDirDialog, SelectFileDialog
 
@@ -238,7 +238,7 @@ class page:
         """Creates shortcuts to start Cashd Server in native mode."""
         try:
             make_shortcut(
-                f"{EXECUTABLE_PATH} --as-native",
+                f"{DEAMON_PATH} --as-native",
                 name=r"Cashd Server app",
                 description="Execute como um aplicativo sem servi-lo para a rede local",
                 icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
@@ -254,7 +254,7 @@ class page:
         """Creates shortcuts to start Cashd Server in server mode."""
         try:
             make_shortcut(
-                f"{PYTHON_PATH} -m cashd.app",
+                str(EXECUTABLE_PATH),
                 name=r"Cashd Server",
                 description="Inicie o serviço do Cashd Server",
                 icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),

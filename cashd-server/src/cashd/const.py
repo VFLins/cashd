@@ -17,3 +17,8 @@ EXECUTABLE_PATH = (
     if sys.platform == "win32"
     else EXECUTABLE_DIR / "cashd-server"
 )
+DEAMON_PATH = (
+    EXECUTABLE_DIR / "cashd-serverd.exe"
+    if sys.platform == "win32"
+    else EXECUTABLE_DIR / "cashd-serverd"
+)
