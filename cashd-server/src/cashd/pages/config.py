@@ -243,7 +243,7 @@ class page:
                 description="Execute como um aplicativo sem servi-lo para a rede local",
                 icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
                 terminal=False,
-                executable="",
+                executable=None,
             )
         except Exception:
             notify_error(self.ui, "Algo deu errado ao criar atalho, verifique os logs")
@@ -259,7 +259,7 @@ class page:
                 description="Inicie o serviço do Cashd Server",
                 icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
                 terminal=True,
-                executable="",
+                executable=None,
             )
         except Exception:
             notify_error(self.ui, "Algo deu errado ao criar atalho, verifique os logs")
