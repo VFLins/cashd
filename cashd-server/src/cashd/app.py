@@ -2,7 +2,7 @@ import multiprocessing
 import sys
 import os
 
-if sys.platform == "linux":
+if sys.platform.startswith("linux"):
     multiprocessing.set_start_method("spawn", force=True)
 
 # NOTE: The above code must run before any app code. This avoids a possible Runtime Error:
@@ -14,10 +14,11 @@ if sys.platform == "linux":
 import threading
 import argparse
 import asyncio
-import pystray
+if not sys.platform.startswith("linux"):
+    import pystray
+    from PIL import Image
 from multiprocessing import freeze_support
 from pathlib import Path
-from PIL import Image
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -71,6 +72,9 @@ async def show_tray():
     if multiprocessing.current_process().name != "MainProcess":
         # This must only run on the main process to avoid duplicate tray icons
         return
+    if sys.platform.startswith("linux"):
+        # This is not supported on linux systems
+        return
     global sys_tray
     sys_tray = get_tray(app)
     thread = threading.Thread(target=sys_tray.run, daemon=True)
@@ -81,6 +85,8 @@ async def show_tray():
 async def hide_tray():
     """Hide the system tray even when the service is ended outside the tray."""
     if multiprocessing.current_process().name != "MainProcess":
+        return
+    if sys.platform.startswith("linux"):
         return
     global sys_tray
     if sys_tray is not None:
