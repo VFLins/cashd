@@ -254,7 +254,7 @@ class page:
         """Creates shortcuts to start Cashd Server in server mode."""
         try:
             make_shortcut(
-                str(EXECUTABLE_PATH),
+                f"{PYTHON_PATH} -m cashd.app",
                 name=r"Cashd Server",
                 description="Inicie o serviço do Cashd Server",
                 icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),

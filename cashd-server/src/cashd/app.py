@@ -11,10 +11,13 @@ if sys.platform == "linux":
 # > multiprocessing objects and Process.
 # This is probably a bug in the current version of NiceGUI==3.11.1
 
+import threading
 import argparse
 import asyncio
+import pystray
 from multiprocessing import freeze_support
 from pathlib import Path
+from PIL import Image
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -27,6 +30,7 @@ from cashd.pages import main, customer, stats, config, login, user
 MIN_WINDOW_SIZE = (450, 620) if sys.platform == "win32" else (450, 660)
 app.add_static_files("/assets", Path(PROJECT_ROOT, "assets"))
 app.native.window_args["min_size"] = MIN_WINDOW_SIZE
+sys_tray = None  # Use the system tray object name early
 
 
 def get_argparser() -> argparse.ArgumentParser:
@@ -48,6 +52,39 @@ def get_argparser() -> argparse.ArgumentParser:
         ),
     )
     return parser
+
+
+def get_tray(app):
+    icon_path = Path(PROJECT_ROOT, "assets", "ICO_LogoIcone.ico")
+    menu = pystray.Menu(pystray.MenuItem("Encerrar", lambda: app.shutdown()))
+    return pystray.Icon(
+        name="Cashd Server tray",
+        icon=Image.open(icon_path),
+        title="O serviço do Cashd está em execução",
+        menu=menu,
+    )
+
+
+@app.on_startup
+async def show_tray():
+    """Display the system tray icon when starting Cashd Server."""
+    if multiprocessing.current_process().name != "MainProcess":
+        # This must only run on the main process to avoid duplicate tray icons
+        return
+    global sys_tray
+    sys_tray = get_tray(app)
+    thread = threading.Thread(target=sys_tray.run, daemon=True)
+    thread.start()
+
+
+@app.on_shutdown
+async def hide_tray():
+    """Hide the system tray even when the service is ended outside the tray."""
+    if multiprocessing.current_process().name != "MainProcess":
+        return
+    global sys_tray
+    if sys_tray is not None:
+        sys_tray.stop()
 
 
 @app.add_middleware
