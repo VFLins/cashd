@@ -56,7 +56,7 @@ def get_argparser() -> argparse.ArgumentParser:
 
 
 def get_tray(app):
-    icon_path = Path(PROJECT_ROOT, "assets", "ICO_LogoIcone.ico")
+    icon_path = Path(PROJECT_ROOT, "assets", "cashd-wb.ico")
     menu = pystray.Menu(pystray.MenuItem("Encerrar", lambda: app.shutdown()))
     return pystray.Icon(
         name="Cashd Server tray",
@@ -185,7 +185,7 @@ def run():
             native=args.as_native,
             reload=False,
             storage_secret=os.urandom(16).hex(),
-            favicon=PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico",
+            favicon=PROJECT_ROOT / "assets" / "cashd-bw.ico",
         )
     except KeyboardInterrupt:
         print("\nInterrupção solicitada, encerrando servidor...")

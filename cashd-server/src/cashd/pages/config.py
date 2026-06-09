@@ -177,6 +177,11 @@ class page:
                     with ui.item():
                         with ui.item_section():
                             ui.link(link, link, new_tab=True)
+                ui.button(
+                    "Encerrar sessão",
+                    icon="cancel",
+                    on_click=lambda: app.shutdown()
+                ).props("color=negative flat")
             h2(ui, "Desenvolvedor")
             with ui.row():
                 ui.image(
@@ -188,17 +193,22 @@ class page:
                         "Entre em contato", "https://vitorlins.com.br", new_tab=True
                     )
 
-            h1(ui, "Criar atalho")
+            h1(ui, "Criar atalho para executar o Cashd")
             with ui.row():
                 ui.button(
-                    "Para executar como aplicativo",
+                    "Como aplicativo",
                     icon="computer",
                     on_click=self.native_mode_shortcut,
                 ).props("flat")
                 ui.button(
-                    "Para executar como servidor",
+                    "Como servidor",
                     icon="dns",
                     on_click=self.server_mode_shortcut,
+                ).props("flat")
+                ui.button(
+                    "Como servidor sem terminal",
+                    icon="dns",
+                    on_click=self.server_noterm_shortcut,
                 ).props("flat")
 
     def set_config(self, config_name: str, input_name: str):
@@ -239,9 +249,9 @@ class page:
         try:
             make_shortcut(
                 f"{DEAMON_PATH} --as-native",
-                name=r"Cashd Server app",
+                name=r"Cashd Server App",
                 description="Execute como um aplicativo sem servi-lo para a rede local",
-                icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
+                icon=str(PROJECT_ROOT / "assets" / "cashd-bw.ico"),
                 terminal=False,
                 executable=None,
             )
@@ -257,8 +267,24 @@ class page:
                 str(EXECUTABLE_PATH),
                 name=r"Cashd Server",
                 description="Inicie o serviço do Cashd Server",
-                icon=str(PROJECT_ROOT / "assets" / "ICO_LogoIcone.ico"),
+                icon=str(PROJECT_ROOT / "assets" / "cashd-wb.ico"),
                 terminal=True,
+                executable=None,
+            )
+        except Exception:
+            notify_error(self.ui, "Algo deu errado ao criar atalho, verifique os logs")
+        else:
+            notify_success(self.ui, "Atalho criado com sucesso")
+
+    def server_noterm_shortcut(self):
+        """Creates shortcuts to start Cashd Server in server mode without terminal."""
+        try:
+            make_shortcut(
+                str(DEAMON_PATH),
+                name=r"Cashd Server sem terminal",
+                description="Inicie o serviço do Cashd Server",
+                icon=str(PROJECT_ROOT / "assets" / "cashd-tb.ico"),
+                terminal=False,
                 executable=None,
             )
         except Exception:
