@@ -18,7 +18,7 @@ para não deixar o fiado virar um problema.
 O cashd vem em duas distribuições, que possuem a mesma funcionalidade, mas que são pensadas
 para atender casos de uso diferentes:
 
-| <a href="https://github.com/VFLins/cashd/tree/main/cashd-local"><img height="50" alt="Cashd-Local-Logo" src="https://github.com/user-attachments/assets/2ed8ef35-cff2-42af-9cc6-6e649d2534aa" /></a> | <a href="https://github.com/VFLins/cashd/tree/main/cashd-server"><img height="50" alt="Cashd-Server-Logo" src="https://github.com/user-attachments/assets/2d6e5fd4-c219-4c59-a51f-fea4b9bf3ac9" /></a> |
+| <a href="https://github.com/VFLins/cashd/tree/main/cashd-local"><img height="50" alt="Cashd Local" src="https://github.com/user-attachments/assets/2ed8ef35-cff2-42af-9cc6-6e649d2534aa" /></a> | <a href="https://github.com/VFLins/cashd/tree/main/cashd-server"><img height="50" alt="Cashd Server" src="https://github.com/user-attachments/assets/2d6e5fd4-c219-4c59-a51f-fea4b9bf3ac9" /></a> |
 | :---                                                   | :---                                                                                                   |
 | <img alt="Captura de tela: Cashd local" src="https://github.com/user-attachments/assets/e21f483d-bd38-4d70-aa9a-dba5339c841b" /> | <img height="950" alt="Captura de tela: Cashd Server" src="https://github.com/user-attachments/assets/31d7af85-dc95-4a32-b24a-72f037c28517" /> |
 | Instalação simples e convencional.                     | Instalação mais complexa e com mais dependências.                                                      |
