@@ -18,23 +18,17 @@ para não deixar o fiado virar um problema.
 O cashd vem em duas distribuições, que possuem a mesma funcionalidade, mas que são pensadas
 para atender casos de uso diferentes:
 
-| [`cashd-local`](https://github.com/VFLins/cashd/tree/main/cashd-local) | [`cashd-server`](https://github.com/VFLins/cashd/tree/main/cashd-server)               |
+| <a href="https://github.com/VFLins/cashd/tree/main/cashd-local"><img height="50" alt="Cashd-Local-Logo" src="https://github.com/user-attachments/assets/2ed8ef35-cff2-42af-9cc6-6e649d2534aa" /></a> | <a href="https://github.com/VFLins/cashd/tree/main/cashd-server"><img height="50" alt="Cashd-Server-Logo" src="https://github.com/user-attachments/assets/2d6e5fd4-c219-4c59-a51f-fea4b9bf3ac9" /></a> |
 | :---                                                   | :---                                                                                                   |
-| <img alt="Captura de tela: Cashd local" src="https://github.com/user-attachments/assets/e21f483d-bd38-4d70-aa9a-dba5339c841b" /> | <img alt="Captura de tela: Cashd server" src="https://github.com/user-attachments/assets/e9de059b-9ffa-4ef2-aa92-b933b0845315" /> |
+| <img alt="Captura de tela: Cashd local" src="https://github.com/user-attachments/assets/e21f483d-bd38-4d70-aa9a-dba5339c841b" /> | <img height="950" alt="Captura de tela: Cashd Server" src="https://github.com/user-attachments/assets/31d7af85-dc95-4a32-b24a-72f037c28517" /> |
 | Instalação simples e convencional.                     | Instalação mais complexa e com mais dependências.                                                      |
-| Só pode ser usado no dispositivo em que foi instalado. | Indicado para ser hospedado em um servidor, mas também pode ser usado localmente como o `cashd-local`. |
 | Aparência nativa no sistema em que é instalado.        | Aparência de aplicativo Web, independente do dispositivo onde está sendo executado.                    |
+| Só pode ser usado onde foi instalado.                  | Instalado em um dispositivo e acessado no próprio e em outros na mesma rede.                           |
 
-Caso deseje usar o `cashd-server` da maneira indicada, é recomendado que tenha algum
-nível de conhecimento em computadores, e seguir as instruções de instalação com cuidado.
-Caso não tenha conhecimento procure um profissional técnico de confiança para fazer isso
-por você.
-
-> [!WARNING]
-> Na versão atual, a possibilidade de usar o `cashd-server` como serviço ainda
-> é meramente planejada, esta funcionalidade deve ser implementada a partir da versão
-> **0.4.0**.
+Caso deseje usar o [Cashd Server](https://github.com/VFLins/cashd/tree/main/cashd-server) 
+da maneira indicada, é recomendado que tenha algum nível de conhecimento em computadores,
+e seguir as instruções de instalação com cuidado. Caso não tenha conhecimento, procure [um
+profissional](https://vitorlins.com.br) técnico de confiança para fazer isso por você.
 
 Para mais informações sobre as diferentes edições do Cashd, clique no link correspondente
 acima e acesse a documentação de seu interesse.
-
