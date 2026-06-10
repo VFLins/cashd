@@ -24,7 +24,7 @@ classifiers = [
 ]
 version = "0.4.0"
 dependencies = [
-    "cashd-core==0.3.4",
+    "cashd-core==0.4.0",
     "nicegui>=3.13,<4.0",
     "pywebview~=6.2",
     "SQLAlchemy~=2.0",
