@@ -8,7 +8,7 @@ Cashd <img src="https://raw.githubusercontent.com/VFLins/cashd/refs/heads/main/c
 Esta é a edição do **Cashd** que executa como um aplicativo local, você pode registrar tudo pelo
 mesmo computador em que ele está instalado, para uma instalação mais mais avançada, onde é
 possível acessar de múltiplos dispositivos simultaneamente, veja
-[`cashd-server`](https://github.com/VFLins/cashd/tree/main/cashd-server).
+[Cashd Server](https://github.com/VFLins/cashd/tree/main/cashd-server).
 
 <img width="950" alt="Captura de tela: Cashd local" src="https://github.com/user-attachments/assets/e21f483d-bd38-4d70-aa9a-dba5339c841b" />
 
