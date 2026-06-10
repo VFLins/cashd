@@ -17,7 +17,7 @@ dependencies = [
 [tool.briefcase]
 project_name = "Cashd"
 bundle = "br.com.vitorlins.cashd"
-version = "0.3.4"
+version = "0.4.0"
 url = "https://vitorlins.com.br/software/cashd"
 license = "MIT"
 license-files = ["LICENSE"]
