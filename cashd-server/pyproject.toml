@@ -4,7 +4,7 @@ authors = [
     {name = "Vitor F. Lins", email = "vflins@live.com"},
 ]
 description = "Manage a simple cash flow operations on different accounts locally."
-requires-python = ">3.9, <3.13"
+requires-python = ">=3.10"
 keywords = ["cash-flow", "financial", "fiado", "sale-on-credit"]
 license = {file = "LICENSE"}
 readme = "README.md"
@@ -25,22 +25,26 @@ classifiers = [
 version = "0.3.4.post1"
 dependencies = [
     "cashd-core==0.3.4",
-    "taipy==4.*",
-    "SQLAlchemy==2.*",
-    "pywebview>=5.0",
+    "nicegui>=3.13,<4.0",
+    "pywebview~=6.2",
+    "SQLAlchemy~=2.0",
     "phonenumbers>=8.13.31",
-    "pandas>=2.2.0",
-    "pyshortcuts==1.9.0",
+    "pyshortcuts~=1.9.0",
     "plotly>=5.22.0",
-    "PyGObject; sys_platform == 'linux'"
+    "fastapi~=0.136",
+    "starlette~=1.0",
+    "argon2-cffi",
+    "pystray~=0.19; sys_platform != 'linux'",
 ]
 
 [project.optional-dependencies]
 dev=[
+    "pytest~=9.0",
     "pytest-cov>=5.0.0",
+    "pytest-asyncio",
+    "requests~=2.34",
     "black>=24.4.2",
-    "ipykernel",
-    "nbformat"
+    "selenium~=4.44"
 ]
 
 [build-system]
@@ -48,12 +52,17 @@ requires = ["setuptools", "setuptools-scm", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-cashd-server = "cashd.app:start_cashd"
+cashd-server = "cashd.app:run"
+
+[project.gui-scripts]
+cashd-serverd = "cashd.app:run"
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
+main_file = "src/cashd/app.py"
+addopts = ["-p", "nicegui.testing.plugin", "--cov=src", "--cov-report", "html"]
 testpaths = "tests"
 pythonpath = "src"
-addopts = "--cov=src --cov-report html"
 
 [tool.setuptools.packages.find]
 where = ["src"]

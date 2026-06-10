@@ -181,26 +181,6 @@ class PreferencesHandler(SettingsHandler):
     def __init__(self, configname="prefs"):
         super().__init__(configname)
 
-        # set defaults
-        if self.read_highest_balaces_limit() is None:
-            self.write_highest_balaces_limit(10)
-
-    def write_highest_balaces_limit(self, val: str | int):
-        """
-        Controla um limite de contas a ser exibidas na tabela 'Maiores saldos'.
-
-        :raises ValueError: If `val` cannot be coerced to integer.
-        :raises AttributeError: If `val` is not a string.
-        """
-        val = str(val)
-        if not val.isnumeric():
-            raise ValueError(
-                f"Expected an integer or numeric string, got '{val}'.")
-        self._write("default", "highest_balaces_limit", str(val))
-
-    def read_highest_balaces_limit(self) -> int | None:
-        return self._read("default", "highest_balaces_limit", convert_to="int")
-
     @property
     def data_tables_rows_per_page(self) -> int:
         value = self._read(
