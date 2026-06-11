@@ -41,7 +41,7 @@ class PaginatedDetailedList(_DataInteractor):
 
     def _set_data_widget(self, id=None, style=None, on_select=None):
         self.data_widget = DetailedList(id=id, style=style, on_select=on_select)
-        if toga.backend == "toga_winforms":
+        if getattr(toga, "backend", None) == "toga_winforms":
             self.data_widget.style.font_size = 9
 
     def refresh(self, widget: TextInput | None = None):

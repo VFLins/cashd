@@ -178,7 +178,8 @@ class MainSection(BaseSection):
                         self.insert_amount_label,
                         self.amount_input,
                         widgets.elems.form_options_container(
-                            children=[self.insert_transac_button], alignment="center"
+                            children=[self.insert_transac_button],
+                            alignment="center",
                         ),
                     ],
                 ),
@@ -205,11 +206,12 @@ class MainSection(BaseSection):
                 self.undo_customer_data_changes_button,
                 self.confirm_customer_data_changes_button,
             ],
+            width=const.FORM_WIDTH,
         )
         self.customer_data_context_content = ScrollContainer(
             content=Box(
                 style=Pack(
-                    direction=COLUMN, align_items="center", width=const.FORM_WIDTH
+                    direction=COLUMN, align_items="center", width=const.CONTENT_WIDTH
                 ),
                 children=[
                     self.customer_data_form.widget,
