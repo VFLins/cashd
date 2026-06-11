@@ -59,6 +59,7 @@ ICON_TRANSAC = Icon(path=Path(RESOURCES_DIR, "TransacaoBranco"), system=True)
 ICON_CONTAS = Icon(path=Path(RESOURCES_DIR, "ContasBranco"), system=True)
 ICON_STATS = Icon(path=Path(RESOURCES_DIR, "DadosBranco"), system=True)
 ICON_CONFIG = Icon(path=Path(RESOURCES_DIR, "ConfiguracaoBranco"), system=True)
+ICON_PERSON = Icon(path=Path(RESOURCES_DIR, "person"), system=True)
 ICON_RETURN = Icon(
     path=Path(RESOURCES_DIR, "arrow-left-dark" if sys_dark_mode() else "arrow-left"),
     system=True,
