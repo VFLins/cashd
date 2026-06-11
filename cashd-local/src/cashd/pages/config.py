@@ -77,7 +77,7 @@ class ConfigSection(BaseSection):
                 ),
             ]
         )
-        self.statistics_prefs_section_title = Label(
+        self.backup_section_title = Label(
             "Backup",
             style=Pack(
                 font_size=const.BIG_FONT_SIZE,
@@ -122,11 +122,9 @@ class ConfigSection(BaseSection):
         )
 
         self.second_section_content = Box(
-            style=Pack(
-                direction="column", width=const.CONTENT_WIDTH / 2, align_items="center"
-            ),
+            style=Pack(direction="column", width=const.CONTENT_WIDTH / 2),
             children=[
-                self.statistics_prefs_section_title,
+                self.backup_section_title,
                 Divider(style=style.SEPARATOR),
                 self.backup_places_list.widget,
                 self.backup_actions.widget,
