@@ -177,8 +177,8 @@ class MainSection(BaseSection):
                     children=[
                         self.insert_amount_label,
                         self.amount_input,
-                        widgets.elems.form_options_container(
-                            children=[self.insert_transac_button],
+                        widgets.elems.form_options(
+                            buttons=[self.insert_transac_button],
                             alignment="center",
                         ),
                     ],
@@ -201,12 +201,11 @@ class MainSection(BaseSection):
             ],
         )
         # containers: 'customer data' context
-        self.customer_data_interaction_buttons = widgets.elems.form_options_container(
-            children=[
+        self.customer_data_interaction_buttons = widgets.elems.form_options(
+            buttons=[
                 self.undo_customer_data_changes_button,
                 self.confirm_customer_data_changes_button,
             ],
-            width=const.FORM_WIDTH,
         )
         self.customer_data_context_content = ScrollContainer(
             content=Box(

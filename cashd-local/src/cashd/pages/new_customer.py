@@ -31,9 +31,9 @@ class CreateCustomerSection(BaseSection):
             on_press=self.confirm_changes,
             style=style.CONTEXT_BUTTON,
         )
-        self.controls = widgets.elems.form_options_container(
+        self.controls = widgets.elems.form_options(
             width=self.customer_form.widget.style.width,
-            children=[self.undo_button, self.confirm_button],
+            buttons=[self.undo_button, self.confirm_button],
         )
         self.full_contents = Box(
             style=style.FULL_CONTENTS,

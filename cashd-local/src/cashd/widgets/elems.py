@@ -367,8 +367,8 @@ class ListOfItems(_DataInteractor):
         self.refresh()
 
 
-def form_options_container(
-    children: list, alignment="end", width=const.CONTENT_WIDTH
+def form_options(
+    buttons: list, alignment="end", width=const.FORM_WIDTH
 ) -> Box:
     """
     Return a `toga.Box` containing elements that shoud be displayed under a form.
@@ -376,7 +376,7 @@ def form_options_container(
     :param children: Widgets that will be contained in this `toga.Box`, usually buttons.
     :param alignment: Horizontal alignment of elements.
     """
-    inner_container = Box(style=style.ROW_OF_BUTTONS, children=children)
+    inner_container = Box(style=style.ROW_OF_BUTTONS, children=buttons)
     outer_container = Box(
         style=Pack(direction="column", align_items=alignment, width=width),
         children=[inner_container],
