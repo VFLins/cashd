@@ -244,9 +244,9 @@ class MainSection(BaseSection):
             style=Pack(width=1010, direction="row"),
             children=[self.header_block],
         )
-        self.body = ScrollContainer(
+        self.body = Box(
             style=Pack(width=1010, direction="row", flex=1),
-            content=self.body_block,
+            children=[self.body_block],
         )
         self.full_contents = Box(
             style=style.FULL_CONTENTS,
@@ -504,7 +504,7 @@ class MainSection(BaseSection):
                     self.SELECTED_CUSTOMER.NomeCompleto}"
             )
 
-    def rearrange_widgets(self):
+    async def rearrange_widgets(self):
         w, h = self.window_size
         expected_layout_id = 0 if (w < 980) else 1
         if expected_layout_id == self.layout_id:

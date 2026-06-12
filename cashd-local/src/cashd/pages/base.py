@@ -33,10 +33,7 @@ class BaseSection:
         """Returns the window size (w, h) of the `app`'s main window, or the default
         window size when the former is not found.
         """
-        try:
-            return self.app.main_window.size
-        except AttributeError:
-            return const.MAIN_WINDOW_SIZE
+        return getattr(self.app.main_window, "size", const.MAIN_WINDOW_SIZE)
 
     async def rearrange_widgets(self):
         """Rearranges this section's widgets, should be used to turn this section

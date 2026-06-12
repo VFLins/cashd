@@ -123,13 +123,13 @@ FULL_CONTENTS = Pack(
 )
 PAGE_BODY = Pack(
     flex=1,
-    width=const.CONTENT_WIDTH + 20,
+    width=const.CONTENT_WIDTH + 10,
     direction=COLUMN,
     align_items="center",
 )
 DATE_INPUT_CONTROLS = Pack(**write_args(direction=ROW, alignment="center"))
 TABLE_OF_DATA = Pack(
-    flex=1, font_size=const.FONT_SIZE, width=const.CONTENT_WIDTH, align_items="start"
+    flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH, align_items="start"
 )
 INLINE_LABEL = Pack(
     **write_args(

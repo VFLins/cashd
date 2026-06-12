@@ -73,7 +73,7 @@ class CreateCustomerSection(BaseSection):
         self.customer_form.clear()
         self.customer_form.add_table_fields(table=data.get_default_customer())
 
-    def rearrange_widgets(self):
+    async def rearrange_widgets(self):
         width, height = self.window_size
         expected_n_cols = 3 if width > 680 else 2
         if self.customer_form.n_cols == expected_n_cols:
