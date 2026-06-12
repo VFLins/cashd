@@ -66,20 +66,13 @@ class PaginatedDetailedList(_DataInteractor):
         current_backend = getattr(toga, "backend", None)
         native_widget = self.data_widget._impl.native
         match current_backend:
-            case "toga_gtk":
-                if hasattr(native_widget, "get_selection"):
-                    native_widget.get_selection().unselect_all()
-                else:
-                    native_widget.get_child().get_selection().unselect_all()
             case "toga_winforms":
-                self.data_widget._impl._selection = -1
-                default_back_color = native_widget.BackColor
-                for control in native_widget.Controls:
-                    control.BackColor = default_back_color
+                self.data_widget._set_selection(-1)
             case _:
-                raise NotImplementedError(
-                    f"Unselect all rows for DetailedList is unsupported on {current_platform=}"
-                )
+                if current_backend is not None:
+                    raise NotImplementedError(
+                        f"Unselect all rows for DetailedList is unsupported on {current_backend=}"
+                    )
 
     @property
     def width(self):
