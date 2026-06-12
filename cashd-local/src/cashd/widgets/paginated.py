@@ -64,14 +64,14 @@ class PaginatedDetailedList(_DataInteractor):
     def clear_selection(self):
         """Ensures every row on this DetailedList is unselected."""
         current_backend = getattr(toga, "backend", None)
-        native_widget = self.data_widget._impl.native
         match current_backend:
             case "toga_winforms":
-                self.data_widget._set_selection(-1)
+                self.data_widget._impl._set_selection(-1)
             case _:
                 if current_backend is not None:
                     raise NotImplementedError(
-                        f"Unselect all rows for DetailedList is unsupported on {current_backend=}"
+                        "Unselecting all rows for DetailedList is not implemented "
+                        f"on {current_backend=}"
                     )
 
     @property
