@@ -381,6 +381,7 @@ class MainSection(BaseSection):
             )
             self._clear_customer_selection()
             self.update_data_widgets()
+            self.customer_selector.clear_selection()
         self._refresh_navigation_buttons(selection=widget.id)
         self._refresh_help_message(selection=widget.id)
 
