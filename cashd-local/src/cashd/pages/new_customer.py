@@ -75,7 +75,7 @@ class CreateCustomerSection(BaseSection):
 
     async def rearrange_widgets(self):
         width, height = self.window_size
-        expected_n_cols = 3 if width > 680 else 2
+        expected_n_cols = 3 if width > 630 else 2
         if self.customer_form.n_cols == expected_n_cols:
             return
         self.customer_form.reshape(n_cols=expected_n_cols)

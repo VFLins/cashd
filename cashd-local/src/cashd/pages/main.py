@@ -252,8 +252,8 @@ class MainSection(BaseSection):
             style=style.FULL_CONTENTS,
             children=[self.head, self.body],
         )
-        self.set_layout_1()
-        self.layout_id: int = 1
+        self.set_layout_0()
+        self.layout_id: int = 0
 
     def set_layout_0(self):
         """Returns this section's widgets in a single-column layout."""
@@ -276,9 +276,10 @@ class MainSection(BaseSection):
         self.body_block.add(
             self.customer_selector.widget, self.customer_options_section
         )
-        self.customer_selector.width = const.CONTENT_WIDTH - 60
-        self.head.style = Pack(width=950, direction="row")
-        self.body.style = Pack(width=950, direction="row", flex=1)
+        width = int(const.CONTENT_WIDTH * 2) - 50
+        self.customer_selector.width = const.FORM_WIDTH
+        self.head.style = Pack(width=width, direction="row")
+        self.body.style = Pack(width=width, direction="row", flex=1)
 
     def select_customer(self, widget: Selection):
         if widget.selection is None:
@@ -507,7 +508,7 @@ class MainSection(BaseSection):
 
     async def rearrange_widgets(self):
         w, h = self.window_size
-        expected_layout_id = 0 if (w < 980) else 1
+        expected_layout_id = 0 if (w < 870) else 1
         if expected_layout_id == self.layout_id:
             return
         match expected_layout_id:
