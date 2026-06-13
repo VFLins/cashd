@@ -1,4 +1,5 @@
 import re
+import sys
 import datetime as dt
 from sqlalchemy import exc
 
@@ -185,6 +186,7 @@ class MainSection(BaseSection):
                 ),
             ],
         )
+        self.insert_transaction_context_content.style.background_color = "#F9F9F9"
         # containers: 'transac history' context
         self.transac_history_options = Box(
             style=Pack(direction=COLUMN, width=180, flex=1),
@@ -200,6 +202,8 @@ class MainSection(BaseSection):
                 self.transac_history_options,
             ],
         )
+        if sys.platform == "win32":
+            self.transaction_history_context_content.background_color = "#F9F9F9"
         # containers: 'customer data' context
         self.customer_data_interaction_buttons = widgets.elems.form_options(
             width=self.customer_data_form.widget.width,
@@ -208,15 +212,15 @@ class MainSection(BaseSection):
                 self.confirm_customer_data_changes_button,
             ],
         )
-        self.customer_data_context_content = ScrollContainer(
-            content=Box(
-                style=Pack(direction=COLUMN, align_items="center"),
-                children=[
-                    self.customer_data_form.widget,
-                    self.customer_data_interaction_buttons,
-                ],
-            )
+        self.customer_data_context_content = Box(
+            style=Pack(direction=COLUMN, align_items="center"),
+            children=[
+                self.customer_data_form.widget,
+                self.customer_data_interaction_buttons,
+            ],
         )
+        if sys.platform == "win32":
+            self.customer_data_context_content.background_color = "#F9F9F9"
         # containers: 'options' context
         self.customer_options_section = OptionContainer(
             style=Pack(
