@@ -54,7 +54,7 @@ def form_options_container(children, alignment="end") -> Box:
 def user_input(widget_type: Type[Widget]) -> Pack:
     """Returns the default style for the user input's form element."""
     if widget_type in [TextInput, Button]:
-        return Pack(margin=(0, 5), width=190, font_size=const.FONT_SIZE)
+        return Pack(margin=(0, 5), width=160, font_size=const.FONT_SIZE)
     elif widget_type is NumberInput:
         return _system_based_number_input_style()
     elif widget_type is Selection:

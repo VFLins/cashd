@@ -204,7 +204,7 @@ class FormHandler:
             elem_width = max(widths)
         else:
             elem_width = style.user_input(TextInput).width
-        return int(n_cols * elem_width) + 20
+        return int(n_cols * elem_width)
 
     @staticmethod
     def _get_ncols(widgets: list[Widget], row_width: int) -> int:

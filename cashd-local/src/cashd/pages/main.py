@@ -210,7 +210,7 @@ class MainSection(BaseSection):
         self.customer_data_context_content = ScrollContainer(
             content=Box(
                 style=Pack(
-                    direction=COLUMN, align_items="center", width=const.CONTENT_WIDTH
+                    direction=COLUMN, align_items="center", width=const.FORM_WIDTH
                 ),
                 children=[
                     self.customer_data_form.widget,
