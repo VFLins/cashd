@@ -79,7 +79,7 @@ class SubsectionAddTransac:
             ],
         )
         if sys.platform == "win32":
-            self.insert_transaction_context_content.style.background_color = "#F9F9F9"
+            self.full_contents.style.background_color = "#F9F9F9"
 
     def insert_transaction(self, widget: Button):
         """Register transaction data to the database."""
@@ -127,6 +127,7 @@ class SubsectionTransacHistory:
             data=self.SELECTED_CUSTOMER.Transacs,
             headings=["Data", "Valor"],
             on_select=self.select_transac,
+            on_activate=self.select_transac,
         )
         """Table containing all transactions of the currently selected customer."""
 
