@@ -67,7 +67,7 @@ class MainSection(BaseSection):
         )
         """Button that returns the user to the context of customer selection."""
 
-       # widgets: 'select' context
+        # widgets: 'select' context
         self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.select_customer,
@@ -202,6 +202,7 @@ class MainSection(BaseSection):
         )
         # containers: 'customer data' context
         self.customer_data_interaction_buttons = widgets.elems.form_options(
+            width=self.customer_data_form.widget.width,
             buttons=[
                 self.undo_customer_data_changes_button,
                 self.confirm_customer_data_changes_button,
@@ -209,9 +210,7 @@ class MainSection(BaseSection):
         )
         self.customer_data_context_content = ScrollContainer(
             content=Box(
-                style=Pack(
-                    direction=COLUMN, align_items="center", width=const.FORM_WIDTH
-                ),
+                style=Pack(direction=COLUMN, align_items="center"),
                 children=[
                     self.customer_data_form.widget,
                     self.customer_data_interaction_buttons,

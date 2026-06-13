@@ -15,7 +15,7 @@ class CreateCustomerSection(BaseSection):
         super().__init__(app)
         # Winforms erroes if this class is instantiated outside a class function
         self.customer_form = FormHandler(
-            n_cols=3,
+            n_cols=2,
             on_change=self.change_fields,
         )
         self.customer_form.add_table_fields(table=data.get_default_customer())

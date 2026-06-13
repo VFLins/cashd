@@ -367,9 +367,7 @@ class ListOfItems(_DataInteractor):
         self.refresh()
 
 
-def form_options(
-    buttons: list, alignment="end", width=const.FORM_WIDTH
-) -> Box:
+def form_options(buttons: list, alignment="end", width=const.FORM_WIDTH) -> Box:
     """
     Return a `toga.Box` containing elements that shoud be displayed under a form.
 
