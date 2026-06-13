@@ -9,7 +9,7 @@ from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN
 from toga.dialogs import ConfirmDialog
-from toga.widgets.box import Box
+from toga.widgets.box import Box, Column
 from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
@@ -29,7 +29,6 @@ from cashd.widgets.paginated import PaginatedDetailedList
 class SubsectionAddTransac:
     def __init__(
         self,
-        app: App,
         selected_customer: data.tbl_clientes,
         on_insert: Callable[[], None] | None,
     ):
@@ -50,7 +49,7 @@ class SubsectionAddTransac:
         self.amount_input = TextInput(
             style=style.user_input(TextInput),
             placeholder="0,00",
-            on_change=self.update_typed_transaction_amount,
+            on_change=self.update_amount_label,
             on_confirm=self.insert_transaction,
         )
         """Text input that only allows integer and decimal numbers. Receives the
@@ -99,16 +98,79 @@ class SubsectionAddTransac:
         if self.on_insert is not None:
             self.on_insert()
 
-    def update_typed_transaction_amount(self, widget):
+    def update_amount_label(self, widget):
+        """Updates the `SubsectionAddTransac.amount_label` to reflect the amount
+        typed by the user.
+        """
         setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
         amount_input = fmt.StringToCurrency(user_input=widget.value)
-        self.amount_label.text = f"Valor: R$ {
-            amount_input.display_value}"
+        self.amount_label.text = f"Valor: R$ {amount_input.display_value}"
         if amount_input.is_valid():
+            # Enables button if a valid customer is selected
             if self.SELECTED_CUSTOMER.required_fields_are_filled():
                 self.confirm_button.enabled = True
         else:
             self.confirm_button.enabled = False
+
+
+class SubsectionTransacHistory:
+    def __init__(
+        self,
+        selected_customer: data.tbl_clientes,
+        on_delete: Callable[[], None] | None,
+    ):
+        self.SELECTED_CUSTOMER = selected_customer
+        self.on_delete = on_delete
+
+        self.table = Table(
+            style=Pack(flex=1, font_size=const.FONT_SIZE),
+            data=self.SELECTED_CUSTOMER.Transacs,
+            headings=["Data", "Valor"],
+            on_select=self.select_transac,
+        )
+        """Table containing all transactions of the currently selected customer."""
+
+        self.remove_button = Button("Remover selecionado", enabled=False, on_press=self.remove_transac)
+        """Button to remove the selected transaction on `transaction_history_table`."""
+
+        self.print_button = Button("Imprimir histórico", style=Pack(margin_left=10), enabled=False)
+        """Button to open the dialog for printing the last few transactions registered
+        and current owed amount. This feature is aimed for thermal printers.
+        """
+
+        self.options_container = Box(
+            style=Pack(margin=5),
+            children=[self.remove_button, self.print_button],
+        )
+        self.full_contents = Column(
+            children=[self.options_container, self.table],
+        )
+        if sys.platform == "win32":
+            self.options_container.style.background_color = "#F9F9F9"
+            self.full_contents.style.background_color = "#F9F9F9"
+
+    def select_transac(self, widget):
+        self.remove_button.enabled = True
+        if widget.selection is None:
+            self.remove_button.enabled = False
+
+    async def remove_transac(self, widget: Button):
+        transac_id = self.table.selection.id
+        transac = data.tbl_transacoes()
+        transac.read(row_id=transac_id)
+        transac_value = f"R$ {transac.Valor/100}".replace(".", ",")
+        confirm = ConfirmDialog(
+            title="Remover transação?",
+            message=f"Data: {transac.DataTransac}\nValor: {transac_value}",
+        )
+        if await widget.app.dialog(confirm):
+            transac.delete()
+            if self.on_delete is not None:
+                self.on_delete()
+            # clear table before filling to avoid glitches from winforms
+            self.table.data = []
+            self.table.data = self.SELECTED_CUSTOMER.Transacs
+            print(f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}")
 
 
 class MainSection(BaseSection):
@@ -119,9 +181,13 @@ class MainSection(BaseSection):
         super().__init__(app)
 
         self.subsection_add_transac = SubsectionAddTransac(
-            app=app,
             selected_customer=self.SELECTED_CUSTOMER,
             on_insert=self._upd_selected_info,
+        )
+
+        self.subsection_transac_history = SubsectionTransacHistory(
+            selected_customer=self.SELECTED_CUSTOMER,
+            on_delete=self._upd_selected_info,
         )
 
         # widgets: all contexts
@@ -166,32 +232,6 @@ class MainSection(BaseSection):
         all registered customers.
         """
 
-        # widgets: 'transac history' context
-        self.transaction_history_table = Table(
-            style=Pack(flex=1, font_size=const.FONT_SIZE),
-            data=self.SELECTED_CUSTOMER.Transacs,
-            headings=["Data", "Valor"],
-            on_select=self.select_transaction,
-        )
-        """Table containing all transactions of the currently selected customer."""
-
-        self.remove_transaction_button = Button(
-            "Remover transação",
-            enabled=False,
-            style=style.VERTICAL_ALIGNED_BUTTON,
-            on_press=self.remove_selected_transaction,
-        )
-        """Button to remove the selected transaction on `transaction_history_table`."""
-
-        self.print_transaction_history_button = Button(
-            "Imprimir",
-            enabled=False,
-            style=style.VERTICAL_ALIGNED_BUTTON,
-        )
-        """Button to open the dialog for printing the last few transactions registered
-        and current owed amount. This feature is aimed for thermal printers.
-        """
-
         # widgets: 'customer data' context
         self.customer_data_form = widgets.form.FormHandler(
             n_cols=2,
@@ -218,24 +258,6 @@ class MainSection(BaseSection):
         )
         """Button to write any changes made by the user on `customer_data_form_widgets`
         to the database. Enabled only when any information is changed."""
-
-        # containers: 'transac history' context
-        self.transac_history_options = Box(
-            style=Pack(direction=COLUMN, width=180, flex=1),
-            children=[
-                self.remove_transaction_button,
-                self.print_transaction_history_button,
-            ],
-        )
-        self.transaction_history_context_content = Box(
-            style=style.HORIZONTAL_BOX,
-            children=[
-                self.transaction_history_table,
-                self.transac_history_options,
-            ],
-        )
-        if sys.platform == "win32":
-            self.transaction_history_context_content.background_color = "#F9F9F9"
 
         # containers: 'customer data' context
         self.customer_data_interaction_buttons = widgets.elems.form_options(
@@ -264,7 +286,7 @@ class MainSection(BaseSection):
             ),
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
-                ("Histórico de transações", self.transaction_history_context_content),
+                ("Histórico de transações", self.subsection_transac_history.full_contents),
                 ("Informações", self.customer_data_context_content),
             ],
         )
@@ -337,7 +359,7 @@ class MainSection(BaseSection):
             f"Local: {self.SELECTED_CUSTOMER.Local}\n"
             f"Saldo devedor: R$ {self.SELECTED_CUSTOMER.Saldo}"
         )
-        self.transaction_history_table.data = self.SELECTED_CUSTOMER.Transacs
+        self.subsection_transac_history.table.data = self.SELECTED_CUSTOMER.Transacs
         self.customer_data_form.clear()
         self.customer_data_form.add_table_fields(self.SELECTED_CUSTOMER)
 
@@ -451,7 +473,7 @@ class MainSection(BaseSection):
         self.SELECTED_CUSTOMER.clear()
         self.subsection_add_transac.amount_input.enabled = False
         self.subsection_add_transac.confirm_button.enabled = False
-        self.transaction_history_table.data = None
+        self.subsection_transac_history.table.data = None
         self.customer_data_form.clear()
         self.selected_customer_info.text = (
             f"Nome: {const.NA_VALUE}\n"
@@ -459,11 +481,6 @@ class MainSection(BaseSection):
             f"Saldo devedor: R$ {const.NA_VALUE}"
         )
         self.customer_selector.search_field.value = ""
-
-    def select_transaction(self, widget):
-        self.remove_transaction_button.enabled = True
-        if widget.selection is None:
-            self.remove_transaction_button.enabled = False
 
     def update_customer_data_field(self, widget):
         """App behaviour when the user interacts with any of the fields of
@@ -497,25 +514,6 @@ class MainSection(BaseSection):
 
     def update_data_widgets(self):
         self.customer_selector.refresh(self.CUSTOMER_LIST)
-
-    async def remove_selected_transaction(self, widget: Button):
-        transac_id = self.transaction_history_table.selection.id
-        transac = data.tbl_transacoes()
-        transac.read(row_id=transac_id)
-        confirm = ConfirmDialog(
-            title="Remover transação?",
-            message=f"Data: {transac.DataTransac}\nValor: {transac.Valor/100}",
-        )
-        if await widget.app.dialog(confirm):
-            transac.delete()
-            self._upd_selected_info()
-            # clear table before filling to avoid glitches from winforms
-            self.transaction_history_table.data = []
-            self.transaction_history_table.data = self.SELECTED_CUSTOMER.Transacs
-            print(
-                f"Removed {transac_id=} from {
-                    self.SELECTED_CUSTOMER.NomeCompleto}"
-            )
 
     async def rearrange_widgets(self):
         w, h = self.window_size
