@@ -74,11 +74,12 @@ def input_annotation(annotation_type: Literal["label", "legend"] = "label") -> P
 
 
 def number_input_width():
+    min_width = 135
     if platform != "linux":
         return const.FONT_SIZE * 7
-    width = const.FONT_SIZE * 13
-    if width <= 160:
-        return 160
+    width = const.FONT_SIZE * 11
+    if width <= min_width:
+        return min_width
     else:
         return width
 
@@ -127,7 +128,6 @@ PAGE_BODY = Pack(
     direction=COLUMN,
     align_items="center",
 )
-DATE_INPUT_CONTROLS = Pack(**write_args(direction=ROW, alignment="center"))
 TABLE_OF_DATA = Pack(
     flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH, align_items="start"
 )

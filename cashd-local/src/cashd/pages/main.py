@@ -67,7 +67,7 @@ class MainSection(BaseSection):
         )
         """Button that returns the user to the context of customer selection."""
 
-        # widgets: 'select' context
+       # widgets: 'select' context
         self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.select_customer,
