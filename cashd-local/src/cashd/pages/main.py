@@ -130,10 +130,14 @@ class SubsectionTransacHistory:
         )
         """Table containing all transactions of the currently selected customer."""
 
-        self.remove_button = Button("Remover selecionado", enabled=False, on_press=self.remove_transac)
+        self.remove_button = Button(
+            "Remover selecionado", enabled=False, on_press=self.remove_transac
+        )
         """Button to remove the selected transaction on `transaction_history_table`."""
 
-        self.print_button = Button("Imprimir histórico", style=Pack(margin_left=10), enabled=False)
+        self.print_button = Button(
+            "Imprimir histórico", style=Pack(margin_left=10), enabled=False
+        )
         """Button to open the dialog for printing the last few transactions registered
         and current owed amount. This feature is aimed for thermal printers.
         """
@@ -286,7 +290,10 @@ class MainSection(BaseSection):
             ),
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
-                ("Histórico de transações", self.subsection_transac_history.full_contents),
+                (
+                    "Histórico de transações",
+                    self.subsection_transac_history.full_contents,
+                ),
                 ("Informações", self.customer_data_context_content),
             ],
         )
