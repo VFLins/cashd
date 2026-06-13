@@ -2,7 +2,9 @@ import re
 import sys
 import datetime as dt
 from sqlalchemy import exc
+from typing import Callable
 
+from toga import Widget
 from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN
@@ -24,12 +26,103 @@ from cashd.pages.base import BaseSection
 from cashd.widgets.paginated import PaginatedDetailedList
 
 
+class SubsectionAddTransac:
+    def __init__(
+        self,
+        app: App,
+        selected_customer: data.tbl_clientes,
+        on_insert: Callable[[], None] | None,
+    ):
+        self.SELECTED_CUSTOMER = selected_customer
+        self.on_insert = on_insert
+
+        self.date_input_form = widgets.HorizontalDateForm()
+        """Custom date input form from 'Inserir transação' context."""
+
+        self.amount_label = Label(
+            "Valor: R$ 0,00",
+            style=style.input_annotation(),
+        )
+        """Label that dynamically displays the currency amount that will be
+        inserted by the user.
+        """
+
+        self.amount_input = TextInput(
+            style=style.user_input(TextInput),
+            placeholder="0,00",
+            on_change=self.update_typed_transaction_amount,
+            on_confirm=self.insert_transaction,
+        )
+        """Text input that only allows integer and decimal numbers. Receives the
+        currency amount of the transaction.
+        """
+        # This input shall be enabled after checking if there are any
+        # customers registered
+        self.amount_input.enabled = False
+
+        self.confirm_button = Button(
+            "Inserir",
+            style=style.CONTEXT_BUTTON,
+            enabled=False,
+            on_press=self.insert_transaction,
+        )
+        """Button to write the transaction with date and currency amount inserted
+        by the user to the database.
+        """
+
+        self.full_contents = Box(
+            style=style.FILLING_VERTICAL_BOX,
+            children=[
+                self.date_input_form.widget,
+                self.amount_label,
+                self.amount_input,
+                self.confirm_button,
+            ],
+        )
+        if sys.platform == "win32":
+            self.insert_transaction_context_content.style.background_color = "#F9F9F9"
+
+    def insert_transaction(self, widget: Button):
+        """Register transaction data to the database."""
+        amount_input = fmt.StringToCurrency(user_input=self.amount_input.value)
+        if not amount_input.is_valid():
+            return
+        transac_data = data.tbl_transacoes(
+            IdCliente=self.SELECTED_CUSTOMER.Id,
+            CarimboTempo=dt.datetime.now(),
+            DataTransac=self.date_input_form.value,
+            Valor=amount_input.value,
+        )
+        transac_data.write()
+        self.confirm_button.enabled = False
+        self.amount_input.value = ""
+        if self.on_insert is not None:
+            self.on_insert()
+
+    def update_typed_transaction_amount(self, widget):
+        setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
+        amount_input = fmt.StringToCurrency(user_input=widget.value)
+        self.amount_label.text = f"Valor: R$ {
+            amount_input.display_value}"
+        if amount_input.is_valid():
+            if self.SELECTED_CUSTOMER.required_fields_are_filled():
+                self.confirm_button.enabled = True
+        else:
+            self.confirm_button.enabled = False
+
+
 class MainSection(BaseSection):
     SELECTED_CUSTOMER = data.tbl_clientes()
     CUSTOMER_LIST = data.CustomerListSource()
 
     def __init__(self, app: App):
         super().__init__(app)
+
+        self.subsection_add_transac = SubsectionAddTransac(
+            app=app,
+            selected_customer=self.SELECTED_CUSTOMER,
+            on_insert=self._upd_selected_info,
+        )
 
         # widgets: all contexts
         self.selected_customer_info = Label(
@@ -49,11 +142,6 @@ class MainSection(BaseSection):
             on_press=self.set_context_screen,
         )
         """Button that changes context to interact with the selected user."""
-
-        self.context_separator = Divider(
-            style=style.SEPARATOR,
-        )
-        """Divider that separates the header and the body of the current page."""
 
         self.help_msg = Label(
             "Selecione um cliente para escolher uma operação",
@@ -76,39 +164,6 @@ class MainSection(BaseSection):
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
-        """
-
-        # widgets: 'insert' context
-        self.date_input_controls = widgets.HorizontalDateForm()
-        """Custom date input form from 'Inserir transação' context."""
-
-        self.insert_amount_label = Label(
-            "Valor: R$ 0,00",
-            style=style.input_annotation(),
-        )
-        """Label that dynamically displays the currency amount that will be
-        inserted by the user.
-        """
-
-        self.amount_input = TextInput(
-            style=style.user_input(TextInput),
-            placeholder="0,00",
-            on_change=self.update_typed_transaction_amount,
-            on_confirm=self.insert_transaction,
-        )
-        """Text input that only allows integer and decimal numbers. Receives the
-        currency amount of the transaction.
-        """
-        self.amount_input.enabled = False
-
-        self.insert_transac_button = Button(
-            "Inserir",
-            style=style.CONTEXT_BUTTON,
-            enabled=False,
-            on_press=self.insert_transaction,
-        )
-        """Button to write the transaction with date and currency amount inserted
-        by the user to the database.
         """
 
         # widgets: 'transac history' context
@@ -164,19 +219,6 @@ class MainSection(BaseSection):
         """Button to write any changes made by the user on `customer_data_form_widgets`
         to the database. Enabled only when any information is changed."""
 
-        # containers: 'insert' context
-        self.insert_transaction_context_content = Box(
-            style=style.FILLING_VERTICAL_BOX,
-            children=[
-                self.date_input_controls.widget,
-                self.insert_amount_label,
-                self.amount_input,
-                self.insert_transac_button,
-            ],
-        )
-        if sys.platform == "win32":
-            self.insert_transaction_context_content.style.background_color = "#F9F9F9"
-
         # containers: 'transac history' context
         self.transac_history_options = Box(
             style=Pack(direction=COLUMN, width=180, flex=1),
@@ -221,7 +263,7 @@ class MainSection(BaseSection):
                 padding=(0, 0, 0, 10),
             ),
             content=[
-                ("Nova transação", self.insert_transaction_context_content),
+                ("Nova transação", self.subsection_add_transac.full_contents),
                 ("Histórico de transações", self.transaction_history_context_content),
                 ("Informações", self.customer_data_context_content),
             ],
@@ -279,13 +321,13 @@ class MainSection(BaseSection):
 
     def select_customer(self, widget: Selection):
         if widget.selection is None:
-            self.amount_input.enabled = False
+            self.subsection_add_transac.amount_input.enabled = False
             self.customer_options_button.enabled = False
             return
         print(f"selected: {widget.selection}")
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
         self._upd_selected_info()
-        self.amount_input.enabled = True
+        self.subsection_add_transac.amount_input.enabled = True
         self.customer_options_button.enabled = True
 
     def _upd_selected_info(self):
@@ -407,8 +449,8 @@ class MainSection(BaseSection):
 
     def _clear_customer_selection(self):
         self.SELECTED_CUSTOMER.clear()
-        self.amount_input.enabled = False
-        self.insert_transac_button.enabled = False
+        self.subsection_add_transac.amount_input.enabled = False
+        self.subsection_add_transac.confirm_button.enabled = False
         self.transaction_history_table.data = None
         self.customer_data_form.clear()
         self.selected_customer_info.text = (
@@ -417,17 +459,6 @@ class MainSection(BaseSection):
             f"Saldo devedor: R$ {const.NA_VALUE}"
         )
         self.customer_selector.search_field.value = ""
-
-    def update_typed_transaction_amount(self, widget):
-        setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
-        amount_input = fmt.StringToCurrency(user_input=widget.value)
-        self.insert_amount_label.text = f"Valor: R$ {
-            amount_input.display_value}"
-        if amount_input.is_valid():
-            if self.SELECTED_CUSTOMER.required_fields_are_filled():
-                self.insert_transac_button.enabled = True
-        else:
-            self.insert_transac_button.enabled = False
 
     def select_transaction(self, widget):
         self.remove_transaction_button.enabled = True
@@ -466,22 +497,6 @@ class MainSection(BaseSection):
 
     def update_data_widgets(self):
         self.customer_selector.refresh(self.CUSTOMER_LIST)
-
-    def insert_transaction(self, widget: Button):
-        """Register transaction data to the database."""
-        amount_input = fmt.StringToCurrency(user_input=self.amount_input.value)
-        if not amount_input.is_valid():
-            return
-        transac_data = data.tbl_transacoes(
-            IdCliente=self.SELECTED_CUSTOMER.Id,
-            CarimboTempo=dt.datetime.now(),
-            DataTransac=self.date_input_controls.value,
-            Valor=amount_input.value,
-        )
-        transac_data.write()
-        self.insert_transac_button.enabled = False
-        self.amount_input.value = ""
-        self._upd_selected_info()
 
     async def remove_selected_transaction(self, widget: Button):
         transac_id = self.transaction_history_table.selection.id
