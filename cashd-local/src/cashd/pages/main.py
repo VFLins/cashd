@@ -30,7 +30,7 @@ class SubsectionAddTransac:
     def __init__(
         self,
         selected_customer: data.tbl_clientes,
-        on_insert: Callable[[], None] | None,
+        on_insert: Callable[[], None] | None = None,
     ):
         self.SELECTED_CUSTOMER = selected_customer
         self.on_insert = on_insert
@@ -117,7 +117,7 @@ class SubsectionTransacHistory:
     def __init__(
         self,
         selected_customer: data.tbl_clientes,
-        on_delete: Callable[[], None] | None,
+        on_delete: Callable[[], None] | None = None,
     ):
         self.SELECTED_CUSTOMER = selected_customer
         self.on_delete = on_delete
@@ -180,6 +180,84 @@ class SubsectionTransacHistory:
             print(f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}")
 
 
+class SectionCustomerInfo:
+    def __init__(
+        self,
+        selected_customer: data.tbl_clientes,
+        on_update: Callable[[], None] | None = None,
+    ):
+        self.SELECTED_CUSTOMER = selected_customer
+        self.on_update = on_update
+
+        self.form = widgets.form.FormHandler(
+            n_cols=2,
+            on_change=self.handle_confirm_permission,
+        )
+        """Multiple text input fields containing the current information of the
+        selected customer.
+        """
+
+        self.undo_button = Button(
+            "Desfazer",
+            enabled=False,
+            on_press=self.undo_changes,
+            style=style.CONTEXT_BUTTON,
+        )
+        """Button to undo any changes made by the user on `customer_data_form_widgets`.
+        Enabled only when any information is changed."""
+
+        self.confirm_button = Button(
+            "Confirmar",
+            enabled=False,
+            on_press=self.confirm_changes,
+            style=style.CONTEXT_BUTTON,
+        )
+        """Button to write any changes made by the user on `customer_data_form_widgets`
+        to the database. Enabled only when any information is changed."""
+
+        self.options_container = widgets.elems.form_options(
+            width=self.form.widget.width,
+            buttons=[self.undo_button, self.confirm_button],
+        )
+        self.body = Box(
+            style=Pack(direction=COLUMN, align_items="center"),
+            children=[self.form.widget, self.options_container],
+        )
+        self.full_contents = ScrollContainer(content=self.body)
+        if sys.platform == "win32":
+            self.customer_data_context_content.style.background_color = "#F9F9F9"
+
+    def handle_confirm_permission(self, widget):
+        """App behaviour when the user interacts with any of the fields of
+        `customer_data_form`.
+        """
+        if self.form.required_fields_are_filled():
+            self.confirm_button.enabled = True
+        else:
+            self.confirm_button.enabled = False
+        self.undo_button.enabled = True
+
+    def undo_changes(self, widget: Button):
+        self.undo_button.enabled = False
+        self.confirm_button.enabled = False
+        self.form.clear()
+        self.form.add_table_fields(self.SELECTED_CUSTOMER)
+
+    def confirm_changes(self, widget):
+        new_data = data.tbl_clientes(
+            Id=self.SELECTED_CUSTOMER.Id, **self.form.data
+        )
+        self.SELECTED_CUSTOMER.fill(new_data)
+        try:
+            self.SELECTED_CUSTOMER.update()
+            self.form.clear()
+            self.form.add_table_fields(self.SELECTED_CUSTOMER)
+            print(f"customer data updated to: {new_data}")
+        except exc.StatementError as err:
+            self.undo_changes(widget)
+            print(f"Alteração proibida: {str(err.args[0])}")
+
+
 class MainSection(BaseSection):
     SELECTED_CUSTOMER = data.tbl_clientes()
     CUSTOMER_LIST = data.CustomerListSource()
@@ -195,6 +273,11 @@ class MainSection(BaseSection):
         self.subsection_transac_history = SubsectionTransacHistory(
             selected_customer=self.SELECTED_CUSTOMER,
             on_delete=self._upd_selected_info,
+        )
+
+        self.subsection_customer_info = SectionCustomerInfo(
+            selected_customer=self.SELECTED_CUSTOMER,
+            on_update=self._upd_selected_info,
         )
 
         # widgets: all contexts
@@ -239,51 +322,6 @@ class MainSection(BaseSection):
         all registered customers.
         """
 
-        # widgets: 'customer data' context
-        self.customer_data_form = widgets.form.FormHandler(
-            n_cols=2,
-            on_change=self.update_customer_data_field,
-        )
-        """Multiple text input fields containing the current information of the
-        selected customer.
-        """
-
-        self.undo_customer_data_changes_button = Button(
-            "Desfazer",
-            enabled=False,
-            on_press=self.undo_customer_data_update,
-            style=style.CONTEXT_BUTTON,
-        )
-        """Button to undo any changes made by the user on `customer_data_form_widgets`.
-        Enabled only when any information is changed."""
-
-        self.confirm_customer_data_changes_button = Button(
-            "Confirmar",
-            enabled=False,
-            on_press=self.confirm_customer_data_update,
-            style=style.CONTEXT_BUTTON,
-        )
-        """Button to write any changes made by the user on `customer_data_form_widgets`
-        to the database. Enabled only when any information is changed."""
-
-        # containers: 'customer data' context
-        self.customer_data_interaction_buttons = widgets.elems.form_options(
-            width=self.customer_data_form.widget.width,
-            buttons=[
-                self.undo_customer_data_changes_button,
-                self.confirm_customer_data_changes_button,
-            ],
-        )
-        self.customer_data_context_content = Box(
-            style=Pack(direction=COLUMN, align_items="center"),
-            children=[
-                self.customer_data_form.widget,
-                self.customer_data_interaction_buttons,
-            ],
-        )
-        if sys.platform == "win32":
-            self.customer_data_context_content.style.background_color = "#F9F9F9"
-
         # containers: 'options' context
         self.customer_options_section = OptionContainer(
             style=Pack(
@@ -297,7 +335,7 @@ class MainSection(BaseSection):
                     "Histórico de transações",
                     self.subsection_transac_history.full_contents,
                 ),
-                ("Informações", self.customer_data_context_content),
+                ("Informações", self.subsection_customer_info.full_contents),
             ],
         )
 
@@ -370,8 +408,8 @@ class MainSection(BaseSection):
             f"Saldo devedor: R$ {self.SELECTED_CUSTOMER.Saldo}"
         )
         self.subsection_transac_history.table.data = self.SELECTED_CUSTOMER.Transacs
-        self.customer_data_form.clear()
-        self.customer_data_form.add_table_fields(self.SELECTED_CUSTOMER)
+        self.subsection_customer_info.form.clear()
+        self.subsection_customer_info.form.add_table_fields(self.SELECTED_CUSTOMER)
 
     def _search_results(self, search: str):
         if len(search) == 0:
@@ -484,43 +522,13 @@ class MainSection(BaseSection):
         self.subsection_add_transac.amount_input.enabled = False
         self.subsection_add_transac.confirm_button.enabled = False
         self.subsection_transac_history.table.data = None
-        self.customer_data_form.clear()
+        self.subsection_customer_info.form.clear()
         self.selected_customer_info.text = (
             f"Nome: {const.NA_VALUE}\n"
             f"Local: {const.NA_VALUE}\n"
             f"Saldo devedor: R$ {const.NA_VALUE}"
         )
         self.customer_selector.search_field.value = ""
-
-    def update_customer_data_field(self, widget):
-        """App behaviour when the user interacts with any of the fields of
-        `customer_data_form`.
-        """
-        if self.customer_data_form.required_fields_are_filled():
-            self.confirm_customer_data_changes_button.enabled = True
-        else:
-            self.confirm_customer_data_changes_button.enabled = False
-        self.undo_customer_data_changes_button.enabled = True
-
-    def undo_customer_data_update(self, widget: Button):
-        self.undo_customer_data_changes_button.enabled = False
-        self.confirm_customer_data_changes_button.enabled = False
-        self.customer_data_form.clear()
-        self.customer_data_form.add_table_fields(self.SELECTED_CUSTOMER)
-
-    def confirm_customer_data_update(self, widget):
-        new_data = data.tbl_clientes(
-            Id=self.SELECTED_CUSTOMER.Id, **self.customer_data_form.data
-        )
-        self.SELECTED_CUSTOMER.fill(new_data)
-        try:
-            self.SELECTED_CUSTOMER.update()
-            self.customer_data_form.clear()
-            self.customer_data_form.add_table_fields(self.SELECTED_CUSTOMER)
-            print(f"customer data updated to: {new_data}")
-        except exc.StatementError as err:
-            self.undo_customer_data_update(widget)
-            print(f"Alteração proibida: {str(err.args[0])}")
 
     def update_data_widgets(self):
         self.customer_selector.refresh(self.CUSTOMER_LIST)
