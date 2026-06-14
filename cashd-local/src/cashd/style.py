@@ -37,6 +37,19 @@ def set_col_alignments(table: Table, alignments: list[Literal["l", "c", "r"]]):
             align_map = {"l": h_align.Left, "c": h_align.Center, "r": h_align.Right}
             for i, al in enumerate(alignments):
                 native_table.Columns[i].TextAlign = align_map[al]
+        case "linux":
+            native_table = native_table.get_child()
+            align_map = {"l": 0.0, "c": 0.5, "r": 1.0}
+            for i, al in enumerate(alignments):
+                # Align heading
+                column = native_table.get_column(i)
+                column.set_alignment(align_map[al])
+                # Toga-GTK cells include [Gtk.CellRendererPixbuf, Gtk.CellRendererText]
+                # Setting alignment only to the text renderer
+                cell_text = column.get_cells()[1]
+                cell_text.set_property("xalign", align_map[al])
+            # Redraw table with new alignment
+            native_table.queue_draw()
         case _:
             print(f"Cannot set table alignment on {platform=}")
 
