@@ -245,9 +245,7 @@ class SectionCustomerInfo:
         self.form.add_table_fields(self.SELECTED_CUSTOMER)
 
     def confirm_changes(self, widget):
-        new_data = data.tbl_clientes(
-            Id=self.SELECTED_CUSTOMER.Id, **self.form.data
-        )
+        new_data = data.tbl_clientes(Id=self.SELECTED_CUSTOMER.Id, **self.form.data)
         self.SELECTED_CUSTOMER.fill(new_data)
         try:
             self.SELECTED_CUSTOMER.update()
