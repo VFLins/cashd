@@ -123,7 +123,7 @@ class SubsectionTransacHistory:
         self.on_delete = on_delete
 
         self.table = Table(
-            style=Pack(flex=1, font_size=const.FONT_SIZE),
+            style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH),
             data=self.SELECTED_CUSTOMER.Transacs,
             headings=["Data", "Valor"],
             on_select=self.select_transac,
@@ -143,11 +143,13 @@ class SubsectionTransacHistory:
         and current owed amount. This feature is aimed for thermal printers.
         """
 
-        self.options_container = Box(
-            style=Pack(margin=5),
-            children=[self.remove_button, self.print_button],
+        self.options_container: Box = widgets.elems.form_options(
+            buttons=[self.remove_button, self.print_button],
         )
+        self.options_container.style.margin = (10, 0, 5, 0)
+
         self.full_contents = Column(
+            style=Pack(align_items="center"),
             children=[self.options_container, self.table],
         )
         if sys.platform == "win32":
