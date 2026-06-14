@@ -130,6 +130,7 @@ class SubsectionTransacHistory:
             on_activate=self.select_transac,
         )
         """Table containing all transactions of the currently selected customer."""
+        style.set_col_alignments(self.table, ["l", "r"])
 
         self.remove_button = Button(
             "Remover selecionado", enabled=False, on_press=self.remove_transac
@@ -225,7 +226,7 @@ class SectionCustomerInfo:
         )
         self.full_contents = ScrollContainer(content=self.body)
         if sys.platform == "win32":
-            self.customer_data_context_content.style.background_color = "#F9F9F9"
+            self.full_contents.style.background_color = "#F9F9F9"
 
     def handle_confirm_permission(self, widget):
         """App behaviour when the user interacts with any of the fields of

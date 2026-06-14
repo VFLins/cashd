@@ -3,10 +3,16 @@ from copy import copy
 from typing import Type, Literal, NewType
 import subprocess
 
+if platform == "win32":
+    import clr
+    clr.AddReference("System.Windows.Forms")
+    from System.Windows.Forms import HorizontalAlignment as h_align
+
 from toga.colors import TRANSPARENT
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from toga.widgets.base import Widget
+from toga.widgets.table import Table
 from toga import (
     TextInput,
     Selection,
@@ -18,22 +24,20 @@ from toga import (
 from cashd import const
 
 
-def write_args(**kwargs):
-    # if platform != "linux":
-    #    return kwargs
-    if "alignment" in kwargs.keys():
-        match kwargs["alignment"]:
-            case "left":
-                kwargs["align_items"] = "start"
-            case "right":
-                kwargs["align_items"] = "end"
-            case "center":
-                kwargs["align_items"] = "center"
-        del kwargs["alignment"]
-    if "padding" in kwargs.keys():
-        kwargs["margin"] = copy(kwargs["padding"])
-        del kwargs["padding"]
-    return kwargs
+def set_col_alignments(table: Table, alignments: list[Literal["l", "c", "r"]]):
+    """Set alignment for columns of `table`, the first item in `alignments` will
+    apply alignment to the first column, and so on.
+
+    On windows, the first column will always align to the left.
+    """
+    native_table = table._impl.native
+    match platform:
+        case "win32":
+            align_map = {"l": h_align.Left, "c": h_align.Center, "r": h_align.Right}
+            for i, al in enumerate(alignments):
+                native_table.Columns[i].TextAlign = align_map[al]
+        case _:
+            print(f"Cannot set table alignment on {platform=}")
 
 
 def form_options_container(children, alignment="end") -> Box:
@@ -90,9 +94,7 @@ def selection_width():
     return const.FONT_SIZE * 12
 
 
-BUTTON_STYLE = Pack(
-    **write_args(width=120, padding=(30, 20), font_size=const.FONT_SIZE)
-)
+BUTTON_STYLE = Pack(width=120, margin=(30, 20), font_size=const.FONT_SIZE)
 SMALL_BUTTON = Pack(
     font_size=const.FONT_SIZE - 2, margin=(5, 5, 5, 0), width=68, height=24
 )
@@ -131,59 +133,31 @@ PAGE_BODY = Pack(
 TABLE_OF_DATA = Pack(
     flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH, align_items="start"
 )
-INLINE_LABEL = Pack(
-    **write_args(
-        font_size=const.FONT_SIZE,
-        padding=15,
-    )
-)
+INLINE_LABEL = Pack(font_size=const.FONT_SIZE, padding=15)
 GENERIC_LABEL = Pack(
     width=const.CONTENT_WIDTH,
     align_items="start",
     font_size=const.SMALL_FONT_SIZE,
-    padding=(0, 0, 22, 0),
+    margin=(0, 0, 22, 0),
 )
-SHORT_FIELD = Pack(
-    padding=8,
-    width=180,
-    font_size=const.FONT_SIZE,
-)
-VERTICAL_ALIGNED_BUTTON = Pack(
-    **write_args(
-        font_size=const.FONT_SIZE,
-        flex=1,
-        padding=(5, 10),
-    )
-)
+SHORT_FIELD = Pack(margin=8, width=180, font_size=const.FONT_SIZE)
+VERTICAL_ALIGNED_BUTTON = Pack(font_size=const.FONT_SIZE, flex=1, margin=(5, 10))
 HORIZONTAL_ALIGNED_BUTTON = Pack(
-    **write_args(padding=(5, 10, 10, 0), width=120, font_size=const.FONT_SIZE)
+    margin=(5, 10, 10, 0), width=120, font_size=const.FONT_SIZE
 )
 BIG_BUTTON = Pack(
-    **write_args(
-        margin=10,
-        width=const.FONT_SIZE * 3,
-        height=const.FONT_SIZE * 3,
-        font_size=const.FONT_SIZE,
-    )
+    margin=10,
+    width=const.FONT_SIZE * 3,
+    height=const.FONT_SIZE * 3,
+    font_size=const.FONT_SIZE,
 )
 CONTEXT_BUTTON = Pack(
     font_size=const.FONT_SIZE,
     padding=(20, 0, 10, 5),
     width=90,
 )
-SEPARATOR = Pack(
-    **write_args(
-        width=const.CONTENT_WIDTH,
-        padding=5,
-    )
-)
-WIDE_SELECTION = Pack(
-    **write_args(
-        padding=(0, 5),
-        width=210,
-        font_size=const.FONT_SIZE,
-    )
-)
+SEPARATOR = Pack(width=const.CONTENT_WIDTH, margin=5)
+WIDE_SELECTION = Pack(margin=(0, 5), width=210, font_size=const.FONT_SIZE)
 
 
 def _system_based_input_label_style() -> Pack:
