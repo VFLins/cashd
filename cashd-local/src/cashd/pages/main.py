@@ -226,7 +226,7 @@ class SectionCustomerInfo:
         )
         self.full_contents = ScrollContainer(content=self.body)
         if sys.platform == "win32":
-            self.full_contents.style.background_color = "#F9F9F9"
+            self.body.style.background_color = "#F9F9F9"
 
     def handle_confirm_permission(self, widget):
         """App behaviour when the user interacts with any of the fields of
