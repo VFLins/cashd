@@ -7,9 +7,9 @@ from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
 from toga.widgets.divider import Divider
+from toga.widgets.selection import Selection
 from toga.widgets.textinput import TextInput
 from toga.widgets.numberinput import NumberInput
-from toga.widgets.selection import Selection
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.dialogs import (
     SelectFolderDialog,
@@ -28,13 +28,7 @@ class ConfigSection(BaseSection):
         super().__init__(app)
 
         self.default_values_section_title = Label(
-            "Valores padrão",
-            style=Pack(
-                font_size=const.BIG_FONT_SIZE,
-                font_weight="bold",
-                width=const.CONTENT_WIDTH,
-                padding=(20, 5, 5, 5),
-            ),
+            "Valores padrão", style=style.HEADING
         )
         self.default_values_section_widgets = widgets.form.FormHandler(n_cols=2)
         self.default_values_section_widgets.add_fields(
@@ -77,15 +71,7 @@ class ConfigSection(BaseSection):
                 ),
             ]
         )
-        self.backup_section_title = Label(
-            "Backup",
-            style=Pack(
-                font_size=const.BIG_FONT_SIZE,
-                font_weight="bold",
-                width=const.CONTENT_WIDTH,
-                padding=(20, 5, 5, 5),
-            ),
-        )
+        self.backup_section_title = Label("Backup", style=style.HEADING)
         self.backup_places_list = ListOfItems(
             datasource=backup.BackupPlacesSource(),
             accessors=["value"],

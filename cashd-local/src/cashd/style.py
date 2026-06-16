@@ -171,6 +171,12 @@ CONTEXT_BUTTON = Pack(
     width=90,
 )
 SEPARATOR = Pack(width=const.CONTENT_WIDTH, margin=5)
+HEADING = Pack(
+    font_size=const.BIG_FONT_SIZE,
+    font_weight="bold",
+    width=const.CONTENT_WIDTH,
+    padding=(20, 5, 5, 0),
+)
 WIDE_SELECTION = Pack(margin=(0, 5), width=210, font_size=const.FONT_SIZE)
 
 

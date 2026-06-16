@@ -4,14 +4,18 @@ Local-first application that helps you handle cash flow records quickly!
 
 import asyncio
 from typing import Type
+from importlib.metadata import version
 from toga import App, Group
-from toga.window import MainWindow
+from toga.window import MainWindow, Window
 from toga.widgets.scrollcontainer import ScrollContainer
+from toga.widgets.button import Button
+from toga.widgets.label import Label
+from toga.widgets.box import Column, Row
 from toga.command import Command
 from toga.style import Pack
 from toga.style.pack import ROW
 
-from cashd import pages, const
+from cashd import pages, const, style
 
 
 class Cashd(App):
@@ -129,6 +133,42 @@ class Cashd(App):
             self.responsive_layout_task = self.loop.create_task(coro)
             await asyncio.gather(*asyncio.all_tasks() - {asyncio.current_task()})
 
+    def about(self):
+        """Overrides the default 'About' dialog, displaying a custom message."""
+        self.about_window = Window(
+            title="Sobre o Cashd",
+            resizable=False,
+            minimizable=False,
+            size=(340, 180),
+        )
+
+        version_title = Label("Versão", style=style.HEADING)
+        version_label = Label(f"Cashd v{version('cashd')}\nToga v{version('toga')}")
+        version_block = Column(
+            style=Pack(width=320), children=[version_title, version_label]
+        )
+
+        madeby_title = Label("Desenvolvido por", style=style.HEADING)
+        madeby_label = Label("Vitor Lins")
+        madeby_block = Column(
+            style=Pack(width=320), children=[madeby_title, madeby_label]
+        )
+
+        close_button = Button(
+            "OK",
+            style=Pack(width=80, margin_top=10),
+            on_press=lambda w: self.about_window.close()
+        )
+        actions_block = Column(
+            style=Pack(width=320, align_items="end"), children=[Row(children=[close_button])])
+
+        full_contents = Column(
+            style=Pack(align_items="center"),
+            children=[version_block, madeby_block, actions_block],
+        )
+
+        self.about_window.content = full_contents
+        self.about_window.show()
 
 def main():
     return Cashd(
