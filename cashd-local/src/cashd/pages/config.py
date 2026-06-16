@@ -27,9 +27,7 @@ class ConfigSection(BaseSection):
     def __init__(self, app: App):
         super().__init__(app)
 
-        self.default_values_section_title = Label(
-            "Valores padrão", style=style.HEADING
-        )
+        self.default_values_section_title = Label("Valores padrão", style=style.HEADING)
         self.default_values_section_widgets = widgets.form.FormHandler(n_cols=2)
         self.default_values_section_widgets.add_fields(
             fields=[

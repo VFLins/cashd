@@ -157,10 +157,12 @@ class Cashd(App):
         close_button = Button(
             "OK",
             style=Pack(width=80, margin_top=10),
-            on_press=lambda w: self.about_window.close()
+            on_press=lambda w: self.about_window.close(),
         )
         actions_block = Column(
-            style=Pack(width=320, align_items="end"), children=[Row(children=[close_button])])
+            style=Pack(width=320, align_items="end"),
+            children=[Row(children=[close_button])],
+        )
 
         full_contents = Column(
             style=Pack(align_items="center"),
@@ -169,6 +171,7 @@ class Cashd(App):
 
         self.about_window.content = full_contents
         self.about_window.show()
+
 
 def main():
     return Cashd(
