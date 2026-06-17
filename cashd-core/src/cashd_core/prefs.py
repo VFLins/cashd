@@ -1,8 +1,8 @@
 from os import path, makedirs
 from sys import platform
 from pathlib import Path
-from typing import Literal
-import configparser
+from typing import Literal, Iterator, Any
+from configparser import ConfigParser, NoOptionError, DuplicateOptionError, DuplicateSectionError
 import logging
 
 
@@ -25,9 +25,8 @@ for dirpath in [CASHD_FILES_PATH, LOG_PATH, CONFIG_PATH]:
 
 
 def get_parser(filename: str) -> ConfigParser:
-    """Base function for parser factories to be used internally by config classes.
-    The parser factories should not take any input value, and return this function's
-    return value with the same inputs.
+    """Base function to produce *parser factories*. The parser factories should not
+    take any input value, and return a `ConfigParser`.
 
     :filename: Name of the config file without extension.
     """
@@ -39,20 +38,25 @@ def get_parser(filename: str) -> ConfigParser:
     return parser
 
 
-def get_default_parser() -> ConfigParser:
+def prefs_parser() -> ConfigParser:
     """Factory of parsers for the 'prefs.ini' config file."""
     return get_parser(filename="prefs")
+
+
+def backup_parser() -> ConfigParser:
+    """Factory of parser for ther 'backup.ini' config file."""
+    return get_parser(filename="backup")
 
 
 class _Config:
     def __init__(
         self,
-        parser_factory: Callable[[], ConfigParser] = get_default_parser,
-        section: str = "default",
         key: str,
         default: Any,
+        parser_factory: Callable[[], ConfigParser] = prefs_parser,
+        section: str = "default",
     ):
-        """Parent that sets logic for interacting with a key that returns a
+        """Base class that sets logic for interacting with a key that returns a
         single value on a specific configuration file.
 
         :parser_factory: Function that always returns a `ConfigParser` with an attribute
@@ -68,11 +72,22 @@ class _Config:
             key,
             default,
         )
+
         parser = self._parser_factory()
         if not parser.has_section(section):
             parser.add_section(section=section)
             with open(parser._config_file, "w") as configfile:
                 parser.write(configfile)
+
+        self.logger = logging.getLogger(f"cashd.{__name__}")
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.propagate = False
+
+        log_fmt = logging.Formatter("%(asctime)s :: %(levelname)s %(message)s")
+        log_handler = logging.FileHandler(LOG_FILE)
+        log_handler.setLevel(logging.DEBUG)
+        log_handler.setFormatter(log_fmt)
+        self.logger.addHandler(log_handler)
 
     @classmethod
     def get(cls):
@@ -101,44 +116,16 @@ class _Config:
             return self._default
 
 
-class _ConfigList:
-    def __init__(
-        self,
-        parser_factory: Callable[[], ConfigParser] = get_default_parser,
-        section: str = "default",
-        key: str,
-        default: list,
-    ):
-        """Parent that sets logic for interacting with a key that returns a
-        list of values on a specific configuration file.
-
-        :parser_factory: Function that always returns a `ConfigParser` with an attribute
-          `_config_file` indicating the file to where this parser writes.
-        :section: Name of the section where this config is located.
-        :key: Name of this option in the config file.
-        :default: Default value of this option, must be compatible with the input type
-          of this class' `__set` method.
-        """
-        self._parser_factory, self._section, self._key, self._default = (
-            parser_factory,
-            section,
-            key,
-            default,
-        )
-        parser = self._parser_factory()
-        if not parser.has_section(section):
-            parser.add_section(section)
-            with open(parser._config_file, "w") as configfile:
-                parser.write(configfile)
-
+class _ConfigList(_Config):
+    """Wrapper base class for configs that handle lists of strings."""
     @classmethod
-    def get(cls) -> list[Any]:
+    def get(cls) -> list[str]:
         """Get list from config file as a python list."""
         interactor = cls()
         return list(interactor.__get())
 
     @classmethod
-    def set(cls, value: list, **kwargs):
+    def set(cls, value: list[str]):
         """Writes a a python list to the config file, replacing the existing one."""
         interactor = cls()
         interactor.__set(value=[str(i) for i in value])
@@ -202,25 +189,34 @@ class _ConfigInt(_Config):
         return int(value)
 
 
-class _BackupConfig(_Config):
-    """Wrapper base class for configs that writes on 'backup.ini'."""
-    def __init__(self, section:str = "default", key: str, default: Any):
-        super().__init__(
-            parser_factory=lambda: get_parser("backup"),
-            section=section,
-            key=key,
-            default=default,
-        )
+class _ConfigBool(_Config):
+    """Wrapper base class for configs that handle boolean values."""
+    @classmethod
+    def get(cls) -> bool:
+        value = super().get()
+        return value=="true"
 
+    @classmethod
+    def set(cls, value: bool):
+        new_value = str(value).lower()
+        super().set(value=new_value)
+
+
+# prefs.ini
 
 class DefaultState(_Config):
     def __init__(self):
-        super().__init__(key="default_state", default="AC")
+        super().__init__(key="state", default="AC")
+
+
+class DefaultCity(_Config):
+    def __init__(self):
+        super().__init__(key="city", default="")
 
 
 class RowsPerPage(_ConfigInt):
     def __init__(self):
-        super().__init__(key="data_tables_rows_per_page", default="200")
+        super().__init__(key="rows_per_page", default="200")
 
 
 class AreaCodeNumber(_ConfigInt):
@@ -228,14 +224,23 @@ class AreaCodeNumber(_ConfigInt):
         super().__init__(key="area_code_number", default="99")
 
 
-class BackupPlaces(_BackupConfig, _ConfigList):
+# backup.ini
+
+class BackupPlaces(_ConfigList):
     def __init__(self):
-        super().__init__(key="backup_places", default=[])
+        super().__init__(parser_factory=backup_parser, key="backup_places", default=[])
 
 
-class DBSize(_BackupConfig, _ConfigInt):
+class DBSize(_ConfigInt):
     def __init__(self):
-        super().__init__(key="dbsize", default=0)
+        super().__init__(parser_factory=backup_parser, key="dbsize", default=0)
+
+
+class BackupOnClose(_ConfigBool):
+    def __init__(self):
+        super().__init__(
+            parser_factory=backup_parser, key="backup_on_close", default=False
+        )
 
 
 class SettingsHandler:
@@ -265,11 +270,11 @@ class SettingsHandler:
         self.log_file = path.join(LOG_PATH, f"{configname}.log")
 
         # config parser
-        self.conf = configparser.ConfigParser()
+        self.conf = ConfigParser()
         self.conf.read(self.config_file)
         try:
             self.conf.add_section("default")
-        except configparser.DuplicateSectionError:
+        except DuplicateSectionError:
             pass
 
         # logger
