@@ -72,7 +72,9 @@ ICON_USER_OPTS = Icon(
     system=True,
 )
 
-with IMG.open(Path(RESOURCES_DIR, "logo-vitor.png")) as img:
+with IMG.open(
+    Path(RESOURCES_DIR, "logo-vitor-dark.png" if sys_dark_mode() else "logo-vitor.png")
+) as img:
     VITORLINS_LOGO = Image(src=img)
 
 FONT_SIZE = 10

@@ -142,7 +142,7 @@ class Cashd(App):
             title="Sobre o Cashd",
             resizable=False,
             minimizable=False,
-            size=(340, 190),
+            size=(360, 190),
         )
 
         desc_title = Label("Descrição", style=style.HEADING)
@@ -161,19 +161,19 @@ class Cashd(App):
         )
 
         madeby_title = Label("Desenvolvido por", style=style.HEADING)
-        madeby_label = ImageView(const.VITORLINS_LOGO)
+        madeby_label = ImageView(const.VITORLINS_LOGO, style=Pack(margin=(20, 0)))
         madeby_block = Column(
             style=Pack(width=content_width), children=[madeby_title, madeby_label]
         )
 
         close_button = Button(
             "OK",
-            style=Pack(width=80, margin=(10, 0)),
+            style=Pack(width=80, margin=(20, 0)),
             on_press=lambda w: self.about_window.close(),
         )
         contact_button = Button(
             "Entre em contato",
-            style=Pack(width=140, margin=(10, 5, 0)),
+            style=Pack(width=140, margin=(20, 5, 0)),
             on_press=lambda w: webbrowser.open("https://vitorlins.com.br/contato/"),
         )
         actions_block = Column(
