@@ -3,11 +3,13 @@ Local-first application that helps you handle cash flow records quickly!
 """
 
 import asyncio
+import webbrowser
 from typing import Type
 from importlib.metadata import version
 from toga import App, Group
 from toga.window import MainWindow, Window
 from toga.widgets.scrollcontainer import ScrollContainer
+from toga.widgets.imageview import ImageView
 from toga.widgets.button import Button
 from toga.widgets.label import Label
 from toga.widgets.box import Column, Row
@@ -135,38 +137,53 @@ class Cashd(App):
 
     def about(self):
         """Overrides the default 'About' dialog, displaying a custom message."""
+        content_width = 320
         self.about_window = Window(
             title="Sobre o Cashd",
             resizable=False,
             minimizable=False,
-            size=(340, 180),
+            size=(340, 190),
+        )
+
+        desc_title = Label("Descrição", style=style.HEADING)
+        desc_label = Label(
+            "Um aplicativo local-first, que te ajuda a controlar \nsuas vendas no "
+            "fiado sem deixar de respeitar a\nprivacidade dos seus dados.",
+        )
+        desc_block = Column(
+            style=Pack(width=content_width), children=[desc_title, desc_label]
         )
 
         version_title = Label("Versão", style=style.HEADING)
-        version_label = Label(f"Cashd v{version('cashd')}\nToga v{version('toga')}")
+        version_label = Label(f"Cashd v{version('cashd')} | Toga v{version('toga')}")
         version_block = Column(
-            style=Pack(width=320), children=[version_title, version_label]
+            style=Pack(width=content_width), children=[version_title, version_label]
         )
 
         madeby_title = Label("Desenvolvido por", style=style.HEADING)
-        madeby_label = Label("Vitor Lins")
+        madeby_label = ImageView(const.VITORLINS_LOGO)
         madeby_block = Column(
-            style=Pack(width=320), children=[madeby_title, madeby_label]
+            style=Pack(width=content_width), children=[madeby_title, madeby_label]
         )
 
         close_button = Button(
             "OK",
-            style=Pack(width=80, margin_top=10),
+            style=Pack(width=80, margin=(10, 0)),
             on_press=lambda w: self.about_window.close(),
         )
+        contact_button = Button(
+            "Entre em contato",
+            style=Pack(width=140, margin=(10, 5, 0)),
+            on_press=lambda w: webbrowser.open("https://vitorlins.com.br/contato/"),
+        )
         actions_block = Column(
-            style=Pack(width=320, align_items="end"),
-            children=[Row(children=[close_button])],
+            style=Pack(width=content_width, align_items="end"),
+            children=[Row(children=[contact_button, close_button])],
         )
 
         full_contents = Column(
             style=Pack(align_items="center"),
-            children=[version_block, madeby_block, actions_block],
+            children=[desc_block, version_block, madeby_block, actions_block],
         )
 
         self.about_window.content = full_contents

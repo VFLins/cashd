@@ -1,7 +1,10 @@
 from sys import platform
-from toga.icons import Icon
 from pathlib import Path
+from PIL import Image as IMG
 import subprocess
+
+from toga.icons import Icon
+from toga.images import Image
 
 
 def sys_dark_mode() -> bool:
@@ -68,6 +71,9 @@ ICON_USER_OPTS = Icon(
     path=Path(RESOURCES_DIR, "user-pen-dark" if sys_dark_mode() else "user-pen"),
     system=True,
 )
+
+with IMG.open(Path(RESOURCES_DIR, "logo-vitor.png")) as img:
+    VITORLINS_LOGO = Image(src=img)
 
 FONT_SIZE = 10
 MAIN_WINDOW_SIZE = (600, 600)
