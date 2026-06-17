@@ -47,8 +47,8 @@ def get_default_parser() -> ConfigParser:
 class _Config:
     def __init__(
         self,
-        parser_factory: Callable[[], ConfigParser],
-        section: str,
+        parser_factory: Callable[[], ConfigParser] = get_default_parser,
+        section: str = "default",
         key: str,
         default: Any,
     ):
@@ -104,8 +104,8 @@ class _Config:
 class _ConfigList:
     def __init__(
         self,
-        parser_factory: Callable[[], ConfigParser],
-        section: str,
+        parser_factory: Callable[[], ConfigParser] = get_default_parser,
+        section: str = "default",
         key: str,
         default: list,
     ):
@@ -193,6 +193,49 @@ class _ConfigList:
             return
         self.__set(value=current)
 
+
+class _ConfigInt(_Config):
+    """Wrapper base class for configs that handle integer values."""
+    @classmethod
+    def get(cls):
+        value = super().get()
+        return int(value)
+
+
+class _BackupConfig(_Config):
+    """Wrapper base class for configs that writes on 'backup.ini'."""
+    def __init__(self, section:str = "default", key: str, default: Any):
+        super().__init__(
+            parser_factory=lambda: get_parser("backup"),
+            section=section,
+            key=key,
+            default=default,
+        )
+
+
+class DefaultState(_Config):
+    def __init__(self):
+        super().__init__(key="default_state", default="AC")
+
+
+class RowsPerPage(_ConfigInt):
+    def __init__(self):
+        super().__init__(key="data_tables_rows_per_page", default="200")
+
+
+class AreaCodeNumber(_ConfigInt):
+    def __init__(self):
+        super().__init__(key="area_code_number", default="99")
+
+
+class BackupPlaces(_BackupConfig, _ConfigList):
+    def __init__(self):
+        super().__init__(key="backup_places", default=[])
+
+
+class DBSize(_BackupConfig, _ConfigInt):
+    def __init__(self):
+        super().__init__(key="dbsize", default=0)
 
 
 class SettingsHandler:
