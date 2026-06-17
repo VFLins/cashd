@@ -3,15 +3,21 @@ Local-first application that helps you handle cash flow records quickly!
 """
 
 import asyncio
+import webbrowser
 from typing import Type
+from importlib.metadata import version
 from toga import App, Group
-from toga.window import MainWindow
+from toga.window import MainWindow, Window
 from toga.widgets.scrollcontainer import ScrollContainer
+from toga.widgets.imageview import ImageView
+from toga.widgets.button import Button
+from toga.widgets.label import Label
+from toga.widgets.box import Column, Row
 from toga.command import Command
 from toga.style import Pack
 from toga.style.pack import ROW
 
-from cashd import pages, const
+from cashd import pages, const, style
 
 
 class Cashd(App):
@@ -39,7 +45,7 @@ class Cashd(App):
         self.main_window = MainWindow(
             title=self.formal_name, size=const.MAIN_WINDOW_SIZE, resizable=True
         )
-        self.main_window.min_size = (600, 510)
+        self.main_window.min_size = (480, 490)
         self.main_window.content = self.main_box
         group_main = Group("Cashd", order=10)
         group_navigate = Group("Navegar", order=20)
@@ -128,6 +134,60 @@ class Cashd(App):
             print(f"Iniciando layout listener de '{command.text}'.")
             self.responsive_layout_task = self.loop.create_task(coro)
             await asyncio.gather(*asyncio.all_tasks() - {asyncio.current_task()})
+
+    def about(self):
+        """Overrides the default 'About' dialog, displaying a custom message."""
+        content_width = 320
+        self.about_window = Window(
+            title="Sobre o Cashd",
+            resizable=False,
+            minimizable=False,
+            size=(360, 190),
+        )
+
+        desc_title = Label("Descrição", style=style.HEADING)
+        desc_label = Label(
+            "Um aplicativo local-first, que te ajuda a controlar \nsuas vendas no "
+            "fiado sem deixar de respeitar a\nprivacidade dos seus dados.",
+        )
+        desc_block = Column(
+            style=Pack(width=content_width), children=[desc_title, desc_label]
+        )
+
+        version_title = Label("Versão", style=style.HEADING)
+        version_label = Label(f"Cashd v{version('cashd')} | Toga v{version('toga')}")
+        version_block = Column(
+            style=Pack(width=content_width), children=[version_title, version_label]
+        )
+
+        madeby_title = Label("Desenvolvido por", style=style.HEADING)
+        madeby_label = ImageView(const.VITORLINS_LOGO, style=Pack(margin=(20, 0)))
+        madeby_block = Column(
+            style=Pack(width=content_width), children=[madeby_title, madeby_label]
+        )
+
+        close_button = Button(
+            "OK",
+            style=Pack(width=80, margin=(20, 0)),
+            on_press=lambda w: self.about_window.close(),
+        )
+        contact_button = Button(
+            "Entre em contato",
+            style=Pack(width=140, margin=(20, 5, 0)),
+            on_press=lambda w: webbrowser.open("https://vitorlins.com.br/contato/"),
+        )
+        actions_block = Column(
+            style=Pack(width=content_width, align_items="end"),
+            children=[Row(children=[contact_button, close_button])],
+        )
+
+        full_contents = Column(
+            style=Pack(align_items="center"),
+            children=[desc_block, version_block, madeby_block, actions_block],
+        )
+
+        self.about_window.content = full_contents
+        self.about_window.show()
 
 
 def main():

@@ -7,11 +7,12 @@ build-backend = "setuptools.build_meta"
 dynamic = ["version"]
 name = "cashd"
 dependencies = [
-    "cashd-core==0.4.0",
+    "cashd-core==0.3.4",
     "briefcase",
     "toga==0.5.4",
     "sqlalchemy==2.*",
     "phonenumbers",
+    "pillow",
 ]
 
 [tool.briefcase]
@@ -21,8 +22,8 @@ version = "0.4.0"
 url = "https://vitorlins.com.br/software/cashd"
 license = "MIT"
 license-files = ["LICENSE"]
-author = "Vitor F. Lins"
-author_email = "vflins@live.com"
+author = "Vitor Lins"
+author_email = "vitorlins.consultor@gmail.com"
 
 [tool.briefcase.app.cashd]
 formal_name = "Cashd"

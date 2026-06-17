@@ -22,8 +22,8 @@ class BaseSection:
         while True:
             try:
                 await sleep(1 / 30)
-                self.ensure_window_size()
-                self.rearrange_widgets()
+                await self.ensure_window_size()
+                await self.rearrange_widgets()
             except CancelledError:
                 break
                 raise
@@ -33,18 +33,15 @@ class BaseSection:
         """Returns the window size (w, h) of the `app`'s main window, or the default
         window size when the former is not found.
         """
-        try:
-            return self.app.main_window.size
-        except AttributeError:
-            return const.MAIN_WINDOW_SIZE
+        return getattr(self.app.main_window, "size", const.MAIN_WINDOW_SIZE)
 
-    def rearrange_widgets(self):
+    async def rearrange_widgets(self):
         """Rearranges this section's widgets, should be used to turn this section
         responsive to the window size.
         """
         return
 
-    def ensure_window_size(self):
+    async def ensure_window_size(self):
         """Restores window size to a value above the minimum values defined at
         the application's main window's `min_height` and `min_width`.
         """

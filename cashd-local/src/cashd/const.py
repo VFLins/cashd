@@ -1,7 +1,10 @@
 from sys import platform
-from toga.icons import Icon
 from pathlib import Path
+from PIL import Image as IMG
 import subprocess
+
+from toga.icons import Icon
+from toga.images import Image
 
 
 def sys_dark_mode() -> bool:
@@ -59,6 +62,7 @@ ICON_TRANSAC = Icon(path=Path(RESOURCES_DIR, "TransacaoBranco"), system=True)
 ICON_CONTAS = Icon(path=Path(RESOURCES_DIR, "ContasBranco"), system=True)
 ICON_STATS = Icon(path=Path(RESOURCES_DIR, "DadosBranco"), system=True)
 ICON_CONFIG = Icon(path=Path(RESOURCES_DIR, "ConfiguracaoBranco"), system=True)
+ICON_PERSON = Icon(path=Path(RESOURCES_DIR, "person"), system=True)
 ICON_RETURN = Icon(
     path=Path(RESOURCES_DIR, "arrow-left-dark" if sys_dark_mode() else "arrow-left"),
     system=True,
@@ -68,15 +72,20 @@ ICON_USER_OPTS = Icon(
     system=True,
 )
 
+with IMG.open(
+    Path(RESOURCES_DIR, "logo-vitor-dark.png" if sys_dark_mode() else "logo-vitor.png")
+) as img:
+    VITORLINS_LOGO = Image(src=img)
+
 FONT_SIZE = 10
-MAIN_WINDOW_SIZE = (1000, 650)
+MAIN_WINDOW_SIZE = (600, 600)
 
 NA_VALUE = "N/D"
 MAX_ALLOWED_VALUE = 99999999
 SMALL_FONT_SIZE = abs(FONT_SIZE * 0.8)
 BIG_FONT_SIZE = abs(FONT_SIZE * 1.15)
-CONTENT_WIDTH = 500
-FORM_WIDTH = 395
+CONTENT_WIDTH = 450
+FORM_WIDTH = 400
 
 ESTADOS = [
     "AC",

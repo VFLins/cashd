@@ -15,7 +15,7 @@ class CreateCustomerSection(BaseSection):
         super().__init__(app)
         # Winforms erroes if this class is instantiated outside a class function
         self.customer_form = FormHandler(
-            n_cols=3,
+            n_cols=2,
             on_change=self.change_fields,
         )
         self.customer_form.add_table_fields(table=data.get_default_customer())
@@ -31,9 +31,9 @@ class CreateCustomerSection(BaseSection):
             on_press=self.confirm_changes,
             style=style.CONTEXT_BUTTON,
         )
-        self.controls = widgets.elems.form_options_container(
+        self.controls = widgets.elems.form_options(
             width=self.customer_form.widget.style.width,
-            children=[self.undo_button, self.confirm_button],
+            buttons=[self.undo_button, self.confirm_button],
         )
         self.full_contents = Box(
             style=style.FULL_CONTENTS,
@@ -73,9 +73,9 @@ class CreateCustomerSection(BaseSection):
         self.customer_form.clear()
         self.customer_form.add_table_fields(table=data.get_default_customer())
 
-    def rearrange_widgets(self):
+    async def rearrange_widgets(self):
         width, height = self.window_size
-        expected_n_cols = 3 if width > 680 else 2
+        expected_n_cols = 3 if width > 630 else 2
         if self.customer_form.n_cols == expected_n_cols:
             return
         self.customer_form.reshape(n_cols=expected_n_cols)

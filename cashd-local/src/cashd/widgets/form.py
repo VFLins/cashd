@@ -1,3 +1,4 @@
+import sys
 from math import ceil
 from copy import deepcopy
 from datetime import date
@@ -10,7 +11,7 @@ from toga.widgets.base import Widget
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.textinput import TextInput
 from toga.widgets.selection import Selection
-from toga.widgets.box import Box, StyleT
+from toga.widgets.box import Box, Row, StyleT
 from toga.widgets.label import Label
 
 from cashd_core import data
@@ -203,7 +204,8 @@ class FormHandler:
             elem_width = max(widths)
         else:
             elem_width = style.user_input(TextInput).width
-        return int(n_cols * elem_width) + 20
+        h_padding = 25
+        return int(n_cols * (elem_width + h_padding))
 
     @staticmethod
     def _get_ncols(widgets: list[Widget], row_width: int) -> int:
@@ -293,8 +295,11 @@ class HorizontalDateForm:
             value=value.day,
         )
 
-        self.widget = Box(
-            style=style.DATE_INPUT_CONTROLS,
+        # GTK Number input takes more space than registered to the right,
+        # the margin is added to provide clearance for other widgets inline,
+        # and also to adjust alignment.
+        self.widget = Row(
+            style=Pack(margin_right=15 if sys.platform == "linux" else 0),
             children=[
                 self.day_input.widget,
                 self.month_input.widget,

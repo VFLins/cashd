@@ -7,9 +7,9 @@ from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
 from toga.widgets.divider import Divider
+from toga.widgets.selection import Selection
 from toga.widgets.textinput import TextInput
 from toga.widgets.numberinput import NumberInput
-from toga.widgets.selection import Selection
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.dialogs import (
     SelectFolderDialog,
@@ -27,15 +27,7 @@ class ConfigSection(BaseSection):
     def __init__(self, app: App):
         super().__init__(app)
 
-        self.default_values_section_title = Label(
-            "Valores padrão",
-            style=Pack(
-                font_size=const.BIG_FONT_SIZE,
-                font_weight="bold",
-                width=const.CONTENT_WIDTH,
-                padding=(20, 5, 5, 5),
-            ),
-        )
+        self.default_values_section_title = Label("Valores padrão", style=style.HEADING)
         self.default_values_section_widgets = widgets.form.FormHandler(n_cols=2)
         self.default_values_section_widgets.add_fields(
             fields=[
@@ -77,15 +69,7 @@ class ConfigSection(BaseSection):
                 ),
             ]
         )
-        self.statistics_prefs_section_title = Label(
-            "Backup",
-            style=Pack(
-                font_size=const.BIG_FONT_SIZE,
-                font_weight="bold",
-                width=const.CONTENT_WIDTH,
-                padding=(20, 5, 5, 5),
-            ),
-        )
+        self.backup_section_title = Label("Backup", style=style.HEADING)
         self.backup_places_list = ListOfItems(
             datasource=backup.BackupPlacesSource(),
             accessors=["value"],
@@ -122,30 +106,25 @@ class ConfigSection(BaseSection):
         )
 
         self.second_section_content = Box(
-            style=Pack(
-                direction="column", width=const.CONTENT_WIDTH / 2, align_items="center"
-            ),
+            style=Pack(direction="column", width=const.CONTENT_WIDTH / 2),
             children=[
-                self.statistics_prefs_section_title,
+                self.backup_section_title,
                 Divider(style=style.SEPARATOR),
                 self.backup_places_list.widget,
                 self.backup_actions.widget,
             ],
         )
 
-        self.option_sections = Box(
+        self.sections = Box(
             style=Pack(direction="column"),
             children=[
                 self.first_section_content,
                 self.second_section_content,
             ],
         )
-        self.forms = ScrollContainer(
-            style=style.PAGE_BODY, content=self.option_sections
-        )
+        self.main_container = Box(style=style.PAGE_BODY, children=[self.sections])
         self.full_contents = Box(
-            style=style.FULL_CONTENTS,
-            children=[self.forms],
+            style=style.FULL_CONTENTS, children=[self.main_container]
         )
 
     def set_default_city(self, widget: TextInput):

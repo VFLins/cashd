@@ -8,7 +8,7 @@ from toga.widgets.base import Widget
 from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
-from toga.widgets.selection import Selection, ListSourceT
+from toga.widgets.selection import Selection, ListSource
 from toga.widgets.textinput import TextInput
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.detailedlist import DetailedList
@@ -157,7 +157,7 @@ class LabeledSelection(_LabeledInput):
         return self.input.items
 
     @items.setter
-    def items(self, items: ListSourceT | Iterable | None):
+    def items(self, items: ListSource | Iterable | None):
         self.input.items = items
 
 
@@ -367,16 +367,14 @@ class ListOfItems(_DataInteractor):
         self.refresh()
 
 
-def form_options_container(
-    children: list, alignment="end", width=const.CONTENT_WIDTH
-) -> Box:
+def form_options(buttons: list, alignment="end", width=const.FORM_WIDTH) -> Box:
     """
     Return a `toga.Box` containing elements that shoud be displayed under a form.
 
     :param children: Widgets that will be contained in this `toga.Box`, usually buttons.
     :param alignment: Horizontal alignment of elements.
     """
-    inner_container = Box(style=style.ROW_OF_BUTTONS, children=children)
+    inner_container = Box(style=style.ROW_OF_BUTTONS, children=buttons)
     outer_container = Box(
         style=Pack(direction="column", align_items=alignment, width=width),
         children=[inner_container],

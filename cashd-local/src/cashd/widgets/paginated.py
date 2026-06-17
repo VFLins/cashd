@@ -1,5 +1,6 @@
 from typing import Type, Callable
 
+import toga
 from toga.style import Pack
 from toga.widgets.base import Widget
 from toga.widgets.table import Table
@@ -7,7 +8,7 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.detailedlist import DetailedList
 
 from cashd_core import data
-from cashd import style
+from cashd import style, const
 from .elems import _DataInteractor
 
 
@@ -21,7 +22,7 @@ class PaginatedDetailedList(_DataInteractor):
 
     def __init__(
         self,
-        datasource: Type[data._DataSource],
+        datasource: data._DataSource,
         id: str | None = None,
         style: Pack | None = None,
         on_select: Callable[[Widget], None] = None,
@@ -40,6 +41,8 @@ class PaginatedDetailedList(_DataInteractor):
 
     def _set_data_widget(self, id=None, style=None, on_select=None):
         self.data_widget = DetailedList(id=id, style=style, on_select=on_select)
+        if getattr(toga, "backend", None) == "toga_winforms":
+            self.data_widget.style.font_size = 9
 
     def refresh(self, widget: TextInput | None = None):
         """Fetches data and updates `self.data_widget`. Requires a data source with at
@@ -53,10 +56,23 @@ class PaginatedDetailedList(_DataInteractor):
         self.data_widget.data = []
         # Grabbing items by index enables it to generalize the data source
         self.data_widget.data = (
-            {"id": r[0], "title": r[1], "subtitle": r[2]}
+            {"id": r[0], "icon": const.ICON_PERSON, "title": r[1], "subtitle": r[2]}
             for r in self._datasource.current_data
         )
         self.update_page_label()
+
+    def clear_selection(self):
+        """Ensures every row on this DetailedList is unselected."""
+        current_backend = getattr(toga, "backend", None)
+        match current_backend:
+            case "toga_winforms":
+                self.data_widget._impl._set_selection(-1)
+            case _:
+                if current_backend is not None:
+                    raise NotImplementedError(
+                        "Unselecting all rows for DetailedList is not implemented "
+                        f"on {current_backend=}"
+                    )
 
     @property
     def width(self):
