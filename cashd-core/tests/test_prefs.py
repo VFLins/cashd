@@ -6,6 +6,7 @@ from cashd_core.prefs import (
     SettingsHandler,
     PreferencesHandler,
     BackupPrefsHandler,
+    get_parser,
     _ConfigList,
     _ConfigInt,
     _ConfigBool,
@@ -25,40 +26,44 @@ backup_prefs_handler = BackupPrefsHandler(path.split(BACKUPPREFS_TEMPFILE.name)[
 handlers = [settings_handler, prefs_handler, backup_prefs_handler]
 
 
+@pytest.mark.skip(reason="This is not a test function")
 def test_parser():
-    return config.get_parser(filename="test")
+    return get_parser(filename="test")
 
 
 class TestConfigList(_ConfigList):
     __test__ = False
+
     def __init__(self):
         super().__init__(
-            parser_factory=get_test_parser,
+            parser_factory=test_parser,
             section="list_test",
             key="words",
-            default=["a", "beautiful", "list"]
+            default=["a", "beautiful", "list"],
         )
 
 
-class TestConfigInt(_ConfigInt)
+class TestConfigInt(_ConfigInt):
     __test__ = False
+
     def __init__(self):
         super().__init__(
             parser_factory=test_parser,
-            section="int_test"
+            section="int_test",
             key="level",
-            default=8
+            default=8,
         )
 
 
-class TestConfigBool(_ConfigBool)
+class TestConfigBool(_ConfigBool):
     __test__ = False
+
     def __init__(self):
         super().__init__(
             parser_factory=test_parser,
-            section="bool_test"
+            section="bool_test",
             key="important",
-            default=False
+            default=False,
         )
 
 
@@ -91,15 +96,15 @@ def test_list_conf():
 def test_int_conf():
     try:
         # when calling `get` before any `set`, should retrieve the default value
-        assert TestConfigList.get() == 8
+        assert TestConfigInt.get() == 8
 
-        # section 'int_test' should exist after first use of TestConfigList
+        # section 'int_test' should exist after first use of TestConfigInt
         conf_path, parser = test_parser()
         assert parser.has_section("int_test")
 
         # test if value is replaced with `set`
-        TestConfigList.set(12)
-        assert TestConfigList.get() == 12
+        TestConfigInt.set(12)
+        assert TestConfigInt.get() == 12
     finally:
         # test cleanup
         if conf_path.is_file():
@@ -109,15 +114,15 @@ def test_int_conf():
 def test_bool_conf():
     try:
         # when calling `get` before any `set`, should retrieve the default value
-        assert TestConfigList.get() == False
+        assert TestConfigBool.get() == False
 
-        # section 'bool_test' should exist after first use of TestConfigList
+        # section 'bool_test' should exist after first use of TestConfigBool
         conf_path, parser = test_parser()
         assert parser.has_section("bool_test")
 
         # test if value is replaced with `set`
-        TestConfigList.set(True)
-        assert TestConfigList.get()
+        TestConfigBool.set(True)
+        assert TestConfigBool.get()
     finally:
         # test cleanup
         if conf_path.is_file():

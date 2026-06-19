@@ -2,7 +2,13 @@ from os import path, makedirs
 from sys import platform
 from pathlib import Path
 from typing import Literal, Iterator, Any, Callable
-from configparser import ConfigParser, NoOptionError, DuplicateOptionError, DuplicateSectionError
+from configparser import (
+    ConfigParser,
+    NoOptionError,
+    NoSectionError,
+    DuplicateOptionError,
+    DuplicateSectionError,
+)
 import logging
 
 
@@ -140,9 +146,9 @@ class _Config:
             raise
 
 
-
 class _ConfigList(_Config):
     """Wrapper base class for configs that handle lists of strings."""
+
     @classmethod
     def get(cls) -> list[str]:
         """Get list from config file as a python list."""
@@ -230,6 +236,7 @@ class _ConfigList(_Config):
 
 class _ConfigInt(_Config):
     """Wrapper base class for configs that handle integer values."""
+
     @classmethod
     def get(cls):
         value = super().get()
@@ -238,10 +245,11 @@ class _ConfigInt(_Config):
 
 class _ConfigBool(_Config):
     """Wrapper base class for configs that handle boolean values."""
+
     @classmethod
     def get(cls) -> bool:
         value = super().get()
-        return value=="true"
+        return value == "true"
 
     @classmethod
     def set(cls, value: bool):
@@ -252,6 +260,7 @@ class _ConfigBool(_Config):
 
 
 # prefs.ini
+
 
 class DefaultState(_Config):
     def __init__(self):
@@ -274,6 +283,7 @@ class AreaCodeNumber(_ConfigInt):
 
 
 # backup.ini
+
 
 class BackupPlaces(_ConfigList):
     def __init__(self):
@@ -359,8 +369,7 @@ class SettingsHandler:
         de um item.
         """
         string_list = (
-            str(list_).replace("[", "[\n\t").replace(
-                ", ", ",\n\t").replace("'", "")
+            str(list_).replace("[", "[\n\t").replace(", ", ",\n\t").replace("'", "")
         )
         return string_list.replace("\\\\", "\\")
 
@@ -380,8 +389,10 @@ class SettingsHandler:
             )
 
         except Exception as xpt:
-            self.logger.error(f"Erro escrevendo [{sect}] {
-                              key}={val}: {str(xpt)}")
+            self.logger.error(
+                f"Erro escrevendo [{sect}] {
+                              key}={val}: {str(xpt)}"
+            )
             raise xpt
 
     def _read(
@@ -402,9 +413,9 @@ class SettingsHandler:
 
         except KeyError:
             return None
-        except configparser.NoSectionError:
+        except NoSectionError:
             return None
-        except configparser.NoOptionError:
+        except NoOptionError:
             return None
 
     def _add_to_list(self, sect: str, key: str, val: str):
@@ -435,8 +446,7 @@ class SettingsHandler:
         n = len(current_list)
 
         if (idx + 1) > n:
-            self.logger.error(
-                f"{idx} fora dos limites, deve ser menor que {n}")
+            self.logger.error(f"{idx} fora dos limites, deve ser menor que {n}")
 
         _ = current_list.pop(idx)
         self.conf.set(sect, key, self.parse_list_to_config(current_list))
@@ -451,12 +461,10 @@ class PreferencesHandler(SettingsHandler):
 
     @property
     def data_tables_rows_per_page(self) -> int:
-        value = self._read(
-            "default", "data_tables_rows_per_page", convert_to="int")
+        value = self._read("default", "data_tables_rows_per_page", convert_to="int")
         if not value:
             default_value = 200
-            self._write("default", "data_tables_rows_per_page",
-                        str(default_value))
+            self._write("default", "data_tables_rows_per_page", str(default_value))
             return default_value
         return value
 
