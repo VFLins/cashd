@@ -86,7 +86,7 @@ def input_annotation(annotation_type: Literal["label", "legend"] = "label") -> P
     if annotation_type == "label":
         return _system_based_input_label_style()
     elif annotation_type == "legend":
-        return Pack(font_size=const.SMALL_FONT_SIZE, margin=(0, 0, 10, 5))
+        return Pack(font_size=const.SMALL_FONT_SIZE, margin=(6, 0, 10, 8), color="gray")
     else:
         raise ValueError(f"{annotation_type=}, expected one of 'label', 'legend'.")
 
@@ -183,9 +183,9 @@ WIDE_SELECTION = Pack(margin=(0, 5), width=210, font_size=const.FONT_SIZE)
 def _system_based_input_label_style() -> Pack:
     """OS based style for a `toga.Label` element used as label to an input field."""
     if platform == "linux":
-        return Pack(margin=(15, 5, 2, 8), width=190, font_size=const.FONT_SIZE)
+        return Pack(margin=(20, 5, 9, 8), width=190, font_size=const.FONT_SIZE)
     else:
-        return Pack(margin=(25, 5, 2, 2), width=190, font_size=const.FONT_SIZE)
+        return Pack(margin=(25, 5, 9, 2), width=190, font_size=const.FONT_SIZE)
 
 
 def _system_based_number_input_style() -> Pack:
