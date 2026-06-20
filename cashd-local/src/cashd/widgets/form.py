@@ -34,7 +34,7 @@ class FormField(Box):
     def __new__(
         self,
         label: str,
-        input_widget: Type[Widget],
+        input_widget: Widget,
         description: str | None = None,
         id: str | None = None,
         is_required: bool = False,

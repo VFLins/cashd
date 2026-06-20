@@ -1,4 +1,5 @@
 from .base import BaseSection
+from sys import platform
 
 from toga.app import App
 from toga.style import Pack
@@ -70,6 +71,7 @@ class ConfigSection(BaseSection):
                 ),
             ]
         )
+
         self.backup_section_title = Label("Backup", style=style.HEADING)
         self.backup_places_list = ListOfItems(
             datasource=backup.BackupPlacesSource(),
@@ -79,6 +81,34 @@ class ConfigSection(BaseSection):
             label_text="Locais de backup",
             style=Pack(width=const.FORM_WIDTH),
         )
+
+        self.backup_on_transac = Row(
+            style=Pack(align_items="center", margin_top=25),
+            children=[
+                Switch(
+                    text="",
+                    value=prefs.BackupOnTransaction.get(),
+                    on_change=self.upd_backup_on_transaction,
+                    style=Pack(margin=(0, 0, 0, 10) if platform=="win32" else (0,10, 0, 0)),
+                ),
+                Label(
+                    "Backup ao registrar transações",
+                    style=Pack(font_size=const.FONT_SIZE)
+                ),
+            ],
+        )
+        self.transac_to_backup_amount = widgets.form.FormField(
+            label="Qtd. de transações",
+            input_widget=NumberInput(
+                min=3,
+                max=50,
+                value=prefs.TransactionsPerBackup.get(),
+                on_change=self.upd_transactions_per_backup,
+            ),
+            id="transac_to_backup_input",
+        )
+        self.transac_to_backup_amount_blank = Box(id="transac_to_backup_blank")
+
         self.backup_actions = widgets.form.FormHandler(n_cols=2)
         self.backup_actions.add_fields(
             fields=[
@@ -94,31 +124,6 @@ class ConfigSection(BaseSection):
                     description="Backups serão salvos nos\n'Locais de backup'.",
                     id="run_backup_button",
                 ),
-                Row(
-                    style=Pack(align_items="center", margin_top=25),
-                    children=[
-                        Switch(
-                            text="",
-                            value=prefs.BackupOnTransaction.get(),
-                            on_change=self.upd_backup_on_transaction,
-                            style=Pack(margin_left=10),
-                        ),
-                        Label(
-                            "Backup ao registrar\ntransações",
-                            style=Pack(font_size=const.FONT_SIZE)
-                        ),
-                    ],
-                ),
-                widgets.form.FormField(
-                    label="Qtd. de transações",
-                    input_widget=NumberInput(
-                        min=3,
-                        max=50,
-                        value=prefs.TransactionsPerBackup.get(),
-                        on_change=self.upd_transactions_per_backup,
-                    ),
-                    id="transac_to_backup_input",
-                )
             ],
         )
 
@@ -137,6 +142,8 @@ class ConfigSection(BaseSection):
                 self.backup_section_title,
                 Divider(style=style.SEPARATOR),
                 self.backup_places_list.widget,
+                self.backup_on_transac,
+                self.transac_to_backup_amount if prefs.BackupOnTransaction.get() else self.transac_to_backup_amount_blank,
                 self.backup_actions.widget,
             ],
         )
@@ -155,7 +162,12 @@ class ConfigSection(BaseSection):
 
     def upd_backup_on_transaction(self, widget: Switch):
         prefs.BackupOnTransaction.set(widget.value)
-        self.app.widgets["transac_to_backup_input"].readonly = widget.value
+        input = self.transac_to_backup_amount
+        blank = self.transac_to_backup_amount_blank
+        if widget.value:
+            self.second_section_content.replace(blank, input)
+        else:
+            self.second_section_content.replace(input, blank)
 
     def upd_transactions_per_backup(self, widget: NumberInput):
         value = int(widget.value)
