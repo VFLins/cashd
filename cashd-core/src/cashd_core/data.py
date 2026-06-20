@@ -35,7 +35,7 @@ from sys import platform
 import phonenumbers
 import re
 
-from cashd_core import prefs, const
+from cashd_core import prefs, const, backup
 
 
 ####################
@@ -390,7 +390,7 @@ class tbl_clientes(dec_base):
 
     def __repr__(self):
         Id, PrimeiroNome, Sobrenome = self.Id, self.PrimeiroNome, self.Sobrenome
-        return f"<cashd customer {Id=}, {PrimeiroNome=}, {Sobrenome=}>"
+        return f"<cashd customer {Id=}, {NomeCompleto=}>"
 
 
 class tbl_transacoes(dec_base):
@@ -402,6 +402,17 @@ class tbl_transacoes(dec_base):
     CarimboTempo: Mapped[datetime] = Column(DateTime(timezone=True))
     DataTransac = Column("DataTransac", Date)
     Valor = Column("Valor", CurrencyAmount)  # valor em centavos
+
+    def write(self, engine: Engine = DB_ENGINE):
+        super().write(engine)
+        if not prefs.BackupOnTransaction.get():
+            return
+        remaining = prefs.TransactionsToBackup.get()
+        prefs.TransactionsToBackup.set(remaining - 1)
+        if remaining == 0:
+            backup.run(force=True)
+            default = prefs.TransactionsPerBackup.get()
+            prefs.TransactionsToBackup.set(default)
 
     def __repr__(self):
         Id, Valor = self.Id, self.Valor
