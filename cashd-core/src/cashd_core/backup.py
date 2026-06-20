@@ -261,8 +261,13 @@ def load(file: str, _raise: bool = False) -> None:
 
     now = datetime.now()
     stashfilename = f"stashed{now}.db".replace(":", "-")
-    rename_on_db_folder(DB_FILE.name, stashfilename)
 
+    if file == str(DB_FILE):
+        # Just create stash file if user loaded current DB
+        shutil.copy(DB_FILE, DB_DIR / stashfilename)
+        return
+
+    rename_on_db_folder(DB_FILE.name, stashfilename)
     copy_file(source_path=file, target_dir=str(DB_DIR), _raise=_raise)
     filename = path.split(file)[1]
     rename_on_db_folder(current=filename, new=DB_FILE.name)
