@@ -24,7 +24,8 @@ else:
 
 CONFIG_FILE = Path(CONFIG_PATH, "backup.ini")
 LOG_FILE = path.join(LOG_PATH, "backup.log")
-DB_FILE = path.join(CASHD_FILES_PATH, "data", "database.db")
+DB_DIR = Path(CASHD_FILES_PATH, "data")
+DB_FILE = Path(DB_DIR, "database.db")
 BACKUP_PATH = path.join(CASHD_FILES_PATH, "data", "backup")
 
 for dirpath in [CASHD_FILES_PATH, CONFIG_PATH, LOG_PATH, BACKUP_PATH]:
@@ -119,6 +120,11 @@ def rename_on_db_folder(current: str, new: str, _raise: bool = False):
             raise xpt
 
 
+def file_is_empty(file: str | Path) -> bool:
+    path = Path(file)
+    return path.is_file() and path.stat().st_size == 0
+
+
 def check_sqlite(file: str, _raise: bool = False) -> bool | None:
     """Checks if `file` represents a sqlite database. All unexpected errors are only
     logged to `backup.log`, but can also be raised if  `_raise=True`.
@@ -138,23 +144,40 @@ def check_sqlite(file: str, _raise: bool = False) -> bool | None:
         logger.error(msg)
         if _raise:
             raise FileNotFoundError(msg)
+
+    if file_is_empty(file):
+        if _raise:
+            raise OSError("File is empty.")
+        return False
+
     try:
         con = sqlite3.connect(file)
     except sqlite3.OperationalError as err:
+        logger.debug(
+            f"Check if '{file}' is a SQLite3 DB returned False: "
+            f"[Err no. {err.sqlite_errorcode}] {err.sqlite_errorname}"
+        )
         return False
+
     cursor = con.cursor()
     try:
         res = cursor.execute(f"PRAGMA schema_version;").fetchone()[0]
-        return type(res) is int
+        val = type(res) is int
+        logger.debug(f"Check if '{file}' is a SQLite3 DB returned {val}")
+        return val
     except sqlite3.DatabaseError as err:
+        logger.debug(
+            f"Check if '{file}' is a SQLite3 DB returned False: [Err no. "
+            f"{err.sqlite_errorcode}] {err.sqlite_errorname}"
+        )
         return False
     except Exception as err:
         logger.critical(
-            f"Unexpected error validating {file}: {str(err)}", exc_info=True
+            f"Unexpected error checking if '{file}' is SQLite3 DB: {str(err)}",
+            exc_info=True,
         )
         if _raise:
             raise err
-        return None
     finally:
         con.close()
 
@@ -221,24 +244,28 @@ def load(file: str, _raise: bool = False) -> None:
     :raises OSError: If the file cannot be loaded.
     """
     logger.debug("function call: load")
-    db_is_present = path.isfile(DB_FILE)
 
     if not check_sqlite(file):
         msg = f"Cannot load non-SQLite file: '{file}'."
         logger.error(msg)
         if _raise:
             raise OSError(msg)
+        return
 
-    if db_is_present:
-        now = datetime.now()
-        dbfilename = path.split(DB_FILE)[1]
-        stashfilename = f"stashed{now}.db".replace(":", "-")
-        rename_on_db_folder(dbfilename, stashfilename)
+    if file_is_empty(DB_FILE):
+        msg = f"Cannot load empty file: '{file}'."
+        logger.error(msg)
+        if _raise:
+            raise OSError(msg)
+        return
 
-    try:
-        shutil.copyfile(file, DB_FILE)
-    except shutil.SameFileError:
-        pass
+    now = datetime.now()
+    stashfilename = f"stashed{now}.db".replace(":", "-")
+    rename_on_db_folder(DB_FILE.name, stashfilename)
+
+    copy_file(source_path=file, target_dir=str(DB_DIR), _raise=_raise)
+    filename = path.split(file)[1]
+    rename_on_db_folder(current=filename, new=DB_FILE.name)
 
 
 def run(

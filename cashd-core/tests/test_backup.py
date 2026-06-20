@@ -6,6 +6,7 @@ from cashd_core.prefs import BackupPrefsHandler
 from cashd_core.backup import (
     settings,
     DB_FILE,
+    DB_DIR,
     CONFIG_FILE,
     BACKUP_PATH,
     read_db_size,
@@ -183,15 +184,16 @@ def test_load():
     with pytest.raises(OSError):
         with NamedTemporaryFile(delete_on_close=True) as tempfile:
             load(file=tempfile.name, _raise=True)
-    # test valid file
-    dbdir = os.path.split(DB_FILE)[0]
-    prev_stash = [f for f in os.listdir(dbdir) if "stash" in f]
-    load(DB_FILE, _raise=True)
-    new_stash = [f for f in os.listdir(dbdir) if "stash" in f]
+
+    # test if DB is being stashed on `load()`
+    prev_stash = [f for f in DB_DIR.iterdir() if "stash" in str(f)]
+    load(str(DB_FILE), _raise=True)
+    new_stash = [f for f in DB_DIR.iterdir() if "stash" in str(f)]
     assert len(prev_stash) == len(new_stash) - 1
+
     # cleanup
     stashed = [f for f in new_stash if f not in prev_stash][0]
-    os.remove(os.path.join(dbdir, stashed))
+    os.remove(DB_DIR / stashed)
 
 
 def test_run():
