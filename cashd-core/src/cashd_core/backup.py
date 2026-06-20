@@ -110,7 +110,7 @@ def rename_on_db_folder(current: str, new: str, _raise: bool = False):
     try:
         rename(path_to_current, path_to_new)
         logger.info(f"{path_to_current} renomeado como {path_to_new}")
-    except WindowsError:
+    except OSError:
         shutil.copy(path_to_current, path_to_new)
     except Exception as xpt:
         logger.error(f"Erro renomeando {path_to_current}: {
@@ -129,13 +129,15 @@ def check_sqlite(file: str, _raise: bool = False) -> bool | None:
 
     :returns: A boolean value indicating if `file` is a SQLite database, or None if an
       unexpected error is catched.
+
+    :raises FileNotFoundError: If `_raise==True` and `file` is does not exist.
     """
     logger.debug("function call: check_sqlite")
     if not path.exists(file):
         msg = f"{file=} does not exist."
         logger.error(msg)
         if _raise:
-            raise FileExistsError(msg)
+            raise FileNotFoundError(msg)
     try:
         con = sqlite3.connect(file)
     except sqlite3.OperationalError as err:
@@ -215,6 +217,8 @@ def load(file: str, _raise: bool = False) -> None:
     :param file: Full path to the file that be loaded as the new database.
     :param _raise: All unexpected errors are only logged to `backup.log`, but can also
       be raised if `_raise=True`.
+
+    :raises OSError: If the file cannot be loaded.
     """
     logger.debug("function call: load")
     db_is_present = path.isfile(DB_FILE)

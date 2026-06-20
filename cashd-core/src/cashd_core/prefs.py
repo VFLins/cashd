@@ -375,7 +375,7 @@ class SettingsHandler:
     - dbsize: `int`
     """
 
-    def __init__(self, configname: Literal["prefs", "backup"]):
+    def __init__(self, configname: str):
         self.config_file = path.join(CONFIG_PATH, f"{configname}.ini")
         self.log_file = path.join(LOG_PATH, f"{configname}.log")
 

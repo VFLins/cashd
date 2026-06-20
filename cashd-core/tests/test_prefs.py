@@ -15,13 +15,13 @@ from cashd_core.prefs import (
 
 CONFIGS_DIR = path.split(PREFS_CONFIG_FILE)[0]
 
-SETTINGS_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
-PREFERENCES_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
-BACKUPPREFS_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
+# SETTINGS_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
+# PREFERENCES_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
+# BACKUPPREFS_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
 
-settings_handler = SettingsHandler(path.split(SETTINGS_TEMPFILE.name)[1])
-prefs_handler = PreferencesHandler(path.split(PREFERENCES_TEMPFILE.name)[1])
-backup_prefs_handler = BackupPrefsHandler(path.split(BACKUPPREFS_TEMPFILE.name)[1])
+settings_handler = SettingsHandler("test_settings")
+prefs_handler = PreferencesHandler("test_prefs")
+backup_prefs_handler = BackupPrefsHandler("test_backup")
 
 handlers = [settings_handler, prefs_handler, backup_prefs_handler]
 
@@ -148,9 +148,9 @@ def test_list_parse(string: str, expected_list: list):
     assert parsed_to == string
 
 
-SETTINGS_TEMPFILE.close()
-PREFERENCES_TEMPFILE.close()
-BACKUPPREFS_TEMPFILE.close()
+# SETTINGS_TEMPFILE.close()
+# PREFERENCES_TEMPFILE.close()
+# BACKUPPREFS_TEMPFILE.close()
 
 for handler in handlers:
     unlink(handler.config_file)
