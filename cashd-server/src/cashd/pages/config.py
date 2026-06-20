@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable
 from importlib.metadata import version
 from cashd_core import backup
+from cashd_core import prefs
 from cashd_core.prefs import settings
 from cashd_core.const import ESTADOS, DDD
 from cashd.const import EXECUTABLE_PATH, DEAMON_PATH, PYTHON_PATH, PROJECT_ROOT
@@ -141,6 +142,18 @@ class page:
             h1(ui, "Backup")
             h2(ui, "Locais de backup")
             self.backup_places = DirectoryList(ui)
+            self.auto_backup = ui.switch(
+                text="Backup ao registrar transações",
+                value=prefs.BackupOnTransaction.get(),
+                on_change=lambda: prefs.BackupOnTransaction.set(self.auto_backup.value)
+            )
+            self.auto_backup_amount = ui.number(
+                label="Qtd. de transações por Backup",
+                value=prefs.TransactionsPerBackup.get(),
+                min=3,
+                max=50,
+            ).props("outlined dense")
+            self.auto_backup_amount.bind_visibility(self.auto_backup, "value")
             h2(ui, "Ações")
             with ui.grid().classes("md:grid-cols-2"):
                 described_button(
