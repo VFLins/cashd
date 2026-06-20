@@ -2,10 +2,11 @@ from .base import BaseSection
 
 from toga.app import App
 from toga.style import Pack
-from toga.widgets.box import Box
+from toga.widgets.box import Box, Row
 from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
+from toga.widgets.switch import Switch
 from toga.widgets.divider import Divider
 from toga.widgets.selection import Selection
 from toga.widgets.textinput import TextInput
@@ -93,6 +94,31 @@ class ConfigSection(BaseSection):
                     description="Backups serão salvos nos\n'Locais de backup'.",
                     id="run_backup_button",
                 ),
+                Row(
+                    style=Pack(align_items="center", margin_top=25),
+                    children=[
+                        Switch(
+                            text="",
+                            value=prefs.BackupOnTransaction.get(),
+                            on_change=self.upd_backup_on_transaction,
+                            style=Pack(margin_left=10),
+                        ),
+                        Label(
+                            "Backup ao registrar\ntransações",
+                            style=Pack(font_size=const.FONT_SIZE)
+                        ),
+                    ],
+                ),
+                widgets.form.FormField(
+                    label="Qtd. de transações",
+                    input_widget=NumberInput(
+                        min=3,
+                        max=50,
+                        value=prefs.TransactionsPerBackup.get(),
+                        on_change=self.upd_transactions_per_backup,
+                    ),
+                    id="transac_to_backup_input",
+                )
             ],
         )
 
@@ -126,6 +152,15 @@ class ConfigSection(BaseSection):
         self.full_contents = Box(
             style=style.FULL_CONTENTS, children=[self.main_container]
         )
+
+    def upd_backup_on_transaction(self, widget: Switch):
+        prefs.BackupOnTransaction.set(widget.value)
+        self.app.widgets["transac_to_backup_input"].readonly = widget.value
+
+    def upd_transactions_per_backup(self, widget: NumberInput):
+        value = int(widget.value)
+        prefs.TransactionsPerBackup.set(value)
+        prefs.TransactionsToBackup.set(value)
 
     def set_default_city(self, widget: TextInput):
         """Runs upon updating the 'Valores padrão: Cidade' field, writes the
