@@ -4,6 +4,7 @@ import asyncio
 import argparse
 import threading
 import multiprocessing
+
 if not sys.platform.startswith("linux"):
     import pystray
     from PIL import Image

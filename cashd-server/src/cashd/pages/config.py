@@ -145,13 +145,16 @@ class page:
             self.auto_backup = ui.switch(
                 text="Backup ao registrar transações",
                 value=prefs.BackupOnTransaction.get(),
-                on_change=lambda: prefs.BackupOnTransaction.set(self.auto_backup.value)
+                on_change=lambda: prefs.BackupOnTransaction.set(self.auto_backup.value),
             )
             self.auto_backup_amount = ui.number(
                 label="Qtd. de transações por Backup",
                 value=prefs.TransactionsPerBackup.get(),
                 min=3,
                 max=50,
+                on_change=lambda: prefs.TransactionsPerBackup.set(
+                    int(self.auto_backup_amount.value)
+                ),
             ).props("outlined dense")
             self.auto_backup_amount.bind_visibility(self.auto_backup, "value")
             h2(ui, "Ações")
@@ -191,9 +194,7 @@ class page:
                         with ui.item_section():
                             ui.link(link, link, new_tab=True)
                 ui.button(
-                    "Encerrar sessão",
-                    icon="cancel",
-                    on_click=lambda: app.shutdown()
+                    "Encerrar sessão", icon="cancel", on_click=lambda: app.shutdown()
                 ).props("color=negative flat")
             h2(ui, "Desenvolvedor")
             with ui.row():
