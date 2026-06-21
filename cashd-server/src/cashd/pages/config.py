@@ -34,7 +34,7 @@ def described_button(
 ):
     with ui.column().classes("w-full gap-1"):
         ui.button(label, icon=icon, on_click=on_click)
-        ui.label(description).classes("text-xs mb-2")
+        ui.label(description).classes("text-xs mb-2 text-gray-500")
 
 
 class DirectoryList:
@@ -142,20 +142,37 @@ class page:
             h1(ui, "Backup")
             h2(ui, "Locais de backup")
             self.backup_places = DirectoryList(ui)
+            self.backup_on_close = ui.switch(
+                text="Forçar backup ao fechar",
+                value=prefs.ForceBackupOnClose.get(),
+                on_change=lambda: prefs.ForceBackupOnClose.set(self.auto_backup.value),
+            ).classes("mt-5")
+            self.backup_on_close_desc = ui.label(
+                "Se desativado, isto só acontecerá se o banco tiver aumentado de "
+                "tamanho desde o último backup."
+            )
+            self.backup_on_close_desc.classes("text-xs mb-2 text-gray-500")
+
             self.auto_backup = ui.switch(
                 text="Backup ao registrar transações",
                 value=prefs.BackupOnTransaction.get(),
                 on_change=lambda: prefs.BackupOnTransaction.set(self.auto_backup.value),
-            )
+            ).classes("mt-5")
             self.auto_backup_amount = ui.number(
                 label="Qtd. de transações por Backup",
                 value=prefs.TransactionsPerBackup.get(),
-                min=3,
-                max=50,
+                min=5,
+                max=60,
                 on_change=lambda: prefs.TransactionsPerBackup.set(
                     int(self.auto_backup_amount.value)
                 ),
-            ).props("outlined dense")
+            )
+            self.auto_backup_desc = ui.label(
+                "Realiza um backup silenciosamente depois que uma quantidade de "
+                "transações é registrada."
+            )
+            self.auto_backup_desc.classes("text-xs mb-2 text-gray-500")
+            self.auto_backup_amount.props("outlined dense").classes("w-51")
             self.auto_backup_amount.bind_visibility(self.auto_backup, "value")
             h2(ui, "Ações")
             with ui.grid().classes("md:grid-cols-2"):

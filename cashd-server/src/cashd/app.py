@@ -14,7 +14,8 @@ from fastapi import Request
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from nicegui import ui, app
+from nicegui import ui, app, background_tasks
+from cashd_core import prefs, backup
 from cashd import auth
 from cashd.const import PROJECT_ROOT, PORT, ADMIN_ROUTES, UNRESTRICTED_ROUTES, HOST_IPS
 from cashd.pages import main, customer, stats, config, login, user
@@ -58,7 +59,7 @@ def get_tray(app):
 
 
 @app.on_startup
-async def show_tray():
+def show_tray():
     """Display the system tray icon when starting Cashd Server."""
     if multiprocessing.current_process().name != "MainProcess":
         # This must only run on the main process to avoid duplicate tray icons
@@ -72,7 +73,7 @@ async def show_tray():
     thread.start()
 
 
-@app.on_shutdown
+@background_tasks.await_on_shutdown
 async def hide_tray():
     """Hide the system tray even when the service is ended outside the tray."""
     if multiprocessing.current_process().name != "MainProcess":
@@ -82,6 +83,20 @@ async def hide_tray():
     global sys_tray
     if sys_tray is not None:
         sys_tray.stop()
+
+
+@background_tasks.await_on_shutdown
+async def backup_on_close():
+    """Perform an automatic backup when closing the app."""
+    force_backup = prefs.ForceBackupOnClose.get()
+    backup.run(force=force_backup)
+    print(f"Backup routine completed with {force_backup=}.")
+
+
+@app.on_shutdown
+async def handle_shutdown():
+    await hide_tray()
+    await backup_on_close()
 
 
 @app.add_middleware
