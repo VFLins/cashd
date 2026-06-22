@@ -149,10 +149,21 @@ class CustomerInfo:
 
 class page:
     CUSTOMERS_SOURCE = CustomerListSource()
-    selected_customer = tbl_clientes()
+
+    @property
+    def selected_customer(self) -> tbl_clientes:
+        customer_id = self.app.storage.tab.get("selected_customer", None)
+        customer = tbl_clientes()
+        if customer_id is not None:
+            customer.read(row_id=customer_id)
+        return customer
+
+    @selected_customer.setter
+    def selected_customer(self, customer: tbl_clientes):
+        self.app.storage.tab["selected_customer"] = customer.Id
 
     def __init__(self, ui, app):
-        self.ui = ui
+        self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Transações")
         with ui.column().classes("w-full gap-0"):
             self.top_section()
