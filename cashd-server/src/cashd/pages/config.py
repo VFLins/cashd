@@ -159,20 +159,18 @@ class page:
                 on_change=lambda: prefs.BackupOnTransaction.set(self.auto_backup.value),
             ).classes("mt-5")
             self.auto_backup_amount = ui.number(
-                label="Qtd. de transações por Backup",
+                label="Qtd. de transações",
                 value=prefs.TransactionsPerBackup.get(),
                 min=5,
                 max=60,
-                on_change=lambda: prefs.TransactionsPerBackup.set(
-                    int(self.auto_backup_amount.value)
-                ),
+                on_change=self.set_transac_per_backup,
             )
             self.auto_backup_desc = ui.label(
                 "Realiza um backup silenciosamente depois que uma quantidade de "
                 "transações é registrada."
             )
             self.auto_backup_desc.classes("text-xs mb-2 text-gray-500")
-            self.auto_backup_amount.props("outlined dense").classes("w-51")
+            self.auto_backup_amount.props("outlined dense debounce=800").classes("w-51")
             self.auto_backup_amount.bind_visibility(self.auto_backup, "value")
             h2(ui, "Ações")
             with ui.grid().classes("md:grid-cols-2"):
@@ -241,6 +239,21 @@ class page:
                     icon="dns",
                     on_click=self.server_noterm_shortcut,
                 ).props("flat")
+
+    def set_transac_per_backup(self):
+        val = int(self.auto_backup_amount.value)
+        val = max(5, min(val, 60)) # set value within range 5~60
+        try:
+            prefs.TransactionsPerBackup.set(val)
+        except Exception:
+            notify_error(
+                self.ui,
+                'Erro inesperado ao alterar "Qtd. de transações", verifique os logs.'
+            )
+        else:
+            notify_success(
+                self.ui, f"Quantidade de transações por backup atualizada para {val}."
+            )
 
     def set_config(self, config_name: str, input_name: str):
         val: str | float = getattr(self, input_name).value
