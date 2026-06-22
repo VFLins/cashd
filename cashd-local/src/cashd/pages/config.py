@@ -85,8 +85,8 @@ class ConfigSection(BaseSection):
         self.transac_to_backup_amount = widgets.form.FormField(
             label="Qtd. de transações",
             input_widget=NumberInput(
-                min=3,
-                max=50,
+                min=5,
+                max=60,
                 value=prefs.TransactionsPerBackup.get(),
                 on_change=self.upd_transactions_per_backup,
             ),
