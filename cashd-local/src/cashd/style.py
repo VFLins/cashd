@@ -86,7 +86,7 @@ def input_annotation(annotation_type: Literal["label", "legend"] = "label") -> P
     if annotation_type == "label":
         return _system_based_input_label_style()
     elif annotation_type == "legend":
-        return Pack(font_size=const.SMALL_FONT_SIZE, margin=(6, 0, 10, 8), color="gray")
+        return _system_based_input_legend_style()
     else:
         raise ValueError(f"{annotation_type=}, expected one of 'label', 'legend'.")
 
@@ -186,6 +186,13 @@ def _system_based_input_label_style() -> Pack:
         return Pack(margin=(20, 5, 9, 8), width=190, font_size=const.FONT_SIZE)
     else:
         return Pack(margin=(25, 5, 9, 2), width=190, font_size=const.FONT_SIZE)
+
+
+def _system_based_input_legend_style() -> Pack:
+    if platform == "linux":
+        return Pack(font_size=const.SMALL_FONT_SIZE, margin=(6, 0, 10, 8), color="gray")
+    else:
+        return Pack(font_size=const.SMALL_FONT_SIZE, margin=(6, 0, 10, 3), color="gray")
 
 
 def _system_based_number_input_style() -> Pack:
