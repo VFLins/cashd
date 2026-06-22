@@ -63,7 +63,7 @@ class StatisticsSection(BaseSection):
         self.transaction_history_table = PaginatedTable(
             datasource=data.LastTransactionsSource(),
             style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.CONTENT_WIDTH),
-            headings=["Data", "Cliente", "Valor"],
+            columns=["Data", "Cliente", "Valor"],
         )
         """Table containing data of every transaction registered recently, most recent first."""
         style.set_col_alignments(
@@ -72,8 +72,7 @@ class StatisticsSection(BaseSection):
 
         self.highest_amounts_table = PaginatedTable(
             style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.CONTENT_WIDTH),
-            headings=["Cliente", "Saldo atual"],
-            accessors=["cliente", "saldo_atual"],
+            columns=["Cliente", "Saldo atual"],
             datasource=data.HighestAmountsSource(),
         )
         """Table displaying customers and their respective owed amount, highest first."""
@@ -81,8 +80,7 @@ class StatisticsSection(BaseSection):
 
         self.inactive_customers_table = PaginatedTable(
             style=style.TABLE_OF_DATA,
-            headings=["Cliente", "Última transação", "Saldo atual"],
-            accessors=["cliente", "ultima_transac", "saldo_atual"],
+            columns=["Cliente", "Última transação", "Saldo atual"],
             datasource=data.InactiveCustomersSource(),
         )
         """Table displaying customers and their last transaction date, oldest first."""
@@ -92,8 +90,7 @@ class StatisticsSection(BaseSection):
 
         self.transac_balance_table = PaginatedTable(
             style=Pack(flex=1, font_size=const.FONT_SIZE),
-            headings=["Data", "Compras", "Abatimentos", "Saldo"],
-            accessors=["data", "compras", "abatimentos", "saldo"],
+            columns=["Data", "Compras", "Abatimentos", "Saldo"],
             datasource=data.TransactionBalanceSource(),
         )
         """Table displaying income vs outcome result by date (may be grouped),
@@ -105,8 +102,7 @@ class StatisticsSection(BaseSection):
 
         self.aggregated_amount_table = PaginatedTable(
             style=Pack(flex=1, font_size=const.FONT_SIZE),
-            headings=["Data", "Compras", "Abatimentos", "Saldo acumulado"],
-            accessors=["data", "compras", "abatimentos", "total"],
+            columns=["Data", "Compras", "Abatimentos", "Saldo acumulado"],
             datasource=data.AggregatedAmountSource(),
         )
         """Table displaying the accumulated income vs outcome result by date

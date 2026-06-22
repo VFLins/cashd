@@ -125,9 +125,8 @@ class SubsectionTransacHistory:
         self.table = Table(
             style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH),
             data=self.SELECTED_CUSTOMER.Transacs,
-            headings=["Data", "Valor"],
+            columns=["Data", "Valor"],
             on_select=self.select_transac,
-            on_activate=self.select_transac,
         )
         """Table containing all transactions of the currently selected customer."""
         style.set_col_alignments(self.table, ["l", "r"])
@@ -326,7 +325,7 @@ class MainSection(BaseSection):
             style=Pack(
                 width=const.CONTENT_WIDTH - 5,
                 font_size=const.FONT_SIZE,
-                padding=(0, 0, 0, 10),
+                margin=(0, 0, 0, 10),
             ),
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),

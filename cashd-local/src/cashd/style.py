@@ -136,7 +136,7 @@ HORIZONTAL_BOX = Pack(
 FULL_CONTENTS = Pack(
     direction=COLUMN,
     align_items="center",
-    padding=(0, 0, 20, 0),
+    margin=(0, 0, 20, 0),
 )
 PAGE_BODY = Pack(
     flex=1,
@@ -147,7 +147,7 @@ PAGE_BODY = Pack(
 TABLE_OF_DATA = Pack(
     flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH, align_items="start"
 )
-INLINE_LABEL = Pack(font_size=const.FONT_SIZE, padding=15)
+INLINE_LABEL = Pack(font_size=const.FONT_SIZE, margin=15)
 GENERIC_LABEL = Pack(
     width=const.CONTENT_WIDTH,
     align_items="start",
@@ -167,7 +167,7 @@ BIG_BUTTON = Pack(
 )
 CONTEXT_BUTTON = Pack(
     font_size=const.FONT_SIZE,
-    padding=(20, 0, 10, 5),
+    margin=(20, 0, 10, 5),
     width=90,
 )
 SEPARATOR = Pack(width=const.CONTENT_WIDTH, margin=5)
@@ -175,7 +175,7 @@ HEADING = Pack(
     font_size=const.BIG_FONT_SIZE,
     font_weight="bold",
     width=const.CONTENT_WIDTH,
-    padding=(20, 5, 5, 0),
+    margin=(20, 5, 5, 0),
 )
 WIDE_SELECTION = Pack(margin=(0, 5), width=210, font_size=const.FONT_SIZE)
 

@@ -75,7 +75,8 @@ class ConfigSection(BaseSection):
         self.backup_section_title = Label("Backup", style=style.HEADING)
         self.backup_places_list = ListOfItems(
             datasource=backup.BackupPlacesSource(),
-            accessors=["value"],
+            columns=["value"],
+            show_headings=False,
             on_add=self.add_backup_dir,
             on_rm=self.rm_backup_dir,
             label_text="Locais de backup",
