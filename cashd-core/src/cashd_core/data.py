@@ -389,7 +389,7 @@ class tbl_clientes(dec_base):
                 return name
 
     def __repr__(self):
-        Id, PrimeiroNome, Sobrenome = self.Id, self.PrimeiroNome, self.Sobrenome
+        Id, NomeCompleto= self.Id, self.NomeCompleto
         return f"<cashd customer {Id=}, {NomeCompleto=}>"
 
 

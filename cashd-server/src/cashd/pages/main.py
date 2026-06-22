@@ -152,15 +152,15 @@ class page:
 
     @property
     def selected_customer(self) -> tbl_clientes:
-        customer_id = self.app.storage.tab.get("selected_customer", None)
+        customer_id = self.app.storage.client.get("selected_customer", None)
         customer = tbl_clientes()
         if customer_id is not None:
             customer.read(row_id=customer_id)
         return customer
 
     @selected_customer.setter
-    def selected_customer(self, customer: tbl_clientes):
-        self.app.storage.tab["selected_customer"] = customer.Id
+    def selected_customer(self, value: tbl_clientes):
+        self.app.storage.client["selected_customer"] = value.Id
 
     def __init__(self, ui, app):
         self.ui, self.app = ui, app
@@ -262,15 +262,17 @@ class page:
     def load_selected_customer(
         self, data: dict[str, Any] | None, update_list: bool = False
     ):
-        customer = self.selected_customer
-        if data is not None:
+        customer = tbl_clientes()
+        # Send selected customer to storage on user interaction with customer list
+        if getattr(self, "customer_list", None) is not None:
             customer.read(row_id=data["Id"])
+            self.selected_customer = customer
+            browserid = self.app.storage.browser["id"]
+            print(f"{browserid} selected: {str(self.selected_customer)}")
+            if update_list:
+                self.customer_list._render_list_items(no_callback=True)
         if getattr(self, "tabs", None) is not None:
             self.tabs.set_value("Transação")
-        # Update customer list items
-        if update_list:
-            if getattr(self, "customer_list", None) is not None:
-                self.customer_list._render_list_items(no_callback=True)
         # Update selected user indicator
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)
@@ -286,6 +288,7 @@ class page:
 
     def update_selected_customer(self):
         customer = self.selected_customer
+        print(customer)
         try:
             customer.PrimeiroNome = self.info.firstname.value
             customer.Sobrenome = self.info.lastname.value
