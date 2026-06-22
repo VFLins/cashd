@@ -1,11 +1,13 @@
 from .base import BaseSection
+from sys import platform
 
 from toga.app import App
 from toga.style import Pack
-from toga.widgets.box import Box
+from toga.widgets.box import Box, Row, Column
 from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
+from toga.widgets.switch import Switch
 from toga.widgets.divider import Divider
 from toga.widgets.selection import Selection
 from toga.widgets.textinput import TextInput
@@ -69,6 +71,7 @@ class ConfigSection(BaseSection):
                 ),
             ]
         )
+
         self.backup_section_title = Label("Backup", style=style.HEADING)
         self.backup_places_list = ListOfItems(
             datasource=backup.BackupPlacesSource(),
@@ -78,6 +81,90 @@ class ConfigSection(BaseSection):
             label_text="Locais de backup",
             style=Pack(width=const.FORM_WIDTH),
         )
+
+        self.transac_to_backup_amount = widgets.form.FormField(
+            label="Qtd. de transações",
+            input_widget=NumberInput(
+                min=5,
+                max=60,
+                value=prefs.TransactionsPerBackup.get(),
+                on_change=self.upd_transactions_per_backup,
+            ),
+            id="transac_to_backup_input",
+        )
+        self.transac_to_backup_amount_blank = Box(id="transac_to_backup_blank")
+        self.backup_on_transac = Column(
+            children=[
+                Row(
+                    style=Pack(align_items="center", margin_top=25),
+                    children=[
+                        Switch(
+                            text="",
+                            value=prefs.BackupOnTransaction.get(),
+                            on_change=self.upd_backup_on_transaction,
+                            style=Pack(
+                                margin=(
+                                    (0, 0, 0, 10)
+                                    if platform == "win32"
+                                    else (0, 10, 0, 0)
+                                )
+                            ),
+                        ),
+                        Label(
+                            "Backup ao registrar transações",
+                            style=Pack(font_size=const.FONT_SIZE),
+                        ),
+                    ],
+                ),
+            ],
+        )
+        self.backup_on_transac_container = Column(
+            children=[
+                self.backup_on_transac,
+                (
+                    self.transac_to_backup_amount
+                    if prefs.BackupOnTransaction.get()
+                    else self.transac_to_backup_amount_blank
+                ),
+                Label(
+                    "Realiza um backup silenciosamente depois que uma quantidade "
+                    "de\ntransações é registrada.",
+                    style=style.input_annotation("legend"),
+                ),
+            ],
+        )
+
+        self.backup_on_close = Column(
+            children=[
+                Row(
+                    style=Pack(align_items="center", margin_top=25),
+                    children=[
+                        Switch(
+                            text="",
+                            value=prefs.ForceBackupOnClose.get(),
+                            on_change=lambda w: prefs.ForceBackupOnClose.set(w.value),
+                            style=Pack(
+                                margin=(
+                                    (0, 0, 0, 10)
+                                    if platform == "win32"
+                                    else (0, 10, 0, 0)
+                                )
+                            ),
+                        ),
+                        Label(
+                            "Forçar backup ao fechar",
+                            style=Pack(font_size=const.FONT_SIZE),
+                        ),
+                    ],
+                ),
+                Label(
+                    "Se desativado, isto só acontecerá se o banco de dados tiver "
+                    "aumentado de\ntamanho desde o último backup.",
+                    style=style.input_annotation("legend"),
+                ),
+            ],
+        )
+
         self.backup_actions = widgets.form.FormHandler(n_cols=2)
         self.backup_actions.add_fields(
             fields=[
@@ -111,6 +198,8 @@ class ConfigSection(BaseSection):
                 self.backup_section_title,
                 Divider(style=style.SEPARATOR),
                 self.backup_places_list.widget,
+                self.backup_on_close,
+                self.backup_on_transac_container,
                 self.backup_actions.widget,
             ],
         )
@@ -126,6 +215,20 @@ class ConfigSection(BaseSection):
         self.full_contents = Box(
             style=style.FULL_CONTENTS, children=[self.main_container]
         )
+
+    def upd_backup_on_transaction(self, widget: Switch):
+        prefs.BackupOnTransaction.set(widget.value)
+        input = self.transac_to_backup_amount
+        blank = self.transac_to_backup_amount_blank
+        if widget.value:
+            self.backup_on_transac_container.replace(blank, input)
+        else:
+            self.backup_on_transac_container.replace(input, blank)
+
+    def upd_transactions_per_backup(self, widget: NumberInput):
+        value = int(widget.value)
+        prefs.TransactionsPerBackup.set(value)
+        prefs.TransactionsToBackup.set(value)
 
     def set_default_city(self, widget: TextInput):
         """Runs upon updating the 'Valores padrão: Cidade' field, writes the

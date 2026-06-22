@@ -1,4 +1,4 @@
-from tempfile import TemporaryFile, TemporaryDirectory
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 import sqlite3
 import pytest
 import os
@@ -6,6 +6,7 @@ from cashd_core.prefs import BackupPrefsHandler
 from cashd_core.backup import (
     settings,
     DB_FILE,
+    DB_DIR,
     CONFIG_FILE,
     BACKUP_PATH,
     read_db_size,
@@ -25,12 +26,12 @@ from cashd_core import data  # ensure database was created
 CONFIGS_DIR = os.path.split(CONFIG_FILE)[0]
 
 SCRIPT_PATH = os.path.split(os.path.realpath(__file__))[0]
-BACKUPPREFS_TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
+BACKUPPREFS_TEMPFILE = NamedTemporaryFile(dir=CONFIGS_DIR)
 
 
 class TempBackupPrefs(BackupPrefsHandler):
     def __init__(self):
-        self.TEMPFILE = TemporaryFile(dir=CONFIGS_DIR)
+        self.TEMPFILE = NamedTemporaryFile(dir=CONFIGS_DIR)
         configname = self.TEMPFILE.name
         super().__init__(configname)
 
@@ -44,7 +45,7 @@ class TempBackupPrefs(BackupPrefsHandler):
 
 
 def test_dbsize_read():
-    with TemporaryFile(delete=False) as data_file, TempBackupPrefs() as settings:
+    with NamedTemporaryFile(delete=False) as data_file, TempBackupPrefs() as settings:
         data_file.write(b"testando um teste testoso...")
 
         filesize = read_db_size(file_path=data_file.name)
@@ -54,17 +55,15 @@ def test_dbsize_read():
 
 
 def test_copy_file():
-    tempfile = TemporaryFile(delete=False)
+    tempfile = NamedTemporaryFile(delete=False)
     tempfile.close()
     with TemporaryDirectory() as tempdir:
         # test success
         copy_file(tempfile.name, tempdir)
         assert len(os.listdir(tempdir)) == 1
         # test fail
-        try:
+        with pytest.raises(FileNotFoundError):
             copy_file("thisisnotevenapath", tempdir, True)
-        except FileNotFoundError:
-            assert 1 == 1
     os.unlink(tempfile.name)
 
 
@@ -72,7 +71,7 @@ def test_rename_on_db_folder():
     db_folder = os.path.split(DB_FILE)[0]
 
     # test closed file
-    file = TemporaryFile(delete=False, dir=db_folder)
+    file = NamedTemporaryFile(delete=False, dir=db_folder)
     file.close()
     old_filename = os.path.split(file.name)[1]
     new_filename = "renamed.file"
@@ -82,7 +81,7 @@ def test_rename_on_db_folder():
     os.unlink(new_filepath)
 
     # test open file
-    with TemporaryFile(dir=db_folder) as file:
+    with NamedTemporaryFile(dir=db_folder) as file:
         old_filename = os.path.split(file.name)[1]
         new_filename = "renamed.file"
         rename_on_db_folder(old_filename, new_filename)
@@ -90,12 +89,8 @@ def test_rename_on_db_folder():
         assert os.path.isfile(new_filepath)
 
     # test invalid file
-    try:
+    with pytest.raises(FileNotFoundError):
         rename_on_db_folder("not a file", "go brrrrr", _raise=True)
-    except Exception:
-        assert True == True
-    else:
-        raise AssertionError("Should raise an error with an invalid file")
 
 
 def test_check_sqlite():
@@ -117,13 +112,13 @@ def test_check_sqlite():
         assert check_sqlite(invalid_db_file) == False
 
         # Test exception when _raise=True
-        with pytest.raises(FileExistsError):
+        with pytest.raises(FileNotFoundError):
             check_sqlite("oi", _raise=True)
 
 
 def test_read_db_size():
     # Create a temporary file
-    with TemporaryFile(delete=False) as temp_file:
+    with NamedTemporaryFile(delete=False) as temp_file:
         temp_file.write(b"something")
         temp_file_path = temp_file.name
 
@@ -141,7 +136,7 @@ def test_read_db_size():
 
 def test_read_last_recorded_size_existing_section():
     # test existing section
-    with TemporaryFile(delete=False) as temp_config_file:
+    with NamedTemporaryFile(delete=False) as temp_config_file:
         temp_config_file.write(b"[file_sizes]\ndbsize = 100\n")
         temp_config_file_path = temp_config_file.name
 
@@ -150,7 +145,7 @@ def test_read_last_recorded_size_existing_section():
     os.remove(temp_config_file_path)
 
     # test missing section
-    with TemporaryFile(delete=False) as temp_config_file:
+    with NamedTemporaryFile(delete=False) as temp_config_file:
         temp_config_file.write(b"[other_section]\nkey = value\n")
         temp_config_file_path = temp_config_file.name
 
@@ -187,17 +182,18 @@ def test_add_rm_backup_place():
 def test_load():
     # test invalid file
     with pytest.raises(OSError):
-        with TemporaryFile(delete_on_close=True) as tempfile:
+        with NamedTemporaryFile(delete_on_close=True) as tempfile:
             load(file=tempfile.name, _raise=True)
-    # test valid file
-    dbdir = os.path.split(DB_FILE)[0]
-    prev_stash = [f for f in os.listdir(dbdir) if "stash" in f]
-    load(DB_FILE, _raise=True)
-    new_stash = [f for f in os.listdir(dbdir) if "stash" in f]
+
+    # test if DB is being stashed on `load()`
+    prev_stash = [f for f in DB_DIR.iterdir() if "stash" in str(f)]
+    load(str(DB_FILE), _raise=True)
+    new_stash = [f for f in DB_DIR.iterdir() if "stash" in str(f)]
     assert len(prev_stash) == len(new_stash) - 1
+
     # cleanup
     stashed = [f for f in new_stash if f not in prev_stash][0]
-    os.remove(os.path.join(dbdir, stashed))
+    os.remove(DB_DIR / stashed)
 
 
 def test_run():

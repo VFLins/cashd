@@ -1,8 +1,14 @@
 from os import path, makedirs
 from sys import platform
 from pathlib import Path
-from typing import Literal
-import configparser
+from typing import Literal, Iterator, Any, Callable
+from configparser import (
+    ConfigParser,
+    NoOptionError,
+    NoSectionError,
+    DuplicateOptionError,
+    DuplicateSectionError,
+)
 import logging
 
 
@@ -22,6 +28,329 @@ DB_FILE = path.join(CASHD_FILES_PATH, "data", "database.db")
 
 for dirpath in [CASHD_FILES_PATH, LOG_PATH, CONFIG_PATH]:
     makedirs(dirpath, exist_ok=True)
+
+
+def get_parser(filename: str) -> tuple[Path, ConfigParser]:
+    """Base function to produce *parser factories*. The parser factories should not
+    take any input value, and return a `ConfigParser`.
+
+    :filename: Name of the config file without extension.
+
+    :returns: A tuple with two items, in order: 1- A `Path` object describing the
+      config file location; 2- A `ConfigParser`.
+    """
+    parser = ConfigParser()
+    config_file = Path(CONFIG_PATH, f"{filename}.ini")
+    config_file.touch(exist_ok=True)
+    parser.read(config_file)
+    return (config_file, parser)
+
+
+def prefs_parser():
+    """Factory of parsers for the 'prefs.ini' config file."""
+    return get_parser(filename="prefs")
+
+
+def backup_parser():
+    """Factory of parser for ther 'backup.ini' config file."""
+    return get_parser(filename="backup")
+
+
+class _Config:
+    def __init__(
+        self,
+        key: str,
+        default: Any,
+        parser_factory: Callable[[], tuple[Path, ConfigParser]] = prefs_parser,
+        section: str = "default",
+    ):
+        """Base class that sets logic for interacting with a key that returns a
+        single value on a specific configuration file.
+
+        :parser_factory: Function that always returns a `ConfigParser` with an attribute
+          `_config_file` indicating the file to where this parser writes.
+        :section: Name of the section where this config is located.
+        :key: Name of this option in the config file.
+        :default: Default value of this option, must be compatible with the input type
+          of this class' `__set` method.
+        """
+        self._parser_factory, self._section, self._key, self._default = (
+            parser_factory,
+            section,
+            key,
+            default,
+        )
+
+        config_file, parser = self._parser_factory()
+        if not parser.has_section(section):
+            parser.add_section(section=section)
+            with open(config_file, "w") as configfile:
+                parser.write(configfile)
+
+        self.logger = logging.getLogger(f"cashd.{__name__}")
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.propagate = False
+
+        log_fmt = logging.Formatter("%(asctime)s :: %(levelname)s %(message)s")
+        log_handler = logging.FileHandler(LOG_FILE)
+        log_handler.setLevel(logging.DEBUG)
+        log_handler.setFormatter(log_fmt)
+        self.logger.addHandler(log_handler)
+
+    @classmethod
+    def get(cls):
+        """Get current value of this config, or the default value if not defined."""
+        interactor = cls()
+        return interactor.__get()
+
+    @classmethod
+    def set(cls, value: Any):
+        """Write `value` to the configuration file."""
+        interactor = cls()
+        interactor.__set(value)
+
+    def __set(self, value: Any):
+        config_file, parser = self._parser_factory()
+        parser.set(self._section, self._key, str(value))
+        try:
+            with open(config_file, "w") as buffer:
+                parser.write(buffer)
+        except Exception as err:
+            self.logger.error(
+                f"Unexpected error trying set {self._key}={value} on "
+                f"{config_file.name}[{self._section}], {err}"
+            )
+            raise
+        else:
+            self.logger.info(
+                f"Config updated {self._key}={value} on {config_file.name}"
+                f"[{self._section}]"
+            )
+
+    def __get(self) -> Any | None:
+        config_file, parser = self._parser_factory()
+        try:
+            return parser.get(self._section, self._key, fallback=self._default)
+        except NoOptionError:
+            self.logger.info(
+                f"Could not find option {self._key} on {config_file.name}"
+                f'[{self._section}], writing option with default "{self._default}"'
+            )
+            self.__set(value=str(self._default))
+            return self._default
+        except Exception as err:
+            self.logger.error(
+                f"Unexpected error getting {self._key} from {config_file.name}"
+                f"[{self._section}], {err}"
+            )
+            raise
+
+
+class _ConfigList(_Config):
+    """Wrapper base class for configs that handle lists of strings."""
+
+    @classmethod
+    def get(cls) -> list[str]:
+        """Get list from config file as a python list."""
+        interactor = cls()
+        return list(interactor.__get())
+
+    @classmethod
+    def set(cls, value: list[str]):
+        """Writes a a python list to the config file, replacing the existing one."""
+        interactor = cls()
+        interactor.__set(value=[str(i) for i in value])
+
+    @classmethod
+    def add(cls, value: str):
+        """Adds a `value` to the config list."""
+        interactor = cls()
+        interactor.__add(value=value)
+
+    @classmethod
+    def rm(cls, value: str):
+        """Removes `value` from config list if it is present. Does nothing otherwise."""
+        interactor = cls()
+        interactor.__rm(value=value)
+
+    def __get(self) -> Iterator[str]:
+        config_file, parser = self._parser_factory()
+        try:
+            string = parser.get(self._section, self._key)
+            string = string.replace("[", "").replace("]", "")
+            list_of_items = string.split(",")
+        except NoOptionError:
+            self.logger.info(
+                f"Could not find option {self._key} on {config_file.name}"
+                f'[{self._section}], writing option with default "{self._default}"'
+            )
+            self.__set(value=self._default)
+            list_of_items = self._default
+        except Exception as err:
+            self.logger.error(
+                f"Unexpected error getting {self._key} from {config_file.name}"
+                f"[{self._section}], {err}"
+            )
+            raise
+        return (i.strip() for i in list_of_items if i.strip() != "")
+
+    def __set(self, value: list[str]):
+        string_list = (
+            str(value)
+            .replace("[", "[\n\t")
+            .replace(", ", ",\n\t")
+            .replace("'", "")
+            .replace("]", "\n]")
+            .replace("\\\\", "\\")
+        )
+        config_file, parser = self._parser_factory()
+        parser.set(self._section, self._key, string_list)
+        try:
+            with open(config_file, "w") as configfile:
+                parser.write(configfile)
+        except Exception as err:
+            self.logger.error(
+                f"Unexpected error trying set {self._key}={value} on "
+                f"{config_file.name}[{self._section}], {err}"
+            )
+            raise
+        else:
+            self.logger.info(
+                f"Config updated {self._key}={value} on {config_file.name}"
+                f"[{self._section}]"
+            )
+
+    def __add(self, value: str):
+        current = [i for i in self.__get()]
+        new = current + [value]
+        self.__set(value=new)
+
+    def __rm(self, value: str):
+        current = [i for i in self.__get()]
+        try:
+            current.remove(value)
+        except ValueError:
+            return
+        self.__set(value=current)
+
+
+class _ConfigInt(_Config):
+    """Wrapper base class for configs that handle integer values."""
+
+    @classmethod
+    def get(cls):
+        value = super().get()
+        return int(value)
+
+
+class _ConfigBool(_Config):
+    """Wrapper base class for configs that handle boolean values."""
+
+    @classmethod
+    def get(cls) -> bool:
+        value = super().get()
+        return value == "true"
+
+    @classmethod
+    def set(cls, value: bool):
+        if type(value) is not bool:
+            raise ValueError(f"Value must be of type {bool}, not {type(value)}")
+        new_value = str(value).lower()
+        super().set(value=new_value)
+
+
+# prefs.ini
+
+
+class DefaultState(_Config):
+    def __init__(self):
+        super().__init__(key="state", default="AC")
+
+
+class DefaultCity(_Config):
+    def __init__(self):
+        super().__init__(key="city", default="")
+
+
+class AreaCodeNumber(_ConfigInt):
+    def __init__(self):
+        super().__init__(key="area_code_number", default="99")
+
+
+class RowsPerPage(_ConfigInt):
+    """Amount of entries displayed in paginated content."""
+    def __init__(self):
+        super().__init__(key="rows_per_page", default="200")
+
+
+# backup.ini
+
+
+class BackupPlaces(_ConfigList):
+    """Paths to the directories where the backup files should be stored."""
+    def __init__(self):
+        super().__init__(parser_factory=backup_parser, key="backup_places", default=[])
+
+
+class DBSize(_ConfigInt):
+    """DB file size (kb) on the last backup performed."""
+    def __init__(self):
+        super().__init__(
+            parser_factory=backup_parser,
+            section="scheduling",
+            key="dbsize",
+            default=0,
+        )
+
+
+class ForceBackupOnClose(_ConfigBool):
+    """Boolean indicating if a backup should always be performed when Cashd closes.
+    By default it will only be done if the DB file size increased since the last backup.
+    """
+    def __init__(self):
+        super().__init__(
+            parser_factory=backup_parser,
+            section="scheduling",
+            key="force_backup_on_close",
+            default=False
+        )
+
+
+class BackupOnTransaction(_ConfigBool):
+    """Boolean indicating if a backup should be automatically started after a certain
+    amount of transactions is registered.
+    """
+    def __init__(self):
+        super().__init__(
+            parser_factory=backup_parser,
+            section="scheduling",
+            key="backup_on_transaction",
+            default=True,
+        )
+
+
+class TransactionsPerBackup(_ConfigInt):
+    """Amount of transactions that need to be registered until a backup is started."""
+    def __init__(self):
+        super().__init__(
+            parser_factory=backup_parser,
+            section="scheduling",
+            key="transactions_per_backup",
+            default=20,
+        )
+
+
+class TransactionsToBackup(_ConfigInt):
+    """Transactions remaining until a backup starts, updated only when
+    'backup_on_transaction=true'.
+    """
+    def __init__(self):
+        super().__init__(
+            parser_factory=backup_parser,
+            section="scheduling",
+            key="transactions_per_backup",
+            default=20,
+        )
 
 
 class SettingsHandler:
@@ -46,16 +375,16 @@ class SettingsHandler:
     - dbsize: `int`
     """
 
-    def __init__(self, configname: Literal["prefs", "backup"]):
+    def __init__(self, configname: str):
         self.config_file = path.join(CONFIG_PATH, f"{configname}.ini")
         self.log_file = path.join(LOG_PATH, f"{configname}.log")
 
         # config parser
-        self.conf = configparser.ConfigParser()
+        self.conf = ConfigParser()
         self.conf.read(self.config_file)
         try:
             self.conf.add_section("default")
-        except configparser.DuplicateSectionError:
+        except DuplicateSectionError:
             pass
 
         # logger
@@ -91,8 +420,7 @@ class SettingsHandler:
         de um item.
         """
         string_list = (
-            str(list_).replace("[", "[\n\t").replace(
-                ", ", ",\n\t").replace("'", "")
+            str(list_).replace("[", "[\n\t").replace(", ", ",\n\t").replace("'", "")
         )
         return string_list.replace("\\\\", "\\")
 
@@ -112,8 +440,10 @@ class SettingsHandler:
             )
 
         except Exception as xpt:
-            self.logger.error(f"Erro escrevendo [{sect}] {
-                              key}={val}: {str(xpt)}")
+            self.logger.error(
+                f"Erro escrevendo [{sect}] {
+                              key}={val}: {str(xpt)}"
+            )
             raise xpt
 
     def _read(
@@ -134,9 +464,9 @@ class SettingsHandler:
 
         except KeyError:
             return None
-        except configparser.NoSectionError:
+        except NoSectionError:
             return None
-        except configparser.NoOptionError:
+        except NoOptionError:
             return None
 
     def _add_to_list(self, sect: str, key: str, val: str):
@@ -167,8 +497,7 @@ class SettingsHandler:
         n = len(current_list)
 
         if (idx + 1) > n:
-            self.logger.error(
-                f"{idx} fora dos limites, deve ser menor que {n}")
+            self.logger.error(f"{idx} fora dos limites, deve ser menor que {n}")
 
         _ = current_list.pop(idx)
         self.conf.set(sect, key, self.parse_list_to_config(current_list))
@@ -183,12 +512,10 @@ class PreferencesHandler(SettingsHandler):
 
     @property
     def data_tables_rows_per_page(self) -> int:
-        value = self._read(
-            "default", "data_tables_rows_per_page", convert_to="int")
+        value = self._read("default", "data_tables_rows_per_page", convert_to="int")
         if not value:
             default_value = 200
-            self._write("default", "data_tables_rows_per_page",
-                        str(default_value))
+            self._write("default", "data_tables_rows_per_page", str(default_value))
             return default_value
         return value
 

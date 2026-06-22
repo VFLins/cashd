@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable
 from importlib.metadata import version
 from cashd_core import backup
+from cashd_core import prefs
 from cashd_core.prefs import settings
 from cashd_core.const import ESTADOS, DDD
 from cashd.const import EXECUTABLE_PATH, DEAMON_PATH, PYTHON_PATH, PROJECT_ROOT
@@ -33,7 +34,7 @@ def described_button(
 ):
     with ui.column().classes("w-full gap-1"):
         ui.button(label, icon=icon, on_click=on_click)
-        ui.label(description).classes("text-xs mb-2")
+        ui.label(description).classes("text-xs mb-2 text-gray-500")
 
 
 class DirectoryList:
@@ -141,6 +142,36 @@ class page:
             h1(ui, "Backup")
             h2(ui, "Locais de backup")
             self.backup_places = DirectoryList(ui)
+            self.backup_on_close = ui.switch(
+                text="Forçar backup ao fechar",
+                value=prefs.ForceBackupOnClose.get(),
+                on_change=lambda: prefs.ForceBackupOnClose.set(self.auto_backup.value),
+            ).classes("mt-5")
+            self.backup_on_close_desc = ui.label(
+                "Se desativado, isto só acontecerá se o banco tiver aumentado de "
+                "tamanho desde o último backup."
+            )
+            self.backup_on_close_desc.classes("text-xs mb-2 text-gray-500")
+
+            self.auto_backup = ui.switch(
+                text="Backup ao registrar transações",
+                value=prefs.BackupOnTransaction.get(),
+                on_change=lambda: prefs.BackupOnTransaction.set(self.auto_backup.value),
+            ).classes("mt-5")
+            self.auto_backup_amount = ui.number(
+                label="Qtd. de transações",
+                value=prefs.TransactionsPerBackup.get(),
+                min=5,
+                max=60,
+                on_change=self.set_transac_per_backup,
+            )
+            self.auto_backup_desc = ui.label(
+                "Realiza um backup silenciosamente depois que uma quantidade de "
+                "transações é registrada."
+            )
+            self.auto_backup_desc.classes("text-xs mb-2 text-gray-500")
+            self.auto_backup_amount.props("outlined dense debounce=800").classes("w-51")
+            self.auto_backup_amount.bind_visibility(self.auto_backup, "value")
             h2(ui, "Ações")
             with ui.grid().classes("md:grid-cols-2"):
                 described_button(
@@ -178,9 +209,7 @@ class page:
                         with ui.item_section():
                             ui.link(link, link, new_tab=True)
                 ui.button(
-                    "Encerrar sessão",
-                    icon="cancel",
-                    on_click=lambda: app.shutdown()
+                    "Encerrar sessão", icon="cancel", on_click=lambda: app.shutdown()
                 ).props("color=negative flat")
             h2(ui, "Desenvolvedor")
             with ui.row():
@@ -210,6 +239,21 @@ class page:
                     icon="dns",
                     on_click=self.server_noterm_shortcut,
                 ).props("flat")
+
+    def set_transac_per_backup(self):
+        val = int(self.auto_backup_amount.value)
+        val = max(5, min(val, 60)) # set value within range 5~60
+        try:
+            prefs.TransactionsPerBackup.set(val)
+        except Exception:
+            notify_error(
+                self.ui,
+                'Erro inesperado ao alterar "Qtd. de transações", verifique os logs.'
+            )
+        else:
+            notify_success(
+                self.ui, f"Quantidade de transações por backup atualizada para {val}."
+            )
 
     def set_config(self, config_name: str, input_name: str):
         val: str | float = getattr(self, input_name).value

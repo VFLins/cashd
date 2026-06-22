@@ -17,6 +17,7 @@ from toga.command import Command
 from toga.style import Pack
 from toga.style.pack import ROW
 
+from cashd_core import prefs, backup
 from cashd import pages, const, style
 
 
@@ -43,7 +44,10 @@ class Cashd(App):
         ###############
 
         self.main_window = MainWindow(
-            title=self.formal_name, size=const.MAIN_WINDOW_SIZE, resizable=True
+            title=self.formal_name,
+            size=const.MAIN_WINDOW_SIZE,
+            resizable=True,
+            on_close=self.on_close,
         )
         self.main_window.min_size = (480, 490)
         self.main_window.content = self.main_box
@@ -188,6 +192,11 @@ class Cashd(App):
 
         self.about_window.content = full_contents
         self.about_window.show()
+
+    def on_close(self, window):
+        force_backup = prefs.ForceBackupOnClose.get()
+        backup.run(force=force_backup)
+        return True
 
 
 def main():
