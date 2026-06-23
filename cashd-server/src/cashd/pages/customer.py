@@ -1,6 +1,7 @@
 from cashd_core.const import ESTADOS
 from cashd_core.data import tbl_clientes, get_default_customer
 from cashd.widgets.parts import DefaultHeader, notify_success, notify_error
+from cashd.const import now
 
 
 class page:
@@ -25,8 +26,9 @@ class page:
         )
 
     def __init__(self, ui, app):
-        self.ui = ui
+        self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Novo cliente")
+        print(f"{now()} Drawing '/customer' page for {app.storage.browser['id']}")
         with ui.column(align_items="center") as form_block:
             form_block.classes(
                 "sm:w-149 absolute sm:top-1/2 left-1/2 transform "
@@ -74,6 +76,7 @@ class page:
                 self.ui,
                 f"{customer.NomeCompleto} cadastrado com sucesso",
             )
+            print(f"{now()} {self.app.storage.browser['id']} added a {customer=}")
             self.reset()
 
     def reset(self):

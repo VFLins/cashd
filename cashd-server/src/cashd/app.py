@@ -17,7 +17,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from nicegui import ui, app, background_tasks
 from cashd_core import prefs, backup
 from cashd import auth
-from cashd.const import PROJECT_ROOT, PORT, ADMIN_ROUTES, UNRESTRICTED_ROUTES, HOST_IPS
+from cashd.const import PROJECT_ROOT, PORT, ADMIN_ROUTES, UNRESTRICTED_ROUTES, HOST_IPS, now
 from cashd.pages import main, customer, stats, config, login, user
 
 MIN_WINDOW_SIZE = (450, 620) if sys.platform == "win32" else (450, 660)
@@ -90,7 +90,7 @@ async def backup_on_close():
     """Perform an automatic backup when closing the app."""
     force_backup = prefs.ForceBackupOnClose.get()
     backup.run(force=force_backup)
-    print(f"Backup routine completed with {force_backup=}.")
+    print(f"{now()} Backup routine completed with {force_backup=}.")
 
 
 @app.on_shutdown

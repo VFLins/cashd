@@ -166,11 +166,15 @@ class page:
     def __init__(self, ui, app):
         self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Transações")
+        print(f"{now()} Drawing '/' page for {app.storage.browser['id']}")
         with ui.column().classes("w-full gap-0"):
             self.top_section()
             with ui.grid().classes("w-full h-full md:grid-cols-2"):
                 self.l_section = self.left_section()
                 self.r_section = self.right_section()
+        # Ensure the customer_list resets to initial state whenever this page loads
+        self.CUSTOMERS_SOURCE.search_text = ""
+        self.customer_list._render_list_items(no_callback=True)
 
     def top_section(self):
         ui = self.ui
@@ -272,7 +276,6 @@ class page:
                 customer.read(row_id=customer_id)
             self.selected_customer = customer
             browserid = self.app.storage.browser["id"]
-            print(f"{now()} {browserid} selected: {str(self.selected_customer)}")
             if update_list:
                 customer_list._render_list_items(no_callback=True)
 
@@ -339,6 +342,7 @@ class page:
             notify_success(self.ui, f"Transação adicionada com sucesso.")
             self.transac.value_input.set_value("")
             self.transac.date = date.today()
+            print(f"{now()} {self.app.storage.browser['id']} added a {transaction=}")
         finally:
             self.load_selected_customer(data=self.customer_list.selected_data)
 

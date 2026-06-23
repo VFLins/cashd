@@ -8,6 +8,7 @@ from cashd_core.data import (
 )
 from cashd.widgets.parts import DefaultHeader
 from cashd import auth
+from cashd.const import now
 import plotly.graph_objects as go
 from nicegui import ui
 
@@ -131,6 +132,7 @@ class page:
     def __init__(self, ui, app):
         self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Estatísticas")
+        print(f"{now()} Drawing '/stats' page for {app.storage.browser['id']}")
         self.controls_block(ui)
         with ui.column(align_items="center") as self.displayed_stat:
             self.displayed_stat.classes("w-full h-full")
