@@ -242,13 +242,13 @@ class page:
 
     def set_transac_per_backup(self):
         val = int(self.auto_backup_amount.value)
-        val = max(5, min(val, 60)) # set value within range 5~60
+        val = max(5, min(val, 60))  # set value within range 5~60
         try:
             prefs.TransactionsPerBackup.set(val)
         except Exception:
             notify_error(
                 self.ui,
-                'Erro inesperado ao alterar "Qtd. de transações", verifique os logs.'
+                'Erro inesperado ao alterar "Qtd. de transações", verifique os logs.',
             )
         else:
             notify_success(

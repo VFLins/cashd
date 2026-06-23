@@ -17,7 +17,14 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from nicegui import ui, app, background_tasks
 from cashd_core import prefs, backup
 from cashd import auth
-from cashd.const import PROJECT_ROOT, PORT, ADMIN_ROUTES, UNRESTRICTED_ROUTES, HOST_IPS, now
+from cashd.const import (
+    PROJECT_ROOT,
+    PORT,
+    ADMIN_ROUTES,
+    UNRESTRICTED_ROUTES,
+    HOST_IPS,
+    now,
+)
 from cashd.pages import main, customer, stats, config, login, user
 
 MIN_WINDOW_SIZE = (450, 620) if sys.platform == "win32" else (450, 660)

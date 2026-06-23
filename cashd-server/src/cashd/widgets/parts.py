@@ -97,14 +97,17 @@ def default_frontmatter(ui):
     """Default frontmatter configuration applied to every page where the DefaultHeader
     is applied
     """
-    ui.add_head_html("""
+    ui.add_head_html(
+        """
     <style>
         .no-margin-scroll .q-scrollarea__content {
             padding: 0 !important;
         }
     </style>
-    """)
-    ui.add_css("""
+    """
+    )
+    ui.add_css(
+        """
     @font-face {
         font-family: 'Saira Semibold';
         src: url('/assets/Saira-SemiBold.ttf') format('truetype');
@@ -124,6 +127,7 @@ def default_frontmatter(ui):
         font-size: 16px;
         font-weight: bold;
     }
-    """)
+    """
+    )
     ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
     ui.colors(primary="#478eff", secondary="gray", accent="#d3d7d9")
