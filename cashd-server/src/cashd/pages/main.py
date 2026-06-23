@@ -7,6 +7,7 @@ from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
 from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd.widgets.custom import DetailedList
 from cashd.widgets.dialogs import DeleteTransactionDialog
+from cashd.const import now
 
 
 class subpage_transac:
@@ -264,13 +265,17 @@ class page:
     ):
         customer = tbl_clientes()
         # Send selected customer to storage on user interaction with customer list
-        if getattr(self, "customer_list", None) is not None:
-            customer.read(row_id=data["Id"])
+        customer_list = getattr(self, "customer_list", None)
+        if (customer_list is not None) and (data is not None):
+            customer_id: int | None = data.get("Id", None)
+            if customer_id is not None:
+                customer.read(row_id=customer_id)
             self.selected_customer = customer
             browserid = self.app.storage.browser["id"]
-            print(f"{browserid} selected: {str(self.selected_customer)}")
+            print(f"{now()} {browserid} selected: {str(self.selected_customer)}")
             if update_list:
-                self.customer_list._render_list_items(no_callback=True)
+                customer_list._render_list_items(no_callback=True)
+
         if getattr(self, "tabs", None) is not None:
             self.tabs.set_value("Transação")
         # Update selected user indicator

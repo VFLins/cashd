@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 import sys
 
@@ -22,3 +23,7 @@ DEAMON_PATH = (
     if sys.platform == "win32"
     else EXECUTABLE_DIR / "cashd-serverd"
 )
+
+
+def now() -> str:
+    return datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
