@@ -43,9 +43,9 @@ class subpage_transac:
 
 
 class subpage_history:
-    def __init__(self, ui, customer: tbl_clientes, on_delete=None):
+    def __init__(self, ui, app, customer: tbl_clientes, on_delete=None):
         self.customer = customer
-        self.delete_transaction_dialog = DeleteTransactionDialog(ui)
+        self.delete_transaction_dialog = DeleteTransactionDialog(ui, app)
         cols = [
             {"name": "data", "label": "Data", "field": "data"},
             {"name": "valor", "label": "Valor (R$)", "field": "valor"},
@@ -239,6 +239,7 @@ class page:
                 with ui.tab_panel(history):
                     self.history = subpage_history(
                         ui,
+                        self.app,
                         customer=self.selected_customer,
                         on_delete=self.del_transaction,
                     )

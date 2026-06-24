@@ -6,15 +6,17 @@ from contextlib import contextmanager
 from sqlalchemy.exc import IntegrityError
 from cashd_core.data import tbl_clientes, tbl_transacoes
 from cashd_core.const import NA_VALUE
+from cashd_core import fmt
 from cashd.widgets.parts import notify_success, notify_error
+from cashd.const import now
 from cashd import auth
 
 
 class CustomDialog:
     """Base class for any custom dialog."""
 
-    def __init__(self, ui):
-        self.ui = ui
+    def __init__(self, ui, app):
+        self.ui, self.app = ui, app
         with ui.dialog() as self.dialog, ui.card().classes("w-full"):
             self.dialog.on("hide", self.cancel)
             self._render_content(ui)
@@ -492,13 +494,17 @@ class DeleteTransactionDialog(CustomDialog):
 
     def delete_transaction(self):
         try:
-            self.transaction.delete()
+            tr = self.transaction
+            tr.delete()
         except Exception as err:
             notify_error(
                 self.ui, "Erro inesperado ao excluir transação, verifique o log."
             )
             raise err
         else:
+            print(
+                f"{now()} {tr} deleted by {self.app.storage.browser['id']}"
+            )
             notify_success(self.ui, "Transação removida com sucesso.")
         finally:
             self.dialog.submit(None)

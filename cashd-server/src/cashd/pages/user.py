@@ -14,7 +14,7 @@ class page:
         {"name": "upd_pass", "label": ""},
     ]
 
-    def __init__(self, ui):
+    def __init__(self, ui, app):
         ui.add_head_html(
             """
         <style>
@@ -27,7 +27,7 @@ class page:
         ui.query("body").style("font-family: Inter, 'Segoe UI', Arial, sans-serif;")
         self.ui = ui
         ui.colors(primary="#478eff", secondary="#d3d7d9")
-        self.user_dialog = AddUserDialog(ui)
+        self.user_dialog = AddUserDialog(ui, app)
         self._render_contents(ui)
 
     def _render_contents(self, ui):
@@ -74,12 +74,12 @@ class page:
         self._refresh_user_table()
 
     async def upd_role(self, user_id):
-        dialog = UpdateRoleDialog(ui=self.ui, user_id=user_id)
+        dialog = UpdateRoleDialog(ui=self.ui, app=self.app, user_id=user_id)
         await dialog.show()
         self._refresh_user_table()
 
     async def upd_pass(self, user_id):
-        dialog = UpdatePassDialog(ui=self.ui, user_id=user_id)
+        dialog = UpdatePassDialog(ui=self.ui, app=self.app, user_id=user_id)
         await dialog.show()
 
     def _refresh_user_table(self):

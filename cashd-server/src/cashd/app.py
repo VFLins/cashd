@@ -179,7 +179,7 @@ def login_page():
 
 @ui.page("/user")
 def user_page():
-    return user.page(ui=ui)
+    return user.page(ui=ui, app=app)
 
 
 def run():

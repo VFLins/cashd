@@ -2,6 +2,7 @@ from argon2.exceptions import VerifyMismatchError
 from sqlalchemy.exc import StatementError
 from nicegui.events import KeyEventArguments
 from cashd.widgets.parts import default_frontmatter, notify_error
+from cashd.const import now
 from cashd import auth
 
 
@@ -42,5 +43,6 @@ class page:
         except (StatementError, ValueError, VerifyMismatchError):
             notify_error(self.ui, "Usuário ou senha incorretos")
         else:
+            print(f"{now()} {self.app.storage.browser['id']} logged in as '{usr}'")
             self.app.storage.user["userid"] = user.Id
             self.ui.navigate.to("/")

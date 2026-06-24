@@ -415,8 +415,10 @@ class tbl_transacoes(dec_base):
             prefs.TransactionsToBackup.set(default)
 
     def __repr__(self):
-        Id, Valor = self.Id, self.Valor
-        return f"<cashd transaction {Id=}, {Valor=}>"
+        Id, Valor, DataTransac, IdCliente = (
+            self.Id, Decimal(self.Valor / 100), self.DataTransac, self.IdCliente
+        )
+        return f"<cashd transaction {Id=}, {IdCliente}, {DataTransac=}, {Valor=}>"
 
 
 def get_default_customer() -> tbl_clientes:
