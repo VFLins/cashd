@@ -327,6 +327,9 @@ class page:
         if not value.is_valid():
             notify_error(self.ui, value.invalid_reason)
             return
+        if self.selected_customer.Id is None:
+            notify_error(self.ui, "Nenhum cliente selecionado.")
+            return
         try:
             transaction = tbl_transacoes(
                 IdCliente=self.selected_customer.Id,
