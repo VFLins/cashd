@@ -42,7 +42,7 @@ class DirectoryList:
     def data(self) -> list[dict[str, str]]:
         return [{"name": place} for place in backup.settings.read_backup_places()]
 
-    def __init__(self, ui):
+    def __init__(self, ui, app):
         self.ui = ui
         self.initial_dir: Path = Path("~").expanduser()
 
@@ -68,7 +68,7 @@ class DirectoryList:
                     js_handler="() => emit(props.rowIndex)",
                     handler=self.rm_dir,
                 )
-        self.dialog_add_directory = SelectDirDialog(ui=ui, initial_dir=self.initial_dir)
+        self.dialog_add_directory = SelectDirDialog(ui=ui, app=app, initial_dir=self.initial_dir)
 
     async def add_dir(self):
         new_dir = await self.dialog_add_directory.show()
@@ -91,9 +91,9 @@ class DirectoryList:
 
 class page:
     def __init__(self, ui, app):
-        self.ui = ui
+        self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Configurações")
-        self.file_dialog = SelectFileDialog(ui, initial_dir=Path("~").expanduser())
+        self.file_dialog = SelectFileDialog(ui=ui, app=app, initial_dir=Path("~").expanduser())
         with ui.column(align_items="left").classes("self-center"):
 
             h1(ui, "Preferências")
@@ -141,7 +141,7 @@ class page:
 
             h1(ui, "Backup")
             h2(ui, "Locais de backup")
-            self.backup_places = DirectoryList(ui)
+            self.backup_places = DirectoryList(ui, app)
             self.backup_on_close = ui.switch(
                 text="Forçar backup ao fechar",
                 value=prefs.ForceBackupOnClose.get(),

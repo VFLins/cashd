@@ -45,6 +45,7 @@ class SelectDirDialog(CustomDialog):
     def __init__(
         self,
         ui,
+        app,
         initial_dir: Path,
     ):
         self.INITIAL_DIR, self.selected_item, self.displayed_dir = (
@@ -52,7 +53,7 @@ class SelectDirDialog(CustomDialog):
             initial_dir,
             initial_dir,
         )
-        super().__init__(ui)
+        super().__init__(ui=ui, app=app)
 
     def _render_content(self, ui):
         with ui.row() as top_block:
