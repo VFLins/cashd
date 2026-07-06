@@ -26,6 +26,7 @@ from sqlalchemy.orm import (
     relationship,
     Session,
 )
+from sqlalchemy.sql.functions import coalesce
 from typing import List, Iterable, Literal, Any, Self, Dict
 from datetime import datetime
 from decimal import Decimal
@@ -884,9 +885,12 @@ class TransactionBalanceSource(_DataSource):
 
 
 class AggregatedAmountSource(_DataSource):
-    sums_col = func.sum(case((tbl_transacoes.Valor > 0, tbl_transacoes.Valor)))
-    deductions_col = func.sum(
-        case((tbl_transacoes.Valor < 0, tbl_transacoes.Valor)))
+    sums_col = coalesce(
+        func.sum(case((tbl_transacoes.Valor > 0, tbl_transacoes.Valor))), 0
+    )
+    deductions_col = coalesce(
+        func.sum(case((tbl_transacoes.Valor < 0, tbl_transacoes.Valor))), 0
+    )
 
     def __init__(self, engine: Engine = DB_ENGINE):
         """Manages database interaction on for 'Transaction Balance' data,
@@ -901,8 +905,7 @@ class AggregatedAmountSource(_DataSource):
         date_col = func.strftime(
             "%Y-%m", tbl_transacoes.DataTransac).label("Date")
         acum_balance_col = query_currency(
-            func.sum(self.sums_col +
-                     self.deductions_col).over(order_by=date_col.asc()),
+            func.sum(self.sums_col + self.deductions_col).over(order_by=date_col.asc()),
             label="AcumBalance",
         )
         select_stmt = (
