@@ -409,11 +409,12 @@ class tbl_transacoes(dec_base):
         if not prefs.BackupOnTransaction.get():
             return
         remaining = prefs.TransactionsToBackup.get()
-        prefs.TransactionsToBackup.set(remaining - 1)
-        if remaining == 0:
+        if remaining == 1:
             backup.run(force=True)
             default = prefs.TransactionsPerBackup.get()
             prefs.TransactionsToBackup.set(default)
+        else:
+            prefs.TransactionsToBackup.set(remaining - 1)
 
     def __repr__(self):
         Id, Valor, DataTransac, IdCliente = (
