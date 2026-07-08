@@ -1,4 +1,4 @@
-name: Test Builds and Generate Badge Data
+name: Test Cashd Local builds and update status badges
 
 on:
   pull_request:
