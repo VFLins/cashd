@@ -35,7 +35,7 @@ class DetailedList:
                 "w-full border border-gray-300 rounded-borders no-margin-scroll"
             )
             scroll.style("min-height: 260px; height: calc(100svh - 320px);")
-            self._render_list_items()
+            self.items_list()
 
     def _pagination(self, ui):
         with ui.scroll_area().classes("h-[2rem] no-margin-scroll w-full items-end"):
@@ -56,7 +56,7 @@ class DetailedList:
                     )
 
     @ui.refreshable
-    def _render_list_items(self, no_callback: bool = False):
+    def items_list(self, no_callback: bool = False):
         """Refreshes the selection list to reflect the current state of the
         `DetailedList.SOURCE`.
         """
@@ -98,19 +98,16 @@ class DetailedList:
     def _next_page(self):
         """When available, renders the next page of data."""
         self.SOURCE.fetch_next_page()
-        # self._render_list_items()
-        self._render_list_items.refresh()
+        self.items_list.refresh()
         self.pagination_label.text = self.pagination_text
 
     def _previous_page(self):
         """When available, renders the previous page of data."""
         self.SOURCE.fetch_previous_page()
-        # self._render_list_items()
-        self._render_list_items.refresh()
+        self.items_list.refresh()
         self.pagination_label.text = self.pagination_text
 
     def _change_search(self):
         self.SOURCE.search_text = self.search_bar.value
-        # self._render_list_items()
-        self._render_list_items.refresh()
+        self.items_list.refresh()
         self.pagination_label.text = self.pagination_text
