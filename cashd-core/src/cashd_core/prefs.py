@@ -348,7 +348,7 @@ class TransactionsToBackup(_ConfigInt):
         super().__init__(
             parser_factory=backup_parser,
             section="scheduling",
-            key="transactions_per_backup",
+            key="transactions_to_backup",
             default=20,
         )
 
