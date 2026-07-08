@@ -34,7 +34,7 @@ class DetailedList:
             scroll.classes(
                 "w-full border border-gray-300 rounded-borders no-margin-scroll"
             )
-            scroll.style("min-height: 260px; height: calc(100svh - 380px);")
+            scroll.style("min-height: 260px; height: calc(100svh - 320px);")
             self._render_list_items()
 
     def _pagination(self, ui):
