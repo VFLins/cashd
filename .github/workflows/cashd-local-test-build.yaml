@@ -107,9 +107,9 @@ jobs:
             echo "{\"schemaVersion\": 1, \"label\": \"$label\", \"message\": \"$message\", \"color\": \"$color\", \"namedLogo\": \"$logo\", \"logoColor\": \"white\"}"
           }
 
-          generate_json "${{ needs.test-windows.outputs.status }}" "Build" "windows" > .github/badges/windows.json
-          generate_json "${{ needs.test-ubuntu.outputs.status }}" "Build" "ubuntu" > .github/badges/ubuntu.json
-          generate_json "${{ needs.test-fedora.outputs.status }}" "Build" "fedora" > .github/badges/fedora.json
+          generate_json "${{ needs.test-windows.outputs.status }}" "Build .msi" "windows" > .github/badges/windows.json
+          generate_json "${{ needs.test-ubuntu.outputs.status }}" "Build .deb" "ubuntu" > .github/badges/ubuntu.json
+          generate_json "${{ needs.test-fedora.outputs.status }}" "Build .rpm" "fedora" > .github/badges/fedora.json
 
       - name: Commit and Push Badge JSONs
         run: |
