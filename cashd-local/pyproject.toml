@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 dynamic = ["version"]
 name = "cashd"
 dependencies = [
-    "cashd-core==0.4.0",
+    "cashd-core==0.4.1",
     "briefcase",
     "toga==0.5.4",
     "sqlalchemy==2.*",
@@ -18,7 +18,7 @@ dependencies = [
 [tool.briefcase]
 project_name = "Cashd"
 bundle = "br.com.vitorlins.cashd"
-version = "0.4.0"
+version = "0.4.1"
 url = "https://vitorlins.com.br/software/cashd"
 license = "MIT"
 license-files = ["LICENSE"]
