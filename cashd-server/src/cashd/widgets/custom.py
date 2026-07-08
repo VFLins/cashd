@@ -1,4 +1,5 @@
 from typing import Any
+from nicegui import ui
 from cashd_core.data import _DataSource
 
 
@@ -17,9 +18,6 @@ class DetailedList:
         self.selection = self._selection(ui)
         self.pagination = self._pagination(ui)
 
-        # handle refreshable content on appropriate container
-        self.render_list = ui.refreshable(self._render_list_items)
-
     @property
     def current_data(self) -> list[dict[str, Any]]:
         return [r._asdict() for r in self.SOURCE.current_data]
@@ -37,7 +35,7 @@ class DetailedList:
                 "w-full border border-gray-300 rounded-borders no-margin-scroll"
             )
             scroll.style("min-height: 260px; height: calc(100svh - 380px);")
-            self.render_list()
+            self._render_list_items()
 
     def _pagination(self, ui):
         with ui.scroll_area().classes("h-[2rem] no-margin-scroll w-full items-end"):
@@ -57,17 +55,15 @@ class DetailedList:
                         .props("flat")
                     )
 
+    @ui.refreshable
     def _render_list_items(self, no_callback: bool = False):
         """Refreshes the selection list to reflect the current state of the
         `DetailedList.SOURCE`.
         """
         # selection_list = getattr(self, "selection_list", self.ui.list())
-        selection_list = self.ui.list()
-        self.selection_list = selection_list
         self.displayed_items = []
         self.displayed_data = []
-        with selection_list:
-            selection_list.clear()
+        with self.ui.list() as selection_list:
             selection_list.props("separator dense")
             selection_list.classes("w-full p-0 m-0 select-none")
             for data in self.current_data:
@@ -103,18 +99,18 @@ class DetailedList:
         """When available, renders the next page of data."""
         self.SOURCE.fetch_next_page()
         # self._render_list_items()
-        self.render_list.refresh()
+        self._render_list_items.refresh()
         self.pagination_label.text = self.pagination_text
 
     def _previous_page(self):
         """When available, renders the previous page of data."""
         self.SOURCE.fetch_previous_page()
         # self._render_list_items()
-        self.render_list.refresh()
+        self._render_list_items.refresh()
         self.pagination_label.text = self.pagination_text
 
     def _change_search(self):
         self.SOURCE.search_text = self.search_bar.value
         # self._render_list_items()
-        self.render_list.refresh()
+        self._render_list_items.refresh()
         self.pagination_label.text = self.pagination_text

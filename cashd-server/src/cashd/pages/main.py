@@ -174,7 +174,7 @@ class page:
                 self.r_section = self.right_section()
         # Ensure the customer_list resets to initial state whenever this page loads
         self.CUSTOMERS_SOURCE.search_text = ""
-        self.customer_list._render_list_items(no_callback=True)
+        self.customer_list._render_list_items.refresh(no_callback=True)
 
     def top_section(self):
         ui = self.ui
@@ -278,7 +278,7 @@ class page:
             self.selected_customer = customer
             browserid = self.app.storage.browser["id"]
             if update_list:
-                customer_list._render_list_items(no_callback=True)
+                customer_list._render_list_items.refresh(no_callback=True)
 
         if getattr(self, "tabs", None) is not None:
             self.tabs.set_value("Transação")
