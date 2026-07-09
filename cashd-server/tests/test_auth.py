@@ -38,7 +38,7 @@ def mock_user() -> Callable[[str], AbstractContextManager[auth.User]]:
 
     @contextmanager
     def _temp_user(
-        role_name: Literal["Supervisor" | "Operador" | "Assistente" | "Desligado"],
+        role_name: Literal["Supervisor", "Operador", "Assistente", "Desligado"],
     ) -> Iterator[auth.User]:
         role = get_role_by_name(role_name)
         username = os.urandom(16).hex()
