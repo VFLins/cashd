@@ -15,3 +15,6 @@ possível acessar de múltiplos dispositivos simultaneamente, veja
 ---
 
 [![Estilo de código: black](https://img.shields.io/badge/Estilo%20de%20código-Black-000000.svg)](https://github.com/psf/black)
+![Windows Build](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/VFLins/cashd/main/.github/badges/windows.json)
+![Ubuntu Build](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/VFLins/cashd/main/.github/badges/ubuntu.json)
+![Fedora Build](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/VFLins/cashd/main/.github/badges/fedora.json)
