@@ -1,0 +1,127 @@
+name: Test Cashd Local builds and update status badges
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '.github/badges/**'
+  workflow_dispatch:
+
+jobs:
+  test-windows:
+    runs-on: windows-latest
+    outputs:
+      status: ${{ job.status }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install briefcase
+
+      - name: Build Windows installer
+        run: |
+          cd cashd-local
+          briefcase build windows
+
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ job.status }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-dev python3-pip build-essential
+          sudo apt-get install -y git pkg-config libgirepository1.0-dev libgirepository-2.0-dev libcairo2-dev gir1.2-gtk-3.0 libcanberra-gtk3-module
+          python -m pip install --upgrade pip
+          pip install briefcase
+
+      - name: Build Linux .deb installer
+        run: |
+          cd cashd-local
+          briefcase build linux
+
+  test-fedora:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    outputs:
+      status: ${{ job.status }}
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y python3 python3-pip python3-devel gcc make rpm-build
+          dnf install -y git pkg-config gobject-introspection-devel cairo-gobject-devel gtk3 libcanberra-gtk3
+          pip3 install --upgrade pip
+          pip3 install briefcase
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Linux .rpm installer
+        run: |
+          cd cashd-local
+          briefcase build linux
+
+  generate-badges:
+    runs-on: ubuntu-latest
+    needs: [test-windows, test-ubuntu, test-fedora]
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }} # Garante permissão para commitar de volta
+
+      - name: Create Shields JSON files
+        run: |
+          # Cria a pasta badges dentro de .github
+          mkdir -p .github/badges
+          
+          generate_json() {
+            local status=$1
+            local label=$2
+            local logo=$3
+            local message="Sucesso"
+            local color="green"
+            
+            if [ "$status" != "success" ]; then
+              message="Falhando"
+              color="red"
+            fi
+            
+            echo "{\"schemaVersion\": 1, \"label\": \"$label\", \"message\": \"$message\", \"color\": \"$color\", \"namedLogo\": \"$logo\", \"logoColor\": \"white\"}"
+          }
+
+          generate_json "${{ needs.test-windows.outputs.status }}" "Build .msi" "windows" > .github/badges/windows.json
+          generate_json "${{ needs.test-ubuntu.outputs.status }}" "Build .deb" "ubuntu" > .github/badges/ubuntu.json
+          generate_json "${{ needs.test-fedora.outputs.status }}" "Build .rpm" "fedora" > .github/badges/fedora.json
+
+      - name: Commit and Push Badge JSONs
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add .github/badges/*.json
+          
+          # Só faz o commit se houver alterações nos arquivos para não quebrar o workflow
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "chore: update build badges [skip ci]"
+            git push origin HEAD:${{ github.head_ref || github.ref_name }}
+          else
+            echo "Nenhuma alteração nos badges."
+          fi
