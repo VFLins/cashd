@@ -12,18 +12,21 @@ class StyleSheet:
         "l_heading",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=9,
+        fontSize=13,
         leading=11,
-        alignment=1,
     )
     L_PARA = ParagraphStyle(
-        "l_para", parent=styles["Normal"], fontName="Helvetica", fontSize=7, leading=9
+        "l_para",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=9,
+        leading=9,
     )
     L_BOLD = ParagraphStyle(
         "l_bold",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=7,
+        fontSize=9,
         leading=9,
     )
     R_PARA = ParagraphStyle("r_para", parent=L_PARA, alignment=2)
@@ -37,23 +40,47 @@ class _Document:
     buffer = []
 
     def __init__(self):
-        self._set_frontmatter()
         self.doc = SimpleDocTemplate(
             str(self.file_path),
             pagesize=(self.w, self.h),
-            leftMargin=self.h_margin,
-            rightMargin=self.h_margin,
-            topMargin=self.v_margin,
-            bottomMargin=self.v_margin,
+            topMargin=self.t_margin,
+            rightMargin=self.r_margin,
+            bottomMargin=self.b_margin,
+            leftMargin=self.l_margin,
         )
         self._write_header()
         self._write_content()
         self._write_footer()
 
-    def _set_frontmatter(self):
-        """Define default attrs to configure a page for a 80mm width invoice note."""
-        self.w, self.h = 80*mm, 220*mm
-        self.h_margin, self.v_margin = 3*mm, 3*mm
+    @property
+    def w(self) -> float:
+        """Width of canvas where content can be printed."""
+        return 72*mm
+
+    @property
+    def h(self) -> float:
+        """Height of canvas where content can be printed."""
+        return 220*mm
+
+    @property
+    def t_margin(self) -> float:
+        """Top margin inside the canvas."""
+        return 3*mm
+
+    @property
+    def r_margin(self) -> float:
+        """Right margin inside the canvas."""
+        return 0*mm
+
+    @property
+    def b_margin(self) -> float:
+        """Bottom margin inside the canvas."""
+        return 0*mm
+
+    @property
+    def l_margin(self) -> float:
+        """Left margin inside the canvas."""
+        return 0*mm
 
     @property
     def file_path(self) -> Path:
@@ -62,22 +89,29 @@ class _Document:
     def _write_header(self):
         s = self.style
         now = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+        # Cashd
         self.buffer.append(Paragraph("<b>CASHD</b>", s.L_HEADING))
-        self.buffer.append(Paragraph("CNPJ: 12.345.678/0001-99", s.C_PARA))
-        self.buffer.append(Paragraph("Av. Paulista, 1000 - São Paulo/SP", s.C_PARA))
-        self.buffer.append(Spacer(1, 2 * mm))
-        self.buffer.append(Paragraph("-" * 50, s.C_PARA))
         self.buffer.append(Spacer(1, 1 * mm))
-        self.buffer.append(Paragraph(f"Data de Emissão: {now}", s.L_PARA))
-        self.buffer.append(Paragraph("-" * 50, s.C_PARA))
+        self.buffer.append(Paragraph("Controle de recebíveis à ver", s.L_PARA))
+        self.buffer.append(Spacer(1, 4 * mm))
+        # Store info
+        self.buffer.append(Paragraph("<b>NOME DA EMPRESA</b>", s.L_PARA))
+        self.buffer.append(Paragraph("CNPJ: 12.345.678/0001-99", s.L_PARA))
+        self.buffer.append(Paragraph("Av. Paulista, 1000 - São Paulo/SP", s.L_PARA))
+        # Timestamp
+        self.buffer.append(Spacer(1, 6 * mm))
+        self.buffer.append(Paragraph(f"Data de Emissão: {now}", s.C_PARA))
+        self.buffer.append(Spacer(1, 6 * mm))
 
     def _write_content(self):
-        pass
+        s = self.style
+        self.buffer.append(Paragraph("Conteúdo aqui", s.L_PARA))
 
     def _write_footer(self):
         s = self.style
-        self.buffer.append(Spacer(1, 4 * mm))
-        self.buffer.append(Paragraph(". . . . . . . . . . . . . . . . . . . . . . . . . . .", s.C_PARA))
+        self.buffer.append(Spacer(1, 6 * mm))
+        self.buffer.append(Paragraph((". " * 22) + ".", s.C_PARA))
         self.buffer.append(Paragraph("Obrigado pela preferência!", s.C_PARA))
 
     def render(self):
@@ -87,11 +121,11 @@ class _Document:
 
 class CustomerTransactions(_Document):
     def __init__(self, customer_id: int):
-        pass
+        super().__init__()
 
     def _write_content(self):
         s = self.style
-        content_width = self.w - (self.h_margin * 2)
+        content_width = self.w - (self.l_margin * 2)
 
         self.buffer.append(Paragraph("<b>CÓD | DESC | QTD | UN | VL UN | VL TOT</b>", s.C_BOLD))
         self.buffer.append(Paragraph("-" * 50, s.L_PARA))
@@ -135,5 +169,5 @@ class CustomerTransactions(_Document):
 
 
 if __name__ == "__main__":
-    doc = _Document()
+    doc = CustomerTransactions(1)
     doc.render()
