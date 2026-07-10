@@ -4,6 +4,15 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from datetime import datetime
 from pathlib import Path
+from dataclasses import dataclass
+
+from cashd_core.pdf.model.base import DocumentMeta
+
+
+@dataclass(frozen=True)
+class InvoiceMeta(DocumentMeta):
+    size = (72*mm, 220*mm)
+    margin = (0, 2*mm, 0, 0)
 
 
 class StyleSheet:
@@ -40,51 +49,18 @@ class _Document:
     buffer = []
 
     def __init__(self):
+        self.meta = InvoiceMeta(name="test")
         self.doc = SimpleDocTemplate(
-            str(self.file_path),
-            pagesize=(self.w, self.h),
-            topMargin=self.t_margin,
-            rightMargin=self.r_margin,
-            bottomMargin=self.b_margin,
-            leftMargin=self.l_margin,
+            str(metadata.file_path),
+            pagesize=metadata.size,
+            topMargin=metadata.margin[0],
+            rightMargin=metadata.margin[1],
+            bottomMargin=metadata.margin[2],
+            leftMargin=metadata.margin[3],
         )
         self._write_header()
         self._write_content()
         self._write_footer()
-
-    @property
-    def w(self) -> float:
-        """Width of canvas where content can be printed."""
-        return 72*mm
-
-    @property
-    def h(self) -> float:
-        """Height of canvas where content can be printed."""
-        return 220*mm
-
-    @property
-    def t_margin(self) -> float:
-        """Top margin inside the canvas."""
-        return 3*mm
-
-    @property
-    def r_margin(self) -> float:
-        """Right margin inside the canvas."""
-        return 0*mm
-
-    @property
-    def b_margin(self) -> float:
-        """Bottom margin inside the canvas."""
-        return 0*mm
-
-    @property
-    def l_margin(self) -> float:
-        """Left margin inside the canvas."""
-        return 0*mm
-
-    @property
-    def file_path(self) -> Path:
-        return Path("file.pdf")
 
     def _write_header(self):
         s = self.style
@@ -106,7 +82,6 @@ class _Document:
 
     def _write_content(self):
         s = self.style
-        self.buffer.append(Paragraph("Conteúdo aqui", s.L_PARA))
 
     def _write_footer(self):
         s = self.style
