@@ -283,8 +283,25 @@ class RowsPerPage(_ConfigInt):
         super().__init__(key="rows_per_page", default="200")
 
 
-# backup.ini
+class CompanyName(_Config):
+    """Company name displayed on custom branding segments."""
+    def __init__(self):
+        super().__init__(key="company_name", default="")
 
+
+class CompanyAddress(_Config):
+    """Company address displayed on custom branding segments."""
+    def __init__(self):
+        super().__init__(key="company_address", default="")
+
+
+class CompanyContact(_Config):
+    """Company contact information displayed on custom branding segments."""
+    def __init__(self):
+        super().__init__(key="company_contact_info", default="")
+
+
+# backup.ini
 
 class BackupPlaces(_ConfigList):
     """Paths to the directories where the backup files should be stored."""
