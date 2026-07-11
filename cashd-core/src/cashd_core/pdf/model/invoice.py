@@ -6,13 +6,14 @@ from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
 
+from cashd_core import data
 from cashd_core.pdf.model.base import DocumentMeta
 
 
-@dataclass(frozen=True)
-class InvoiceMeta(DocumentMeta):
+def InvoiceMeta(name) -> DocumentMeta:
     size = (72*mm, 220*mm)
-    margin = (0, 2*mm, 0, 0)
+    margin = (0, 1*mm, 0, 0)
+    return DocumentMeta(size=size, margin=margin, name=name)
 
 
 class StyleSheet:
@@ -40,6 +41,7 @@ class StyleSheet:
     )
     R_PARA = ParagraphStyle("r_para", parent=L_PARA, alignment=2)
     R_BOLD = ParagraphStyle("r_bold", parent=L_BOLD, alignment=2)
+    C_HEADING = ParagraphStyle("c_para", parent=L_HEADING, alignment=1)
     C_PARA = ParagraphStyle("c_para", parent=L_PARA, alignment=1)
     C_BOLD = ParagraphStyle("c_bold", parent=L_BOLD, alignment=1)
 
@@ -51,12 +53,12 @@ class _Document:
     def __init__(self):
         self.meta = InvoiceMeta(name="test")
         self.doc = SimpleDocTemplate(
-            str(metadata.file_path),
-            pagesize=metadata.size,
-            topMargin=metadata.margin[0],
-            rightMargin=metadata.margin[1],
-            bottomMargin=metadata.margin[2],
-            leftMargin=metadata.margin[3],
+            str(self.meta.document_path),
+            pagesize=self.meta.size,
+            topMargin=self.meta.margin[0],
+            rightMargin=self.meta.margin[1],
+            bottomMargin=self.meta.margin[2],
+            leftMargin=self.meta.margin[3],
         )
         self._write_header()
         self._write_content()
@@ -77,7 +79,7 @@ class _Document:
         self.buffer.append(Paragraph("Av. Paulista, 1000 - São Paulo/SP", s.L_PARA))
         # Timestamp
         self.buffer.append(Spacer(1, 6 * mm))
-        self.buffer.append(Paragraph(f"Data de Emissão: {now}", s.C_PARA))
+        self.buffer.append(Paragraph(f"Data de Emissão: {now}", s.R_PARA))
         self.buffer.append(Spacer(1, 6 * mm))
 
     def _write_content(self):
@@ -91,38 +93,45 @@ class _Document:
 
     def render(self):
         self.doc.build(self.buffer)
-        print(f"PDF gerado com sucesso: {self.file_path}")
+        print(f"PDF gerado com sucesso: {self.meta.document_path}")
 
 
 class CustomerTransactions(_Document):
     def __init__(self, customer_id: int):
+        self.customer = data.tbl_clientes()
+        self.customer.read(row_id=customer_id)
         super().__init__()
 
     def _write_content(self):
         s = self.style
-        content_width = self.w - (self.l_margin * 2)
-
-        self.buffer.append(Paragraph("<b>CÓD | DESC | QTD | UN | VL UN | VL TOT</b>", s.C_BOLD))
-        self.buffer.append(Paragraph("-" * 50, s.L_PARA))
-
-        col_widths = [content_width * 0.50, content_width * 0.15, content_width * 0.35]
-        dados_produtos = [
-            # Colunas: [Descrição, Qtd x Un, Valor Total]
-            [Paragraph("001 REFRIGERANTE LATA 350ML", s.L_PARA), Paragraph("1 UN x 5,00", s.L_PARA), Paragraph("5,00", s.R_PARA)],
-            [Paragraph("002 PASTEL DE CARNE ESPECIAL", s.L_PARA), Paragraph("2 UN x 12,00", s.L_PARA), Paragraph("24,00", s.R_PARA)],
-            [Paragraph("003 BATATA FRITA COMPLETA", s.L_PARA), Paragraph("1 UN x 22,50", s.L_PARA), Paragraph("22,50", s.R_PARA)],
-        ]
-
-        tabela_produtos = Table(dados_produtos, colWidths=col_widths)
-        tabela_produtos.setStyle(TableStyle([
+        transactions = list(self.customer.Transacs)[:10]
+        content_width = self.meta.size[0] - self.meta.margin[1] - self.meta.margin[3]
+        col_widths = [content_width * 0.50, content_width * 0.5]
+        table_style = TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
             ('BOTTOMPADDING', (0,0), (-1,-1), 1),
             ('TOPPADDING', (0,0), (-1,-1), 1),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
-        ]))
-        self.buffer.append(tabela_produtos)
-        self.buffer.append(Paragraph("-" * 50, s.L_PARA))
+        ])
+
+        # table header
+        table_head = Table(
+            [
+                [
+                    Paragraph("<b>Data</b>", s.L_BOLD),
+                    Paragraph("<b>Valor (R$)</b>", s.R_BOLD),
+                ]
+            ],
+            colWidths=col_widths,
+        )
+
+        transactions = [
+            [Paragraph(tr["data"].strftime("%d/%m/%Y"), s.L_PARA), Paragraph(tr["valor"], s.R_PARA)]
+            for tr in transactions
+        ]
+
+        table_body = Table(transactions, colWidths=col_widths)
 
         col_totais = [content_width * 0.6, content_width * 0.4]
         dados_totais = [
@@ -131,16 +140,16 @@ class CustomerTransactions(_Document):
             [Paragraph("FORMA DE PAGAMENTO: Cartão Débito", s.L_PARA), Paragraph("51,50", s.R_PARA)],
         ]
 
-        tabela_totais = Table(dados_totais, colWidths=col_totais)
-        tabela_totais.setStyle(TableStyle([
-            ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 1),
-            ('TOPPADDING', (0,0), (-1,-1), 1),
-            ('LEFTPADDING', (0,0), (-1,-1), 0),
-            ('RIGHTPADDING', (0,0), (-1,-1), 0),
-        ]))
-        self.buffer.append(tabela_totais)
-        self.buffer.append(Paragraph("-" * 50, s.L_PARA))
+        tabela_totais = Table(dados_totais, colWidths=col_widths)
+        tabela_totais.setStyle(table_style)
+        self.buffer.append(Paragraph(f"Últimas {len(transactions)} transações de", s.L_PARA))
+        self.buffer.append(Paragraph(f"{self.customer.Id}, {self.customer.NomeCompleto}", s.L_BOLD))
+        self.buffer.append(Spacer(1, 2 * mm))
+        self.buffer.append(table_head)
+        self.buffer.append(table_body)
+        self.buffer.append(Spacer(1, 2 * mm))
+        self.buffer.append(Paragraph("Saldo no momento de emissão", s.C_PARA))
+        self.buffer.append(Paragraph(f"R$ {self.customer.Saldo}", s.C_HEADING))
 
 
 if __name__ == "__main__":
