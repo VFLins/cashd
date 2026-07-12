@@ -1,3 +1,12 @@
+import phonenumbers
+import re
+from typing import List, Iterable, Literal, Any, Self, Dict
+from datetime import datetime
+from decimal import Decimal
+from pathlib import Path
+from copy import copy
+from sys import platform
+from sqlalchemy.sql.functions import coalesce
 from sqlalchemy import (
     Column,
     Engine,
@@ -26,36 +35,13 @@ from sqlalchemy.orm import (
     relationship,
     Session,
 )
-from sqlalchemy.sql.functions import coalesce
-from typing import List, Iterable, Literal, Any, Self, Dict
-from datetime import datetime
-from decimal import Decimal
-from pathlib import Path
-from copy import copy
-from sys import platform
-import phonenumbers
-import re
 
 from cashd_core import prefs, const, backup
 
 
-####################
-# CONSTANTS
-####################
-
-if platform == "win32":
-    CASHD_FILES_PATH = Path.home().joinpath("AppData", "Local", "Cashd")
-    CONFIG_PATH = Path(CASHD_FILES_PATH, "configs")
-    LOG_PATH = Path(CASHD_FILES_PATH, "logs")
-else:
-    CASHD_FILES_PATH = Path.home().joinpath(".local", "share", "Cashd")
-    CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
-    LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
-
-DATA_PATH = Path(CASHD_FILES_PATH, "data")
-DATA_PATH.mkdir(exist_ok=True)
 DB_ENGINE = create_engine(
-    f"sqlite:///{Path(DATA_PATH, 'database.db')}", echo=False)
+    f"sqlite:///{Path(const.DATA_DIR, 'database.db')}", echo=False
+)
 
 
 ####################

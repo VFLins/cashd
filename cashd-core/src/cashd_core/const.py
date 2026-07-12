@@ -3,6 +3,23 @@ from pathlib import Path
 import subprocess
 
 
+if platform == "win32":
+    CASHD_FILES_DIR = Path.home().joinpath("AppData", "Local", "Cashd")
+    CONFIG_DIR = Path(CASHD_FILES_DIR, "configs")
+    LOG_DIR = Path(CASHD_FILES_DIR, "logs")
+else:
+    CASHD_FILES_DIR = Path.home().joinpath(".local", "share", "Cashd")
+    CONFIG_DIR = Path.home().joinpath(".config", "Cashd")
+    LOG_DIR = Path.home().joinpath(".local", "state", "Cashd", "logs")
+DATA_DIR = Path(CASHD_FILES_DIR, "data")
+DOCUMENTS_DIR = Path(CASHD_FILES_DIR, "documents")
+
+
+# ensure dirs
+for dir in [CASHD_FILES_DIR, CONFIG_DIR, LOG_DIR, DATA_DIR, DOCUMENTS_DIR]:
+    dir.mkdir(exist_ok=True)
+
+
 def sys_dark_mode() -> bool:
     """Detects if dark mode is currently enabled in the OS.
 

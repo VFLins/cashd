@@ -11,23 +11,13 @@ from configparser import (
 )
 import logging
 
+from cashd_core.const import CONFIG_DIR, LOG_DIR, CASHD_FILES_DIR
 
-if platform == "win32":
-    CASHD_FILES_PATH = Path.home().joinpath("AppData", "Local", "Cashd")
-    CONFIG_PATH = Path(CASHD_FILES_PATH, "configs")
-    LOG_PATH = Path(CASHD_FILES_PATH, "logs")
-else:
-    CASHD_FILES_PATH = Path.home().joinpath(".local", "share", "Cashd")
-    CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
-    LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
 
-PREFS_CONFIG_FILE = Path(CONFIG_PATH, "prefs.ini")
-BACKUP_CONFIG_FILE = Path(CONFIG_PATH, "backup.ini")
-LOG_FILE = path.join(LOG_PATH, "prefs.log")
-DB_FILE = path.join(CASHD_FILES_PATH, "data", "database.db")
-
-for dirpath in [CASHD_FILES_PATH, LOG_PATH, CONFIG_PATH]:
-    makedirs(dirpath, exist_ok=True)
+PREFS_CONFIG_FILE = Path(CONFIG_DIR, "prefs.ini")
+BACKUP_CONFIG_FILE = Path(CONFIG_DIR, "backup.ini")
+LOG_FILE = path.join(LOG_DIR, "prefs.log")
+DB_FILE = path.join(CASHD_FILES_DIR, "data", "database.db")
 
 
 def get_parser(filename: str) -> tuple[Path, ConfigParser]:
@@ -40,7 +30,7 @@ def get_parser(filename: str) -> tuple[Path, ConfigParser]:
       config file location; 2- A `ConfigParser`.
     """
     parser = ConfigParser()
-    config_file = Path(CONFIG_PATH, f"{filename}.ini")
+    config_file = Path(CONFIG_DIR, f"{filename}.ini")
     config_file.touch(exist_ok=True)
     parser.read(config_file)
     return (config_file, parser)
@@ -393,8 +383,8 @@ class SettingsHandler:
     """
 
     def __init__(self, configname: str):
-        self.config_file = path.join(CONFIG_PATH, f"{configname}.ini")
-        self.log_file = path.join(LOG_PATH, f"{configname}.log")
+        self.config_file = path.join(CONFIG_DIR, f"{configname}.ini")
+        self.log_file = path.join(LOG_DIR, f"{configname}.log")
 
         # config parser
         self.conf = ConfigParser()
