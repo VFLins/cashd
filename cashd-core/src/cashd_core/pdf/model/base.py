@@ -1,15 +1,26 @@
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from cashd_core.data import CASHD_FILES_PATH
+from cashd_core.const import CASHD_FILES_DIR, DOCUMENTS_DIR
 
-DOCUMENTS_DIR = CASHD_FILES_PATH.joinpath("documents")
-DOCUMENTS_DIR.mkdir(exist_ok=True)
+
+# readonly resources directory
+RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
+
+
+pdfmetrics.registerFont(TTFont("Saira-SemiBold", RESOURCES_DIR / "Saira-SemiBold.ttf"))
 
 
 class StyleSheet:
     styles = getSampleStyleSheet()
+    L_BRAND = ParagraphStyle(
+        "l_brand",
+        fontName="Saira-SemiBold",
+        fontSize=13,
+    )
     L_HEADING = ParagraphStyle(
         "l_heading",
         parent=styles["Normal"],
@@ -31,8 +42,10 @@ class StyleSheet:
         fontSize=9,
         leading=9,
     )
+    R_HEADING = ParagraphStyle("c_para", parent=L_HEADING, alignment=2)
     R_PARA = ParagraphStyle("r_para", parent=L_PARA, alignment=2)
     R_BOLD = ParagraphStyle("r_bold", parent=L_BOLD, alignment=2)
+    C_HEADING = ParagraphStyle("c_para", parent=L_HEADING, alignment=1)
     C_PARA = ParagraphStyle("c_para", parent=L_PARA, alignment=1)
     C_BOLD = ParagraphStyle("c_bold", parent=L_BOLD, alignment=1)
 

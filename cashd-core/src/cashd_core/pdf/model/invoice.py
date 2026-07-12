@@ -7,44 +7,13 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from cashd_core import data, prefs
-from cashd_core.pdf.model.base import DocumentMeta
+from cashd_core.pdf.model.base import StyleSheet, DocumentMeta
 
 
 def InvoiceMeta(name) -> DocumentMeta:
     size = (72*mm, 220*mm)
     margin = (0, 1*mm, 0, 0)
     return DocumentMeta(size=size, margin=margin, name=name)
-
-
-class StyleSheet:
-    styles = getSampleStyleSheet()
-    L_HEADING = ParagraphStyle(
-        "l_heading",
-        parent=styles["Normal"],
-        fontName="Helvetica-Bold",
-        fontSize=13,
-        leading=11,
-    )
-    L_PARA = ParagraphStyle(
-        "l_para",
-        parent=styles["Normal"],
-        fontName="Helvetica",
-        fontSize=9,
-        leading=9,
-    )
-    L_BOLD = ParagraphStyle(
-        "l_bold",
-        parent=styles["Normal"],
-        fontName="Helvetica-Bold",
-        fontSize=9,
-        leading=9,
-    )
-    R_HEADING = ParagraphStyle("c_para", parent=L_HEADING, alignment=2)
-    R_PARA = ParagraphStyle("r_para", parent=L_PARA, alignment=2)
-    R_BOLD = ParagraphStyle("r_bold", parent=L_BOLD, alignment=2)
-    C_HEADING = ParagraphStyle("c_para", parent=L_HEADING, alignment=1)
-    C_PARA = ParagraphStyle("c_para", parent=L_PARA, alignment=1)
-    C_BOLD = ParagraphStyle("c_bold", parent=L_BOLD, alignment=1)
 
 
 class _Document:
@@ -70,7 +39,7 @@ class _Document:
         now = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
         # Cashd
-        self.buffer.append(Paragraph("<b>CASHD</b>", s.L_HEADING))
+        self.buffer.append(Paragraph("<b>Cashd</b>", s.L_BRAND))
         self.buffer.append(Spacer(1, 1 * mm))
         self.buffer.append(Paragraph("Controle de recebíveis à ver", s.L_PARA))
         self.buffer.append(Spacer(1, 4 * mm))
