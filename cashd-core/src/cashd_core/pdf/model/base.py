@@ -3,6 +3,9 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from dataclasses import dataclass, field
 from pathlib import Path
+from sys import platform
+import subprocess
+import os
 
 from cashd_core.const import CASHD_FILES_DIR, DOCUMENTS_DIR
 
@@ -72,3 +75,13 @@ class DocumentMeta:
             "document_path",
             DOCUMENTS_DIR.joinpath(f"{self.name}.pdf")
         )
+
+    def open_file(self):
+        match platform::
+            case "win32":
+                os.startfile(self.document_path)
+            case "linux":
+                subprocess.run(["xdg-open", self.document_path])
+            case "darwin":
+                subprocess.run(["open", self.document_path])
+

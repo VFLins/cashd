@@ -40,9 +40,7 @@ class _Document:
 
         # Cashd
         self.buffer.append(Paragraph("<b>Cashd</b>", s.L_BRAND))
-        self.buffer.append(Spacer(1, 1 * mm))
-        self.buffer.append(Paragraph("Controle de recebíveis à ver", s.L_PARA))
-        self.buffer.append(Spacer(1, 4 * mm))
+        self.buffer.append(Spacer(1, 6 * mm))
         # Store info
         company_name = prefs.CompanyName.get()
         if company_name:
@@ -70,6 +68,9 @@ class _Document:
     def render(self):
         self.doc.build(self.buffer)
         print(f"PDF gerado com sucesso: {self.meta.document_path}")
+
+    def launch_file(self):
+        self.meta.open_file()
 
 
 class CustomerTransactions(_Document):
