@@ -2,8 +2,8 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
-from datetime import datetime
 from pathlib import Path
+from datetime import datetime
 from dataclasses import dataclass
 
 from cashd_core import data, prefs
@@ -83,7 +83,9 @@ class CustomerTransactions(_Document):
 
     def _write_content(self):
         s = self.style
-        transactions = list(self.customer.Transacs)[:10]
+        # get first 10 transactions (most recent)
+        transactions = [tr for i, tr in zip(range(10), self.customer.Transacs)]
+        transactions.reverse() # set most recent last
         content_width = self.meta.size[0] - self.meta.margin[1] - self.meta.margin[3]
         col_widths = [content_width * 0.50, content_width * 0.5]
 
@@ -112,6 +114,6 @@ class CustomerTransactions(_Document):
 
 
 if __name__ == "__main__":
-    doc = CustomerTransactions(2)
+    doc = CustomerTransactions(1)
     doc.render()
     doc.launch_file()
