@@ -8,7 +8,7 @@ from toga import Widget
 from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN
-from toga.dialogs import ConfirmDialog
+from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog
 from toga.widgets.box import Box, Column
 from toga.widgets.label import Label
 from toga.widgets.table import Table
@@ -164,10 +164,25 @@ class SubsectionTransacHistory:
         if widget.selection is None:
             self.remove_button.enabled = False
 
-    def export_transac(self, widget):
-        doc = pdf.model.invoice.CustomerTransactions(customer_id=self.SELECTED_CUSTOMER.Id)
-        doc.render()
-        doc.launch_file()
+    async def export_transac(self, widget: Button):
+        try:
+            doc = pdf.model.invoice.CustomerTransactions(customer_id=self.SELECTED_CUSTOMER.Id)
+            doc.render()
+        except ValueError:
+            error = ErrorDialog(
+                "Erro processando conteúdo do documento",
+                "Um conjunto de caractéres inválidos foram encontrados nas "
+                "informações da empresa, corrija os dados inseridos em:\n\n"
+                '"Configurações" > "Informações da empresa"\n\ne tente novamente.'
+            )
+            await widget.app.dialog(error)
+        else:
+            info = InfoDialog(
+                "Documento criado com sucesso",
+                "O documento será aberto em outro aplicativo."
+            )
+            await widget.app.dialog(info)
+            doc.launch_file()
 
 
     async def remove_transac(self, widget: Button):
@@ -339,7 +354,7 @@ class MainSection(BaseSection):
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
                 (
-                    "Histórico de transações",
+                    "Histórico",
                     self.subsection_transac_history.full_contents,
                 ),
                 ("Informações", self.subsection_customer_info.full_contents),
