@@ -69,22 +69,36 @@ def form_options_container(children, alignment="end") -> Box:
     return outer_container
 
 
-def user_input(widget_type: Type[Widget]) -> Pack:
+def user_input(widget_type: Type[Widget], default_width: bool = True) -> Pack:
     """Returns the default style for the user input's form element."""
     if widget_type in [TextInput, Button]:
-        return Pack(margin=(0, 5), width=160, font_size=const.FONT_SIZE)
+        out = Pack(
+            margin=(0, 5),
+            width=160,
+            font_size=const.FONT_SIZE,
+        )
     elif widget_type is NumberInput:
-        return _system_based_number_input_style()
+        out = _system_based_number_input_style(default_width)
     elif widget_type is Selection:
-        return Pack(margin=(0, 5), width=110, font_size=const.FONT_SIZE)
+        out = Pack(
+            margin=(0, 5),
+            width=110,
+            font_size=const.FONT_SIZE,
+        )
     else:
-        return Pack()
+        out = Pack()
+    if not default_width:
+        del out.width
+    return out
 
 
-def input_annotation(annotation_type: Literal["label", "legend"] = "label") -> Pack:
+def input_annotation(
+        annotation_type: Literal["label", "legend"] = "label",
+        default_width: bool = True,
+    ) -> Pack:
     """Returns the default style for the user input's annotation element."""
     if annotation_type == "label":
-        return _system_based_input_label_style()
+        return _system_based_input_label_style(default_width)
     elif annotation_type == "legend":
         return _system_based_input_legend_style()
     else:
@@ -180,12 +194,23 @@ HEADING = Pack(
 WIDE_SELECTION = Pack(margin=(0, 5), width=210, font_size=const.FONT_SIZE)
 
 
-def _system_based_input_label_style() -> Pack:
+def _system_based_input_label_style(default_width: bool = True) -> Pack:
     """OS based style for a `toga.Label` element used as label to an input field."""
     if platform == "linux":
-        return Pack(margin=(20, 5, 9, 8), width=190, font_size=const.FONT_SIZE)
+        out = Pack(
+            margin=(20, 5, 9, 8),
+            width=190,
+            font_size=const.FONT_SIZE,
+        )
     else:
-        return Pack(margin=(25, 5, 9, 2), width=190, font_size=const.FONT_SIZE)
+        out = Pack(
+            margin=(25, 5, 9, 2),
+            width=190,
+            font_size=const.FONT_SIZE,
+        )
+    if not default_width:
+        del out.width
+    return out
 
 
 def _system_based_input_legend_style() -> Pack:
@@ -195,13 +220,16 @@ def _system_based_input_legend_style() -> Pack:
         return Pack(font_size=const.SMALL_FONT_SIZE, margin=(6, 0, 10, 3), color="gray")
 
 
-def _system_based_number_input_style() -> Pack:
+def _system_based_number_input_style(default_width: bool = True) -> Pack:
     """OS based style for a `toga.NumberInput` element used as form input field."""
     if platform == "linux":
-        return Pack(
+        out = Pack(
             margin=(0, 5), width=number_input_width(), font_size=const.FONT_SIZE
         )
     else:
-        return Pack(
+        out = Pack(
             margin=(0, 5), width=number_input_width(), font_size=const.FONT_SIZE
         )
+    if not default_width:
+        del out.width
+    return out
