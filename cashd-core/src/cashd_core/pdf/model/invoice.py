@@ -20,10 +20,11 @@ class _Document:
     style = StyleSheet()
     buffer = []
 
-    def __init__(self):
-        self.meta = InvoiceMeta(name="test")
+    def __init__(self, name: str = "test"):
+        self.meta = InvoiceMeta(name=name)
         self.doc = SimpleDocTemplate(
             str(self.meta.document_path),
+            title=self.meta.name,
             pagesize=self.meta.size,
             topMargin=self.meta.margin[0],
             rightMargin=self.meta.margin[1],
@@ -77,7 +78,8 @@ class CustomerTransactions(_Document):
     def __init__(self, customer_id: int):
         self.customer = data.tbl_clientes()
         self.customer.read(row_id=customer_id)
-        super().__init__()
+        now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S.%f")
+        super().__init__(name=f"{now}_LastTransactions_{self.customer.Id}")
 
     def _write_content(self):
         s = self.style
@@ -112,3 +114,4 @@ class CustomerTransactions(_Document):
 if __name__ == "__main__":
     doc = CustomerTransactions(2)
     doc.render()
+    doc.launch_file()

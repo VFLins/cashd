@@ -77,7 +77,7 @@ class DocumentMeta:
         )
 
     def open_file(self):
-        match platform::
+        match platform:
             case "win32":
                 os.startfile(self.document_path)
             case "linux":
