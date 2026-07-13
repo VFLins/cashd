@@ -38,7 +38,6 @@ class ConfigSection(BaseSection):
                         value=prefs.CompanyName.get(),
                         on_change=lambda w: prefs.CompanyName.set(w.value),
                     ),
-                    default_width=False,
                 ),
                 widgets.form.FormField(
                     label="Local",
@@ -46,7 +45,6 @@ class ConfigSection(BaseSection):
                         value=prefs.CompanyAddress.get(),
                         on_change=lambda w: prefs.CompanyAddress.set(w.value),
                     ),
-                    default_width=False,
                 ),
                 widgets.form.FormField(
                     label="Info. de contato",
@@ -54,10 +52,11 @@ class ConfigSection(BaseSection):
                         value=prefs.CompanyContact.get(),
                         on_change=lambda w: prefs.CompanyContact.set(w.value),
                     ),
-                    default_width=False,
                 ),
             ],
         )
+        for field in self.company_info.fields.values():
+            field.input.width = const.FORM_WIDTH
 
         self.default_values = widgets.form.FormHandler(n_cols=2)
         self.default_values.add_fields(

@@ -19,7 +19,7 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.widgets.optioncontainer import OptionContainer
 
-from cashd_core import data, fmt
+from cashd_core import data, fmt, pdf
 
 from cashd import const, style, widgets
 from cashd.pages.base import BaseSection
@@ -136,15 +136,18 @@ class SubsectionTransacHistory:
         )
         """Button to remove the selected transaction on `transaction_history_table`."""
 
-        self.print_button = Button(
-            "Imprimir histórico", style=Pack(margin_left=10), enabled=False
+        self.export_button = Button(
+            "Exportar transações recentes",
+            style=Pack(margin_left=10),
+            enabled=False,
+            on_press=self.export_transac
         )
         """Button to open the dialog for printing the last few transactions registered
         and current owed amount. This feature is aimed for thermal printers.
         """
 
         self.options_container: Box = widgets.elems.form_options(
-            buttons=[self.remove_button, self.print_button],
+            buttons=[self.remove_button, self.export_button],
         )
         self.options_container.style.margin = (10, 0, 5, 0)
 
@@ -160,6 +163,12 @@ class SubsectionTransacHistory:
         self.remove_button.enabled = True
         if widget.selection is None:
             self.remove_button.enabled = False
+
+    def export_transac(self, widget):
+        doc = pdf.model.invoice.CustomerTransactions(customer_id=self.SELECTED_CUSTOMER.Id)
+        doc.render()
+        doc.launch_file()
+
 
     async def remove_transac(self, widget: Button):
         transac_id = self.table.selection.id
@@ -390,12 +399,14 @@ class MainSection(BaseSection):
     def select_customer(self, widget: Selection):
         if widget.selection is None:
             self.subsection_add_transac.amount_input.enabled = False
+            self.subsection_transac_history.export_button.enabled = False
             self.customer_options_button.enabled = False
             return
         print(f"selected: {widget.selection}")
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
         self._upd_selected_info()
         self.subsection_add_transac.amount_input.enabled = True
+        self.subsection_transac_history.export_button.enabled = True
         self.customer_options_button.enabled = True
 
     def _upd_selected_info(self):
