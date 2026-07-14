@@ -47,7 +47,7 @@ class ConfigSection(BaseSection):
                     ),
                 ),
                 widgets.form.FormField(
-                    label="Info. de contato",
+                    label="Informação de contato",
                     input_widget=TextInput(
                         value=prefs.CompanyContact.get(),
                         on_change=lambda w: prefs.CompanyContact.set(w.value),
@@ -120,6 +120,7 @@ class ConfigSection(BaseSection):
             ),
             id="transac_to_backup_input",
         )
+        self.transac_to_backup_amount.label.style.margin_top = 10
         self.transac_to_backup_amount_blank = Box(id="transac_to_backup_blank")
         self.backup_on_transac = Column(
             children=[
