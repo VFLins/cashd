@@ -186,22 +186,28 @@ class SubsectionTransacHistory:
 
 
     async def remove_transac(self, widget: Button):
-        transac_id = self.table.selection.id
-        transac = data.tbl_transacoes()
-        transac.read(row_id=transac_id)
-        transac_value = f"R$ {transac.Valor/100}".replace(".", ",")
-        confirm = ConfirmDialog(
-            title="Remover transação?",
-            message=f"Data: {transac.DataTransac}\nValor: {transac_value}",
-        )
-        if await widget.app.dialog(confirm):
-            transac.delete()
-            if self.on_delete is not None:
-                self.on_delete()
-            # clear table before filling to avoid glitches from winforms
-            self.table.data = []
-            self.table.data = self.SELECTED_CUSTOMER.Transacs
-            print(f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}")
+        try:
+            transac_id = self.table.selection.id
+        except AttributeError:
+            # (GTK only) Will raise this if somehow there aren't any rows
+            # selected and the button is enabled and clicked
+            widget.enabled = False
+        else:
+            transac = data.tbl_transacoes()
+            transac.read(row_id=transac_id)
+            transac_value = f"R$ {transac.Valor/100}".replace(".", ",")
+            confirm = ConfirmDialog(
+                title="Remover transação?",
+                message=f"Data: {transac.DataTransac}\nValor: {transac_value}",
+            )
+            if await widget.app.dialog(confirm):
+                transac.delete()
+                if self.on_delete is not None:
+                    self.on_delete()
+                # clear table before filling to avoid glitches from winforms
+                self.table.data = []
+                self.table.data = self.SELECTED_CUSTOMER.Transacs
+                print(f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}")
 
 
 class SectionCustomerInfo:
