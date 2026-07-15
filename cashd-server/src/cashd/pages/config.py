@@ -96,6 +96,23 @@ class page:
         self.file_dialog = SelectFileDialog(ui=ui, app=app, initial_dir=Path("~").expanduser())
         with ui.column(align_items="left").classes("self-center"):
 
+            h1(ui, "Informações da empresa")
+            ui.input(
+                "Nome da empresa",
+                value=prefs.CompanyName.get(),
+                on_change=lambda w: prefs.CompanyName.set(w.value),
+            ).props("outlined dense").classes("w-100 md:w-full")
+            ui.input(
+                "Local",
+                value=prefs.CompanyAddress.get(),
+                on_change=lambda w: prefs.CompanyAddress.set(w.value),
+            ).props("outlined dense").classes("w-100 md:w-full")
+            ui.input(
+                "Informações de contato",
+                value=prefs.CompanyContact.get(),
+                on_change=lambda w: prefs.CompanyContact.set(w.value),
+            ).props("outlined dense").classes("w-100 md:w-full")
+
             h1(ui, "Preferências")
             h2(ui, "Valores padrão no formulário de contas")
             with ui.grid().classes("h-full center-items md:grid-cols-3"):
