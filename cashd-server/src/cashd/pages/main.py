@@ -4,9 +4,10 @@ from typing import Any
 from cashd_core.fmt import StringToCurrency
 from cashd_core.const import ESTADOS
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
+from cashd_core.pdf.model import invoice
 from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd.widgets.custom import DetailedList
-from cashd.widgets.dialogs import DeleteTransactionDialog
+from cashd.widgets.dialogs import DeleteTransactionDialog, MessageDialog
 from cashd.const import now
 
 
@@ -44,7 +45,7 @@ class subpage_transac:
 
 class subpage_history:
     def __init__(self, ui, app, customer: tbl_clientes, on_delete=None):
-        self.customer = customer
+        self.ui, self.app, self.customer = ui, app, customer
         self.delete_transaction_dialog = DeleteTransactionDialog(ui, app)
         cols = [
             {"name": "data", "label": "Data", "field": "data"},
@@ -54,7 +55,7 @@ class subpage_history:
             cols = [{"name": "action", "label": ""}] + cols
 
         with ui.column(align_items="end").classes("w-60 md:w-90"):
-            ui.button("Imprimir", icon="print")
+            ui.button("Exportar", icon="print", on_click=self.export_history)
             self.table = ui.table(
                 row_key="id",
                 columns=cols,
@@ -80,6 +81,33 @@ class subpage_history:
     def change_customer(self, customer: tbl_clientes):
         self.customer = customer
         self.table.rows = list(customer.Transacs)
+
+    async def export_history(self):
+        try:
+            doc = invoice.CustomerTransactions(customer_id=self.customer.Id)
+            doc.render()
+        except ValueError:
+            error_dialog = MessageDialog(
+                ui=self.ui,
+                app=self.app,
+                title="Erro processando conteúdo do documento",
+                message="Um conjunto de caractéres inválidos foram encontrados nas "
+                "informações da empresa, corrija os dados inseridos em:\n\n"
+                '"Configurações" > "Informações da empresa"\n\ne tente novamente.',
+                msg_type="error",
+            )
+            await error_dialog.show()
+        else:
+            info_dialog = MessageDialog(
+                ui=self.ui,
+                app=self.app,
+                title="Documento criado com sucesso",
+                message="O documento será aberto em outro aplicativo.",
+                msg_type="info",
+            )
+            await info_dialog.show()
+            doc.launch_file()
+
 
 
 class subpage_info:

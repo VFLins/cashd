@@ -169,17 +169,17 @@ class SubsectionTransacHistory:
             doc = pdf.model.invoice.CustomerTransactions(customer_id=self.SELECTED_CUSTOMER.Id)
             doc.render()
         except ValueError:
-            error = ErrorDialog(
+            error = MessageDialog(
                 "Erro processando conteúdo do documento",
                 "Um conjunto de caractéres inválidos foram encontrados nas "
                 "informações da empresa, corrija os dados inseridos em:\n\n"
-                '"Configurações" > "Informações da empresa"\n\ne tente novamente.'
+                '"Configurações" > "Informações da empresa"\n\ne tente novamente.',
             )
             await widget.app.dialog(error)
         else:
-            info = InfoDialog(
+            info = MessageDialog(
                 "Documento criado com sucesso",
-                "O documento será aberto em outro aplicativo."
+                "O documento será aberto em outro aplicativo.",
             )
             await widget.app.dialog(info)
             doc.launch_file()
