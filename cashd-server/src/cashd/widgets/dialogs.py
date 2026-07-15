@@ -525,9 +525,7 @@ class DeleteTransactionDialog(CustomDialog):
             )
             raise err
         else:
-            print(
-                f"{now()} {tr} deleted by {self.app.storage.browser['id']}"
-            )
+            print(f"{now()} {tr} deleted by {self.app.storage.browser['id']}")
             notify_success(self.ui, "Transação removida com sucesso.")
         finally:
             self.dialog.submit(None)

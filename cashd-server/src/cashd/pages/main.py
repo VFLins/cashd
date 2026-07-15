@@ -109,7 +109,6 @@ class subpage_history:
             doc.launch_file()
 
 
-
 class subpage_info:
     def __init__(self, ui, customer: tbl_clientes | None = None, on_update=None):
         with ui.row().classes("no-wrap w-70 md:w-90"):

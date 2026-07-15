@@ -140,7 +140,7 @@ class SubsectionTransacHistory:
             "Exportar transações recentes",
             style=Pack(margin_left=10),
             enabled=False,
-            on_press=self.export_transac
+            on_press=self.export_transac,
         )
         """Button to open the dialog for printing the last few transactions registered
         and current owed amount. This feature is aimed for thermal printers.
@@ -166,7 +166,9 @@ class SubsectionTransacHistory:
 
     async def export_transac(self, widget: Button):
         try:
-            doc = pdf.model.invoice.CustomerTransactions(customer_id=self.SELECTED_CUSTOMER.Id)
+            doc = pdf.model.invoice.CustomerTransactions(
+                customer_id=self.SELECTED_CUSTOMER.Id
+            )
             doc.render()
         except ValueError:
             error = MessageDialog(
@@ -183,7 +185,6 @@ class SubsectionTransacHistory:
             )
             await widget.app.dialog(info)
             doc.launch_file()
-
 
     async def remove_transac(self, widget: Button):
         try:
@@ -207,7 +208,9 @@ class SubsectionTransacHistory:
                 # clear table before filling to avoid glitches from winforms
                 self.table.data = []
                 self.table.data = self.SELECTED_CUSTOMER.Transacs
-                print(f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}")
+                print(
+                    f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}"
+                )
 
 
 class SectionCustomerInfo:

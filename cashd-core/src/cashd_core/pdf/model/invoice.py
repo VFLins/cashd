@@ -11,8 +11,8 @@ from cashd_core.pdf.model.base import StyleSheet, DocumentMeta
 
 
 def InvoiceMeta(name) -> DocumentMeta:
-    size = (72*mm, 220*mm)
-    margin = (0, 1*mm, 0, 0)
+    size = (72 * mm, 220 * mm)
+    margin = (0, 1 * mm, 0, 0)
     return DocumentMeta(size=size, margin=margin, name=name)
 
 
@@ -37,7 +37,7 @@ class _Document:
 
     def _write_header(self):
         s = self.style
-        now = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         # Cashd
         self.buffer.append(Paragraph("<b>Cashd</b>", s.L_BRAND))
@@ -85,26 +85,35 @@ class CustomerTransactions(_Document):
         s = self.style
         # get first 10 transactions (most recent)
         transactions = [tr for i, tr in zip(range(10), self.customer.Transacs)]
-        transactions.reverse() # set most recent last
+        transactions.reverse()  # set most recent last
         content_width = self.meta.size[0] - self.meta.margin[1] - self.meta.margin[3]
         col_widths = [content_width * 0.50, content_width * 0.5]
 
         # table header
-        head_data = [[
-            Paragraph("<b>Data</b>", s.L_BOLD),
-            Paragraph("<b>Valor (R$)</b>", s.R_BOLD),
-        ]]
+        head_data = [
+            [
+                Paragraph("<b>Data</b>", s.L_BOLD),
+                Paragraph("<b>Valor (R$)</b>", s.R_BOLD),
+            ]
+        ]
         table_head = Table(head_data, colWidths=col_widths)
 
         # table body
         transac_data = [
-            [Paragraph(tr["data"].strftime("%d/%m/%Y"), s.L_PARA), Paragraph(tr["valor"], s.R_PARA)]
+            [
+                Paragraph(tr["data"].strftime("%d/%m/%Y"), s.L_PARA),
+                Paragraph(tr["valor"], s.R_PARA),
+            ]
             for tr in transactions
         ]
         table_body = Table(transac_data, colWidths=col_widths)
 
-        self.buffer.append(Paragraph(f"Últimas {len(transactions)} transações de", s.L_PARA))
-        self.buffer.append(Paragraph(f"{self.customer.Id}, {self.customer.NomeCompleto}", s.L_BOLD))
+        self.buffer.append(
+            Paragraph(f"Últimas {len(transactions)} transações de", s.L_PARA)
+        )
+        self.buffer.append(
+            Paragraph(f"{self.customer.Id}, {self.customer.NomeCompleto}", s.L_BOLD)
+        )
         self.buffer.append(Spacer(1, 2 * mm))
         self.buffer.append(table_head)
         self.buffer.append(table_body)

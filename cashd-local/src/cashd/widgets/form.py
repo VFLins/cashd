@@ -46,7 +46,7 @@ class FormField(Box):
         :param input_widget: A `Widget` that can recieve user input.
         :param description: (Optional) Text displayed belou the input widget explaining
           it's usage.
-        :param id: (Optional) A text used as ID 
+        :param id: (Optional) A text used as ID
         :param is_required: A boolean indicator if this input needs to be filled. Used
           mainly by `FormHandler`.
         :param default_width: Boolean indicating if should use default width of the

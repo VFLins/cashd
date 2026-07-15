@@ -71,9 +71,7 @@ class DocumentMeta:
 
     def __post_init__(self):
         object.__setattr__(
-            self,
-            "document_path",
-            DOCUMENTS_DIR.joinpath(f"{self.name}.pdf")
+            self, "document_path", DOCUMENTS_DIR.joinpath(f"{self.name}.pdf")
         )
 
     def open_file(self):
@@ -84,4 +82,3 @@ class DocumentMeta:
                 subprocess.run(["xdg-open", self.document_path])
             case "darwin":
                 subprocess.run(["open", self.document_path])
-

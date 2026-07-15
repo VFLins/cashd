@@ -68,7 +68,9 @@ class DirectoryList:
                     js_handler="() => emit(props.rowIndex)",
                     handler=self.rm_dir,
                 )
-        self.dialog_add_directory = SelectDirDialog(ui=ui, app=app, initial_dir=self.initial_dir)
+        self.dialog_add_directory = SelectDirDialog(
+            ui=ui, app=app, initial_dir=self.initial_dir
+        )
 
     async def add_dir(self):
         new_dir = await self.dialog_add_directory.show()
@@ -93,7 +95,9 @@ class page:
     def __init__(self, ui, app):
         self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Configurações")
-        self.file_dialog = SelectFileDialog(ui=ui, app=app, initial_dir=Path("~").expanduser())
+        self.file_dialog = SelectFileDialog(
+            ui=ui, app=app, initial_dir=Path("~").expanduser()
+        )
         with ui.column(align_items="left").classes("self-center"):
 
             h1(ui, "Informações da empresa")

@@ -269,38 +269,45 @@ class AreaCodeNumber(_ConfigInt):
 
 class RowsPerPage(_ConfigInt):
     """Amount of entries displayed in paginated content."""
+
     def __init__(self):
         super().__init__(key="rows_per_page", default="200")
 
 
 class CompanyName(_Config):
     """Company name displayed on custom branding segments."""
+
     def __init__(self):
         super().__init__(key="company_name", default="")
 
 
 class CompanyAddress(_Config):
     """Company address displayed on custom branding segments."""
+
     def __init__(self):
         super().__init__(key="company_address", default="")
 
 
 class CompanyContact(_Config):
     """Company contact information displayed on custom branding segments."""
+
     def __init__(self):
         super().__init__(key="company_contact_info", default="")
 
 
 # backup.ini
 
+
 class BackupPlaces(_ConfigList):
     """Paths to the directories where the backup files should be stored."""
+
     def __init__(self):
         super().__init__(parser_factory=backup_parser, key="backup_places", default=[])
 
 
 class DBSize(_ConfigInt):
     """DB file size (kb) on the last backup performed."""
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
@@ -314,12 +321,13 @@ class ForceBackupOnClose(_ConfigBool):
     """Boolean indicating if a backup should always be performed when Cashd closes.
     By default it will only be done if the DB file size increased since the last backup.
     """
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
             section="scheduling",
             key="force_backup_on_close",
-            default=False
+            default=False,
         )
 
 
@@ -327,6 +335,7 @@ class BackupOnTransaction(_ConfigBool):
     """Boolean indicating if a backup should be automatically started after a certain
     amount of transactions is registered.
     """
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
@@ -338,6 +347,7 @@ class BackupOnTransaction(_ConfigBool):
 
 class TransactionsPerBackup(_ConfigInt):
     """Amount of transactions that need to be registered until a backup is started."""
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
@@ -351,6 +361,7 @@ class TransactionsToBackup(_ConfigInt):
     """Transactions remaining until a backup starts, updated only when
     'backup_on_transaction=true'.
     """
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,

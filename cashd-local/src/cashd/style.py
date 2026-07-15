@@ -93,9 +93,9 @@ def user_input(widget_type: Type[Widget], default_width: bool = True) -> Pack:
 
 
 def input_annotation(
-        annotation_type: Literal["label", "legend"] = "label",
-        default_width: bool = True,
-    ) -> Pack:
+    annotation_type: Literal["label", "legend"] = "label",
+    default_width: bool = True,
+) -> Pack:
     """Returns the default style for the user input's annotation element."""
     if annotation_type == "label":
         return _system_based_input_label_style(default_width)
@@ -230,9 +230,7 @@ def _system_based_number_input_style(default_width: bool = True) -> Pack:
             margin=(0, 15, 0, 5), width=number_input_width(), font_size=const.FONT_SIZE
         )
     else:
-        out = Pack(
-            margin=(0, 5), width=number_input_width(), font_size=const.FONT_SIZE
-        )
+        out = Pack(margin=(0, 5), width=number_input_width(), font_size=const.FONT_SIZE)
     if not default_width:
         del out.width
     return out
