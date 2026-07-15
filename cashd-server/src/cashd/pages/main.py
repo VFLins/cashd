@@ -281,7 +281,7 @@ class page:
                 customer_list.items_list.refresh(no_callback=True)
 
         if getattr(self, "tabs", None) is not None:
-            self.tabs.set_value("Transação")
+            self.tabs.set_value("Nova transação")
         # Update selected user indicator
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)
