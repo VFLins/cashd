@@ -22,9 +22,10 @@ from sqlalchemy.orm import (
     Mapped,
 )
 
-from cashd_core.data import DATA_PATH, _DataSource
+from cashd_core.data import _DataSource
+from cashd_core.const import DATA_DIR
 
-DB_ENGINE = create_engine(f"sqlite:///{Path(DATA_PATH, 'auth.db')}", echo=False)
+DB_ENGINE = create_engine(f"sqlite:///{Path(DATA_DIR, 'auth.db')}", echo=False)
 
 
 class RequiredText(types.TypeDecorator):

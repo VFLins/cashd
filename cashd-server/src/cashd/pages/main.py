@@ -223,7 +223,7 @@ class page:
                 )
                 self.tabs.style("font-family: 'Saira Semibold';")
                 self.tabs.on_value_change(lambda p: self.handle_tab_change(payload=p))
-                transac = ui.tab("Transação").classes("bg-gray-100 text-gray-700")
+                transac = ui.tab("Nova transação").classes("bg-gray-100 text-gray-700")
                 history = ui.tab("Histórico").classes("bg-gray-100 text-gray-700")
                 info = ui.tab("Informações").classes("bg-gray-100 text-gray-700")
                 transac.style(
