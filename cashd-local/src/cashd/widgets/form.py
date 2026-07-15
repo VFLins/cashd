@@ -310,11 +310,7 @@ class HorizontalDateForm:
             value=value.day,
         )
 
-        # GTK Number input takes more space than registered to the right,
-        # the margin is added to provide clearance for other widgets inline,
-        # and also to adjust alignment.
         self.widget = Row(
-            style=Pack(margin_right=15 if sys.platform == "linux" else 0),
             children=[
                 self.day_input.widget,
                 self.month_input.widget,

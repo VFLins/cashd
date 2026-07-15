@@ -223,8 +223,11 @@ def _system_based_input_legend_style() -> Pack:
 def _system_based_number_input_style(default_width: bool = True) -> Pack:
     """OS based style for a `toga.NumberInput` element used as form input field."""
     if platform == "linux":
+        # GTK Number input takes more space than registered to the right,
+        # the margin is added to provide clearance for other widgets inline,
+        # and also to adjust alignment.
         out = Pack(
-            margin=(0, 5), width=number_input_width(), font_size=const.FONT_SIZE
+            margin=(0, 15, 0, 5), width=number_input_width(), font_size=const.FONT_SIZE
         )
     else:
         out = Pack(
