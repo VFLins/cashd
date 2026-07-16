@@ -11,23 +11,13 @@ from configparser import (
 )
 import logging
 
+from cashd_core.const import CONFIG_DIR, LOG_DIR, CASHD_FILES_DIR
 
-if platform == "win32":
-    CASHD_FILES_PATH = Path.home().joinpath("AppData", "Local", "Cashd")
-    CONFIG_PATH = Path(CASHD_FILES_PATH, "configs")
-    LOG_PATH = Path(CASHD_FILES_PATH, "logs")
-else:
-    CASHD_FILES_PATH = Path.home().joinpath(".local", "share", "Cashd")
-    CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
-    LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
 
-PREFS_CONFIG_FILE = Path(CONFIG_PATH, "prefs.ini")
-BACKUP_CONFIG_FILE = Path(CONFIG_PATH, "backup.ini")
-LOG_FILE = path.join(LOG_PATH, "prefs.log")
-DB_FILE = path.join(CASHD_FILES_PATH, "data", "database.db")
-
-for dirpath in [CASHD_FILES_PATH, LOG_PATH, CONFIG_PATH]:
-    makedirs(dirpath, exist_ok=True)
+PREFS_CONFIG_FILE = Path(CONFIG_DIR, "prefs.ini")
+BACKUP_CONFIG_FILE = Path(CONFIG_DIR, "backup.ini")
+LOG_FILE = path.join(LOG_DIR, "prefs.log")
+DB_FILE = path.join(CASHD_FILES_DIR, "data", "database.db")
 
 
 def get_parser(filename: str) -> tuple[Path, ConfigParser]:
@@ -40,9 +30,10 @@ def get_parser(filename: str) -> tuple[Path, ConfigParser]:
       config file location; 2- A `ConfigParser`.
     """
     parser = ConfigParser()
-    config_file = Path(CONFIG_PATH, f"{filename}.ini")
+    config_file = Path(CONFIG_DIR, f"{filename}.ini")
     config_file.touch(exist_ok=True)
-    parser.read(config_file)
+    with open(config_file, "r", encoding="utf-8") as buffer:
+        parser.read_file(buffer)
     return (config_file, parser)
 
 
@@ -100,20 +91,20 @@ class _Config:
     @classmethod
     def get(cls):
         """Get current value of this config, or the default value if not defined."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         return interactor.__get()
 
     @classmethod
     def set(cls, value: Any):
         """Write `value` to the configuration file."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         interactor.__set(value)
 
     def __set(self, value: Any):
         config_file, parser = self._parser_factory()
         parser.set(self._section, self._key, str(value))
         try:
-            with open(config_file, "w") as buffer:
+            with open(config_file, "w", encoding="utf-8") as buffer:
                 parser.write(buffer)
         except Exception as err:
             self.logger.error(
@@ -152,25 +143,25 @@ class _ConfigList(_Config):
     @classmethod
     def get(cls) -> list[str]:
         """Get list from config file as a python list."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         return list(interactor.__get())
 
     @classmethod
     def set(cls, value: list[str]):
         """Writes a a python list to the config file, replacing the existing one."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         interactor.__set(value=[str(i) for i in value])
 
     @classmethod
     def add(cls, value: str):
         """Adds a `value` to the config list."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         interactor.__add(value=value)
 
     @classmethod
     def rm(cls, value: str):
         """Removes `value` from config list if it is present. Does nothing otherwise."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         interactor.__rm(value=value)
 
     def __get(self) -> Iterator[str]:
@@ -279,8 +270,30 @@ class AreaCodeNumber(_ConfigInt):
 
 class RowsPerPage(_ConfigInt):
     """Amount of entries displayed in paginated content."""
+
     def __init__(self):
         super().__init__(key="rows_per_page", default="200")
+
+
+class CompanyName(_Config):
+    """Company name displayed on custom branding segments."""
+
+    def __init__(self):
+        super().__init__(key="company_name", default="")
+
+
+class CompanyAddress(_Config):
+    """Company address displayed on custom branding segments."""
+
+    def __init__(self):
+        super().__init__(key="company_address", default="")
+
+
+class CompanyContact(_Config):
+    """Company contact information displayed on custom branding segments."""
+
+    def __init__(self):
+        super().__init__(key="company_contact_info", default="")
 
 
 # backup.ini
@@ -288,12 +301,14 @@ class RowsPerPage(_ConfigInt):
 
 class BackupPlaces(_ConfigList):
     """Paths to the directories where the backup files should be stored."""
+
     def __init__(self):
         super().__init__(parser_factory=backup_parser, key="backup_places", default=[])
 
 
 class DBSize(_ConfigInt):
     """DB file size (kb) on the last backup performed."""
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
@@ -307,12 +322,13 @@ class ForceBackupOnClose(_ConfigBool):
     """Boolean indicating if a backup should always be performed when Cashd closes.
     By default it will only be done if the DB file size increased since the last backup.
     """
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
             section="scheduling",
             key="force_backup_on_close",
-            default=False
+            default=False,
         )
 
 
@@ -320,6 +336,7 @@ class BackupOnTransaction(_ConfigBool):
     """Boolean indicating if a backup should be automatically started after a certain
     amount of transactions is registered.
     """
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
@@ -331,6 +348,7 @@ class BackupOnTransaction(_ConfigBool):
 
 class TransactionsPerBackup(_ConfigInt):
     """Amount of transactions that need to be registered until a backup is started."""
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
@@ -344,6 +362,7 @@ class TransactionsToBackup(_ConfigInt):
     """Transactions remaining until a backup starts, updated only when
     'backup_on_transaction=true'.
     """
+
     def __init__(self):
         super().__init__(
             parser_factory=backup_parser,
@@ -376,8 +395,8 @@ class SettingsHandler:
     """
 
     def __init__(self, configname: str):
-        self.config_file = path.join(CONFIG_PATH, f"{configname}.ini")
-        self.log_file = path.join(LOG_PATH, f"{configname}.log")
+        self.config_file = path.join(CONFIG_DIR, f"{configname}.ini")
+        self.log_file = path.join(LOG_DIR, f"{configname}.log")
 
         # config parser
         self.conf = ConfigParser()

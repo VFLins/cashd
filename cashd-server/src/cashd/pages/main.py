@@ -4,10 +4,11 @@ from typing import Any
 from cashd_core.fmt import StringToCurrency
 from cashd_core.const import ESTADOS
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
+from cashd_core.pdf.model import invoice
 from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd.widgets.custom import DetailedList
-from cashd.widgets.dialogs import DeleteTransactionDialog
-from cashd.const import now
+from cashd.widgets.dialogs import DeleteTransactionDialog, MessageDialog
+from cashd.const import now, is_host, safe_download
 
 
 class subpage_transac:
@@ -44,7 +45,7 @@ class subpage_transac:
 
 class subpage_history:
     def __init__(self, ui, app, customer: tbl_clientes, on_delete=None):
-        self.customer = customer
+        self.ui, self.app, self.customer = ui, app, customer
         self.delete_transaction_dialog = DeleteTransactionDialog(ui, app)
         cols = [
             {"name": "data", "label": "Data", "field": "data"},
@@ -53,18 +54,21 @@ class subpage_history:
         if on_delete is not None:
             cols = [{"name": "action", "label": ""}] + cols
 
-        with ui.column(align_items="end").classes("w-60 md:w-90"):
-            ui.button("Imprimir", icon="print")
+        with ui.column().classes("w-60 md:w-90"):
             self.table = ui.table(
                 row_key="id",
                 columns=cols,
                 rows=list(customer.Transacs),
             )
-            self.table.props(
-                "dense no-data-label='Nenhuma transação para este cliente'"
-            )
+            self.table.props("dense no-data-label='Nenhuma transação registrada'")
             self.table.classes("self-center w-70 md:w-90")
-            self.table.style("max-height: calc(100svh - 410px);")
+            self.table.style("max-height: calc(100svh - 300px);")
+            with self.table.add_slot("top-right"):
+                self.export_button = ui.button(
+                    "Exportar", icon="description", on_click=self.export_history
+                )
+                self.export_button.props("flat")
+                self.export_button.disable()
             if on_delete is not None:
                 with self.table.add_slot("body-cell-action"):
                     with self.table.cell("action"):
@@ -80,6 +84,47 @@ class subpage_history:
     def change_customer(self, customer: tbl_clientes):
         self.customer = customer
         self.table.rows = list(customer.Transacs)
+        if customer.Id is None:
+            self.export_button.disable()
+        else:
+            self.export_button.enable()
+
+    async def export_history(self):
+        try:
+            doc = invoice.CustomerTransactions(customer_id=self.customer.Id)
+            doc.render()
+        except ValueError:
+            error_dialog = MessageDialog(
+                ui=self.ui,
+                app=self.app,
+                title="Erro processando conteúdo do documento",
+                message="Um conjunto de caractéres inválidos foram encontrados nas "
+                "informações da empresa, corrija os dados inseridos em:\n\n"
+                "Configurações > Informações da empresa\n\ne tente novamente.",
+                msg_type="error",
+            )
+            await error_dialog.show()
+        else:
+            if is_host(self.ui):
+                info_dialog = MessageDialog(
+                    ui=self.ui,
+                    app=self.app,
+                    title="Documento criado com sucesso",
+                    message="O documento será aberto em outro aplicativo.",
+                    msg_type="info",
+                )
+                await info_dialog.show()
+                doc.launch_file()
+            else:
+                info_dialog = MessageDialog(
+                    ui=self.ui,
+                    app=self.app,
+                    title="Documento criado com sucesso",
+                    message="Ao pressionar 'OK', você fará download do arquivo.",
+                    msg_type="info",
+                )
+                await info_dialog.show()
+                safe_download(self.ui, doc.meta.document_path)
 
 
 class subpage_info:
@@ -223,7 +268,7 @@ class page:
                 )
                 self.tabs.style("font-family: 'Saira Semibold';")
                 self.tabs.on_value_change(lambda p: self.handle_tab_change(payload=p))
-                transac = ui.tab("Transação").classes("bg-gray-100 text-gray-700")
+                transac = ui.tab("Nova transação").classes("bg-gray-100 text-gray-700")
                 history = ui.tab("Histórico").classes("bg-gray-100 text-gray-700")
                 info = ui.tab("Informações").classes("bg-gray-100 text-gray-700")
                 transac.style(
@@ -281,7 +326,7 @@ class page:
                 customer_list.items_list.refresh(no_callback=True)
 
         if getattr(self, "tabs", None) is not None:
-            self.tabs.set_value("Transação")
+            self.tabs.set_value("Nova transação")
         # Update selected user indicator
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)

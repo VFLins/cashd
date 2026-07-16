@@ -68,7 +68,9 @@ class DirectoryList:
                     js_handler="() => emit(props.rowIndex)",
                     handler=self.rm_dir,
                 )
-        self.dialog_add_directory = SelectDirDialog(ui=ui, app=app, initial_dir=self.initial_dir)
+        self.dialog_add_directory = SelectDirDialog(
+            ui=ui, app=app, initial_dir=self.initial_dir
+        )
 
     async def add_dir(self):
         new_dir = await self.dialog_add_directory.show()
@@ -93,8 +95,27 @@ class page:
     def __init__(self, ui, app):
         self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Configurações")
-        self.file_dialog = SelectFileDialog(ui=ui, app=app, initial_dir=Path("~").expanduser())
+        self.file_dialog = SelectFileDialog(
+            ui=ui, app=app, initial_dir=Path("~").expanduser()
+        )
         with ui.column(align_items="left").classes("self-center"):
+
+            h1(ui, "Informações da empresa")
+            ui.input(
+                "Nome da empresa",
+                value=prefs.CompanyName.get(),
+                on_change=lambda w: prefs.CompanyName.set(w.value),
+            ).props("outlined dense").classes("w-100 md:w-full")
+            ui.input(
+                "Local",
+                value=prefs.CompanyAddress.get(),
+                on_change=lambda w: prefs.CompanyAddress.set(w.value),
+            ).props("outlined dense").classes("w-100 md:w-full")
+            ui.input(
+                "Informações de contato",
+                value=prefs.CompanyContact.get(),
+                on_change=lambda w: prefs.CompanyContact.set(w.value),
+            ).props("outlined dense").classes("w-100 md:w-full")
 
             h1(ui, "Preferências")
             h2(ui, "Valores padrão no formulário de contas")

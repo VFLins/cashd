@@ -1,3 +1,12 @@
+import phonenumbers
+import re
+from typing import List, Iterable, Literal, Any, Self, Dict
+from datetime import datetime
+from decimal import Decimal
+from pathlib import Path
+from copy import copy
+from sys import platform
+from sqlalchemy.sql.functions import coalesce
 from sqlalchemy import (
     Column,
     Engine,
@@ -26,36 +35,13 @@ from sqlalchemy.orm import (
     relationship,
     Session,
 )
-from sqlalchemy.sql.functions import coalesce
-from typing import List, Iterable, Literal, Any, Self, Dict
-from datetime import datetime
-from decimal import Decimal
-from pathlib import Path
-from copy import copy
-from sys import platform
-import phonenumbers
-import re
 
 from cashd_core import prefs, const, backup
 
 
-####################
-# CONSTANTS
-####################
-
-if platform == "win32":
-    CASHD_FILES_PATH = Path.home().joinpath("AppData", "Local", "Cashd")
-    CONFIG_PATH = Path(CASHD_FILES_PATH, "configs")
-    LOG_PATH = Path(CASHD_FILES_PATH, "logs")
-else:
-    CASHD_FILES_PATH = Path.home().joinpath(".local", "share", "Cashd")
-    CONFIG_PATH = Path.home().joinpath(".config", "Cashd")
-    LOG_PATH = Path.home().joinpath(".local", "state", "Cashd", "logs")
-
-DATA_PATH = Path(CASHD_FILES_PATH, "data")
-DATA_PATH.mkdir(exist_ok=True)
 DB_ENGINE = create_engine(
-    f"sqlite:///{Path(DATA_PATH, 'database.db')}", echo=False)
+    f"sqlite:///{Path(const.DATA_DIR, 'database.db')}", echo=False
+)
 
 
 ####################
@@ -215,7 +201,8 @@ class dec_base(DeclarativeBase):
     def required_fieldnames(self) -> List[str]:
         """Names of every required fields in this table."""
         return [
-            colname for colname in self.data.keys()
+            colname
+            for colname in self.data.keys()
             if self.types[colname] in REQUIRED_TYPES
         ]
 
@@ -268,8 +255,7 @@ class dec_base(DeclarativeBase):
         :raises AttributeError: If `self.Id` is None or not defined.
         """
         if not self.Id:
-            raise AttributeError(
-                f"Expected `self.Id` to be integer, got {self.Id=}.")
+            raise AttributeError(f"Expected `self.Id` to be integer, got {self.Id=}.")
         cls = type(self)
         with Session(bind=engine) as ses:
             stmt = update(cls).where(cls.Id == self.Id).values(**self.data)
@@ -321,8 +307,7 @@ class tbl_clientes(dec_base):
         if not customer_id:
             return []
         stmt = (
-            select(tbl_transacoes.Id, tbl_transacoes.DataTransac,
-                   tbl_transacoes.Valor)
+            select(tbl_transacoes.Id, tbl_transacoes.DataTransac, tbl_transacoes.Valor)
             .where(tbl_transacoes.IdCliente == customer_id)
             .order_by(tbl_transacoes.Id.desc())
         )
@@ -390,14 +375,13 @@ class tbl_clientes(dec_base):
                 return name
 
     def __repr__(self):
-        Id, NomeCompleto= self.Id, self.NomeCompleto
+        Id, NomeCompleto = self.Id, self.NomeCompleto
         return f"<cashd customer {Id=}, {NomeCompleto=}>"
 
 
 class tbl_transacoes(dec_base):
     __tablename__ = "transacoes"
-    NomeCliente: Mapped["tbl_clientes"] = relationship(
-        back_populates="SaldoTransacoes")
+    NomeCliente: Mapped["tbl_clientes"] = relationship(back_populates="SaldoTransacoes")
 
     IdCliente: Mapped[int] = Column("IdCliente", ForeignKey("clientes.Id"))
     CarimboTempo: Mapped[datetime] = Column(DateTime(timezone=True))
@@ -418,7 +402,10 @@ class tbl_transacoes(dec_base):
 
     def __repr__(self):
         Id, Valor, DataTransac, IdCliente = (
-            self.Id, Decimal(self.Valor / 100), self.DataTransac, self.IdCliente
+            self.Id,
+            Decimal(self.Valor / 100),
+            self.DataTransac,
+            self.IdCliente,
         )
         return f"<cashd transaction {Id=}, {IdCliente}, {DataTransac=}, {Valor=}>"
 
@@ -577,8 +564,7 @@ class _DataSource:
         # `nrows`
         with Session(self.ENGINE) as ses:
             select_stmt = self.searched_select_stmt(search_text)
-            nrows_stmt = select(func.count()).select_from(
-                select_stmt.subquery())
+            nrows_stmt = select(func.count()).select_from(select_stmt.subquery())
             self.nrows = ses.execute(nrows_stmt).scalar()
         if self.is_paginated():
             # `min_idx`
@@ -615,13 +601,12 @@ class _DataSource:
             if last < first:
                 first, last = last, first
                 reverse = True
-            stmt = stmt.limit(last-first).offset(first)
+            stmt = stmt.limit(last - first).offset(first)
         with Session(self.ENGINE) as ses:
             result = ses.execute(stmt).all()
             if reverse:
                 return list(reversed(result))
             return result
-
 
     def is_paginated(self) -> bool:
         try:
@@ -781,8 +766,7 @@ class HighestAmountsSource(_DataSource):
         select_stmt = (
             select(
                 FORMATTED_FULL_CUSTOMER_NAME.label("Name"),
-                query_currency(func.sum(tbl_transacoes.Valor),
-                               label="OwedAmount"),
+                query_currency(func.sum(tbl_transacoes.Valor), label="OwedAmount"),
             )
             .join(tbl_clientes, tbl_transacoes.IdCliente == tbl_clientes.Id)
             .group_by(tbl_clientes.Id)
@@ -812,8 +796,7 @@ class InactiveCustomersSource(_DataSource):
             select(
                 FORMATTED_FULL_CUSTOMER_NAME.label("Name"),
                 func.max(tbl_transacoes.DataTransac).label("LastTransac"),
-                query_currency(func.sum(tbl_transacoes.Valor),
-                               label="OwedAmount"),
+                query_currency(func.sum(tbl_transacoes.Valor), label="OwedAmount"),
             )
             .join(tbl_clientes, tbl_transacoes.IdCliente == tbl_clientes.Id)
             .group_by(tbl_clientes.Id)
@@ -830,8 +813,7 @@ class InactiveCustomersSource(_DataSource):
 
 class TransactionBalanceSource(_DataSource):
     sums_col = func.sum(case((tbl_transacoes.Valor > 0, tbl_transacoes.Valor)))
-    deductions_col = func.sum(
-        case((tbl_transacoes.Valor < 0, tbl_transacoes.Valor)))
+    deductions_col = func.sum(case((tbl_transacoes.Valor < 0, tbl_transacoes.Valor)))
     balance_col = func.sum(tbl_transacoes.Valor)
 
     def __init__(self, engine: Engine = DB_ENGINE):
@@ -845,8 +827,7 @@ class TransactionBalanceSource(_DataSource):
         :Balance: Sums + (-Deductions).
         """
         # initial date frequency is monthlhy
-        date_col = func.strftime(
-            "%Y-%m", tbl_transacoes.DataTransac).label("Date")
+        date_col = func.strftime("%Y-%m", tbl_transacoes.DataTransac).label("Date")
         select_stmt = (
             select(
                 date_col,
@@ -871,8 +852,7 @@ class TransactionBalanceSource(_DataSource):
             date_format = "%Y-%W"
         if date_freq == "d":
             date_format = "%Y-%m-%d"
-        date_col = func.strftime(
-            date_format, tbl_transacoes.DataTransac).label("Date")
+        date_col = func.strftime(date_format, tbl_transacoes.DataTransac).label("Date")
         self.SELECT_STMT = (
             select(
                 date_col,
@@ -903,8 +883,7 @@ class AggregatedAmountSource(_DataSource):
         :Deductions: Total amount of all payments registered.
         :AcumBalance: Sums + (-Deductions) aggregated over time.
         """
-        date_col = func.strftime(
-            "%Y-%m", tbl_transacoes.DataTransac).label("Date")
+        date_col = func.strftime("%Y-%m", tbl_transacoes.DataTransac).label("Date")
         acum_balance_col = query_currency(
             func.sum(self.sums_col + self.deductions_col).over(order_by=date_col.asc()),
             label="AcumBalance",
@@ -933,11 +912,9 @@ class AggregatedAmountSource(_DataSource):
             date_format = "%Y-%W"
         if date_freq == "d":
             date_format = "%Y-%m-%d"
-        date_col = func.strftime(
-            date_format, tbl_transacoes.DataTransac).label("Date")
+        date_col = func.strftime(date_format, tbl_transacoes.DataTransac).label("Date")
         acum_balance_col = query_currency(
-            func.sum(self.sums_col +
-                     self.deductions_col).over(order_by=date_col.asc()),
+            func.sum(self.sums_col + self.deductions_col).over(order_by=date_col.asc()),
             label="AcumBalance",
         )
         self.SELECT_STMT = (

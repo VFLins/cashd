@@ -8,7 +8,7 @@ from toga import Widget
 from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN
-from toga.dialogs import ConfirmDialog
+from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog
 from toga.widgets.box import Box, Column
 from toga.widgets.label import Label
 from toga.widgets.table import Table
@@ -19,7 +19,7 @@ from toga.widgets.textinput import TextInput
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.widgets.optioncontainer import OptionContainer
 
-from cashd_core import data, fmt
+from cashd_core import data, fmt, pdf
 
 from cashd import const, style, widgets
 from cashd.pages.base import BaseSection
@@ -125,7 +125,8 @@ class SubsectionTransacHistory:
         self.table = Table(
             style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH),
             data=self.SELECTED_CUSTOMER.Transacs,
-            columns=["Data", "Valor"],
+            columns=["Data", "Valor (R$)"],
+            accessors=("data", "valor"),
             on_select=self.select_transac,
         )
         """Table containing all transactions of the currently selected customer."""
@@ -136,15 +137,18 @@ class SubsectionTransacHistory:
         )
         """Button to remove the selected transaction on `transaction_history_table`."""
 
-        self.print_button = Button(
-            "Imprimir histórico", style=Pack(margin_left=10), enabled=False
+        self.export_button = Button(
+            "Exportar",
+            style=Pack(margin_left=10),
+            enabled=False,
+            on_press=self.export_transac,
         )
         """Button to open the dialog for printing the last few transactions registered
         and current owed amount. This feature is aimed for thermal printers.
         """
 
         self.options_container: Box = widgets.elems.form_options(
-            buttons=[self.remove_button, self.print_button],
+            buttons=[self.remove_button, self.export_button],
         )
         self.options_container.style.margin = (10, 0, 5, 0)
 
@@ -161,23 +165,55 @@ class SubsectionTransacHistory:
         if widget.selection is None:
             self.remove_button.enabled = False
 
+    async def export_transac(self, widget: Button):
+        try:
+            doc = pdf.model.invoice.CustomerTransactions(
+                customer_id=self.SELECTED_CUSTOMER.Id
+            )
+            doc.render()
+        except ValueError:
+            error = ErrorDialog(
+                "Erro processando conteúdo do documento",
+                "Um conjunto de caractéres inválidos foram encontrados nas "
+                "informações da empresa, corrija os dados inseridos em:\n\n"
+                "Configurações > Informações da empresa\n\ne tente novamente.",
+            )
+            await widget.app.dialog(error)
+        else:
+            info = InfoDialog(
+                "Documento criado com sucesso",
+                "O documento será aberto em outro aplicativo.",
+            )
+            await widget.app.dialog(info)
+            doc.launch_file()
+
     async def remove_transac(self, widget: Button):
-        transac_id = self.table.selection.id
-        transac = data.tbl_transacoes()
-        transac.read(row_id=transac_id)
-        transac_value = f"R$ {transac.Valor/100}".replace(".", ",")
-        confirm = ConfirmDialog(
-            title="Remover transação?",
-            message=f"Data: {transac.DataTransac}\nValor: {transac_value}",
-        )
-        if await widget.app.dialog(confirm):
-            transac.delete()
-            if self.on_delete is not None:
-                self.on_delete()
-            # clear table before filling to avoid glitches from winforms
-            self.table.data = []
-            self.table.data = self.SELECTED_CUSTOMER.Transacs
-            print(f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}")
+        try:
+            transac_id = self.table.selection.id
+        except AttributeError:
+            # Will raise this if somehow there aren't any rows
+            # selected but the button is enabled and clicked.
+            # Doing this, since there is no 'on_unselect' or
+            # 'on_lose_focus' trigger.
+            widget.enabled = False
+        else:
+            transac = data.tbl_transacoes()
+            transac.read(row_id=transac_id)
+            transac_value = f"R$ {transac.Valor/100}".replace(".", ",")
+            confirm = ConfirmDialog(
+                title="Remover transação?",
+                message=f"Data: {transac.DataTransac}\nValor: {transac_value}",
+            )
+            if await widget.app.dialog(confirm):
+                transac.delete()
+                if self.on_delete is not None:
+                    self.on_delete()
+                # clear table before filling to avoid glitches from winforms
+                self.table.data = []
+                self.table.data = self.SELECTED_CUSTOMER.Transacs
+                print(
+                    f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}"
+                )
 
 
 class SectionCustomerInfo:
@@ -330,7 +366,7 @@ class MainSection(BaseSection):
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
                 (
-                    "Histórico de transações",
+                    "Histórico",
                     self.subsection_transac_history.full_contents,
                 ),
                 ("Informações", self.subsection_customer_info.full_contents),
@@ -390,12 +426,14 @@ class MainSection(BaseSection):
     def select_customer(self, widget: Selection):
         if widget.selection is None:
             self.subsection_add_transac.amount_input.enabled = False
+            self.subsection_transac_history.export_button.enabled = False
             self.customer_options_button.enabled = False
             return
         print(f"selected: {widget.selection}")
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
         self._upd_selected_info()
         self.subsection_add_transac.amount_input.enabled = True
+        self.subsection_transac_history.export_button.enabled = True
         self.customer_options_button.enabled = True
 
     def _upd_selected_info(self):

@@ -29,9 +29,37 @@ class ConfigSection(BaseSection):
     def __init__(self, app: App):
         super().__init__(app)
 
-        self.default_values_section_title = Label("Valores padrão", style=style.HEADING)
-        self.default_values_section_widgets = widgets.form.FormHandler(n_cols=2)
-        self.default_values_section_widgets.add_fields(
+        self.company_info = widgets.form.FormHandler(n_cols=1)
+        self.company_info.add_fields(
+            fields=[
+                widgets.form.FormField(
+                    label="Nome da empresa",
+                    input_widget=TextInput(
+                        value=prefs.CompanyName.get(),
+                        on_change=lambda w: prefs.CompanyName.set(w.value),
+                    ),
+                ),
+                widgets.form.FormField(
+                    label="Local",
+                    input_widget=TextInput(
+                        value=prefs.CompanyAddress.get(),
+                        on_change=lambda w: prefs.CompanyAddress.set(w.value),
+                    ),
+                ),
+                widgets.form.FormField(
+                    label="Informação de contato",
+                    input_widget=TextInput(
+                        value=prefs.CompanyContact.get(),
+                        on_change=lambda w: prefs.CompanyContact.set(w.value),
+                    ),
+                ),
+            ],
+        )
+        for field in self.company_info.fields.values():
+            field.input.width = const.FORM_WIDTH
+
+        self.default_values = widgets.form.FormHandler(n_cols=2)
+        self.default_values.add_fields(
             fields=[
                 widgets.form.FormField(
                     label="Estado",
@@ -72,7 +100,6 @@ class ConfigSection(BaseSection):
             ]
         )
 
-        self.backup_section_title = Label("Backup", style=style.HEADING)
         self.backup_places_list = ListOfItems(
             datasource=backup.BackupPlacesSource(),
             columns=["value"],
@@ -93,6 +120,7 @@ class ConfigSection(BaseSection):
             ),
             id="transac_to_backup_input",
         )
+        self.transac_to_backup_amount.label.style.margin_top = 10
         self.transac_to_backup_amount_blank = Box(id="transac_to_backup_blank")
         self.backup_on_transac = Column(
             children=[
@@ -184,19 +212,28 @@ class ConfigSection(BaseSection):
             ],
         )
 
-        self.first_section_content = Box(
+        self.company_info_section = Box(
             style=Pack(direction="column", width=const.CONTENT_WIDTH / 2),
             children=[
-                self.default_values_section_title,
+                Label("Informações da empresa", style=style.HEADING),
                 Divider(style=style.SEPARATOR),
-                self.default_values_section_widgets.widget,
+                self.company_info.widget,
             ],
         )
 
-        self.second_section_content = Box(
+        self.default_values_section = Box(
             style=Pack(direction="column", width=const.CONTENT_WIDTH / 2),
             children=[
-                self.backup_section_title,
+                Label("Valores padrão", style=style.HEADING),
+                Divider(style=style.SEPARATOR),
+                self.default_values.widget,
+            ],
+        )
+
+        self.backup_section = Box(
+            style=Pack(direction="column", width=const.CONTENT_WIDTH / 2),
+            children=[
+                Label("Backup", style=style.HEADING),
                 Divider(style=style.SEPARATOR),
                 self.backup_places_list.widget,
                 self.backup_on_close,
@@ -208,8 +245,9 @@ class ConfigSection(BaseSection):
         self.sections = Box(
             style=Pack(direction="column"),
             children=[
-                self.first_section_content,
-                self.second_section_content,
+                self.company_info_section,
+                self.default_values_section,
+                self.backup_section,
             ],
         )
         self.main_container = Box(style=style.PAGE_BODY, children=[self.sections])

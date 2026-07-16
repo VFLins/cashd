@@ -1,7 +1,7 @@
 import time
 import asyncio
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from contextlib import contextmanager
 from sqlalchemy.exc import IntegrityError
 from cashd_core.data import tbl_clientes, tbl_transacoes
@@ -39,6 +39,33 @@ class CustomDialog:
 
     def _cleanup(self):
         """Use this to perform any necessary cleanup after the dialog is closed."""
+
+
+class MessageDialog(CustomDialog):
+    def __init__(
+        self,
+        ui,
+        app,
+        title: str,
+        message: str,
+        msg_type: Literal["info", "error", "success"] = "info",
+    ):
+        self.title, self.message, self.msg_type = title, message, msg_type
+        super().__init__(ui=ui, app=app)
+
+    def _render_content(self, ui):
+        color_map = {"info": "primary", "error": "negative", "success": "positive"}
+        icon_map = {"info": "info", "error": "error", "success": "check"}
+        with ui.row(align_items="center"):
+            icon = ui.icon(icon_map[self.msg_type], color=color_map[self.msg_type])
+            icon.classes("text-3xl")
+            title = ui.label(self.title)
+            title.classes(f"text-{color_map[self.msg_type]} text-xl")
+            title.style("font-family: 'Saira Semibold'")
+        message = ui.label(self.message)
+        message.classes("my-4 whitespace-pre-wrap")
+        button = ui.button("Ok", on_click=self.dialog.close)
+        button.props("flat").classes("self-end")
 
 
 class SelectDirDialog(CustomDialog):
@@ -503,9 +530,7 @@ class DeleteTransactionDialog(CustomDialog):
             )
             raise err
         else:
-            print(
-                f"{now()} {tr} deleted by {self.app.storage.browser['id']}"
-            )
+            print(f"{now()} {tr} deleted by {self.app.storage.browser['id']}")
             notify_success(self.ui, "Transação removida com sucesso.")
         finally:
             self.dialog.submit(None)
