@@ -11,7 +11,7 @@ from cashd_core.pdf.model.base import StyleSheet, DocumentMeta
 
 
 def InvoiceMeta(name) -> DocumentMeta:
-    size = (72 * mm, 220 * mm)
+    size = (72 * mm, 160 * mm)
     margin = (0, 1 * mm, 0, 0)
     return DocumentMeta(size=size, margin=margin, name=name)
 

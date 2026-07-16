@@ -91,20 +91,20 @@ class _Config:
     @classmethod
     def get(cls):
         """Get current value of this config, or the default value if not defined."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         return interactor.__get()
 
     @classmethod
     def set(cls, value: Any):
         """Write `value` to the configuration file."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         interactor.__set(value)
 
     def __set(self, value: Any):
         config_file, parser = self._parser_factory()
         parser.set(self._section, self._key, str(value))
         try:
-            with open(config_file, "w", enconding="utf-8") as buffer:
+            with open(config_file, "w", encoding="utf-8") as buffer:
                 parser.write(buffer)
         except Exception as err:
             self.logger.error(
@@ -143,25 +143,25 @@ class _ConfigList(_Config):
     @classmethod
     def get(cls) -> list[str]:
         """Get list from config file as a python list."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         return list(interactor.__get())
 
     @classmethod
     def set(cls, value: list[str]):
         """Writes a a python list to the config file, replacing the existing one."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         interactor.__set(value=[str(i) for i in value])
 
     @classmethod
     def add(cls, value: str):
         """Adds a `value` to the config list."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         interactor.__add(value=value)
 
     @classmethod
     def rm(cls, value: str):
         """Removes `value` from config list if it is present. Does nothing otherwise."""
-        interactor = cls()
+        interactor = cls() # ty: ignore[missing-argument]
         interactor.__rm(value=value)
 
     def __get(self) -> Iterator[str]:
