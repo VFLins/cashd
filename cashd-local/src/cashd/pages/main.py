@@ -137,7 +137,7 @@ class SubsectionTransacHistory:
         """Button to remove the selected transaction on `transaction_history_table`."""
 
         self.export_button = Button(
-            "Exportar transações recentes",
+            "Exportar",
             style=Pack(margin_left=10),
             enabled=False,
             on_press=self.export_transac,
@@ -190,8 +190,10 @@ class SubsectionTransacHistory:
         try:
             transac_id = self.table.selection.id
         except AttributeError:
-            # (GTK only) Will raise this if somehow there aren't any rows
-            # selected and the button is enabled and clicked
+            # Will raise this if somehow there aren't any rows
+            # selected but the button is enabled and clicked.
+            # Doing this, since there is no 'on_unselect' or
+            # 'on_lose_focus' trigger.
             widget.enabled = False
         else:
             transac = data.tbl_transacoes()
