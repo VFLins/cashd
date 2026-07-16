@@ -54,18 +54,21 @@ class subpage_history:
         if on_delete is not None:
             cols = [{"name": "action", "label": ""}] + cols
 
-        with ui.column(align_items="end").classes("w-60 md:w-90"):
-            ui.button("Exportar", icon="print", on_click=self.export_history)
+        with ui.column().classes("w-60 md:w-90"):
             self.table = ui.table(
                 row_key="id",
                 columns=cols,
                 rows=list(customer.Transacs),
             )
-            self.table.props(
-                "dense no-data-label='Nenhuma transação para este cliente'"
-            )
+            self.table.props("dense no-data-label='Nenhuma transação registrada'")
             self.table.classes("self-center w-70 md:w-90")
             self.table.style("max-height: calc(100svh - 410px);")
+            with self.table.add_slot("top-right"):
+                self.export_button = ui.button(
+                    "Exportar", icon="description", on_click=self.export_history
+                )
+                self.export_button.props("flat")
+                self.export_button.disable()
             if on_delete is not None:
                 with self.table.add_slot("body-cell-action"):
                     with self.table.cell("action"):
@@ -81,6 +84,10 @@ class subpage_history:
     def change_customer(self, customer: tbl_clientes):
         self.customer = customer
         self.table.rows = list(customer.Transacs)
+        if customer.Id is None:
+            self.export_button.disable()
+        else:
+            self.export_button.enable()
 
     async def export_history(self):
         try:
