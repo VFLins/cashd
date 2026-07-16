@@ -62,7 +62,7 @@ class subpage_history:
             )
             self.table.props("dense no-data-label='Nenhuma transação registrada'")
             self.table.classes("self-center w-70 md:w-90")
-            self.table.style("max-height: calc(100svh - 410px);")
+            self.table.style("max-height: calc(100svh - 300px);")
             with self.table.add_slot("top-right"):
                 self.export_button = ui.button(
                     "Exportar", icon="description", on_click=self.export_history
