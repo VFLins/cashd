@@ -172,7 +172,7 @@ class SubsectionTransacHistory:
             )
             doc.render()
         except ValueError:
-            error = MessageDialog(
+            error = ErrorDialog(
                 "Erro processando conteúdo do documento",
                 "Um conjunto de caractéres inválidos foram encontrados nas "
                 "informações da empresa, corrija os dados inseridos em:\n\n"
@@ -180,7 +180,7 @@ class SubsectionTransacHistory:
             )
             await widget.app.dialog(error)
         else:
-            info = MessageDialog(
+            info = InfoDialog(
                 "Documento criado com sucesso",
                 "O documento será aberto em outro aplicativo.",
             )
