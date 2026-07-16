@@ -176,7 +176,7 @@ class SubsectionTransacHistory:
                 "Erro processando conteúdo do documento",
                 "Um conjunto de caractéres inválidos foram encontrados nas "
                 "informações da empresa, corrija os dados inseridos em:\n\n"
-                '"Configurações" > "Informações da empresa"\n\ne tente novamente.',
+                "Configurações > Informações da empresa\n\ne tente novamente.",
             )
             await widget.app.dialog(error)
         else:
