@@ -125,7 +125,8 @@ class SubsectionTransacHistory:
         self.table = Table(
             style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH),
             data=self.SELECTED_CUSTOMER.Transacs,
-            columns=["Data", "Valor"],
+            columns=["Data", "Valor (R$)"],
+            accessors=("data", "valor"),
             on_select=self.select_transac,
         )
         """Table containing all transactions of the currently selected customer."""
