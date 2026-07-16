@@ -8,7 +8,7 @@ from cashd_core.pdf.model import invoice
 from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd.widgets.custom import DetailedList
 from cashd.widgets.dialogs import DeleteTransactionDialog, MessageDialog
-from cashd.const import now
+from cashd.const import now, is_host, safe_download
 
 
 class subpage_transac:
@@ -93,20 +93,31 @@ class subpage_history:
                 title="Erro processando conteúdo do documento",
                 message="Um conjunto de caractéres inválidos foram encontrados nas "
                 "informações da empresa, corrija os dados inseridos em:\n\n"
-                '"Configurações" > "Informações da empresa"\n\ne tente novamente.',
+                "Configurações > Informações da empresa\n\ne tente novamente.",
                 msg_type="error",
             )
             await error_dialog.show()
         else:
-            info_dialog = MessageDialog(
-                ui=self.ui,
-                app=self.app,
-                title="Documento criado com sucesso",
-                message="O documento será aberto em outro aplicativo.",
-                msg_type="info",
-            )
-            await info_dialog.show()
-            doc.launch_file()
+            if is_host(self.ui):
+                info_dialog = MessageDialog(
+                    ui=self.ui,
+                    app=self.app,
+                    title="Documento criado com sucesso",
+                    message="O documento será aberto em outro aplicativo.",
+                    msg_type="info",
+                )
+                await info_dialog.show()
+                doc.launch_file()
+            else:
+                info_dialog = MessageDialog(
+                    ui=self.ui,
+                    app=self.app,
+                    title="Documento criado com sucesso",
+                    message="Ao pressionar 'OK', você fará download do arquivo.",
+                    msg_type="info",
+                )
+                await info_dialog.show()
+                safe_download(self.ui, doc.meta.document_path)
 
 
 class subpage_info:
