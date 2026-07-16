@@ -54,13 +54,18 @@ class MessageDialog(CustomDialog):
         super().__init__(ui=ui, app=app)
 
     def _render_content(self, ui):
-        color_map = {"info": "brand", "error": "negative", "success": "positive"}
+        color_map = {"info": "primary", "error": "negative", "success": "positive"}
         icon_map = {"info": "info", "error": "error", "success": "check"}
-        with ui.grid(columns=2).classes("mb-6"):
-            ui.icon(icon_map[self.msg_type], color=color_map[self.msg_type])
-            ui.label(self.title).classes(f"text-{color_map[self.msg_type]} bold")
-        ui.label(self.message)
-        ui.button("Ok", on_click=self.dialog.close)
+        with ui.row(align_items="center"):
+            icon = ui.icon(icon_map[self.msg_type], color=color_map[self.msg_type])
+            icon.classes("text-3xl")
+            title = ui.label(self.title)
+            title.classes(f"text-{color_map[self.msg_type]} text-xl")
+            title.style("font-family: 'Saira Semibold'")
+        message = ui.label(self.message)
+        message.classes("my-4 whitespace-pre-wrap")
+        button = ui.button("Ok", on_click=self.dialog.close)
+        button.props("flat").classes("self-end")
 
 
 class SelectDirDialog(CustomDialog):
