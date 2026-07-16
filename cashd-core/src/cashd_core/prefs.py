@@ -32,7 +32,8 @@ def get_parser(filename: str) -> tuple[Path, ConfigParser]:
     parser = ConfigParser()
     config_file = Path(CONFIG_DIR, f"{filename}.ini")
     config_file.touch(exist_ok=True)
-    parser.read(config_file)
+    with open(config_file, "r", encoding="utf-8") as buffer:
+        parser.read_file(buffer)
     return (config_file, parser)
 
 
@@ -103,7 +104,7 @@ class _Config:
         config_file, parser = self._parser_factory()
         parser.set(self._section, self._key, str(value))
         try:
-            with open(config_file, "w") as buffer:
+            with open(config_file, "w", enconding="utf-8") as buffer:
                 parser.write(buffer)
         except Exception as err:
             self.logger.error(
