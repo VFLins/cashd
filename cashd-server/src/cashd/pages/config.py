@@ -135,9 +135,9 @@ class page:
                 )  # debounce will delay the on_change call
                 self.area_code = ui.select(
                     DDD,
-                    value=settings.area_code_number,
+                    value=prefs.AreaCodeNumber.get(),
                     label="Número do DDD",
-                    on_change=lambda: self.set_config("area_code_number", "area_code"),
+                    on_change=lambda w: prefs.AreaCodeNumber.set(w.value),
                 ).props("outlined dense")
             h2(ui, "Linhas por página")
             with ui.grid().classes("h-full center-items md:grid-cols-3"):
