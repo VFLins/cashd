@@ -10,11 +10,29 @@ def notify_success(ui, message: str):
 
 
 class DefaultHeader:
+    ICONS = {
+        "transaction": {
+            "white": "/assets/SVG_TransacaoBranco.svg",
+            "blue": "/assets/SVG_TransacaoAzul.svg",
+        },
+        "customer": {
+            "white": "/assets/SVG_ContasBranco.svg",
+            "blue": "/assets/SVG_ContasAzul.svg",
+        },
+        "data": {
+            "white": "/assets/SVG_DadosBranco.svg",
+            "blue": "/assets/SVG_DadosAzul.svg",
+        },
+        "config": {
+            "white": "/assets/SVG_ConfiguracaoBranco.svg",
+            "blue": "/assets/SVG_ConfiguracaoAzul.svg",
+        }
+    }
     HEADER_ENTRIES = [
-        ("/assets/SVG_TransacaoBranco.svg", "Transações", "/"),
-        ("/assets/SVG_ContasBranco.svg", "Novo cliente", "/customer"),
-        ("/assets/SVG_DadosBranco.svg", "Estatísticas", "/stats"),
-        ("/assets/SVG_ConfiguracaoBranco.svg", "Configurações", "/config"),
+        (ICONS["transaction"], "Transações", "/"),
+        (ICONS["customer"], "Novo cliente", "/customer"),
+        (ICONS["data"], "Estatísticas", "/stats"),
+        (ICONS["config"], "Configurações", "/config"),
     ]
 
     def __init__(self, ui, app, selected_entry: str):
@@ -23,14 +41,14 @@ class DefaultHeader:
         selected_idx = self.HEADER_ENTRIES.index(selected_idx)
         default_frontmatter(ui)
         with ui.header(elevated=True) as header:
-            header.style("background-color: #cadfe7")
+            header.style("background-color: #e3f2fd")
             header.classes("gap-0")
             with ui.row() as default_block:
                 default_block.classes("!hidden md:!flex w-full")
                 for i, entry in enumerate(self.allowed_entries()):
                     if entry[1] == selected_entry:
                         with ui.button().props("unelevated"):
-                            btn_image = ui.image(entry[0])
+                            btn_image = ui.image(entry[0]["white"])
                             btn_image.classes("rounded-full size-8 mr-3 mt-1 mb-1")
                             btn_label = ui.label(entry[1])
                             btn_label.classes("text-base")
@@ -41,7 +59,7 @@ class DefaultHeader:
                         with ui.button() as enabled_button:
                             enabled_button.on("click", self.navigate_to(ui, entry[2]))
                             enabled_button.props("flat")
-                            btn_image = ui.image(entry[0])
+                            btn_image = ui.image(entry[0]["white"])
                             btn_image.classes("rounded-full size-8 mr-3 mt-1 mb-1")
                             btn_label = ui.label(entry[1])
                             btn_label.classes("text-base")
@@ -53,8 +71,8 @@ class DefaultHeader:
 
             with ui.row(align_items="center") as mobile_block:
                 mobile_block.classes("md:!hidden w-full flex-nowrap")
-                header_image = ui.image(self.HEADER_ENTRIES[selected_idx][0])
-                header_image.classes("rounded-full size-12 select-none")
+                header_image = ui.image(self.HEADER_ENTRIES[selected_idx][0]["blue"])
+                header_image.classes("rounded-full size-10 select-none")
                 header_label = ui.label(self.HEADER_ENTRIES[selected_idx][1])
                 header_label.classes("text-2xl select-none truncate")
                 header_label.style(
@@ -63,15 +81,15 @@ class DefaultHeader:
                     "color: #478eff;"
                 )
                 ui.space()
-                with ui.button(icon="menu"):
+                with ui.button(icon="menu").props("flat"):
                     with ui.menu() as menu:
                         for i, entry in enumerate(self.allowed_entries()):
                             if entry[1] == selected_entry:
                                 continue
                             with ui.menu_item(on_click=self.navigate_to(ui, entry[2])):
-                                with ui.row().classes("items-center gap-2 no-wrap"):
-                                    ui.image(entry[0]).classes(
-                                        "rounded-full size-8 mr-3"
+                                with ui.row().classes("items-center gap-2 my-2 no-wrap"):
+                                    ui.image(entry[0]["blue"]).classes(
+                                        "rounded-full size-7 mr-2"
                                     )
                                     ui.label(entry[1]).classes(
                                         "whitespace-nowrap select-none"

@@ -82,8 +82,8 @@ class ConfigSection(BaseSection):
                     label="Número de DDD",
                     input_widget=Selection(
                         items=const.DDD,
-                        value=prefs.settings.area_code_number,
-                        on_change=self.set_default_area_code,
+                        value=prefs.AreaCodeNumber.get(),
+                        on_change=lambda w: prefs.AreaCodeNumber.set(w.value),
                     ),
                 ),
                 widgets.form.FormField(

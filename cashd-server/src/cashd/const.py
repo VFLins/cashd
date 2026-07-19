@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 import sys
 import base64
+import shutil
 import mimetypes
 
 
@@ -26,6 +27,15 @@ DEAMON_PATH = (
     if sys.platform == "win32"
     else EXECUTABLE_DIR / "cashd-serverd"
 )
+
+# FALLBACK: When running outside a virtual environment (venv/pipx), the executables
+# will not be in the Python directory. Search the system PATH instead.
+if not EXECUTABLE_PATH.exists():
+    if path_str := shutil.which("cashd-server"):
+        EXECUTABLE_PATH = Path(path_str)
+if not DEAMON_PATH.exists():
+    if path_str := shutil.which("cashd-serverd"):
+        DEAMON_PATH = Path(path_str)
 
 
 def now() -> str:

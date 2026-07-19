@@ -263,19 +263,19 @@ class page:
             right_section.classes("!hidden md:!flex w-full items-center")
             with ui.tabs().classes("w-full mt-4") as self.tabs:
                 self.tabs.props(
-                    "no-caps active-color='primary' indicator-color='transparent' "
-                    "active-bg-color=blue-1 dense"
+                    "no-caps active-color='white' indicator-color='transparent' "
+                    "active-bg-color='primary' dense"
                 )
                 self.tabs.style("font-family: 'Saira Semibold';")
                 self.tabs.on_value_change(lambda p: self.handle_tab_change(payload=p))
-                transac = ui.tab("Nova transação").classes("bg-gray-100 text-gray-700")
-                history = ui.tab("Histórico").classes("bg-gray-100 text-gray-700")
-                info = ui.tab("Informações").classes("bg-gray-100 text-gray-700")
+                transac = ui.tab("Nova transação").classes("bg-gray-200 text-gray-800")
+                history = ui.tab("Histórico").classes("bg-gray-200 text-gray-800")
+                info = ui.tab("Informações").classes("bg-gray-200 text-gray-800")
                 transac.style(
-                    "border-top-left-radius: 8px; border-bottom-left-radius: 8px;"
+                    "border-top-left-radius: 4px; border-bottom-left-radius: 4px;"
                 )
                 info.style(
-                    "border-top-right-radius: 8px; border-bottom-right-radius: 8px;"
+                    "border-top-right-radius: 4px; border-bottom-right-radius: 4px;"
                 )
             with ui.tab_panels(self.tabs, value=transac):
                 with ui.tab_panel(transac):

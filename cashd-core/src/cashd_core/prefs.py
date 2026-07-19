@@ -265,7 +265,7 @@ class DefaultCity(_Config):
 
 class AreaCodeNumber(_ConfigInt):
     def __init__(self):
-        super().__init__(key="area_code_number", default="99")
+        super().__init__(key="area_code_number", default=99)
 
 
 class RowsPerPage(_ConfigInt):
