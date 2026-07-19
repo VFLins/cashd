@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 import sys
 import base64
+import shutil
 import mimetypes
 
 
@@ -21,11 +22,16 @@ EXECUTABLE_PATH = (
     if sys.platform == "win32"
     else EXECUTABLE_DIR / "cashd-server"
 )
+if not EXECUTABLE_PATH.exists():
+    # shutil can find the executable path when not installed in a virtual env
+    EXECUTABLE_PATH = Path(shutil.which("cashd-server"))
 DEAMON_PATH = (
     EXECUTABLE_DIR / "cashd-serverd.exe"
     if sys.platform == "win32"
     else EXECUTABLE_DIR / "cashd-serverd"
 )
+if not DEAMON_PATH.exists():
+    DEAMON_PATH = Path(shutil.which("cashd-serverd"))
 
 
 def now() -> str:
