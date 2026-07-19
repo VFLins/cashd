@@ -22,16 +22,20 @@ EXECUTABLE_PATH = (
     if sys.platform == "win32"
     else EXECUTABLE_DIR / "cashd-server"
 )
-if not EXECUTABLE_PATH.exists():
-    # shutil can find the executable path when not installed in a virtual env
-    EXECUTABLE_PATH = Path(shutil.which("cashd-server"))
 DEAMON_PATH = (
     EXECUTABLE_DIR / "cashd-serverd.exe"
     if sys.platform == "win32"
     else EXECUTABLE_DIR / "cashd-serverd"
 )
+
+# FALLBACK: When running outside a virtual environment (venv/pipx), the executables
+# will not be in the Python directory. Search the system PATH instead.
+if not EXECUTABLE_PATH.exists():
+    if path_str := shutil.which("cashd-server"):
+        EXECUTABLE_PATH = Path(path_str)
 if not DEAMON_PATH.exists():
-    DEAMON_PATH = Path(shutil.which("cashd-serverd"))
+    if path_str := shutil.which("cashd-serverd"):
+        DEAMON_PATH = Path(path_str)
 
 
 def now() -> str:
