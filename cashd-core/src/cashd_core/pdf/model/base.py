@@ -14,6 +14,12 @@ from cashd_core.const import CASHD_FILES_DIR, DOCUMENTS_DIR
 RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
 
 
+# Resources references
+IMG_LOGO = RESOURCES_DIR / "logo.png"
+IMG_LOGO_SPACED = RESOURCES_DIR / "logo-spaced.png"
+IMG_LOGO_SPACED_TRB = RESOURCES_DIR / "logo-spaced-trb.png"
+
+
 pdfmetrics.registerFont(TTFont("Saira-SemiBold", RESOURCES_DIR / "Saira-SemiBold.ttf"))
 
 

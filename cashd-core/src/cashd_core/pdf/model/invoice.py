@@ -7,7 +7,7 @@ from datetime import datetime
 from dataclasses import dataclass
 
 from cashd_core import data, prefs
-from cashd_core.pdf.model.base import StyleSheet, DocumentMeta
+from cashd_core.pdf.model.base import StyleSheet, DocumentMeta, IMG_LOGO_SPACED_TRB
 
 
 def InvoiceMeta(name) -> DocumentMeta:
@@ -40,7 +40,7 @@ class _Document:
         now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         # Cashd
-        self.buffer.append(Paragraph("<b>Cashd</b>", s.L_BRAND))
+        self.buffer.append(Paragraph(f"<img src={IMG_LOGO_SPACED_TRB} width='28' height='28' valign='middle'/><b>Cashd</b>", s.L_BRAND))
         self.buffer.append(Spacer(1, 6 * mm))
         # Store info
         company_name = prefs.CompanyName.get()
@@ -63,7 +63,8 @@ class _Document:
     def _write_footer(self):
         s = self.style
         self.buffer.append(Spacer(1, 6 * mm))
-        self.buffer.append(Paragraph((". " * 22) + ".", s.C_PARA))
+        self.buffer.append(Paragraph(("_" * 26), s.C_PARA))
+        self.buffer.append(Spacer(1, 2 * mm))
         self.buffer.append(Paragraph("Obrigado pela preferência!", s.C_PARA))
 
     def render(self):
