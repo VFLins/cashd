@@ -6,6 +6,10 @@ from toga.widgets.button import Button
 from cashd_core import data
 from .base import BaseSection
 from cashd import style, widgets
+from cashd.style.vars import (
+    CONTEXT_BUTTON,
+    FULL_CONTENTS,
+)
 from cashd.widgets.form import FormHandler
 
 
@@ -23,20 +27,20 @@ class CreateCustomerSection(BaseSection):
             "Desfazer",
             enabled=False,
             on_press=self.undo_changes,
-            style=style.CONTEXT_BUTTON,
+            style=CONTEXT_BUTTON,
         )
         self.confirm_button = Button(
             "Confirmar",
             enabled=False,
             on_press=self.confirm_changes,
-            style=style.CONTEXT_BUTTON,
+            style=CONTEXT_BUTTON,
         )
         self.controls = widgets.elems.form_options(
             width=self.customer_form.widget.style.width,
             buttons=[self.undo_button, self.confirm_button],
         )
         self.full_contents = Box(
-            style=style.FULL_CONTENTS,
+            style=FULL_CONTENTS,
             children=[self.customer_form.widget, self.controls],
         )
 

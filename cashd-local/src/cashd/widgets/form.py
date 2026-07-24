@@ -15,7 +15,11 @@ from toga.widgets.box import Box, Row, StyleT
 from toga.widgets.label import Label
 
 from cashd_core import data
-from cashd import style, const
+from cashd import const
+from cashd.style.vars import (
+    input_annotation,
+    user_input,
+)
 from cashd.widgets.elems import (
     LabeledSelection,
     LabeledNumberInput,
@@ -57,9 +61,9 @@ class FormField(Box):
         label_widget = Label(
             text=label,
             id=f"{id}_label" if id else f"{label}_label",
-            style=style.input_annotation("label", default_width),
+            style=input_annotation("label", default_width),
         )
-        input_widget.style = style.user_input(type(input_widget), default_width)
+        input_widget.style = user_input(type(input_widget), default_width)
 
         self.contents = Box(
             id=id if id else label,
@@ -70,7 +74,7 @@ class FormField(Box):
             description_widget = Label(
                 text=description,
                 id=f"{id}_desc" if id else f"{label}_desc",
-                style=style.input_annotation("legend"),
+                style=input_annotation("legend"),
             )
             self.contents.add(description_widget)
             self.contents.description = description_widget
@@ -218,7 +222,7 @@ class FormHandler:
         if widths:
             elem_width = max(widths)
         else:
-            elem_width = style.user_input(TextInput).width
+            elem_width = user_input(TextInput).width
         h_padding = 25
         return int(n_cols * (elem_width + h_padding))
 
@@ -231,7 +235,7 @@ class FormHandler:
         if widths:
             elem_width = max(widths)
         else:
-            elem_width = style.user_input(TextInput).width
+            elem_width = user_input(TextInput).width
         return int(row_width / elem_width)
 
     @property
@@ -288,7 +292,7 @@ class HorizontalDateForm:
 
         self.year_input = LabeledNumberInput(
             label_text="Ano",
-            style=style.user_input(NumberInput),
+            style=user_input(NumberInput),
             min=1,
             max=9999,
             value=value.year,
@@ -296,7 +300,7 @@ class HorizontalDateForm:
 
         self.month_input = LabeledSelection(
             label_text="Mês",
-            style=style.user_input(Selection),
+            style=user_input(Selection),
             items=self.MONTHS,
             value=self.MONTHS[value.month - 1],
             on_change=self._update_allowed_day_values,
@@ -304,7 +308,7 @@ class HorizontalDateForm:
 
         self.day_input = LabeledNumberInput(
             label_text="Dia",
-            style=style.user_input(NumberInput),
+            style=user_input(NumberInput),
             min=1,
             max=self._last_day_of_month(),
             value=value.day,

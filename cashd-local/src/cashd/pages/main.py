@@ -21,7 +21,28 @@ from toga.widgets.optioncontainer import OptionContainer
 
 from cashd_core import data, fmt, pdf
 
-from cashd import const, style, widgets
+from cashd import const, widgets
+from cashd.style.compose import (
+    get_container,
+    TWO_COLUMNS,
+    H_CENTERED_CONTENT,
+    V_CENTERED_CONTENT,
+    H_STRETCH,
+)
+from cashd.style.vars import (
+    set_col_alignments,
+    input_annotation,
+    user_input,
+    INLINE_LABEL,
+    GENERIC_LABEL,
+    FULL_CONTENTS,
+    CONTEXT_BUTTON,
+    TABLE_OF_DATA,
+    PAGE_BODY,
+    VERTICAL_BOX,
+    FILLING_VERTICAL_BOX,
+    HORIZONTAL_BOX,
+)
 from cashd.pages.base import BaseSection
 from cashd.widgets.paginated import PaginatedDetailedList
 
@@ -40,14 +61,14 @@ class SubsectionAddTransac:
 
         self.amount_label = Label(
             "Valor: R$ 0,00",
-            style=style.input_annotation(),
+            style=input_annotation(),
         )
         """Label that dynamically displays the currency amount that will be
         inserted by the user.
         """
 
         self.amount_input = TextInput(
-            style=style.user_input(TextInput),
+            style=user_input(TextInput),
             placeholder="0,00",
             on_change=self.update_amount_label,
             on_confirm=self.insert_transaction,
@@ -61,7 +82,7 @@ class SubsectionAddTransac:
 
         self.confirm_button = Button(
             "Inserir",
-            style=style.CONTEXT_BUTTON,
+            style=CONTEXT_BUTTON,
             enabled=False,
             on_press=self.insert_transaction,
         )
@@ -70,7 +91,7 @@ class SubsectionAddTransac:
         """
 
         self.full_contents = Box(
-            style=style.FILLING_VERTICAL_BOX,
+            style=FILLING_VERTICAL_BOX,
             children=[
                 self.date_input_form.widget,
                 self.amount_label,
@@ -130,7 +151,7 @@ class SubsectionTransacHistory:
             on_select=self.select_transac,
         )
         """Table containing all transactions of the currently selected customer."""
-        style.set_col_alignments(self.table, ["l", "r"])
+        set_col_alignments(self.table, ["l", "r"])
 
         self.remove_button = Button(
             "Remover selecionado", enabled=False, on_press=self.remove_transac
@@ -237,7 +258,7 @@ class SectionCustomerInfo:
             "Desfazer",
             enabled=False,
             on_press=self.undo_changes,
-            style=style.CONTEXT_BUTTON,
+            style=CONTEXT_BUTTON,
         )
         """Button to undo any changes made by the user on `customer_data_form_widgets`.
         Enabled only when any information is changed."""
@@ -246,7 +267,7 @@ class SectionCustomerInfo:
             "Confirmar",
             enabled=False,
             on_press=self.confirm_changes,
-            style=style.CONTEXT_BUTTON,
+            style=CONTEXT_BUTTON,
         )
         """Button to write any changes made by the user on `customer_data_form_widgets`
         to the database. Enabled only when any information is changed."""
@@ -319,7 +340,7 @@ class MainSection(BaseSection):
             f"Nome: {const.NA_VALUE}\n"
             f"Local: {const.NA_VALUE}\n"
             f"Saldo devedor: R$ {const.NA_VALUE}",
-            style=style.INLINE_LABEL,
+            style=INLINE_LABEL,
         )
         """Text on top of the page displaying information about the currently
         selected customer.
@@ -335,7 +356,7 @@ class MainSection(BaseSection):
 
         self.help_msg = Label(
             "Selecione um cliente para escolher uma operação",
-            style=style.GENERIC_LABEL,
+            style=GENERIC_LABEL,
         )
         """Text displaying help for the current page functionality."""
 
@@ -350,7 +371,7 @@ class MainSection(BaseSection):
         self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.select_customer,
-            style=style.TABLE_OF_DATA,
+            style=TABLE_OF_DATA,
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
@@ -374,11 +395,11 @@ class MainSection(BaseSection):
         )
 
         # main container
-        self.header_block = Box(style=style.HORIZONTAL_BOX)
+        self.header_block = Box(style=HORIZONTAL_BOX)
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
-        self.body_block = Box(style=style.HORIZONTAL_BOX)
+        self.body_block = Box(style=HORIZONTAL_BOX)
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.
         """
@@ -391,7 +412,7 @@ class MainSection(BaseSection):
             children=[self.body_block],
         )
         self.full_contents = Box(
-            style=style.FULL_CONTENTS,
+            style=FULL_CONTENTS,
             children=[self.head, self.body],
         )
         self.set_layout_0()
@@ -407,8 +428,8 @@ class MainSection(BaseSection):
         )
         self.customer_selector.width = const.CONTENT_WIDTH
         self.body_block.add(self.customer_selector.widget)
-        self.head.style = style.VERTICAL_BOX
-        self.body.style = style.PAGE_BODY
+        self.head.style = VERTICAL_BOX
+        self.body.style = PAGE_BODY
 
     def set_layout_1(self):
         """Returns this section's widgets in a two-column layout."""
@@ -582,6 +603,6 @@ class MainSection(BaseSection):
         self.full_contents.clear()
         self.full_contents.add(self.head)
         self.full_contents.add(self.body)
-        self.full_contents.style = style.FULL_CONTENTS
+        self.full_contents.style = FULL_CONTENTS
         self.full_contents.refresh()
         self.layout_id = expected_layout_id

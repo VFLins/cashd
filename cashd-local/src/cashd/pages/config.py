@@ -21,7 +21,15 @@ from toga.dialogs import (
 )
 
 from cashd_core import prefs, const
-from cashd import style, backup, widgets
+from cashd import backup, widgets
+from cashd.style.vars import (
+    user_input,
+    input_annotation,
+    SEPARATOR,
+    HEADING,
+    FULL_CONTENTS,
+    PAGE_BODY,
+)
 from cashd.widgets.elems import ListOfItems
 
 
@@ -73,7 +81,7 @@ class ConfigSection(BaseSection):
                     label="Cidade",
                     input_widget=TextInput(
                         value=prefs.settings.default_city,
-                        style=style.user_input(TextInput),
+                        style=user_input(TextInput),
                         on_change=self.set_default_city,
                         on_lose_focus=self.set_title_case,
                     ),
@@ -90,7 +98,7 @@ class ConfigSection(BaseSection):
                     label="Linhas por página",
                     input_widget=NumberInput(
                         value=prefs.settings.data_tables_rows_per_page,
-                        style=style.user_input(NumberInput),
+                        style=user_input(NumberInput),
                         on_change=self.set_rows_per_page,
                         max=500,
                         min=50,
@@ -158,7 +166,7 @@ class ConfigSection(BaseSection):
                 Label(
                     "Realiza um backup silenciosamente depois que uma quantidade "
                     "de\ntransações é registrada.",
-                    style=style.input_annotation("legend"),
+                    style=input_annotation("legend"),
                 ),
             ],
         )
@@ -189,7 +197,7 @@ class ConfigSection(BaseSection):
                 Label(
                     "Se desativado, isto só acontecerá se o banco de dados tiver "
                     "aumentado de\ntamanho desde o último backup.",
-                    style=style.input_annotation("legend"),
+                    style=input_annotation("legend"),
                 ),
             ],
         )
@@ -215,8 +223,8 @@ class ConfigSection(BaseSection):
         self.company_info_section = Box(
             style=Pack(direction="column", width=const.CONTENT_WIDTH / 2),
             children=[
-                Label("Informações da empresa", style=style.HEADING),
-                Divider(style=style.SEPARATOR),
+                Label("Informações da empresa", style=HEADING),
+                Divider(style=SEPARATOR),
                 self.company_info.widget,
             ],
         )
@@ -224,8 +232,8 @@ class ConfigSection(BaseSection):
         self.default_values_section = Box(
             style=Pack(direction="column", width=const.CONTENT_WIDTH / 2),
             children=[
-                Label("Valores padrão", style=style.HEADING),
-                Divider(style=style.SEPARATOR),
+                Label("Valores padrão", style=HEADING),
+                Divider(style=SEPARATOR),
                 self.default_values.widget,
             ],
         )
@@ -233,8 +241,8 @@ class ConfigSection(BaseSection):
         self.backup_section = Box(
             style=Pack(direction="column", width=const.CONTENT_WIDTH / 2),
             children=[
-                Label("Backup", style=style.HEADING),
-                Divider(style=style.SEPARATOR),
+                Label("Backup", style=HEADING),
+                Divider(style=SEPARATOR),
                 self.backup_places_list.widget,
                 self.backup_on_close,
                 self.backup_on_transac_container,
@@ -250,9 +258,9 @@ class ConfigSection(BaseSection):
                 self.backup_section,
             ],
         )
-        self.main_container = Box(style=style.PAGE_BODY, children=[self.sections])
+        self.main_container = Box(style=PAGE_BODY, children=[self.sections])
         self.full_contents = Box(
-            style=style.FULL_CONTENTS, children=[self.main_container]
+            style=FULL_CONTENTS, children=[self.main_container]
         )
 
     def upd_backup_on_transaction(self, widget: Switch):

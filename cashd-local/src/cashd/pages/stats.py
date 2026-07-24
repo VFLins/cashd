@@ -13,7 +13,16 @@ from toga.widgets.table import Table
 from toga.widgets.base import Widget
 
 from cashd_core import data
-from cashd import const, style
+from cashd import const
+from cashd.style.vars import (
+    set_col_alignments,
+    user_input,
+    TABLE_OF_DATA,
+    FULL_CONTENTS,
+    WIDE_SELECTION,
+    HORIZONTAL_BOX,
+    VERTICAL_BOX,
+)
 from cashd.widgets.paginated import PaginatedTable
 from .base import BaseSection
 
@@ -43,14 +52,14 @@ class StatisticsSection(BaseSection):
 
         ### widgets ###
         self.visualization_selection = Selection(
-            style=style.WIDE_SELECTION,
+            style=WIDE_SELECTION,
             items=VISUALIZATION_OPTIONS,
             on_change=self.select_visualization,
         )
         """Dropdown visualization selector. Updates the displayed table on selection."""
 
         self.time_grouping_selection = Selection(
-            style=style.user_input(Selection),
+            style=user_input(Selection),
             items=TIME_GROUP_OPTIONS,
             on_change=self.update_data,
             enabled=False,
@@ -66,7 +75,7 @@ class StatisticsSection(BaseSection):
             columns=["Data", "Cliente", "Valor"],
         )
         """Table containing data of every transaction registered recently, most recent first."""
-        style.set_col_alignments(
+        set_col_alignments(
             self.transaction_history_table.data_widget, ["l", "l", "r"]
         )
 
@@ -76,15 +85,15 @@ class StatisticsSection(BaseSection):
             datasource=data.HighestAmountsSource(),
         )
         """Table displaying customers and their respective owed amount, highest first."""
-        style.set_col_alignments(self.highest_amounts_table.data_widget, ["l", "r"])
+        set_col_alignments(self.highest_amounts_table.data_widget, ["l", "r"])
 
         self.inactive_customers_table = PaginatedTable(
-            style=style.TABLE_OF_DATA,
+            style=TABLE_OF_DATA,
             columns=["Cliente", "Última transação", "Saldo atual"],
             datasource=data.InactiveCustomersSource(),
         )
         """Table displaying customers and their last transaction date, oldest first."""
-        style.set_col_alignments(
+        set_col_alignments(
             self.inactive_customers_table.data_widget, ["l", "l", "r"]
         )
 
@@ -96,7 +105,7 @@ class StatisticsSection(BaseSection):
         """Table displaying income vs outcome result by date (may be grouped),
         most recent first.
         """
-        style.set_col_alignments(
+        set_col_alignments(
             self.transac_balance_table.data_widget, ["l", "r", "r", "r"]
         )
 
@@ -108,7 +117,7 @@ class StatisticsSection(BaseSection):
         """Table displaying the accumulated income vs outcome result by date
         (may be grouped), most recent first.
         """
-        style.set_col_alignments(
+        set_col_alignments(
             self.aggregated_amount_table.data_widget, ["l", "r", "r", "r"]
         )
 
@@ -120,12 +129,12 @@ class StatisticsSection(BaseSection):
                 self.time_grouping_selection,
             ],
         )
-        self.header = Box(style=style.VERTICAL_BOX, children=[self.controls_first_row])
+        self.header = Box(style=VERTICAL_BOX, children=[self.controls_first_row])
         self.body = ScrollContainer(
-            style=style.HORIZONTAL_BOX, content=self.transaction_history_table.widget
+            style=HORIZONTAL_BOX, content=self.transaction_history_table.widget
         )
         self.full_contents = Box(
-            style=style.FULL_CONTENTS,
+            style=FULL_CONTENTS,
             children=[
                 self.header,
                 self.body,

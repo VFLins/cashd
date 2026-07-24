@@ -14,8 +14,12 @@ from toga.widgets.numberinput import NumberInput
 from toga.widgets.detailedlist import DetailedList
 
 from cashd_core import data
-from cashd import const, style
-from cashd.style import input_annotation
+from cashd import const
+from cashd.style.vars import (
+    input_annotation,
+    ROW_OF_BUTTONS,
+    SMALL_BUTTON,
+)
 
 
 class _LabeledInput:
@@ -253,16 +257,16 @@ class _DataInteractor:
         )
         if self._datasource.is_paginated():
             self.bottom_controls = Box(
-                style=style.ROW_OF_BUTTONS,
+                style=ROW_OF_BUTTONS,
                 children=[
                     self.page_label,
                     Button(
                         "Anterior",
                         on_press=self.previous_page,
-                        style=style.SMALL_BUTTON,
+                        style=SMALL_BUTTON,
                     ),
                     Button(
-                        "Próximo", on_press=self.next_page, style=style.SMALL_BUTTON
+                        "Próximo", on_press=self.next_page, style=SMALL_BUTTON
                     ),
                 ],
             )
@@ -343,10 +347,10 @@ class ListOfItems(_DataInteractor):
 
     def _set_bottom_controls(self):
         self.add_button = Button(
-            "Adicionar", on_press=self.on_add, style=style.SMALL_BUTTON
+            "Adicionar", on_press=self.on_add, style=SMALL_BUTTON
         )
         self.rm_button = Button(
-            "Remover", on_press=self.on_rm, style=style.SMALL_BUTTON
+            "Remover", on_press=self.on_rm, style=SMALL_BUTTON
         )
         self.bottom_controls = Box(
             style=Pack(margin=(0, 5)), children=[self.rm_button, self.add_button]
@@ -374,7 +378,7 @@ def form_options(buttons: list, alignment="end", width=const.FORM_WIDTH) -> Box:
     :param children: Widgets that will be contained in this `toga.Box`, usually buttons.
     :param alignment: Horizontal alignment of elements.
     """
-    inner_container = Box(style=style.ROW_OF_BUTTONS, children=buttons)
+    inner_container = Box(style=ROW_OF_BUTTONS, children=buttons)
     outer_container = Box(
         style=Pack(direction="column", align_items=alignment, width=width),
         children=[inner_container],
