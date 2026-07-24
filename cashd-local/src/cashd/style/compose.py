@@ -1,8 +1,11 @@
 
-from toga.style.pack import ROW, COLUMN, CENTER, LEFT, RIGHT, TOP, BOTTOM
-from toga import Box
+from toga.style.pack import ROW, COLUMN, CENTER, LEFT, RIGHT, TOP, BOTTOM, Pack
+from toga import Box, Column, Row
 
 class Modifier:
+    """Generic class for the declarative container system."""
+
+class Styler(Modifier):
     def __init__(self, parent_style: dict = None, child_style: dict = None):
         self.parent_style = parent_style or {}
         self.child_style = child_style or {}
@@ -14,44 +17,79 @@ class Modifier:
         style_dict.update(self.child_style)
 
 
+class GridHandler(Modifier):
+    def __init__(self, n: int = 1, direction: str = COLUMN):
+        self.n = max(1, n)
+        self.direction = direction
+
+    def arrange(self, children: list, child_style: dict) -> list[Box]:
+        """Ponto de entrada que delega para a função privada correspondente."""
+        if self.direction == COLUMN:
+            return self._arrange_columns(children, child_style)
+        return self._arrange_rows(children, child_style)
+
+    def _arrange_columns(self, children: list, child_style: dict = {}) -> list[Box]:
+        """Cria N colunas verticais e distribui os filhos alternadamente (round-robin)."""
+        columns = [Column(style=Pack(**child_style)) for _ in range(self.n)]
+
+        for i, child in enumerate(children):
+            col_index = i % self.n
+            columns[col_index].add(child)
+        return columns
+
+    def _arrange_rows(self, children: list, child_style: dict = {}) -> list[Box]:
+        """Agrupa os filhos em sub-containers de linha com tamanho máximo N."""
+        rows = []
+
+        for i in range(0, len(children), self.n):
+            row_items = children[i : i + self.n]
+            row_box = Row(style=Pack(**self.child_style))
+
+            for child in row_items:
+                row_box.add(child)
+
+            # Keep last row proportional with a filler
+            missing_items = self.n - len(row_items)
+            for _ in range(missing_items):
+                row_box.add(Box(style=Pack(flex=1)))
+            rows.append(row_box)
+        return rows
+
 # --- 1. Static instances ---
 
-TWO_COLUMNS = Modifier(
-    parent_style={"direction": ROW},
-    child_style={"direction": COLUMN, "flex": 1},
-)
-
-H_STRETCH = Modifier(parent_style={"flex": 1})
-H_CENTERED_CONTENT = Modifier(child_style={"alignment": CENTER})
-V_CENTERED_CONTENT = Modifier(child_style={"justify_content": CENTER})
+H_STRETCH = Styler(parent_style={"flex": 1})
+H_CENTERED_CONTENT = Styler(child_style={"alignment": CENTER})
+V_CENTERED_CONTENT = Styler(child_style={"justify_content": CENTER})
 
 
 # --- 2. Customizable instances ---
 
-def GAP(padding_value: int) -> Modifier:
+def GAP(padding_value: int) -> Styler:
     """Aplica espaçamento interno (padding) nos containers dos filhos."""
-    return Modifier(child_style={"padding": padding_value})
+    return Styler(child_style={"padding": padding_value})
 
-def FLEX(value: int) -> Modifier:
+def FLEX(value: int) -> Styler:
     """Aplica um fator de flexibilidade personalizado ao container pai."""
-    return Modifier(parent_style={"flex": value})
+    return Styler(parent_style={"flex": value})
 
-def N_COLUMNS(count: int) -> Modifier:
-    """Permite criar N colunas de largura proporcional."""
-    return Modifier(
-        parent_style={"direction": ROW},
-        child_style={"direction": COLUMN, "flex": 1},
-    )
+def N_COLUMNS(count: int) -> GridHandler:
+    """Cria N colunas verticais infinitas e preenche alternadamente."""
+    return GridHandler(n=count, direction=COLUMN)
+
+def N_ROWS(count: int) -> GridHandler:
+    """Cria linhas horizontais com no máximo N itens cada."""
+    return GridHandler(n=count, direction=ROW)
+
+def CONTENT_WIDTH(value: int) -> Styler:
+    """Set a common width to all of it's immediate children."""
+    return Styler(child_style={"width": value})
 
 
 class ComposedBox(Box):
     def __init__(self, *modifiers, **kwargs):
         raw_children = kwargs.pop("children", [])
         self._raw_children = list(raw_children)
-        """Reference to it's children whithout any modifier applied."""
-
         self._modifiers = [m for m in modifiers if isinstance(m, Modifier)]
-        """Reference to it's modifiers applying styles to this container."""
 
         super().__init__(**kwargs)
         self.rebuild()
@@ -59,54 +97,59 @@ class ComposedBox(Box):
     def add(self, *children):
         if not children:
             return
-
-        child_style = {}
-        for mod in self.modifiers:
-            mod.apply_child(child_style)
-
-        if child_style:
-            for child in children:
-                col_box = toga.Box(style=Pack(**child_style))
-                col_box.add(child)
-                super().add(col_box)
-        else:
-            super().add(*children)
+        self._raw_children.extend(children)
+        self.rebuild()
 
     def add_mods(self, *modifiers):
-        """Adds modifiers and recalculates the layout."""
         for m in modifiers:
-            if isinstance(m, Modifier) and m not in self._modifiers:
+            if isinstance(m, Styler) and m not in self._modifiers:
                 self._modifiers.append(m)
         self.rebuild()
 
     def rm_mods(self, *modifiers):
-        """Remove modifiers if present and recalculates the layout."""
         for m in modifiers:
             if m in self._modifiers:
                 self._modifiers.remove(m)
         self.rebuild()
 
+    @property
+    def grid_handler(self) -> GridHandler | None:
+        try:
+            return [m for m in self._modifiers if isinstance(m, GridHandler)][0]
+        except IndexError:
+            return None
+
+    @property
+    def stylers(self) -> list[Styler]:
+        return [m for m in self._modifiers if isinstance(m, Styler)]
+
     def rebuild(self):
-        """Removes children and styling, and rebuilds using current `_modifiers` and `_raw_children`."""
+        """Reconstrói o layout delegando a montagem ao GridHandler se presente."""
         parent_style = {}
-        for mod in self._modifiers:
+        child_style = {}
+
+        # Reset style modifiers
+        for mod in self.stylers:
             mod.apply_parent(parent_style)
+            mod.apply_child(child_style)
         self.style = Pack(**parent_style)
 
-        child_style = {}
-        for mod in self._modifiers:
-            mod.apply_child(child_style)
-
-        # Cleanup of children without losing references
+        # Delete widgets keeping references
         for child in list(self.children):
             super().remove(child)
         if not self._raw_children:
             return
 
-        # Reapply modified children
-        if child_style:
+        # Add widgets from references
+        if self.grid_handler is not None:
+            sub_containers = self.grid_handler.arrange(
+                self._raw_children, child_style=child_style
+            )
+            for sub in sub_containers:
+                super().add(sub)
+        elif child_style:
             for child in self._raw_children:
-                col_box = toga.Box(style=Pack(**child_style))
+                col_box = Box(style=Pack(**child_style))
                 col_box.add(child)
                 super().add(col_box)
         else:
