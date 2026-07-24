@@ -24,13 +24,18 @@ from cashd_core import data, fmt, pdf
 from cashd import const, widgets
 from cashd.style.compose import (
     get_container,
-    H_CENTERED_CONTENT,
-    V_CENTERED_CONTENT,
-    H_STRETCH,
+    H_CENTER_CONTENT,
+    V_CENTER_CONTENT,
+    H_CENTER,
+    V_CENTER,
+    STRETCH,
     CONTENT_WIDTH,
+    WIDTH,
     N_COLUMNS,
+    BG_COLOR,
     FLEX,
     GAP,
+    H_GAP,
 )
 from cashd.style.vars import (
     set_col_alignments,
@@ -414,7 +419,7 @@ class MainSection(BaseSection):
             style=Pack(width=1010, direction="row", flex=1),
             children=[self.body_block],
         )
-        self.footer = get_container(N_COLUMNS(2), CONTENT_WIDTH(60), GAP(5))
+        self.footer = get_container(N_COLUMNS(2), CONTENT_WIDTH(60), WIDTH(600), H_GAP(50), V_CENTER)
         self.footer.add(*[Button(str(i)) for i in range(10)])
         self.full_contents = Box(
             style=FULL_CONTENTS,
