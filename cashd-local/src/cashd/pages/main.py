@@ -7,9 +7,9 @@ from typing import Callable
 from toga import Widget
 from toga.app import App
 from toga.style import Pack
-from toga.style.pack import COLUMN
+from toga.style.pack import COLUMN, ROW
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog
-from toga.widgets.box import Box, Column
+from toga.widgets.box import Box, Column, Row
 from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
@@ -24,14 +24,14 @@ from cashd_core import data, fmt, pdf
 from cashd import const, widgets
 from cashd.style.compose import (
     get_container,
-    H_CENTER_CONTENT,
-    V_CENTER_CONTENT,
-    H_CENTER,
-    V_CENTER,
+    CENTER_CONTENT_Y,
+    CENTER_CONTENT_X,
+    CENTER_Y,
+    CENTER_X,
     STRETCH,
     CONTENT_WIDTH,
     WIDTH,
-    N_COLUMNS,
+    COLUMNS,
     BG_COLOR,
     FLEX,
     GAP,
@@ -419,8 +419,27 @@ class MainSection(BaseSection):
             style=Pack(width=1010, direction="row", flex=1),
             children=[self.body_block],
         )
-        self.footer = get_container(N_COLUMNS(2), CONTENT_WIDTH(60), WIDTH(600), H_GAP(50), V_CENTER)
+
+        self.footer = get_container(COLUMNS(2, STRETCH, CENTER_X, CONTENT_WIDTH(60)), STRETCH)
         self.footer.add(*[Button(str(i)) for i in range(10)])
+
+        print(f"{self.footer.style=}")
+        print(f"{self.footer.children[0].style=}")
+
+        #self.footer = Row(
+        #    style=Pack(flex=1),
+        #    children=[
+        #        Column(
+        #            style=Pack(flex=1, align_items="center"),
+        #            children=[Button(str(i), style=Pack(width=50)) for i in range(5)],
+        #        ),
+        #        Column(
+        #            style=Pack(flex=1, align_items="center"),
+        #            children=[Button(str(i), style=Pack(width=50)) for i in range(5, 10)],
+        #        ),
+        #    ],
+        #)
+
         self.full_contents = Box(
             style=FULL_CONTENTS,
             children=[self.head, self.body, self.footer],
