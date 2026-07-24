@@ -46,13 +46,15 @@ def N_COLUMNS(count: int) -> Modifier:
 
 class ComposedBox(Box):
     def __init__(self, *modifiers, **kwargs):
-        self.modifiers = [m for m in modifiers if isinstance(m, Modifier)]
+        raw_children = kwargs.pop("children", [])
+        self._raw_children = list(raw_children)
+        """Reference to it's children whithout any modifier applied."""
 
-        parent_style = {}
-        for mod in self.modifiers:
-            mod.apply_parent(parent_style)
+        self._modifiers = [m for m in modifiers if isinstance(m, Modifier)]
+        """Reference to it's modifiers applying styles to this container."""
 
-        super().__init__(style=Pack(**parent_style), **kwargs)
+        super().__init__(**kwargs)
+        self.rebuild()
 
     def add(self, *children):
         if not children:
@@ -69,6 +71,47 @@ class ComposedBox(Box):
                 super().add(col_box)
         else:
             super().add(*children)
+
+    def add_mods(self, *modifiers):
+        """Adds modifiers and recalculates the layout."""
+        for m in modifiers:
+            if isinstance(m, Modifier) and m not in self._modifiers:
+                self._modifiers.append(m)
+        self.rebuild()
+
+    def rm_mods(self, *modifiers):
+        """Remove modifiers if present and recalculates the layout."""
+        for m in modifiers:
+            if m in self._modifiers:
+                self._modifiers.remove(m)
+        self.rebuild()
+
+    def rebuild(self):
+        """Removes children and styling, and rebuilds using current `_modifiers` and `_raw_children`."""
+        parent_style = {}
+        for mod in self._modifiers:
+            mod.apply_parent(parent_style)
+        self.style = Pack(**parent_style)
+
+        child_style = {}
+        for mod in self._modifiers:
+            mod.apply_child(child_style)
+
+        # Cleanup of children without losing references
+        for child in list(self.children):
+            super().remove(child)
+        if not self._raw_children:
+            return
+
+        # Reapply modified children
+        if child_style:
+            for child in self._raw_children:
+                col_box = toga.Box(style=Pack(**child_style))
+                col_box.add(child)
+                super().add(col_box)
+        else:
+            for child in self._raw_children:
+                super().add(child)
 
 
 def get_container(*args, **kwargs) -> ComposedBox:
