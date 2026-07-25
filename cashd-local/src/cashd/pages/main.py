@@ -29,13 +29,17 @@ from cashd.style.compose import (
     CENTER_Y,
     CENTER_X,
     STRETCH,
+    STRETCH_CONTENT,
+    V,
+    H,
+    V_CONTENT,
+    H_CONTENT,
     CONTENT_WIDTH,
     WIDTH,
     COLUMNS,
     BG_COLOR,
     FLEX,
-    GAP,
-    H_GAP,
+    MARGIN,
 )
 from cashd.style.vars import (
     set_col_alignments,
@@ -379,7 +383,7 @@ class MainSection(BaseSection):
         self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.select_customer,
-            style=TABLE_OF_DATA,
+            #style=TABLE_OF_DATA,
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
@@ -415,16 +419,13 @@ class MainSection(BaseSection):
             style=Pack(width=1010, direction="row"),
             children=[self.header_block],
         )
-        self.body = Box(
-            style=Pack(width=1010, direction="row", flex=1),
-            children=[self.body_block],
-        )
+        #self.body = Box(
+        #    style=Pack(width=1010, direction="row", flex=1),
+        #    children=[self.body_block],
+        #)
 
-        self.footer = get_container(COLUMNS(2, STRETCH, CENTER_X, CONTENT_WIDTH(60)), STRETCH)
-        self.footer.add(*[Button(str(i)) for i in range(10)])
-
-        print(f"{self.footer.style=}")
-        print(f"{self.footer.children[0].style=}")
+        #self.footer = get_container(COLUMNS(2, STRETCH, CENTER_X, CONTENT_WIDTH(60)), STRETCH)
+        #self.footer.add(*[Button(str(i)) for i in range(10)])
 
         #self.footer = Row(
         #    style=Pack(flex=1),
@@ -440,11 +441,17 @@ class MainSection(BaseSection):
         #    ],
         #)
 
+        self.body = get_container(COLUMNS(2, STRETCH, CONTENT_WIDTH(450), CENTER_X, V_CONTENT), STRETCH)
+        self.body.add(self.customer_selector.widget, self.customer_options_section)
+
+        print(f"{self.body.style=}")
+        print(f"{self.body.children[0].style=}")
+
         self.full_contents = Box(
             style=FULL_CONTENTS,
-            children=[self.head, self.body, self.footer],
+            children=[self.head, self.body],
         )
-        self.set_layout_0()
+        #self.set_layout_0()
         self.layout_id: int = 0
 
     def set_layout_0(self):
@@ -620,6 +627,7 @@ class MainSection(BaseSection):
         self.customer_selector.refresh(self.CUSTOMER_LIST)
 
     async def rearrange_widgets(self):
+        return
         w, h = self.window_size
         expected_layout_id = 0 if (w < 870) else 1
         if expected_layout_id == self.layout_id:

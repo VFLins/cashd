@@ -70,6 +70,11 @@ class GridHandler(Modifier):
 # --- 1. Static instances ---
 
 STRETCH = Styler(parent_style={"flex": 1})
+STRETCH_CONTENT = Styler(child_style={"flex": 1})
+V = Styler(parent_style={"direction": COLUMN})
+H = Styler(parent_style={"direction": ROW})
+V_CONTENT = Styler(child_style={"direction": COLUMN})
+H_CONTENT = Styler(child_style={"direction": ROW})
 CENTER_CONTENT_X = Styler(child_style={"alignment": CENTER})
 CENTER_CONTENT_Y = Styler(child_style={"justify_content": CENTER})
 CENTER_X = Styler(parent_style={"alignment": CENTER})
@@ -90,13 +95,9 @@ def BG_COLOR(color: str) -> Styler:
     """Sets a background color to the parent widget."""
     return Styler(parent_style={"background_color": color})
 
-def GAP(padding_value: int) -> Styler:
+def MARGIN(t: int = 0, l: int = 0, b: int  = 0, r: int = 0) -> Styler:
     """Aplica espaçamento interno (padding) nos containers dos filhos."""
-    return Styler(child_style={"margin": padding_value})
-
-def H_GAP(value: int) -> Styler:
-    """Aplica espaçamento interno (padding) nos containers dos filhos."""
-    return Styler(child_style={"margin": (0, value)})
+    return Styler(child_style={"margin": (t, l, b, r)})
 
 def FLEX(value: int) -> Styler:
     """Aplica um fator de flexibilidade personalizado ao container pai."""
