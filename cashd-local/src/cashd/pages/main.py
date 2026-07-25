@@ -37,6 +37,7 @@ from cashd.style.compose import (
     CONTENT_WIDTH,
     WIDTH,
     COLUMNS,
+    ROWS,
     BG_COLOR,
     FLEX,
     MARGIN,
@@ -436,22 +437,24 @@ class MainSection(BaseSection):
         #    ],
         #)
 
-        self.body = get_container(COLUMNS(2, STRETCH, STRETCH_CONTENT, CONTENT_WIDTH(450), CENTER_X, V_CONTENT), H, STRETCH)
-        self.body.add(self.customer_selector.widget, self.customer_options_section)
+        self.body = get_container(
+            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH,
+            children=[self.customer_selector.widget, self.customer_options_section],
+        )
+        col0, col1 = self.body.children[0], self.body.children[1]
+        col0.style.flex, col1.style.flex = 2, 3
+        self.customer_selector.width = 350
+        col1.children[0].style.width = 450
 
-        print(f"[body] {self.body.style}")
-        print(f"[body.column] {self.body.children[0].style}")
-        print(f"[body.column.container] {self.body.children[0].children[0].style}")
-        print(f"[body.column.container.search] {self.body.children[0].children[0].children[0].style}")
-        print(f"[body.column.container.detailedlist] {self.body.children[0].children[0].children[1].style}")
-        print(f"[body.column.container.pagination_container] {self.body.children[0].children[0].children[2].style}")
+        col0.style.background_color = "red"
+        col1.style.background_color = "blue"
 
         self.full_contents = Box(
             style=FULL_CONTENTS,
             children=[self.head, self.body],
         )
         #self.set_layout_0()
-        self.layout_id: int = 0
+        self.layout_id: int = 1
 
     def set_layout_0(self):
         """Returns this section's widgets in a single-column layout."""
@@ -468,6 +471,10 @@ class MainSection(BaseSection):
 
     def set_layout_1(self):
         """Returns this section's widgets in a two-column layout."""
+        #self.body.set_modifiers(
+        #    COLUMNS(2, STRETCH, STRETCH_CONTENT, CONTENT_WIDTH(450), CENTER_X, V_CONTENT), H, STRETCH,
+        #)
+        return
         self.header_block.clear()
         self.body_block.clear()
         self.header_block.add(self.selected_customer_info)
@@ -626,19 +633,25 @@ class MainSection(BaseSection):
         self.customer_selector.refresh(self.CUSTOMER_LIST)
 
     async def rearrange_widgets(self):
-        return
         w, h = self.window_size
-        expected_layout_id = 0 if (w < 870) else 1
+        if w < 870:
+            expected_layout_id = 0
+        elif w < 1050:
+            expected_layout_id = 1
+        else:
+            expected_layout_id = 1
+
         if expected_layout_id == self.layout_id:
             return
+
         match expected_layout_id:
             case 0:
                 self.set_layout_0()
+                self.customer_selector.widget.style.width = 450
             case 1:
                 self.set_layout_1()
-        self.full_contents.clear()
-        self.full_contents.add(self.head)
-        self.full_contents.add(self.body)
-        self.full_contents.style = FULL_CONTENTS
-        self.full_contents.refresh()
+                self.customer_selector.widget.style.width = 350
+            case 2:
+                self.set_layout_1()
+                self.customer_selector.widget.style.width = 450
         self.layout_id = expected_layout_id

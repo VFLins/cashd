@@ -82,6 +82,7 @@ class PaginatedDetailedList(_DataInteractor):
     def width(self, val):
         self.widget.style.width = val
         self.top_controls.style.width = val
+        self.search_field.style.width = val
         self.bottom_controls.style.width = val
         self.data_widget.style.width = val - 5
         self.search_field.style.width = val - 5

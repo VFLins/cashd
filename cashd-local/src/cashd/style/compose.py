@@ -49,7 +49,7 @@ class GridHandler(Modifier):
 
     def _arrange_rows(self, children: list[Widget], *child_stylers) -> list[Box]:
         """Agrupa os filhos em sub-containers de linha com tamanho máximo N."""
-        row_style = self._get_block_style(**child_stylers)
+        row_style = self._get_block_style(*child_stylers)
         rows = []
 
         style_kw = child_kw(*child_stylers)
@@ -97,7 +97,7 @@ def BG_COLOR(color: str) -> Styler:
 
 def MARGIN(t: int = 0, l: int = 0, b: int  = 0, r: int = 0) -> Styler:
     """Aplica espaçamento interno (padding) nos containers dos filhos."""
-    return Styler(child_style={"margin": (t, l, b, r)})
+    return Styler(parent_style={"margin": (t, l, b, r)})
 
 def FLEX(value: int) -> Styler:
     """Aplica um fator de flexibilidade personalizado ao container pai."""
