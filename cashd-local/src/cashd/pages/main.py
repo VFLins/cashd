@@ -383,7 +383,7 @@ class MainSection(BaseSection):
         self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.select_customer,
-            #style=TABLE_OF_DATA,
+            style=Pack(flex=1),
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
@@ -391,11 +391,6 @@ class MainSection(BaseSection):
 
         # containers: 'options' context
         self.customer_options_section = OptionContainer(
-            style=Pack(
-                width=const.CONTENT_WIDTH - 5,
-                font_size=const.FONT_SIZE,
-                margin=(0, 0, 0, 10),
-            ),
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
                 (
@@ -441,11 +436,15 @@ class MainSection(BaseSection):
         #    ],
         #)
 
-        self.body = get_container(COLUMNS(2, STRETCH, CONTENT_WIDTH(450), CENTER_X, V_CONTENT), STRETCH)
+        self.body = get_container(COLUMNS(2, STRETCH, STRETCH_CONTENT, CONTENT_WIDTH(450), CENTER_X, V_CONTENT), H, STRETCH)
         self.body.add(self.customer_selector.widget, self.customer_options_section)
 
-        print(f"{self.body.style=}")
-        print(f"{self.body.children[0].style=}")
+        print(f"[body] {self.body.style}")
+        print(f"[body.column] {self.body.children[0].style}")
+        print(f"[body.column.container] {self.body.children[0].children[0].style}")
+        print(f"[body.column.container.search] {self.body.children[0].children[0].children[0].style}")
+        print(f"[body.column.container.detailedlist] {self.body.children[0].children[0].children[1].style}")
+        print(f"[body.column.container.pagination_container] {self.body.children[0].children[0].children[2].style}")
 
         self.full_contents = Box(
             style=FULL_CONTENTS,
