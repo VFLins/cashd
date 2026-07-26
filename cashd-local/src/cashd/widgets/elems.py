@@ -2,6 +2,7 @@ from typing import Iterable, Callable
 from decimal import Decimal
 import asyncio
 
+from toga import backend
 from toga.style import Pack
 from toga.widgets.box import Box, Column
 from toga.widgets.base import Widget
@@ -9,6 +10,7 @@ from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
 from toga.widgets.selection import Selection, ListSource
+from toga.widgets.dateinput import DateInput
 from toga.widgets.textinput import TextInput
 from toga.widgets.numberinput import NumberInput
 from toga.widgets.detailedlist import DetailedList
@@ -384,3 +386,76 @@ def form_options(buttons: list, alignment="end", width=const.FORM_WIDTH) -> Box:
         children=[inner_container],
     )
     return outer_container
+
+
+class FormattedDateInput(DateInput):
+  """Subclasse de toga.DateInput para GTK que substitui o calendário fixo
+
+  por um Gtk.MenuButton + Gtk.Popover compacto, delegando dinamicamente
+  todas as chamadas nativas (métodos e atributos como minDate/maxDate)
+  para o Gtk.Calendar interno.
+  """
+
+  def __init__(self, format_str="%d/%m/%Y", **kwargs):
+    self._user_on_change = kwargs.get("on_change", None)
+    kwargs["on_change"] = self._handle_on_change
+
+    super().__init__(**kwargs)
+
+    self.format_str = format_str
+    self._is_gtk = backend == "toga_gtk"
+
+    if self._is_gtk:
+      self._setup_gtk_polymorphic_button()
+
+  def _setup_gtk_polymorphic_button(self):
+    from gi.repository import Gtk
+
+    impl = self._impl
+    self._gtk_calendar = impl.native
+    self._popover = Gtk.Popover()
+    self._popover.add(self._gtk_calendar)
+
+    # 3. Cria o MenuButton
+    self._btn_popover = Gtk.MenuButton(
+        label=self.value.strftime(self.format_str), popover=self._popover
+    )
+    self._btn_popover.show_all()
+
+    # Inject interface
+    self._btn_popover.interface = self
+
+    calendar = self._gtk_calendar
+    btn = self._btn_popover
+    # Redirect common calendar calls from 'btn' to 'calendar'
+    for attr in ["minDate", "maxDate", "min_date", "max_date", "get_date"]:
+      if hasattr(calendar, attr):
+        setattr(btn, attr, getattr(calendar, attr))
+
+    # Sobrescreve o __getattr__ do botão individual para redirecionar leituras
+    original_getattr = getattr(btn, "__getattr__", None)
+
+    def custom_getattr(name):
+      if hasattr(calendar, name):
+        return getattr(calendar, name)
+      if original_getattr:
+        return original_getattr(name)
+      raise AttributeError(
+          f"'{type(btn).__name__}' object has no attribute '{name}'"
+      )
+
+    btn.__getattr__ = custom_getattr
+
+    # 6. Atualiza o impl.native para renderizar o botão na interface
+    impl.native = self._btn_popover
+
+  def _handle_on_change(self, widget, **kwargs):
+    # Atualiza o rótulo do botão com a nova data e fecha o Popover
+    if self._is_gtk and hasattr(self, "_btn_popover"):
+      self._btn_popover.set_label(self.value.strftime(self.format_str))
+      if hasattr(self, "_popover"):
+        self._popover.popdown()
+
+    # Dispara o evento 'on_change' do usuário, caso tenha sido fornecido
+    if self._user_on_change:
+      self._user_on_change(widget, **kwargs)

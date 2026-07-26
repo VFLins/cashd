@@ -14,6 +14,7 @@ from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
 from toga.widgets.divider import Divider
+from toga.widgets.dateinput import DateInput
 from toga.widgets.selection import Selection
 from toga.widgets.textinput import TextInput
 from toga.widgets.scrollcontainer import ScrollContainer
@@ -57,6 +58,8 @@ from cashd.style.vars import (
     HORIZONTAL_BOX,
 )
 from cashd.pages.base import BaseSection
+from cashd.widgets.form import FormField
+from cashd.widgets.elems import FormattedDateInput
 from cashd.widgets.paginated import PaginatedDetailedList
 
 
@@ -69,8 +72,13 @@ class SubsectionAddTransac:
         self.SELECTED_CUSTOMER = selected_customer
         self.on_insert = on_insert
 
-        self.date_input_form = widgets.HorizontalDateForm()
+        #self.date_input_form = widgets.HorizontalDateForm()
+        self.date_input_form = FormField(
+            label="Data",
+            input_widget=FormattedDateInput(),
+        )
         """Custom date input form from 'Inserir transação' context."""
+        self.date_input_form.style.width = 190
 
         self.amount_label = Label(
             "Valor: R$ 0,00",
@@ -81,7 +89,7 @@ class SubsectionAddTransac:
         """
 
         self.amount_input = TextInput(
-            style=user_input(TextInput),
+            style=Pack(width=190),
             placeholder="0,00",
             on_change=self.update_amount_label,
             on_confirm=self.insert_transaction,
@@ -106,7 +114,7 @@ class SubsectionAddTransac:
         self.full_contents = Box(
             style=FILLING_VERTICAL_BOX,
             children=[
-                self.date_input_form.widget,
+                self.date_input_form,
                 self.amount_label,
                 self.amount_input,
                 self.confirm_button,
