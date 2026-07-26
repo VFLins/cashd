@@ -9,6 +9,7 @@ if platform == "win32":
     clr.AddReference("System.Windows.Forms")
     from System.Windows.Forms import HorizontalAlignment as h_align
 
+from toga import backend
 from toga.colors import TRANSPARENT
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
@@ -32,12 +33,12 @@ def set_col_alignments(table: Table, alignments: list[Literal["l", "c", "r"]]):
     On windows, the first column will always align to the left.
     """
     native_table = table._impl.native
-    match platform:
-        case "win32":
+    match backend:
+        case "toga_winforms":
             align_map = {"l": h_align.Left, "c": h_align.Center, "r": h_align.Right}
             for i, al in enumerate(alignments):
                 native_table.Columns[i].TextAlign = align_map[al]
-        case "linux":
+        case "toga_gtk":
             native_table = native_table.get_child()
             align_map = {"l": 0.0, "c": 0.5, "r": 1.0}
             for i, al in enumerate(alignments):

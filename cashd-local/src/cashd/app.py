@@ -6,7 +6,7 @@ import asyncio
 import webbrowser
 from typing import Type
 from importlib.metadata import version
-from toga import App, Group
+from toga import App, Group, backend
 from toga.window import MainWindow, Window
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.widgets.imageview import ImageView
@@ -49,7 +49,7 @@ class Cashd(App):
             resizable=True,
             on_close=self.on_close,
         )
-        self.main_window.min_size = (880, 490)
+        self.main_window.min_size = (580, 490)
         self.main_window.content = self.main_box
         group_main = Group("Cashd", order=10)
         group_navigate = Group("Navegar", order=20)
@@ -89,8 +89,9 @@ class Cashd(App):
         self.commands[Command.EXIT].group = group_main
         self.commands[Command.ABOUT].text = "Sobre"
         self.commands[Command.ABOUT].group = group_help
-        self.commands[Command.VISIT_HOMEPAGE].text = "Documentação"
-        self.commands[Command.VISIT_HOMEPAGE].group = group_help
+        if backend != "toga_qt":
+            self.commands[Command.VISIT_HOMEPAGE].text = "Documentação"
+            self.commands[Command.VISIT_HOMEPAGE].group = group_help
         self.main_window.show()
 
     # Methods
