@@ -349,7 +349,7 @@ class MainSection(BaseSection):
             on_insert=self._upd_selected_info,
         )
 
-        self.subsection_transac_history = SubsectionTransacHistory(
+        self.subsection_history = SubsectionTransacHistory(
             selected_customer=self.SELECTED_CUSTOMER,
             on_delete=self._upd_selected_info,
         )
@@ -394,10 +394,7 @@ class MainSection(BaseSection):
         self.customer_options_section = OptionContainer(
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
-                (
-                    "Histórico",
-                    self.subsection_transac_history.full_contents,
-                ),
+                ("Histórico", self.subsection_history.full_contents),
                 ("Informações", self.subsection_customer_info.full_contents),
             ],
         )
@@ -463,18 +460,23 @@ class MainSection(BaseSection):
     def select_customer(self, widget: Selection):
         if widget.selection is None:
             self.subsection_add_transac.amount_input.enabled = False
-            self.subsection_transac_history.export_button.enabled = False
+            self.subsection_history.export_button.enabled = False
             self.customer_options_button.enabled = False
             return
         print(f"selected: {widget.selection}")
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
         self._upd_selected_info()
         self.subsection_add_transac.amount_input.enabled = True
-        self.subsection_transac_history.export_button.enabled = True
+        self.subsection_history.export_button.enabled = True
         self.customer_options_button.enabled = True
 
     def _upd_selected_info(self):
         self.customer_options_section.current_tab = 0
+        if tbl_clientes.table_is_empty():
+            self.help_msg.text = (
+                'Cadastre um cliente em "Novo cliente" para\n'
+                "começar a registrar transações."
+            )
         if self.SELECTED_CUSTOMER.Saldo == "N/D":
             self.help_msg.text = (
                 "Selecione um cliente, depois clique no botão ao lado"
@@ -485,27 +487,9 @@ class MainSection(BaseSection):
                 f"Local: {self.SELECTED_CUSTOMER.Local}\n"
                 f"Saldo devedor: R$ {self.SELECTED_CUSTOMER.Saldo}"
             )
-        self.subsection_transac_history.table.data = self.SELECTED_CUSTOMER.Transacs
+        self.subsection_history.table.data = self.SELECTED_CUSTOMER.Transacs
         self.subsection_customer_info.form.clear()
         self.subsection_customer_info.form.add_table_fields(self.SELECTED_CUSTOMER)
-
-    def _search_results(self, search: str):
-        if len(search) == 0:
-            return const.customers
-        search_terms = re.findall(r"\w+", search)
-
-        def is_match(d: dict) -> bool:
-            return all(
-                re.search(
-                    term,
-                    f"{d.get('title')} {
-                        d.get('subtitle')}",
-                    re.IGNORECASE,
-                )
-                for term in search_terms
-            )
-
-        return [d for d in const.customers if is_match(d)]
 
     def upd_value_label(self, widget):
         value = widget.value
@@ -517,32 +501,6 @@ class MainSection(BaseSection):
             self.insert_amount_label.text = (
                 f"Valor: {sign} R$ {abs(value)/100:.2f}".replace(".", ",")
             )
-
-    def upd_customer_list(self, widget):
-        search = self.customer_search_bar.value
-        page_number = self.customer_list_page_handler.current_page
-        self.customer_list_page_handler.upd_list_items(search, page_number)
-        self.select_customer_list.data = self.customer_list_page_handler.displayed_data
-        self.customer_list_pagination_label.text = (
-            self.customer_list_page_handler.pagination_label()
-        )
-        self.select_customer_list.refresh()
-
-    def next_page_customer_list(self, widget):
-        self.customer_list_page_handler.next_page()
-        widget.enabled = self.customer_list_page_handler.next_page_exists()
-        self.customer_list_previous_page_button.enabled = (
-            self.customer_list_page_handler.previous_page_exists()
-        )
-        self.upd_customer_list(widget)
-
-    def previous_page_customer_list(self, widget):
-        self.customer_list_page_handler.previous_page()
-        if not self.customer_list_page_handler.previous_page_exists():
-            widget.enabled = False
-        if self.customer_list_page_handler.next_page_exists():
-            self.customer_list_next_page_button.enabled = True
-        self.upd_customer_list(widget)
 
     def set_context_screen(self, widget: Button | None = None):
         """Change between customer selection and customer data management, depending on
@@ -588,7 +546,7 @@ class MainSection(BaseSection):
         self.SELECTED_CUSTOMER.clear()
         self.subsection_add_transac.amount_input.enabled = False
         self.subsection_add_transac.confirm_button.enabled = False
-        self.subsection_transac_history.table.data = None
+        self.subsection_history.table.data = None
         self.subsection_customer_info.form.clear()
         self.help_msg.text = self.HELP_MSG
         self.customer_selector.search_field.value = ""

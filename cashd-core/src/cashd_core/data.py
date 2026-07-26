@@ -163,6 +163,7 @@ class dec_base(DeclarativeBase):
         """Wrapper to generate the *display name* of any data scalar in `self.data`."""
         return name
 
+    @classmethod
     def table_is_empty(self, engine: Engine = DB_ENGINE):
         """Static method that returns a boolean value indicating if the current table
         is empty. Should only be used by classes that inherit from
