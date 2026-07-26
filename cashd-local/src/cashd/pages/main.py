@@ -453,31 +453,30 @@ class MainSection(BaseSection):
 
         self.full_contents = Box(
             style=FULL_CONTENTS,
-            children=[self.head, self.body],
+            children=[self.body],
         )
-        self.set_layout_0()
+        self.set_layout_0(const.MAIN_WINDOW_SIZE[0])
         self.layout_id: int = 0
 
-    def set_layout_0(self):
-        """Returns this section's widgets in a single-column layout."""
+    def set_layout_0(self, w: int):
+        """Rearranges this section's widgets in a single-column layout.
+
+        :param w: window width where this layout handling should be based on.
+        """
         self.body._raw_children = [self.customer_selector.widget]
         self.body.set_modifiers(
             COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH,
         )
-        return
-        self.header_block.clear()
-        self.body_block.clear()
-        self.header_block.add(
-            self.customer_options_button,
-            self.selected_customer_info,
-        )
-        self.customer_selector.width = const.CONTENT_WIDTH
-        self.body_block.add(self.customer_selector.widget)
-        self.head.style = VERTICAL_BOX
-        self.body.style = PAGE_BODY
+        # Assign widths to the columns
+        self.customer_selector.width = int(w * 0.85)
+        self.customer_options_section.style.width = int(w * 0.85)
 
-    def set_layout_1(self):
-        """Returns this section's widgets in a two-column layout."""
+
+    def set_layout_1(self, w: int):
+        """Rearranges this section's widgets in a two-column layout.
+
+        :param w: window width where this layout handling should be based on.
+        """
         self.body._raw_children = [self.customer_selector.widget, self.customer_options_section]
         self.body.set_modifiers(
             COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH,
@@ -485,17 +484,9 @@ class MainSection(BaseSection):
         # Use custom flex to use the window width appropriately
         col0, col1 = self.body.children[0], self.body.children[1]
         col0.style.flex, col1.style.flex = 45, 50
-        return
-        self.header_block.clear()
-        self.body_block.clear()
-        self.header_block.add(self.selected_customer_info)
-        self.body_block.add(
-            self.customer_selector.widget, self.customer_options_section
-        )
-        width = int(const.CONTENT_WIDTH * 2) - 50
-        self.customer_selector.width = const.FORM_WIDTH
-        self.head.style = Pack(width=width, direction="row")
-        self.body.style = Pack(width=width, direction="row", flex=1)
+        # Assign widths to the columns
+        self.customer_selector.width = int(w * 0.45)
+        self.customer_options_section.style.width = int(w * 0.5)
 
     def select_customer(self, widget: Selection):
         if widget.selection is None:
@@ -644,26 +635,18 @@ class MainSection(BaseSection):
         self.customer_selector.refresh(self.CUSTOMER_LIST)
 
     async def rearrange_widgets(self):
-        w, h = self.window_size
+        w, _ = self.window_size
         # Get a distinct layout ID for every window width, from 0 to len(widths)
-        widths = range(550, 5121, 200)
+        widths = range(420, 5121, 200)
         expected_layout_id = sum(w >= t for t in widths)
 
         if expected_layout_id == self.layout_id:
             return
 
-        match expected_layout_id:
-            case 0:
-                self.set_layout_0()
-                self.customer_selector.width = 450
-                self.customer_options_section.style.width = 450
-            case 1:
-                self.set_layout_0()
-                self.customer_selector.width = 550
-                self.customer_options_section.style.width = 550
-            case _:
-                self.set_layout_1()
-                total_width = widths[expected_layout_id - 1]
-                self.customer_selector.width = int(total_width * 0.45)
-                self.customer_options_section.style.width = int(total_width * 0.5)
+        # Use one of the predefined widths so the content widths are previsible
+        w = widths[expected_layout_id - 1]
+        if expected_layout_id in (1, 2):
+            self.set_layout_0(w)
+        elif expected_layout_id >= 3:
+            self.set_layout_1(w)
         self.layout_id = expected_layout_id
