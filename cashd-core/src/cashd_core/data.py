@@ -164,14 +164,13 @@ class dec_base(DeclarativeBase):
         return name
 
     @classmethod
-    def table_is_empty(self, engine: Engine = DB_ENGINE):
+    def table_is_empty(cls, engine: Engine = DB_ENGINE):
         """Static method that returns a boolean value indicating if the current table
         is empty. Should only be used by classes that inherit from
         `cashd_core.data.dec_base`.
         """
-        table_cls = type(self)
         with Session(engine) as ses:
-            stmt = select(func.count()).select_from(table_cls)
+            stmt = select(func.count()).select_from(cls)
             return ses.execute(stmt).scalar() == 0
 
     @property

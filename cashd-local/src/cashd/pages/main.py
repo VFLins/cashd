@@ -360,7 +360,15 @@ class MainSection(BaseSection):
         )
 
         # widgets: all contexts
-        self.help_msg = Label(self.HELP_MSG, style=INLINE_LABEL)
+        self.help_msg = Label(
+            (
+                'Cadastre um cliente em "Novo cliente" para\n'
+                "começar a registrar transações."
+                if data.tbl_clientes.table_is_empty()
+                else self.HELP_MSG
+            ),
+            style=INLINE_LABEL
+        )
         """Text on top of the page displaying information about the currently
         selected customer.
         """
@@ -400,20 +408,11 @@ class MainSection(BaseSection):
         )
 
         # main container
-        self.head = get_container(
-            COLUMNS(2), H, CENTER_X, GAP(10), MARGIN(t=20, b=10),
-            children=[
-                self.customer_options_button,
-                ScrollContainer(style=Pack(align_items="center"), content=self.help_msg)
-            ],
-        )
+        self.head = get_container()
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
-        self.body = get_container(
-            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X), H, STRETCH,
-            children=[self.customer_selector.widget, self.customer_options_section],
-        )
+        self.body = get_container()
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.
         """
@@ -422,19 +421,25 @@ class MainSection(BaseSection):
             style=FULL_CONTENTS,
             children=[self.head, self.body],
         )
-        self.set_layout_0(const.MAIN_WINDOW_SIZE[0])
-        self.layout_id: int = 0
+        self.set_layout_0(w=const.MAIN_WINDOW_SIZE[0])
 
     def set_layout_0(self, w: int):
         """Rearranges this section's widgets in a single-column layout.
 
         :param w: window width where this layout handling should be based on.
         """
+        # Assign content
+        self.head._raw_children = [
+            self.customer_options_button,
+            ScrollContainer(style=Pack(align_items="center"), content=self.help_msg),
+        ]
         self.body._raw_children = [self.customer_selector.widget]
+        # Assign modifers
+        self.head.set_modifiers(COLUMNS(2), H, CENTER_Y, GAP(10), MARGIN(t=20, b=10))
         self.body.set_modifiers(
             COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH,
         )
-        # Assign widths to the columns
+        # Apply adjustments
         self.head.children[1].style.width = int(w * 0.85) - 80
         self.customer_selector.width = int(w * 0.85)
         self.customer_options_section.style.width = int(w * 0.85)
@@ -445,14 +450,21 @@ class MainSection(BaseSection):
 
         :param w: window width where this layout handling should be based on.
         """
-        self.body._raw_children = [self.customer_selector.widget, self.customer_options_section]
+        # Assign content
+        self.head._raw_children = [
+            ScrollContainer(style=Pack(align_items="center"), content=self.help_msg)
+        ]
+        self.body._raw_children = [
+            self.customer_selector.widget, self.customer_options_section
+        ]
+        # Assign modifiers
+        self.head.set_modifiers(H, GAP(10), MARGIN(t=20, b=10))
         self.body.set_modifiers(
-            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH,
+            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
         )
-        # Use custom flex to use the window width appropriately
+        # Apply adjustments
         col0, col1 = self.body.children[0], self.body.children[1]
         col0.style.flex, col1.style.flex = 45, 50
-        # Assign widths to the columns
         self.head.children[1].style.width = int(w * 0.85) - 80
         self.customer_selector.width = int(w * 0.45)
         self.customer_options_section.style.width = int(w * 0.5)
@@ -472,11 +484,6 @@ class MainSection(BaseSection):
 
     def _upd_selected_info(self):
         self.customer_options_section.current_tab = 0
-        if data.tbl_clientes.table_is_empty():
-            self.help_msg.text = (
-                'Cadastre um cliente em "Novo cliente" para\n'
-                "começar a registrar transações."
-            )
         if self.SELECTED_CUSTOMER.Saldo == "N/D":
             self.help_msg.text = (
                 "Selecione um cliente, depois clique no botão ao lado"
@@ -562,7 +569,7 @@ class MainSection(BaseSection):
 
         if expected_layout_id == self.layout_id:
             return
-
+        print(f"applying layout id={expected_layout_id}")
         # Use one of the predefined widths so the content widths are previsible
         w = widths[expected_layout_id - 1]
         if expected_layout_id in (1, 2):
