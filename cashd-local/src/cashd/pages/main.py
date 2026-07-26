@@ -455,8 +455,8 @@ class MainSection(BaseSection):
             style=FULL_CONTENTS,
             children=[self.head, self.body],
         )
-        self.set_layout_1()
-        self.layout_id: int = 1
+        self.set_layout_0()
+        self.layout_id: int = 0
 
     def set_layout_0(self):
         """Returns this section's widgets in a single-column layout."""
