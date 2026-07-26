@@ -165,7 +165,7 @@ class SubsectionTransacHistory:
         self.on_delete = on_delete
 
         self.table = Table(
-            style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH),
+            style=Pack(flex=1, font_size=const.FONT_SIZE, width=300),
             data=self.SELECTED_CUSTOMER.Transacs,
             columns=["Data", "Valor (R$)"],
             accessors=("data", "valor"),
@@ -193,6 +193,7 @@ class SubsectionTransacHistory:
             buttons=[self.remove_button, self.export_button],
         )
         self.options_container.style.margin = (10, 0, 5, 0)
+        self.options_container.style.width = 300
 
         self.full_contents = Column(
             style=Pack(align_items="center"),
@@ -483,7 +484,7 @@ class MainSection(BaseSection):
         )
         # Use custom flex to use the window width appropriately
         col0, col1 = self.body.children[0], self.body.children[1]
-        col0.style.flex, col1.style.flex = 8, 9
+        col0.style.flex, col1.style.flex = 45, 50
         return
         self.header_block.clear()
         self.body_block.clear()
@@ -645,7 +646,7 @@ class MainSection(BaseSection):
     async def rearrange_widgets(self):
         w, h = self.window_size
         # Get a distinct layout ID for every window width, from 0 to len(widths)
-        widths = range(900, 5121, 200)
+        widths = range(550, 5121, 200)
         expected_layout_id = sum(w >= t for t in widths)
 
         if expected_layout_id == self.layout_id:
@@ -653,6 +654,10 @@ class MainSection(BaseSection):
 
         match expected_layout_id:
             case 0:
+                self.set_layout_0()
+                self.customer_selector.width = 450
+                self.customer_options_section.style.width = 450
+            case 1:
                 self.set_layout_0()
                 self.customer_selector.width = 550
                 self.customer_options_section.style.width = 550

@@ -49,7 +49,7 @@ class Cashd(App):
             resizable=True,
             on_close=self.on_close,
         )
-        self.main_window.min_size = (580, 490)
+        self.main_window.min_size = (490, 490)
         self.main_window.content = self.main_box
         group_main = Group("Cashd", order=10)
         group_navigate = Group("Navegar", order=20)
