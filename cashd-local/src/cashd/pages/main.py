@@ -73,12 +73,12 @@ class SubsectionAddTransac:
         self.on_insert = on_insert
 
         #self.date_input_form = widgets.HorizontalDateForm()
-        self.date_input_form = FormField(
+        self.date = FormField(
             label="Data",
             input_widget=FormattedDateInput(),
         )
         """Custom date input form from 'Inserir transação' context."""
-        self.date_input_form.style.width = 190
+        self.date.style.width = 190
 
         self.amount_label = Label(
             "Valor: R$ 0,00",
@@ -114,7 +114,7 @@ class SubsectionAddTransac:
         self.full_contents = Box(
             style=FILLING_VERTICAL_BOX,
             children=[
-                self.date_input_form,
+                self.date,
                 self.amount_label,
                 self.amount_input,
                 self.confirm_button,
@@ -131,7 +131,7 @@ class SubsectionAddTransac:
         transac_data = data.tbl_transacoes(
             IdCliente=self.SELECTED_CUSTOMER.Id,
             CarimboTempo=dt.datetime.now(),
-            DataTransac=self.date_input_form.value,
+            DataTransac=self.date.input.value,
             Valor=amount_input.value,
         )
         transac_data.write()
