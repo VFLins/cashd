@@ -472,7 +472,7 @@ class MainSection(BaseSection):
 
     def _upd_selected_info(self):
         self.customer_options_section.current_tab = 0
-        if tbl_clientes.table_is_empty():
+        if data.tbl_clientes.table_is_empty():
             self.help_msg.text = (
                 'Cadastre um cliente em "Novo cliente" para\n'
                 "começar a registrar transações."
