@@ -67,7 +67,7 @@ class GridHandler(Modifier):
             rows.append(row_box)
         return rows
 
-# --- 1. Static instances ---
+# --- 1. Static ---
 
 STRETCH = Styler(parent_style={"flex": 1})
 STRETCH_CONTENT = Styler(child_style={"flex": 1})
@@ -81,15 +81,7 @@ CENTER_X = Styler(parent_style={"alignment": CENTER})
 CENTER_Y = Styler(parent_style={"justify_content": CENTER})
 
 
-# --- 2. Customizable instances ---
-
-def COLUMNS(n: int, *stylers: Styler) -> GridHandler:
-    """Cria N colunas verticais infinitas e preenche alternadamente."""
-    return GridHandler(n, COLUMN, *stylers)
-
-def ROWS(n: int, *stylers: Styler) -> GridHandler:
-    """Cria linhas horizontais com no máximo N itens cada."""
-    return GridHandler(n, ROW, *stylers)
+# --- 2. Customizable ---
 
 def BG_COLOR(color: str) -> Styler:
     """Sets a background color to the parent widget."""
@@ -104,12 +96,29 @@ def FLEX(value: int) -> Styler:
     return Styler(parent_style={"flex": value})
 
 def CONTENT_WIDTH(value: int) -> Styler:
-    """Set a common width to all of it's immediate children."""
+    """Set a common width to all of it's children."""
     return Styler(child_style={"width": value})
 
 def WIDTH(value: int) -> Styler:
-    """Set a common width to all of it's immediate children."""
+    """Set a common width to all of it's children."""
     return Styler(parent_style={"width": value})
+
+def GAP(value: int) -> Styler:
+    """Set spacing around it's children."""
+    return Styler(parent_style={"gap": value})
+
+
+# --- 3. Iterable ---
+
+# --- 4. Grids ---
+
+def COLUMNS(n: int, *stylers: Styler) -> GridHandler:
+    """Cria N colunas verticais infinitas e preenche alternadamente."""
+    return GridHandler(n, COLUMN, *stylers)
+
+def ROWS(n: int, *stylers: Styler) -> GridHandler:
+    """Cria linhas horizontais com no máximo N itens cada."""
+    return GridHandler(n, ROW, *stylers)
 
 
 class ComposedBox(Box):

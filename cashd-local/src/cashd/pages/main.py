@@ -42,6 +42,7 @@ from cashd.style.compose import (
     BG_COLOR,
     FLEX,
     MARGIN,
+    GAP,
 )
 from cashd.style.vars import (
     set_col_alignments,
@@ -338,6 +339,7 @@ class SectionCustomerInfo:
 class MainSection(BaseSection):
     SELECTED_CUSTOMER = data.tbl_clientes()
     CUSTOMER_LIST = data.CustomerListSource()
+    HELP_MSG = "Selecione um cliente e clique no\nbotão ao lado."
 
     def __init__(self, app: App):
         super().__init__(app)
@@ -358,12 +360,7 @@ class MainSection(BaseSection):
         )
 
         # widgets: all contexts
-        self.selected_customer_info = Label(
-            f"Nome: {const.NA_VALUE}\n"
-            f"Local: {const.NA_VALUE}\n"
-            f"Saldo devedor: R$ {const.NA_VALUE}",
-            style=INLINE_LABEL,
-        )
+        self.help_msg = Label(self.HELP_MSG, style=INLINE_LABEL)
         """Text on top of the page displaying information about the currently
         selected customer.
         """
@@ -375,12 +372,6 @@ class MainSection(BaseSection):
             on_press=self.set_context_screen,
         )
         """Button that changes context to interact with the selected user."""
-
-        self.help_msg = Label(
-            "Selecione um cliente para escolher uma operação",
-            style=GENERIC_LABEL,
-        )
-        """Text displaying help for the current page functionality."""
 
         self.return_button = Button(
             icon=const.ICON_RETURN,
@@ -412,48 +403,27 @@ class MainSection(BaseSection):
         )
 
         # main container
-        self.header_block = Box(style=HORIZONTAL_BOX)
+        self.head = get_container(
+            COLUMNS(2), H, CENTER_X, GAP(10), MARGIN(t=20, b=10),
+            children=[
+                self.customer_options_button,
+                ScrollContainer(style=Pack(align_items="center"), content=self.help_msg)
+            ],
+        )
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
-        self.body_block = Box(style=HORIZONTAL_BOX)
+        self.body = get_container(
+            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X), H, STRETCH,
+            children=[self.customer_selector.widget, self.customer_options_section],
+        )
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.
         """
-        self.head = Box(
-            style=Pack(width=450, direction="row"),
-            children=[self.header_block],
-        )
-        #self.body = Box(
-        #    style=Pack(width=1010, direction="row", flex=1),
-        #    children=[self.body_block],
-        #)
-
-        #self.footer = get_container(COLUMNS(2, STRETCH, CENTER_X, CONTENT_WIDTH(60)), STRETCH)
-        #self.footer.add(*[Button(str(i)) for i in range(10)])
-
-        #self.footer = Row(
-        #    style=Pack(flex=1),
-        #    children=[
-        #        Column(
-        #            style=Pack(flex=1, align_items="center"),
-        #            children=[Button(str(i), style=Pack(width=50)) for i in range(5)],
-        #        ),
-        #        Column(
-        #            style=Pack(flex=1, align_items="center"),
-        #            children=[Button(str(i), style=Pack(width=50)) for i in range(5, 10)],
-        #        ),
-        #    ],
-        #)
-
-        self.body = get_container(
-            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH,
-            children=[self.customer_selector.widget, self.customer_options_section],
-        )
 
         self.full_contents = Box(
             style=FULL_CONTENTS,
-            children=[self.body],
+            children=[self.head, self.body],
         )
         self.set_layout_0(const.MAIN_WINDOW_SIZE[0])
         self.layout_id: int = 0
@@ -468,6 +438,7 @@ class MainSection(BaseSection):
             COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH,
         )
         # Assign widths to the columns
+        self.head.children[1].style.width = int(w * 0.85) - 80
         self.customer_selector.width = int(w * 0.85)
         self.customer_options_section.style.width = int(w * 0.85)
 
@@ -485,6 +456,7 @@ class MainSection(BaseSection):
         col0, col1 = self.body.children[0], self.body.children[1]
         col0.style.flex, col1.style.flex = 45, 50
         # Assign widths to the columns
+        self.head.children[1].style.width = int(w * 0.85) - 80
         self.customer_selector.width = int(w * 0.45)
         self.customer_options_section.style.width = int(w * 0.5)
 
@@ -503,11 +475,16 @@ class MainSection(BaseSection):
 
     def _upd_selected_info(self):
         self.customer_options_section.current_tab = 0
-        self.selected_customer_info.text = (
-            f"Nome: {self.SELECTED_CUSTOMER.NomeCompleto}\n"
-            f"Local: {self.SELECTED_CUSTOMER.Local}\n"
-            f"Saldo devedor: R$ {self.SELECTED_CUSTOMER.Saldo}"
-        )
+        if self.SELECTED_CUSTOMER.Saldo == "N/D":
+            self.help_msg.text = (
+                "Selecione um cliente, depois clique no botão ao lado"
+            )
+        else:
+            self.help_msg.text = (
+                f"Nome: {self.SELECTED_CUSTOMER.NomeCompleto}\n"
+                f"Local: {self.SELECTED_CUSTOMER.Local}\n"
+                f"Saldo devedor: R$ {self.SELECTED_CUSTOMER.Saldo}"
+            )
         self.subsection_transac_history.table.data = self.SELECTED_CUSTOMER.Transacs
         self.subsection_customer_info.form.clear()
         self.subsection_customer_info.form.add_table_fields(self.SELECTED_CUSTOMER)
@@ -572,20 +549,20 @@ class MainSection(BaseSection):
         the button clicked.
         """
         if widget.id == "customer_options_button":
-            self.header_block.replace(
+            self.head.children[0].replace(
                 old_child=self.customer_options_button,
                 new_child=self.return_button,
             )
-            self.body_block.replace(
+            self.body.children[0].replace(
                 old_child=self.customer_selector.widget,
                 new_child=self.customer_options_section,
             )
         if widget.id == "return_button":
-            self.header_block.replace(
+            self.head.children[0].replace(
                 old_child=self.return_button,
                 new_child=self.customer_options_button,
             )
-            self.body_block.replace(
+            self.body.children[0].replace(
                 old_child=self.customer_options_section,
                 new_child=self.customer_selector.widget,
             )
@@ -593,7 +570,6 @@ class MainSection(BaseSection):
             self.update_data_widgets()
             self.customer_selector.clear_selection()
         self._refresh_navigation_buttons(selection=widget.id)
-        self._refresh_help_message(selection=widget.id)
 
     def _refresh_navigation_buttons(self, selection: str):
         buttons = {
@@ -608,27 +584,13 @@ class MainSection(BaseSection):
                 button.enabled = True
             buttons[selection].enabled = False
 
-    def _refresh_help_message(self, selection: str):
-        help_messages = {
-            "return_button": "Selecione um cliente para escolher uma operação",
-            "add_transac_button": "Insira os dados da transação e confirme",
-            "show_transac_button": "Simples consulta de dados de transação",
-            "customer_data_button": "Consulte e edite os dados do cliente selecionado",
-            "customer_options_button": "Interaja com os dados do cliente selecionado",
-        }
-        self.help_msg.text = help_messages[selection]
-
     def _clear_customer_selection(self):
         self.SELECTED_CUSTOMER.clear()
         self.subsection_add_transac.amount_input.enabled = False
         self.subsection_add_transac.confirm_button.enabled = False
         self.subsection_transac_history.table.data = None
         self.subsection_customer_info.form.clear()
-        self.selected_customer_info.text = (
-            f"Nome: {const.NA_VALUE}\n"
-            f"Local: {const.NA_VALUE}\n"
-            f"Saldo devedor: R$ {const.NA_VALUE}"
-        )
+        self.help_msg.text = self.HELP_MSG
         self.customer_selector.search_field.value = ""
 
     def update_data_widgets(self):
