@@ -339,7 +339,7 @@ class SectionCustomerInfo:
 class MainSection(BaseSection):
     SELECTED_CUSTOMER = data.tbl_clientes()
     CUSTOMER_LIST = data.CustomerListSource()
-    HELP_MSG = "Selecione um cliente e clique no\nbotão ao lado."
+    HELP_MSG = "Selecione um cliente para registrar\numa transação."
 
     def __init__(self, app: App):
         super().__init__(app)
@@ -372,6 +372,11 @@ class MainSection(BaseSection):
         """Text on top of the page displaying information about the currently
         selected customer.
         """
+
+        self.help_msg_block = ScrollContainer(
+            style=Pack(align_items="center", direction="row"),
+            content=self.help_msg,
+        )
 
         self.customer_options_button = Button(
             icon=const.ICON_USER_OPTS,
@@ -429,20 +434,28 @@ class MainSection(BaseSection):
         :param w: window width where this layout handling should be based on.
         """
         # Assign content
-        self.head._raw_children = [
-            self.customer_options_button,
-            ScrollContainer(style=Pack(align_items="center"), content=self.help_msg),
-        ]
+        self.head._raw_children = [self.customer_options_button, self.help_msg_block]
         self.body._raw_children = [self.customer_selector.widget]
         # Assign modifers
-        self.head.set_modifiers(COLUMNS(2), H, CENTER_Y, GAP(10), MARGIN(t=20, b=10))
+        self.head.set_modifiers(
+            H,
+            CENTER_X,
+            GAP(10),
+            MARGIN(t=20, b=10),
+            BG_COLOR("#1d1d20" if const.sys_dark_mode() else "#f9f9f9")
+        )
         self.body.set_modifiers(
-            COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH,
+            COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
         )
         # Apply adjustments
         self.head.children[1].style.width = int(w * 0.85) - 80
-        self.customer_selector.width = int(w * 0.85)
         self.customer_options_section.style.width = int(w * 0.85)
+        # A rebuild after changing customer_options_section's width is required
+        # to keep it's flex for some reason.
+        self.body.rebuild()
+        # The customer_selector width must be called after the last rebuild so it
+        # can keep centered.
+        self.customer_selector.width = int(w * 0.85)
 
 
     def set_layout_1(self, w: int):
@@ -451,21 +464,22 @@ class MainSection(BaseSection):
         :param w: window width where this layout handling should be based on.
         """
         # Assign content
-        self.head._raw_children = [
-            ScrollContainer(style=Pack(align_items="center"), content=self.help_msg)
-        ]
+        self.head._raw_children = [self.help_msg_block]
         self.body._raw_children = [
             self.customer_selector.widget, self.customer_options_section
         ]
         # Assign modifiers
-        self.head.set_modifiers(H, GAP(10), MARGIN(t=20, b=10))
+        self.head.set_modifiers(
+            MARGIN(t=20, b=10),
+            BG_COLOR("#1d1d20" if const.sys_dark_mode() else "#f9f9f9")
+        )
         self.body.set_modifiers(
             COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
         )
         # Apply adjustments
         col0, col1 = self.body.children[0], self.body.children[1]
         col0.style.flex, col1.style.flex = 45, 50
-        self.head.children[1].style.width = int(w * 0.85) - 80
+        self.head.children[0].style.width = int(w * 0.85) - 80
         self.customer_selector.width = int(w * 0.45)
         self.customer_options_section.style.width = int(w * 0.5)
 
@@ -567,7 +581,7 @@ class MainSection(BaseSection):
         widths = range(420, 5121, 200)
         expected_layout_id = sum(w >= t for t in widths)
 
-        if expected_layout_id == self.layout_id:
+        if expected_layout_id == getattr(self, "layout_id", None):
             return
         print(f"applying layout id={expected_layout_id}")
         # Use one of the predefined widths so the content widths are previsible
