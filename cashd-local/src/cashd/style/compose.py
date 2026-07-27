@@ -49,13 +49,13 @@ class IterableStyler(Styler):
         """
         super().__init__(parent_style, child_style)
 
-    def apply_parent_at(self, index: int, style_dict: dict) -> dict:
+    def apply_parent_at(self, index: int, style_dict: dict):
         style_dict.update({
             k: v[index % len(v)] if isinstance(v, (list, tuple)) else v
             for k, v in self.parent_style.items()
         })
 
-    def apply_child_at(self, index: int, style_dict: dict) -> dict:
+    def apply_child_at(self, index: int, style_dict: dict):
         style_dict.update({
             k: v[index % len(v)] if isinstance(v, (list, tuple)) else v
             for k, v in self.child_style.items()
@@ -236,8 +236,8 @@ class ComposedBox(Box):
 
 def parent_kw(*stylers: Styler) -> Generator[dict, None, None]:
     """Infinite generator of 'parent' styles."""
+    i = 0
     while True:
-        i = 0
         kw = {}
         for s in stylers:
             if type(s) is IterableStyler:
@@ -250,16 +250,16 @@ def parent_kw(*stylers: Styler) -> Generator[dict, None, None]:
 
 def child_kw(*stylers: Styler) -> Generator[dict, None, None]:
     """Infinite generator of 'child' styles."""
+    i = 0
     while True:
-        i = 0
         kw = {}
         for s in stylers:
             if type(s) is IterableStyler:
                 s.apply_child_at(i, kw)
             else:
                 s.apply_child(kw)
-        yield kw
         i = i + 1
+        yield kw
 
 
 def get_container(*args, **kwargs) -> ComposedBox:

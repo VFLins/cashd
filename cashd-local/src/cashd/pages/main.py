@@ -36,11 +36,14 @@ from cashd.style.compose import (
     V_CONTENT,
     H_CONTENT,
     CONTENT_WIDTH,
+    CONTENT_WIDTHS,
     WIDTH,
+    WIDTHS,
     COLUMNS,
     ROWS,
     BG_COLOR,
     FLEX,
+    FLEXES,
     MARGIN,
     GAP,
 )
@@ -439,9 +442,11 @@ class MainSection(BaseSection):
         self.head._raw_children = [self.customer_options_button, self.help_msg_block]
         self.body._raw_children = [self.customer_selector.widget]
         # Assign modifers
+        label_block_width = int(w * 0.85) - 80
         self.head.set_modifiers(
             H,
             CENTER_X,
+            CONTENT_WIDTHS(60, label_block_width),
             GAP(10),
             MARGIN(t=20, b=10),
             BG_COLOR("#1d1d20" if const.sys_dark_mode() else "#f9f9f9")
@@ -450,7 +455,6 @@ class MainSection(BaseSection):
             COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
         )
         # Apply adjustments
-        self.head.children[1].style.width = int(w * 0.85) - 80
         self.customer_options_section.style.width = int(w * 0.85)
         # A rebuild after changing customer_options_section's width is required
         # to keep it's flex for some reason.
