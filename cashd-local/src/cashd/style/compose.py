@@ -49,17 +49,17 @@ class IterableStyler(Styler):
         """
         super().__init__(parent_style, child_style)
 
-    def get_parent_style_at(self, index: int) -> dict:
-        return {
+    def apply_parent_at(self, index: int, style_dict: dict) -> dict:
+        style_dict.update({
             k: v[index % len(v)] if isinstance(v, (list, tuple)) else v
             for k, v in self.parent_style.items()
-        }
+        })
 
-    def get_child_style_at(self, index: int) -> dict:
-        return {
+    def apply_child_at(self, index: int, style_dict: dict) -> dict:
+        style_dict.update({
             k: v[index % len(v)] if isinstance(v, (list, tuple)) else v
             for k, v in self.child_style.items()
-        }
+        })
 
 
 class GridHandler(Modifier):
@@ -76,7 +76,6 @@ class GridHandler(Modifier):
         blocks = []
         for i in range(self.n):
             block_style, child_style = next(style_gen)
-            print(f"{block_style=} // {child_style=}")
             block = Box(
                 style=block_style,
                 children=self._get_children_at(
@@ -158,6 +157,9 @@ def CONTENT_WIDTHS(*values: int) -> IterableStyler:
 def FLEXES(*values: int) -> IterableStyler:
     return IterableStyler(parent_style={"flex": values})
 
+def CONTENT_FLEXES(*values: int) -> IterableStyler:
+    return IterableStyler(child_style={"flex": values})
+
 def BG_COLORS(*colors: str) -> IterableStyler:
     return IterableStyler(parent_style={"background_color": colors})
 
@@ -182,11 +184,16 @@ class ComposedBox(Box):
         super().__init__(**kwargs)
         self.rebuild()
 
-    def add(self, *children):
+    def add(self, *children: Widget):
         if not children:
             return
         self._raw_children.extend(children)
         self.rebuild()
+
+    def add_at(self, index: int, *children: Widget):
+        if not children:
+            return
+        self._raw_children[index:index] = children
 
     def set_modifiers(self, *modifiers: Modifier):
         self._modifiers = [m for m in modifiers if isinstance(m, Modifier)]
@@ -204,8 +211,10 @@ class ComposedBox(Box):
         return [m for m in self._modifiers if isinstance(m, Styler)]
 
     def rebuild(self):
-        """Reconstrói o layout delegando a montagem ao GridHandler se presente."""
-        child_styler = child_kw(*self.stylers)
+        """Rebuilds it's layout."""
+        # Reapply own styling
+        parent_style = parent_kw(*self.stylers)
+        self.style = Pack(**next(parent_style))
 
         # Delete widgets keeping references
         for child in list(self.children):
@@ -219,6 +228,7 @@ class ComposedBox(Box):
             for c in containers:
                 super().add(c)
         else:
+            child_styler = child_kw(*self.stylers)
             for child in self._raw_children:
                 child.style = Pack(**next(child_styler))
                 super().add(child)
@@ -231,7 +241,7 @@ def parent_kw(*stylers: Styler) -> Generator[dict, None, None]:
         kw = {}
         for s in stylers:
             if type(s) is IterableStyler:
-                kw.update(s.get_parent_style_at(i))
+                s.apply_parent_at(i, kw)
             else:
                 s.apply_parent(kw)
         yield kw
@@ -245,7 +255,7 @@ def child_kw(*stylers: Styler) -> Generator[dict, None, None]:
         kw = {}
         for s in stylers:
             if type(s) is IterableStyler:
-                kw.update(s.get_child_style_at(i))
+                s.apply_child_at(i, kw)
             else:
                 s.apply_child(kw)
         yield kw
