@@ -379,16 +379,18 @@ class MainSection(BaseSection):
         )
 
         self.customer_options_button = Button(
-            icon=const.ICON_USER_OPTS,
+            style=Pack(margin_left=20),
             id="customer_options_button",
+            icon=const.ICON_USER_OPTS,
             enabled=False,
             on_press=self.set_context_screen,
         )
         """Button that changes context to interact with the selected user."""
 
         self.return_button = Button(
-            icon=const.ICON_RETURN,
+            style=Pack(margin_left=20),
             id="return_button",
+            icon=const.ICON_RETURN,
             on_press=self.set_context_screen,
         )
         """Button that returns the user to the context of customer selection."""
@@ -528,7 +530,7 @@ class MainSection(BaseSection):
         the button clicked.
         """
         if widget.id == "customer_options_button":
-            self.head.children[0].replace(
+            self.head.replace(
                 old_child=self.customer_options_button,
                 new_child=self.return_button,
             )
@@ -537,7 +539,7 @@ class MainSection(BaseSection):
                 new_child=self.customer_options_section,
             )
         if widget.id == "return_button":
-            self.head.children[0].replace(
+            self.head.replace(
                 old_child=self.return_button,
                 new_child=self.customer_options_button,
             )
