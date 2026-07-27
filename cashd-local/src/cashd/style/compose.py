@@ -1,4 +1,4 @@
-from typing import Any, Generator
+from typing import Any, Generator, Iterable
 from toga import Widget
 from toga.style.pack import ROW, COLUMN, CENTER, LEFT, RIGHT, TOP, BOTTOM, Pack
 from toga.widgets.box import Box, Column, Row
@@ -26,12 +26,20 @@ class Styler(Modifier):
     def apply_child(self, style_dict: dict):
         style_dict.update(self.child_style)
 
+    def __repr__(self):
+        _repr = "<Styler"
+        if self.parent_style:
+            _repr = _repr + f" parent_style={self.parent_style}"
+        if self.child_style:
+            _repr = _repr + f" child_style={self.child_style}"
+        return _repr + ">"
+
 
 class IterableStyler(Styler):
     def __init__(
         self,
-        parent_style: dict[str, list[Any]] | None = None,
-        child_style: dict[str, list[Any]] | None = None,
+        parent_style: dict[str, Iterable[Any]] | None = None,
+        child_style: dict[str, Iterable[Any]] | None = None,
     ):
         """Modifier that allows for applying a list of styles iteratively to one or
         multiple widgets.
@@ -59,13 +67,16 @@ class GridHandler(Modifier):
         self.n = max(1, n)
         self.direction = direction
         self.stylers = stylers
-        self.parent_stylers: list[Styler] = []
+        self.parent_stylers: Iterable[Styler] = []
 
     def arrange(self, children: list, *parent_stylers: Styler) -> list[Box]:
         """Ponto de entrada que delega para a função privada correspondente."""
+        self.parent_stylers = parent_stylers
+        style_gen = self._get_next_styles()
         blocks = []
         for i in range(self.n):
-            block_style, child_style = self._get_next_styles()
+            block_style, child_style = next(style_gen)
+            print(f"{block_style=} // {child_style=}")
             block = Box(
                 style=block_style,
                 children=self._get_children_at(
@@ -78,13 +89,13 @@ class GridHandler(Modifier):
 
     def _get_next_styles(self) -> Generator[tuple[Pack, Pack], None, None]:
         """Gerador infinito que fornece (estilo_do_container, estilo_do_filho) a cada iteração."""
-        self.block_kw = getattr(self, "block_kw", parent_kw(*self.stylers))
-        self.inherit_kw = getattr(self, "inherit_kw", child_kw(*self.parent_stylers))
-        self.child_kw = getattr(self, "child_kw", child_kw(*self.stylers))
+        block_gen = parent_kw(*self.stylers)
+        inherit_gen = child_kw(*self.parent_stylers)
+        child_gen = child_kw(*self.stylers)
         while True:
-            b_kw = next(self.block_kw)
-            b_kw.update(next(self.inherit_kw))
-            c_kw = next(self.child_kw)
+            b_kw = next(block_gen)
+            b_kw.update(next(inherit_gen))
+            c_kw = next(child_gen)
             yield Pack(**b_kw), Pack(**c_kw)
 
     def _get_children_at(self, index: int, style: Pack, children: list[Widget]) -> list[Widget]:
@@ -103,9 +114,9 @@ V = Styler(parent_style={"direction": COLUMN})
 H = Styler(parent_style={"direction": ROW})
 V_CONTENT = Styler(child_style={"direction": COLUMN})
 H_CONTENT = Styler(child_style={"direction": ROW})
-CENTER_CONTENT_X = Styler(child_style={"alignment": CENTER})
+CENTER_CONTENT_X = Styler(child_style={"align_items": CENTER})
 CENTER_CONTENT_Y = Styler(child_style={"justify_content": CENTER})
-CENTER_X = Styler(parent_style={"alignment": CENTER})
+CENTER_X = Styler(parent_style={"align_items": CENTER})
 CENTER_Y = Styler(parent_style={"justify_content": CENTER})
 
 
@@ -139,16 +150,16 @@ def GAP(value: int) -> Styler:
 # --- 3. Iterable ---
 
 def WIDTHS(*values: int) -> IterableStyler:
-    return IterableStyler(key="width", values=values, is_parent=True)
+    return IterableStyler(parent_style={"width": values})
 
 def CONTENT_WIDTHS(*values: int) -> IterableStyler:
-    return IterableStyler(key="width", values=values, is_parent=False)
+    return IterableStyler(child_style={"width": values})
 
 def FLEXES(*values: int) -> IterableStyler:
-    return IterableStyler(key="flex", values=values, is_parent=True)
+    return IterableStyler(parent_style={"flex": values})
 
-def BG_COLORS(*values: str) -> IterableStyler:
-    return IterableStyler(key="background_color", values=values, is_parent=True)
+def BG_COLORS(*colors: str) -> IterableStyler:
+    return IterableStyler(parent_style={"background_color": colors})
 
 
 # --- 4. Grids ---
@@ -195,7 +206,6 @@ class ComposedBox(Box):
     def rebuild(self):
         """Reconstrói o layout delegando a montagem ao GridHandler se presente."""
         child_styler = child_kw(*self.stylers)
-        self.style = Pack(**parent_kw(*self.stylers))
 
         # Delete widgets keeping references
         for child in list(self.children):
@@ -208,38 +218,38 @@ class ComposedBox(Box):
             containers = self.grid_handler.arrange(self._raw_children, *self.stylers)
             for c in containers:
                 super().add(c)
-        elif child_styler:
-            for child in self._raw_children:
-                col_box = Box(style=Pack(**child_styler))
-                col_box.add(child)
-                super().add(col_box)
         else:
             for child in self._raw_children:
+                child.style = Pack(**next(child_styler))
                 super().add(child)
 
 
 def parent_kw(*stylers: Styler) -> Generator[dict, None, None]:
     """Infinite generator of 'parent' styles."""
-    for i in count():
+    while True:
+        i = 0
         kw = {}
         for s in stylers:
-            if isinstance(s, IterableStyler) and s.is_parent:
-                kw.update(s.get_style_at(i))
-            elif not isinstance(s, IterableStyler):
+            if type(s) is IterableStyler:
+                kw.update(s.get_parent_style_at(i))
+            else:
                 s.apply_parent(kw)
         yield kw
+        i = i + 1
 
 
 def child_kw(*stylers: Styler) -> Generator[dict, None, None]:
     """Infinite generator of 'child' styles."""
-    for i in count():
+    while True:
+        i = 0
         kw = {}
         for s in stylers:
-            if isinstance(s, IterableStyler) and not s.is_parent:
-                kw.update(s.get_style_at(i))
-            elif not isinstance(s, IterableStyler):
+            if type(s) is IterableStyler:
+                kw.update(s.get_child_style_at(i))
+            else:
                 s.apply_child(kw)
         yield kw
+        i = i + 1
 
 
 def get_container(*args, **kwargs) -> ComposedBox:
