@@ -162,7 +162,7 @@ PAGE_BODY = Pack(
 TABLE_OF_DATA = Pack(
     flex=1, font_size=const.FONT_SIZE, width=const.FORM_WIDTH, align_items="start"
 )
-INLINE_LABEL = Pack(font_size=const.FONT_SIZE, margin=15)
+INLINE_LABEL = Pack(font_size=const.FONT_SIZE + 1, margin=15)
 GENERIC_LABEL = Pack(
     width=const.CONTENT_WIDTH,
     align_items="start",

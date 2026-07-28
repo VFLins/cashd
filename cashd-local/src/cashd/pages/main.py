@@ -42,6 +42,7 @@ from cashd.style.compose import (
     COLUMNS,
     ROWS,
     BG_COLOR,
+    CONTENT_BG_COLOR,
     FLEX,
     FLEXES,
     MARGIN,
@@ -370,11 +371,12 @@ class MainSection(BaseSection):
                 if data.tbl_clientes.table_is_empty()
                 else self.HELP_MSG
             ),
-            style=INLINE_LABEL
+            style=INLINE_LABEL,
         )
         """Text on top of the page displaying information about the currently
         selected customer.
         """
+        self.help_msg.style.background_color = "#1d1d20" if const.sys_dark_mode() else "#f9f9f9"
 
         self.help_msg_block = ScrollContainer(
             style=Pack(align_items="center", direction="row"),
@@ -449,7 +451,8 @@ class MainSection(BaseSection):
             CONTENT_WIDTHS(60, label_block_width),
             GAP(10),
             MARGIN(t=20, b=10),
-            BG_COLOR("#1d1d20" if const.sys_dark_mode() else "#f9f9f9")
+            BG_COLOR("#1d1d20" if const.sys_dark_mode() else "#f9f9f9"),
+            CONTENT_BG_COLOR("#1d1d20" if const.sys_dark_mode() else "#f9f9f9"),
         )
         self.body.set_modifiers(
             COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
@@ -584,7 +587,7 @@ class MainSection(BaseSection):
     async def rearrange_widgets(self):
         w, _ = self.window_size
         # Get a distinct layout ID for every window width, from 0 to len(widths)
-        widths = range(420, 5121, 200)
+        widths = range(420, 5121, 300)
         expected_layout_id = sum(w >= t for t in widths)
 
         if expected_layout_id == getattr(self, "layout_id", None):
@@ -592,8 +595,8 @@ class MainSection(BaseSection):
         print(f"applying layout id={expected_layout_id}")
         # Use one of the predefined widths so the content widths are previsible
         w = widths[expected_layout_id - 1]
-        if expected_layout_id in (1, 2):
+        if expected_layout_id == 1:
             self.set_layout_0(w)
-        elif expected_layout_id >= 3:
+        elif expected_layout_id >= 2:
             self.set_layout_1(w)
         self.layout_id = expected_layout_id

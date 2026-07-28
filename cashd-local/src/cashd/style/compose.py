@@ -130,6 +130,10 @@ def BG_COLOR(color: str) -> Styler:
     """Sets a background color to the parent widget."""
     return Styler(parent_style={"background_color": color})
 
+def CONTENT_BG_COLOR(color: str) -> Styler:
+    """Sets a background color to the parent widget."""
+    return Styler(child_style={"background_color": color})
+
 def MARGIN(t: int = 0, l: int = 0, b: int  = 0, r: int = 0) -> Styler:
     """Aplica espaçamento interno (padding) nos containers dos filhos."""
     return Styler(parent_style={"margin": (t, l, b, r)})
@@ -167,6 +171,9 @@ def CONTENT_FLEXES(*values: int) -> IterableStyler:
 
 def BG_COLORS(*colors: str) -> IterableStyler:
     return IterableStyler(parent_style={"background_color": colors})
+
+def CONTENT_BG_COLORS(*colors: str) -> IterableStyler:
+    return IterableStyler(child_style={"background_color": colors})
 
 
 # --- 4. Grids ---
