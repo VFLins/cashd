@@ -48,18 +48,34 @@ class IterableStyler(Styler):
         :param child_style: Style applied to the widget's children, when possible.
         """
         super().__init__(parent_style, child_style)
+        self.parent_gen = self._get_parent_gen()
+        self.child_gen = self._get_child_gen()
 
-    def apply_parent_at(self, index: int, style_dict: dict):
-        style_dict.update({
-            k: v[index % len(v)] if isinstance(v, (list, tuple)) else v
-            for k, v in self.parent_style.items()
-        })
+    def apply_parent(style_dict: dict):
+        kw = next(self.parent_gen)
+        style_dict.update(kw)
 
-    def apply_child_at(self, index: int, style_dict: dict):
-        style_dict.update({
-            k: v[index % len(v)] if isinstance(v, (list, tuple)) else v
-            for k, v in self.child_style.items()
-        })
+    def apply_child(style_dict: dict):
+        kw = next(self.child_gen)
+        style_dict.update(kw)
+
+    def _get_parent_gen(self) -> Generator[dict, None, None]:
+        index = 0
+        while True:
+            yield {
+                k: v[index % len(v)] if isinstance(v, (list, tuple)) else v
+                for k, v in self.parent_style.items()
+            }
+            index = index + 1
+
+    def _get_child_gen(self) -> Generator[dict, None, None]:
+        index = 0
+        while True:
+            yield {
+                k: v[index % len(v)] if isinstance(v, (list, tuple)) else v
+                for k, v in self.child_style.items()
+            }
+            index = index + 1
 
 
 class GridHandler(Modifier):
@@ -72,8 +88,6 @@ class GridHandler(Modifier):
     def arrange(self, children: list, *parent_stylers: Styler) -> list[Box]:
         """Ponto de entrada que delega para a função privada correspondente."""
         self.parent_stylers = parent_stylers
-        block_style_gen = self._gen_block_styles()
-        child_style_gen = self._gen_child_styles()
         blocks = []
         for i in range(self.n):
             block = Box(
@@ -81,32 +95,19 @@ class GridHandler(Modifier):
                     index=i, style_gen=child_style_gen, children=children
                 )
             )
-            apply_styles(block, **next(block_style_gen))
+            # Apply styles inherited from parent block
+            apply_styles(as_parent=False, block, self.parent_stylers)
+            # Apply own styles overwriting inherited ones when conflicting
+            apply_styles(as_parent=True, block, self.stylers)
             block.style.direction = self.direction
             blocks.append(block)
         return blocks
 
-    def _gen_block_styles(self) -> Generator[dict, None, None]:
-        """Gerador infinito que fornece (estilo_do_container, estilo_do_filho) a cada iteração."""
-        block_gen = parent_kw(*self.stylers)
-        inherit_gen = child_kw(*self.parent_stylers)
-        while True:
-            b_kw = next(block_gen)
-            b_kw.update(next(inherit_gen))
-            yield b_kw
-
-    def _gen_child_styles(self) -> Generator[dict, None, None]:
-        child_gen = child_kw(*self.stylers)
-        while True:
-            c_kw = next(child_gen)
-            yield c_kw
-
-
-    def _get_children_at(self, index: int, style_gen: Generator[dict, None, None], children: list[Widget]) -> list[Widget]:
+    def _get_children_at(self, index: int, children: list[Widget]) -> list[Widget]:
         """Seleciona as crianças da coluna `index` (passo N) e aplica o estilo a cada uma."""
         subset = children[index::self.n]
         for child in subset:
-            apply_styles(child, **next(style_gen))
+            apply_styles(as_parent=False, child, self.stylers)
         return subset
 
 
@@ -225,8 +226,7 @@ class ComposedBox(Box):
     def rebuild(self):
         """Rebuilds it's layout."""
         # Reapply own styling
-        parent_style = parent_kw(*self.stylers)
-        apply_styles(self, **next(parent_style))
+        apply_styles(as_parent=True, self, self.stylers)
 
         # Delete widgets keeping references
         for child in list(self.children):
@@ -240,43 +240,26 @@ class ComposedBox(Box):
             for c in containers:
                 super().add(c)
         else:
-            child_styler = child_kw(*self.stylers)
             for child in self._raw_children:
-                apply_styles(child, **next(child_styler))
+                apply_styles(as_parent=False, child, self.stylers)
                 super().add(child)
 
 
-def parent_kw(*stylers: Styler) -> Generator[dict, None, None]:
-    """Infinite generator of 'parent' styles."""
-    i = 0
-    while True:
-        kw = {}
-        for s in stylers:
-            if type(s) is IterableStyler:
-                s.apply_parent_at(i, kw)
-            else:
-                s.apply_parent(kw)
-        yield kw
-        i = i + 1
+def apply_styles(as_parent: bool, widget: Widget, stylers: list[Styler]):
+    """Apply multiple styles to a Widget without removing widget's non-conflicting
+    styles.
 
-
-def child_kw(*stylers: Styler) -> Generator[dict, None, None]:
-    """Infinite generator of 'child' styles."""
-    i = 0
-    while True:
-        kw = {}
-        for s in stylers:
-            if type(s) is IterableStyler:
-                s.apply_child_at(i, kw)
-            else:
-                s.apply_child(kw)
-        i = i + 1
-        yield kw
-
-
-def apply_styles(widget: Widget, **kwstyles):
-    """Apply multiple styles to a Widget without removing non-conflicting styles."""
-    for k, v in kwstyles.items():
+    :param as_parent: Boolean indicating if this `widget` should use parent styles.
+    :param widget: A `toga.Widget` that will get the styles.
+    :param stylers: Stylers holding styles that will be passed on to the widget.
+    """
+    kw = dict()
+    for s in stylers:
+        if as_parent:
+            s.apply_parent(kw)
+        else:
+            s.apply_child(kw)
+    for k, v in kw.items()
         setattr(widget.style, k, v)
 
 
