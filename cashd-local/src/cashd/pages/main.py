@@ -459,6 +459,7 @@ class MainSection(BaseSection):
         )
         # Apply adjustments
         self.customer_options_section.style.width = int(w * 0.85)
+        self.subsection_customer_info.form.reshape(n_cols=1)
         # A rebuild after changing customer_options_section's width is required
         # to keep it's flex for some reason.
         self.body.rebuild()
@@ -486,6 +487,8 @@ class MainSection(BaseSection):
             COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
         )
         # Apply adjustments
+        if (w > 500) or (self.subsection_customer_info.form.n_cols != 2):
+            self.subsection_customer_info.form.reshape(n_cols=2)
         col0, col1 = self.body.children[0], self.body.children[1]
         col0.style.flex, col1.style.flex = 45, 50
         self.head.children[0].style.width = int(w * 0.85) - 80

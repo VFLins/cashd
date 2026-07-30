@@ -1,5 +1,4 @@
 import sys
-from math import ceil
 from copy import deepcopy
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -16,6 +15,7 @@ from toga.widgets.label import Label
 
 from cashd_core import data
 from cashd import const
+from cashd.style.compose import ComposedBox, COLUMNS, STRETCH
 from cashd.style.vars import (
     input_annotation,
     user_input,
@@ -85,50 +85,24 @@ class FormField(Box):
         return self.contents
 
 
-class FormRow(Box):
-    def __init__(
-        self,
-        id: str | None = None,
-        style: StyleT | None = None,
-        children: Iterable[Widget] | None = None,
-        **kwargs,
-    ):
-        if children:
-            self._assert_children_amount(*children)
-        if style:
-            style.direction = ROW
-        else:
-            style = Pack(direction=ROW)
-        super().__init__(id, style, children)
-
-    def add(self, *children):
-        self._assert_children_amount(*children)
-        super().add(*children)
-
-    def _assert_children_amount(self, *new_children: Widget | None):
-        current_children = getattr(self, "_children", [])
-        n_children = len(current_children) + len(new_children)
-
-
 class FormHandler:
     def __init__(
         self,
-        n_cols: int,
+        n_cols: int = 1,
         on_change: Callable[[Widget], None] | None = None,
     ):
         """
+        :param n_cols: Initial number of columns for the grid layout.
         :param on_change: Add `on_change` handler that applies to every *non-required*
           `FormField` added.
         """
         self.n_cols = n_cols
-        width = self._get_rows_width(widgets=[], n_cols=n_cols)
         self._on_change = on_change
-        self._widget = Box(
-            style=Pack(direction=COLUMN, width=width, align_items="center")
-        )
+        self._widget = ComposedBox(COLUMNS(self.n_cols))
+        self._fields: Dict[str, FormField] = {}
 
     @property
-    def widget(self):
+    def widget(self) -> ComposedBox:
         return self._widget
 
     def add_table_fields(
@@ -137,15 +111,13 @@ class FormHandler:
         id: str | None = None,
         style: Pack | None = None,
     ):
-        """Adds multiple `cashd.widgets.form.FormRow` into this FormHandler. Each item in
-        children is added in row groups to the form rows.
+        """Adds multiple fields into this FormHandler based on a declared table. Each column name
+        will be handled as its `FormField.id`, and each form field can be fetched as
+        `self.fields['colname']`.
 
-        :param table: Declared table, child of `cashd.data.dec_base`. Each column name
-          will be handled as it's `FormField.id`, and each form field can be fetched as
-          `self.fields['colname']`.
-        :param id: Base ID value to be passed to the rows, a number will. If not empty,
-          be appended to the end indicating the row number.
-        :param style: Common stylesheet for all rows.
+        :param table: Declared table, child of `cashd.data.dec_base`.
+        :param id: Base ID value to be passed to the fields.
+        :param style: Common stylesheet to apply to the container.
         """
         children = get_form_fields(table=table, on_change=self._on_change)
         self.add_fields(fields=children, id=id, style=style)
@@ -153,121 +125,72 @@ class FormHandler:
     def add_fields(
         self, fields: List[FormField], id: str | None = None, style: Pack | None = None
     ):
-        """Adds muiltiple `cashd.widgets.form.FormRow` into this FormHandler
+        """Adds multiple `FormField` objects into this FormHandler.
 
-        :param fields: List of `FormRow` objects.
-        :param id: Base ID value to be passed to the rows, a number will. If not empty,
-          be appended to the end indicating the row number.
-        :param style: Common stylesheet for all rows.
+        :param fields: List of `FormField` objects.
+        :param id: Base ID value to be passed to the fields.
+        :param style: Common stylesheet to apply to the container.
         """
-        form_width = self._widget.style.width
         if style:
-            style.width = form_width
-        else:
-            style = Pack(width=form_width)
-        self.n_cols = self._get_ncols(widgets=fields, row_width=form_width)
-        n_rows = ceil(len(fields) / self.n_cols)
-        for rn in range(n_rows):
-            min_idx = rn * self.n_cols
-            max_idx = min_idx + self.n_cols
-            children_subset = [c for c in fields[min_idx:max_idx]]
-            row = FormRow(children=children_subset, id=id, style=style)
-            self._widget.add(row)
+            for k, v in style.__dict__.items():
+                if v is not None:
+                    setattr(self._widget.style, k, v)
+
+        self._widget.add(*fields)
         self._save_field_refs()
 
     def clear(self):
-        """Removes every FormRow of `self.widget` along with their `FormField`'s
-        references.
-        """
+        """Removes every `FormField` of `self.widget` along with their references."""
         self._fields = {}
         self._widget.clear()
+        self._widget._raw_children.clear()
+        self._widget.rebuild()
 
     def required_fields_are_filled(self) -> bool:
         """Checks if every required field in this form is not empty. Return `True` if
         there are no required fields.
         """
         return all(
-            form_field.children[1].value.strip()
-            not in [None, ""]  # input widget at [1]
-            for row in self.widget.children
-            for form_field in row.children
-            if form_field.is_required
+            field.input.value.strip() not in [None, ""]
+            for field in self.fields.values()
+            if getattr(field, "is_required", False)
         )
 
     def reshape(self, n_cols: int):
-        """Rebuilds the form with this amount of columns requested. Does nothing if
-        this form has no fields.
-        """
-        if not self._fields:
-            return
-        fieldnames, fields = zip(*self._fields.items())
-        data: dict[str, str] = deepcopy(self.data)
-        form_width = self._get_rows_width(widgets=self.fields.values(), n_cols=n_cols)
-        self._widget.style.width = form_width
-        self.clear()
-        self.add_fields(fields=fields)
-        self._write_data(**data)
-
-    def _write_data(self, **data: dict[str, str]):
-        """Write data on multiple fields by id-value pairs."""
-        for id, val in data.items():
-            self.fields[id].input.value = val
-
-    @staticmethod
-    def _get_rows_width(widgets: list[Widget], n_cols: int) -> int:
-        """Returns the expected row width for the number of columns and widget list."""
-        widths = [
-            wdg.style.width for wdg in widgets if wdg.style.width not in [None, "none"]
-        ]
-        if widths:
-            elem_width = max(widths)
-        else:
-            elem_width = user_input(TextInput).width
-        h_padding = 25
-        return int(n_cols * (elem_width + h_padding))
-
-    @staticmethod
-    def _get_ncols(widgets: list[Widget], row_width: int) -> int:
-        """Returns the expected number of columns for the row width and widget list."""
-        widths = [
-            wdg.style.width for wdg in widgets if wdg.style.width not in [None, "none"]
-        ]
-        if widths:
-            elem_width = max(widths)
-        else:
-            elem_width = user_input(TextInput).width
-        return int(row_width / elem_width)
+        """Rebuilds the form grid layout with the specified amount of columns."""
+        self.n_cols = n_cols
+        self._widget.set_modifiers(COLUMNS(n_cols))
 
     @property
     def data(self) -> Dict[str, str]:
         """Data currently typed by the user in the form."""
-        return {wdg_id: self._fields[wdg_id].input.value for wdg_id in self._fields}
+        return {wdg_id: field.input.value for wdg_id, field in self._fields.items()}
 
     def _save_field_refs(self):
         """Populates `self.fields` with the children provided. Must run at the end of
         every transforming action.
         """
-        children = [field for row in self.widget.children for field in row.children]
+        children = self._widget._raw_children
         label_names = unique_strings(lst=[ch.id for ch in children])
         self._fields = {lb: ch for lb, ch in zip(label_names, children)}
 
     @property
     def fields(self) -> Dict[str, FormField]:
         """Dictionary with each `FormField` element stored in this `FormHandler`."""
-        return getattr(self, "_fields", {})
+        return self._fields
 
     @property
     def on_change(self) -> Callable | None:
-        """Handles `on_change` calls for every of it's `FormField`."""
+        """Handles `on_change` calls for every of its `FormField`."""
         on_change_calls = [field.input.on_change for field in self.fields.values()]
         fields_are_set = all(call is not None for call in on_change_calls)
         if fields_are_set and (len(on_change_calls) > 0):
             return on_change_calls[0]
-        else:
-            return None
+        return None
 
     @on_change.setter
     def on_change(self, func: Callable[[Widget], None]):
+        self._on_change = func
         for field in self._fields.values():
             field.input.on_change = func
 
