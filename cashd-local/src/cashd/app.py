@@ -150,7 +150,7 @@ class Cashd(App):
             size=(360, 190),
         )
 
-        desc_title = Label("Descrição", style=style.HEADING)
+        desc_title = Label("Descrição", style=style.vars.HEADING)
         desc_label = Label(
             "Um aplicativo local-first, que te ajuda a controlar \nsuas vendas no "
             "fiado sem deixar de respeitar a\nprivacidade dos seus dados.",
@@ -159,13 +159,13 @@ class Cashd(App):
             style=Pack(width=content_width), children=[desc_title, desc_label]
         )
 
-        version_title = Label("Versão", style=style.HEADING)
+        version_title = Label("Versão", style=style.vars.HEADING)
         version_label = Label(f"Cashd v{version('cashd')} | Toga v{version('toga')}")
         version_block = Column(
             style=Pack(width=content_width), children=[version_title, version_label]
         )
 
-        madeby_title = Label("Desenvolvido por", style=style.HEADING)
+        madeby_title = Label("Desenvolvido por", style=style.vars.HEADING)
         madeby_label = ImageView(const.VITORLINS_LOGO, style=Pack(margin=(20, 0)))
         madeby_block = Column(
             style=Pack(width=content_width), children=[madeby_title, madeby_label]

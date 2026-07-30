@@ -51,11 +51,11 @@ class IterableStyler(Styler):
         self.parent_gen = self._get_parent_gen()
         self.child_gen = self._get_child_gen()
 
-    def apply_parent(style_dict: dict):
+    def apply_parent(self, style_dict: dict):
         kw = next(self.parent_gen)
         style_dict.update(kw)
 
-    def apply_child(style_dict: dict):
+    def apply_child(self, style_dict: dict):
         kw = next(self.child_gen)
         style_dict.update(kw)
 
@@ -91,14 +91,12 @@ class GridHandler(Modifier):
         blocks = []
         for i in range(self.n):
             block = Box(
-                children=self._get_children_at(
-                    index=i, style_gen=child_style_gen, children=children
-                )
+                children=self._get_children_at(index=i, children=children)
             )
             # Apply styles inherited from parent block
-            apply_styles(as_parent=False, block, self.parent_stylers)
+            apply_styles(as_parent=False, widget=block, stylers=self.parent_stylers)
             # Apply own styles overwriting inherited ones when conflicting
-            apply_styles(as_parent=True, block, self.stylers)
+            apply_styles(as_parent=True, widget=block, stylers=self.stylers)
             block.style.direction = self.direction
             blocks.append(block)
         return blocks
@@ -107,7 +105,7 @@ class GridHandler(Modifier):
         """Seleciona as crianças da coluna `index` (passo N) e aplica o estilo a cada uma."""
         subset = children[index::self.n]
         for child in subset:
-            apply_styles(as_parent=False, child, self.stylers)
+            apply_styles(as_parent=False, widget=child, stylers=self.stylers)
         return subset
 
 
@@ -226,7 +224,7 @@ class ComposedBox(Box):
     def rebuild(self):
         """Rebuilds it's layout."""
         # Reapply own styling
-        apply_styles(as_parent=True, self, self.stylers)
+        apply_styles(as_parent=True, widget=self, stylers=self.stylers)
 
         # Delete widgets keeping references
         for child in list(self.children):
@@ -241,7 +239,7 @@ class ComposedBox(Box):
                 super().add(c)
         else:
             for child in self._raw_children:
-                apply_styles(as_parent=False, child, self.stylers)
+                apply_styles(as_parent=False, widget=child, stylers=self.stylers)
                 super().add(child)
 
 
@@ -259,7 +257,7 @@ def apply_styles(as_parent: bool, widget: Widget, stylers: list[Styler]):
             s.apply_parent(kw)
         else:
             s.apply_child(kw)
-    for k, v in kw.items()
+    for k, v in kw.items():
         setattr(widget.style, k, v)
 
 
