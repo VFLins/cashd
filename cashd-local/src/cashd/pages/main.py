@@ -274,7 +274,7 @@ class SectionCustomerInfo:
         self.on_update = on_update
 
         self.form = widgets.form.FormHandler(
-            n_cols=2,
+            n_cols=1,
             on_change=self.handle_confirm_permission,
         )
         """Multiple text input fields containing the current information of the
@@ -412,6 +412,7 @@ class MainSection(BaseSection):
 
         # containers: 'options' context
         self.customer_options_section = OptionContainer(
+            style=Pack(flex=1), # Ensure it spreads along the window height initially
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
                 ("Histórico", self.subsection_history.full_contents),
