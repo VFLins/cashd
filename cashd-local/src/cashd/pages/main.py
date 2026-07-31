@@ -368,7 +368,7 @@ class MainSection(BaseSection):
             (
                 'Cadastre um cliente em "Novo cliente" para\n'
                 "começar a registrar transações."
-                if data.tbl_clientes.table_is_empty()
+                if data.tbl_clientes().table_is_empty()
                 else self.HELP_MSG
             ),
             style=INLINE_LABEL,
@@ -488,8 +488,11 @@ class MainSection(BaseSection):
             COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
         )
         # Apply adjustments
-        if (w > 500) or (self.subsection_customer_info.form.n_cols != 2):
-            self.subsection_customer_info.form.reshape(n_cols=2)
+        if w > 800:
+            if self.subsection_customer_info.form.n_cols != 2:
+                self.subsection_customer_info.form.reshape(n_cols=2)
+        else:
+            self.subsection_customer_info.form.reshape(n_cols=1)
         col0, col1 = self.body.children[0], self.body.children[1]
         col0.style.flex, col1.style.flex = 45, 50
         self.head.children[0].style.width = int(w * 0.85) - 80
