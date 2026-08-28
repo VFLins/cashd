@@ -1,6 +1,8 @@
 from typing import Any, Generator, Iterable
 from toga import Widget
-from toga.style.pack import ROW, COLUMN, CENTER, LEFT, RIGHT, TOP, BOTTOM, Pack
+from toga.style.pack import (
+    ROW, COLUMN, CENTER, LEFT, RIGHT, TOP, BOTTOM, VISIBLE, HIDDEN, Pack
+)
 from toga.widgets.box import Box, Column, Row
 
 class Modifier:
@@ -227,6 +229,8 @@ class ComposedBox(Box):
         apply_styles(as_parent=True, widget=self, stylers=self.stylers)
 
         # Delete widgets keeping references
+        self.style.visibility = HIDDEN
+        self.refresh()
         for child in list(self.children):
             super().remove(child)
         if not self._raw_children:
@@ -241,6 +245,7 @@ class ComposedBox(Box):
             for child in self._raw_children:
                 apply_styles(as_parent=False, widget=child, stylers=self.stylers)
                 super().add(child)
+        self.style.visibility = VISIBLE
 
 
 def apply_styles(as_parent: bool, widget: Widget, stylers: list[Styler]):
