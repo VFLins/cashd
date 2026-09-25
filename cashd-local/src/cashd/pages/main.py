@@ -424,7 +424,9 @@ class MainSection(BaseSection):
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
-        self.head_border = widgets.custom.GroupBox(children=[self.head])
+        self.head_border = widgets.custom.GroupBox(
+            title="teste", children=[self.head], style=Pack(margin=(10, 0, 20, 0))
+        )
         self.body = get_container()
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.
@@ -477,8 +479,9 @@ class MainSection(BaseSection):
             self.customer_selector.widget, self.customer_options_section
         ]
         # Assign modifiers
+        self.head.rebuild()
         self.body.set_modifiers(
-            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
+            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X), H, STRETCH
         )
         # Apply adjustments
         if w > 800:
@@ -587,7 +590,7 @@ class MainSection(BaseSection):
     async def rearrange_widgets(self):
         w, _ = self.window_size
         # Get a distinct layout ID for every window width, from 0 to len(widths)
-        widths = range(420, 5121, 300)
+        widths = range(420, 4320, 300)
         expected_layout_id = sum(w >= t for t in widths)
 
         if expected_layout_id == getattr(self, "layout_id", None):

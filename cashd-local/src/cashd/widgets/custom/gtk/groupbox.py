@@ -6,7 +6,7 @@ from toga_gtk.widgets.base import Widget
 
 
 class GroupBoxImpl(Widget):
-    """Implementação GTK do GroupBox."""
+    """GroupBox implementation in GTK."""
 
     def create(self):
         self.native = Gtk.Frame()
