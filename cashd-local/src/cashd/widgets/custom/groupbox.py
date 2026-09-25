@@ -28,13 +28,13 @@ class GroupBox(toga.Widget):
         style: Pack | None = None,
         **kwargs,
     ):
-        self.title = title
-
         super().__init__(
             id=id,
             style=style,
             **kwargs,
         )
+
+        self.title = title
 
         # Widget.__init__() chama _create() antes de retornar.
         # Portanto, _children precisa ser criado DEPOIS do super(),
@@ -63,8 +63,11 @@ class GroupBox(toga.Widget):
             f"GroupBox não possui implementação para o backend: {backend}"
         )
 
-    def set_title(self, title: str | None):
-        """Altera o título do GroupBox."""
+    @property
+    def title(self):
+        return self._title
 
-        self.title = title
+    @title.setter
+    def title(self, title: str | None):
+        self._title = title
         self._impl.set_title(title)

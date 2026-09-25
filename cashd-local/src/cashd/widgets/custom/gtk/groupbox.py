@@ -23,22 +23,17 @@ class GroupBoxImpl(Widget):
         else:
             self.native.set_child(self._content_container)
 
-    def set_title(self, title):
-        if title is None:
-            self.native.set_label(None)
-        else:
-            self.native.set_label(title)
+    def set_title(self, title: str | None):
+        self.native.set_label(title)
 
     def rehint(self):
         if GTK_VERSION < (4, 0, 0):
             width = self.native.get_preferred_width()
             height = self.native.get_preferred_height()
-
             self.interface.intrinsic.width = width[0]
             self.interface.intrinsic.height = height[0]
 
         else:
             min_size, _ = self.native.get_preferred_size()
-
             self.interface.intrinsic.width = min_size.width
             self.interface.intrinsic.height = min_size.height
