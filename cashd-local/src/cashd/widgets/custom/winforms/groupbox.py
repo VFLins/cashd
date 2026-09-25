@@ -1,20 +1,72 @@
+from __future__ import annotations
+
 import System.Windows.Forms as WinForms
 
+from toga_winforms.container import Container
+from toga_winforms.widgets.base import Widget
 
-def create(box_interface, title):
-    """Migra os controles do Panel padrão para um GroupBox do WinForms."""
-    backend_view = box_interface._impl.native
 
-    if hasattr(backend_view, "Controls"):
-        groupbox = WinForms.GroupBox()
-        groupbox.Text = title
+class GroupBoxImpl(Widget):
+    """Implementação WinForms do GroupBox."""
 
-        groupbox.Size = backend_view.Size
-        groupbox.Dock = backend_view.Dock
+    def create(self):
+        self.native = WinForms.GroupBox()
 
-        while backend_view.Controls.Count > 0:
-            control = backend_view.Controls[0]
-            backend_view.Controls.Remove(control)
-            groupbox.Controls.Add(control)
+        if self.interface.title is not None:
+            self.native.Text = self.interface.title
 
-        box_interface._impl.native = groupbox
+        # Children belong to the internal container.
+        self._content_container = Container(self.native)
+
+    def set_title(self, title):
+        if title is None:
+            self.native.Text = ""
+        else:
+            self.native.Text = title
+
+    @property
+    def container(self):
+        return self._container
+
+    @container.setter
+    def container(self, container):
+        if self._container is not None:
+            self._container.remove_content(self)
+
+        self._container = container
+
+        if container is not None:
+            container.add_content(self)
+
+        for child in self.interface.children:
+            child._impl.container = self._content_container
+
+        self.refresh()
+
+    def add_child(self, child):
+        child.container = self._content_container
+
+    def insert_child(self, index, child):
+        child.container = self._content_container
+
+    def remove_child(self, child):
+        child.container = None
+
+    def refresh(self):
+        self.rehint()
+
+        if self._container is not None:
+            self._container.refreshed()
+
+    def rehint(self):
+        preferred = self.native.GetPreferredSize(
+            WinForms.Size(0, 0)
+        )
+
+        self.interface.intrinsic.width = self.scale_out(
+            preferred.Width
+        )
+
+        self.interface.intrinsic.height = self.scale_out(
+            preferred.Height
+        )

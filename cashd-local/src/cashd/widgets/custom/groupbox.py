@@ -1,33 +1,70 @@
+from __future__ import annotations
+
+from collections.abc import Iterable
+
 import toga
-from toga.style.pack import COLUMN
+from toga.style import Pack
 
 
-class GroupBoxFactory:
-    """Fábrica responsável por mapear e construir as visões de backend do GroupBox."""
+class GroupBox(toga.Widget):
+    """Container nativo com uma moldura opcionalmente titulada.
 
-    _registry = {
-        "toga_gtk": ".gtk.groupbox",
-        "toga_winforms": ".winforms.groupbox"
-    }
+    Args:
+        title: Texto exibido na moldura. ``None`` cria uma moldura sem título.
+        children: Widgets que serão colocados dentro da moldura.
+        id: Identificador do widget.
+        style: Estilo Pack.
+        kwargs: Propriedades de estilo adicionais.
+    """
 
-    @classmethod
-    def build(cls, box_interface, title):
-        backend_name = toga.backend
+    _MIN_WIDTH = 0
+    _MIN_HEIGHT = 0
 
-        if backend_name in cls._registry:
-            module_path = cls._registry[backend_name]
-            module = importlib.import_module(module_path, package=__name__)
-            module.create(box_interface, title)
-        else:
-            print(f"[Warning] Suporte indisponível para o backend: {backend_name}")
-
-
-class GroupBox(toga.Box):
-    """Componente visível do Toga que agrupa graficamente os elementos filhos."""
-
-    def __init__(self, title, children=None, id=None, style=None):
-        super().__init__(id=id, style=style, children=children)
-        self.style.direction = COLUMN
+    def __init__(
+        self,
+        title: str | None = None,
+        children: Iterable[toga.Widget] | None = None,
+        id: str | None = None,
+        style: Pack | None = None,
+        **kwargs,
+    ):
         self.title = title
 
-        GroupBoxFactory.build(self, self.title)
+        super().__init__(
+            id=id,
+            style=style,
+            **kwargs,
+        )
+
+        # Widget.__init__() chama _create() antes de retornar.
+        # Portanto, _children precisa ser criado DEPOIS do super(),
+        # mas ANTES de adicionar os filhos.
+        self._children = []
+
+        if children is not None:
+            self.add(*children)
+
+    def _create(self):
+        """Cria a implementação específica do backend."""
+
+        backend = toga.backend
+
+        if backend == "toga_gtk":
+            from .gtk.groupbox import GroupBoxImpl
+
+            return GroupBoxImpl(interface=self)
+
+        if backend == "toga_winforms":
+            from .winforms.groupbox import GroupBoxImpl
+
+            return GroupBoxImpl(interface=self)
+
+        raise NotImplementedError(
+            f"GroupBox não possui implementação para o backend: {backend}"
+        )
+
+    def set_title(self, title: str | None):
+        """Altera o título do GroupBox."""
+
+        self.title = title
+        self._impl.set_title(title)

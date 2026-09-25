@@ -376,7 +376,7 @@ class MainSection(BaseSection):
         """Text on top of the page displaying information about the currently
         selected customer.
         """
-        self.help_msg.style.background_color = "#1d1d20" if const.sys_dark_mode() else "#f9f9f9"
+        #self.help_msg.style.background_color = "#1d1d20" if const.sys_dark_mode() else "#f9f9f9"
 
         self.help_msg_block = widgets.GroupBox(
             style=Pack(align_items="center", direction="row"),
@@ -432,7 +432,7 @@ class MainSection(BaseSection):
 
         self.full_contents = Box(
             style=FULL_CONTENTS,
-            children=[self.head, self.body],
+            children=[self.help_msg_block, self.head, self.body],
         )
         self.set_layout_0(w=const.MAIN_WINDOW_SIZE[0])
 
