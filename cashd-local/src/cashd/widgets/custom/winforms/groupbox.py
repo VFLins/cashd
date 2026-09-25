@@ -7,12 +7,50 @@ from toga_winforms.container import Container
 from toga_winforms.widgets.base import Widget
 
 
+class GroupBoxContainer(Container):
+    INSET = 85
+
+    def apply_layout(self, layout_width, layout_height):
+        super().apply_layout(layout_width, layout_height)
+        if self.content is None:
+            return
+
+        print(
+            "CONTAINER:",
+            "panel=",
+            self.native_content.Location.X,
+            self.native_content.Location.Y,
+            self.native_content.Width,
+            self.native_content.Height,
+            "child=",
+            self.content.native.Location.X,
+            self.content.native.Location.Y,
+            self.content.native.Width,
+            self.content.native.Height,
+        )
+
+        inset = self.scale_in(self.INSET)
+        width = max(0, self.native_width - 2 * inset)
+        height = max(0, self.native_height - 2 * inset)
+
+        self.content.native.Location = Drawing.Point(inset, inset)
+        self.content.native.Size = Drawing.Size(width, height)
+
+        print(
+            "AFTER:",
+            self.content.native.Location.X,
+            self.content.native.Location.Y,
+            self.content.native.Width,
+            self.content.native.Height,
+        )
+
+
 class GroupBoxImpl(Widget):
     """Implementação WinForms do GroupBox."""
 
     def create(self):
         self.native = WinForms.GroupBox()
-        self._content_container = Container(self.native)
+        self._content_container = GroupBoxContainer(self.native)
         self._ensure_bounds()
 
     def set_title(self, title: str | None):
@@ -41,12 +79,5 @@ class GroupBoxImpl(Widget):
     def _ensure_bounds(self):
         """Handler added to ensure that content is contained inside the borders."""
         bounds = self.native.DisplayRectangle
-        content_inset = self.scale_in(2) # Use toga.Widget DPI scaling
-        self._content_container.native_content.Location = Drawing.Point(
-            bounds.X + content_inset,
-            bounds.Y + content_inset,
-        )
-        self._content_container.native_content.Size = Drawing.Size(
-            max(0, bounds.Width - 2 * content_inset),
-            max(0, bounds.Height - 2 * content_inset),
-        )
+        self._content_container.native_content.Location = bounds.Location
+        self._content_container.native_content.Size = bounds.Size
