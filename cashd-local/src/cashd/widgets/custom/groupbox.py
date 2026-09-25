@@ -1,30 +1,33 @@
 import toga
-from toga.style import Pack
+from toga.style.pack import COLUMN
+
+
+class GroupBoxFactory:
+    """Fábrica responsável por mapear e construir as visões de backend do GroupBox."""
+
+    _registry = {
+        "toga_gtk": ".gtk.groupbox",
+        "toga_winforms": ".winforms.groupbox"
+    }
+
+    @classmethod
+    def build(cls, box_interface, title):
+        backend_name = toga.backend
+
+        if backend_name in cls._registry:
+            module_path = cls._registry[backend_name]
+            module = importlib.import_module(module_path, package=__name__)
+            module.create(box_interface, title)
+        else:
+            print(f"[Warning] Suporte indisponível para o backend: {backend_name}")
+
 
 class GroupBox(toga.Box):
-    def __init__(self, title="", id=None, style=None, children=None):
-        # Inicializa a interface base
+    """Componente visível do Toga que agrupa graficamente os elementos filhos."""
+
+    def __init__(self, title, children=None, id=None, style=None):
         super().__init__(id=id, style=style, children=children)
-        self._title = title
+        self.style.direction = COLUMN
+        self.title = title
 
-        # Seleciona o backend nativo com base no SO
-        factory = toga.App.app.factory
-        if factory.backend_name == 'gtk':
-            from .gtk.groupbox import GroupBoxGTK
-            self._impl = GroupBoxGTK(interface=self)
-        elif factory.backend_name == 'winforms':
-            from .winforms.groupbox import GroupBoxWinForms
-            self._impl = GroupBoxWinForms(interface=self)
-        else:
-            # Fallback para sistemas não suportados (usa a implementação padrão do Box)
-            self._impl = factory.Box(interface=self)
-
-    @property
-    def title(self):
-        return self._title
-
-    @title.setter
-    def title(self, value):
-        self._title = value
-        if hasattr(self._impl, 'set_title'):
-            self._impl.set_title(value)
+        GroupBoxFactory.build(self, self.title)

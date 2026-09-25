@@ -378,9 +378,9 @@ class MainSection(BaseSection):
         """
         self.help_msg.style.background_color = "#1d1d20" if const.sys_dark_mode() else "#f9f9f9"
 
-        self.help_msg_block = ScrollContainer(
+        self.help_msg_block = widgets.GroupBox(
             style=Pack(align_items="center", direction="row"),
-            content=self.help_msg,
+            children=[self.help_msg],
         )
 
         self.customer_options_button = Button(
