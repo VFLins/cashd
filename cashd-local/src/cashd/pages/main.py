@@ -77,7 +77,7 @@ class SubsectionAddTransac:
         self.SELECTED_CUSTOMER = selected_customer
         self.on_insert = on_insert
 
-        #self.date_input_form = widgets.HorizontalDateForm()
+        # self.date_input_form = widgets.HorizontalDateForm()
         self.date = FormField(
             label="Data",
             input_widget=FormattedDateInput(),
@@ -411,7 +411,7 @@ class MainSection(BaseSection):
 
         # containers: 'options' context
         self.customer_options_section = OptionContainer(
-            style=Pack(flex=1), # Ensure it spreads along the window height initially
+            style=Pack(flex=1),  # Ensure it spreads along the window height initially
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
                 ("Histórico", self.subsection_history.full_contents),
@@ -425,7 +425,7 @@ class MainSection(BaseSection):
         customer's data.
         """
         self.head_border = widgets.custom.GroupBox(
-            title="teste", children=[self.head], style=Pack(margin=(10, 0, 20, 0))
+            title="teste", children=[self.head], style=Pack(margin=(20, 0, 30, 0))
         )
         self.body = get_container()
         """Contents of most of the interactive part of this section, including
@@ -467,7 +467,6 @@ class MainSection(BaseSection):
         # can keep centered.
         self.customer_selector.width = int(w * 0.85)
 
-
     def set_layout_1(self, w: int):
         """Rearranges this section's widgets in a two-column layout.
 
@@ -476,7 +475,8 @@ class MainSection(BaseSection):
         # Assign content
         self.head._raw_children = [self.help_msg_block]
         self.body._raw_children = [
-            self.customer_selector.widget, self.customer_options_section
+            self.customer_selector.widget,
+            self.customer_options_section,
         ]
         # Assign modifiers
         self.head.rebuild()
@@ -511,9 +511,7 @@ class MainSection(BaseSection):
     def _upd_selected_info(self):
         self.customer_options_section.current_tab = 0
         if self.SELECTED_CUSTOMER.Saldo == "N/D":
-            self.help_msg.text = (
-                "Selecione um cliente, depois clique no botão ao lado"
-            )
+            self.help_msg.text = "Selecione um cliente, depois clique no botão ao lado"
         else:
             self.help_msg.text = (
                 f"Nome: {self.SELECTED_CUSTOMER.NomeCompleto}\n"

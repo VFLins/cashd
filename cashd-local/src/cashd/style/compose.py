@@ -1,12 +1,23 @@
 from typing import Any, Generator, Iterable
 from toga import Widget
 from toga.style.pack import (
-    ROW, COLUMN, CENTER, LEFT, RIGHT, TOP, BOTTOM, VISIBLE, HIDDEN, Pack
+    ROW,
+    COLUMN,
+    CENTER,
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM,
+    VISIBLE,
+    HIDDEN,
+    Pack,
 )
 from toga.widgets.box import Box, Column, Row
 
+
 class Modifier:
     """Generic class for the declarative container system."""
+
 
 class Styler(Modifier):
     def __init__(
@@ -92,9 +103,7 @@ class GridHandler(Modifier):
         self.parent_stylers = parent_stylers
         blocks = []
         for i in range(self.n):
-            block = Box(
-                children=self._get_children_at(index=i, children=children)
-            )
+            block = Box(children=self._get_children_at(index=i, children=children))
             # Apply styles inherited from parent block
             apply_styles(as_parent=False, widget=block, stylers=self.parent_stylers)
             # Apply own styles overwriting inherited ones when conflicting
@@ -105,7 +114,7 @@ class GridHandler(Modifier):
 
     def _get_children_at(self, index: int, children: list[Widget]) -> list[Widget]:
         """Seleciona as crianças da coluna `index` (passo N) e aplica o estilo a cada uma."""
-        subset = children[index::self.n]
+        subset = children[index :: self.n]
         for child in subset:
             apply_styles(as_parent=False, widget=child, stylers=self.stylers)
         return subset
@@ -127,29 +136,36 @@ CENTER_Y = Styler(parent_style={"justify_content": CENTER})
 
 # --- 2. Customizable ---
 
+
 def BG_COLOR(color: str) -> Styler:
     """Sets a background color to the parent widget."""
     return Styler(parent_style={"background_color": color})
+
 
 def CONTENT_BG_COLOR(color: str) -> Styler:
     """Sets a background color to the parent widget."""
     return Styler(child_style={"background_color": color})
 
-def MARGIN(t: int = 0, l: int = 0, b: int  = 0, r: int = 0) -> Styler:
+
+def MARGIN(t: int = 0, l: int = 0, b: int = 0, r: int = 0) -> Styler:
     """Aplica espaçamento interno (padding) nos containers dos filhos."""
     return Styler(parent_style={"margin": (t, l, b, r)})
+
 
 def FLEX(value: int) -> Styler:
     """Aplica um fator de flexibilidade personalizado ao container pai."""
     return Styler(parent_style={"flex": value})
 
+
 def CONTENT_WIDTH(value: int) -> Styler:
     """Set a common width to all of it's children."""
     return Styler(child_style={"width": value})
 
+
 def WIDTH(value: int) -> Styler:
     """Set a common width to all of it's children."""
     return Styler(parent_style={"width": value})
+
 
 def GAP(value: int) -> Styler:
     """Set spacing around it's children."""
@@ -158,20 +174,26 @@ def GAP(value: int) -> Styler:
 
 # --- 3. Iterable ---
 
+
 def WIDTHS(*values: int) -> IterableStyler:
     return IterableStyler(parent_style={"width": values})
+
 
 def CONTENT_WIDTHS(*values: int) -> IterableStyler:
     return IterableStyler(child_style={"width": values})
 
+
 def FLEXES(*values: int) -> IterableStyler:
     return IterableStyler(parent_style={"flex": values})
+
 
 def CONTENT_FLEXES(*values: int) -> IterableStyler:
     return IterableStyler(child_style={"flex": values})
 
+
 def BG_COLORS(*colors: str) -> IterableStyler:
     return IterableStyler(parent_style={"background_color": colors})
+
 
 def CONTENT_BG_COLORS(*colors: str) -> IterableStyler:
     return IterableStyler(child_style={"background_color": colors})
@@ -179,9 +201,11 @@ def CONTENT_BG_COLORS(*colors: str) -> IterableStyler:
 
 # --- 4. Grids ---
 
+
 def COLUMNS(n: int, *stylers: Styler) -> GridHandler:
     """Cria N colunas verticais infinitas e preenche alternadamente."""
     return GridHandler(n, COLUMN, *stylers)
+
 
 def ROWS(n: int, *stylers: Styler) -> GridHandler:
     """Cria linhas horizontais com no máximo N itens cada."""

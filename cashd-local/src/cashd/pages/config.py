@@ -259,9 +259,7 @@ class ConfigSection(BaseSection):
             ],
         )
         self.main_container = Box(style=PAGE_BODY, children=[self.sections])
-        self.full_contents = Box(
-            style=FULL_CONTENTS, children=[self.main_container]
-        )
+        self.full_contents = Box(style=FULL_CONTENTS, children=[self.main_container])
 
     def upd_backup_on_transaction(self, widget: Switch):
         prefs.BackupOnTransaction.set(widget.value)

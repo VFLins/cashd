@@ -1,9 +1,8 @@
 from __future__ import annotations
-
 from collections.abc import Iterable
 
 import toga
-from toga.style import Pack
+from toga.style import Pack, TogaApplicator
 
 
 class GroupBox(toga.Widget):
@@ -36,11 +35,7 @@ class GroupBox(toga.Widget):
 
         self.title = title
 
-        # Widget.__init__() chama _create() antes de retornar.
-        # Portanto, _children precisa ser criado DEPOIS do super(),
-        # mas ANTES de adicionar os filhos.
         self._children = []
-
         if children is not None:
             self.add(*children)
 
