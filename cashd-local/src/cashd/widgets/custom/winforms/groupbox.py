@@ -39,6 +39,14 @@ class GroupBoxImpl(Widget):
         self._ensure_bounds()
 
     def _ensure_bounds(self):
+        """Handler added to ensure that content is contained inside the borders."""
         bounds = self.native.DisplayRectangle
-        self._content_container.native_content.Location = bounds.Location
-        self._content_container.native_content.Size = bounds.Size
+        content_inset = self.scale_in(2) # Use toga.Widget DPI scaling
+        self._content_container.native_content.Location = Drawing.Point(
+            bounds.X + content_inset,
+            bounds.Y + content_inset,
+        )
+        self._content_container.native_content.Size = Drawing.Size(
+            max(0, bounds.Width - 2 * content_inset),
+            max(0, bounds.Height - 2 * content_inset),
+        )

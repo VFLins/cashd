@@ -451,7 +451,6 @@ class MainSection(BaseSection):
             CENTER_X,
             CONTENT_WIDTHS(60, label_block_width),
             GAP(10),
-            MARGIN(t=20, b=10, l=10, r=10), # groupbox clearance
         )
         self.body.set_modifiers(
             COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
@@ -478,7 +477,6 @@ class MainSection(BaseSection):
             self.customer_selector.widget, self.customer_options_section
         ]
         # Assign modifiers
-        self.head.set_modifiers(MARGIN(t=20, b=10, r=10, l=10)) # groupbox clearance
         self.body.set_modifiers(
             COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
         )

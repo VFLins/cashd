@@ -64,8 +64,8 @@ class GroupBox(toga.Widget):
         )
 
     @property
-    def title(self):
-        return self._title
+    def title(self) -> str | None:
+        return getattr(self, "_title", None)
 
     @title.setter
     def title(self, title: str | None):
