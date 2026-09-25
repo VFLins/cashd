@@ -15,6 +15,12 @@ dependencies = [
     "pillow",
 ]
 
+[project.entry-points."togax_groupbox.backend.toga_gtk"]
+GroupBox = "cashd.widgets.custom.gtk.groupbox:GroupBox"
+
+[project.entry-points."togax_groupbox.backend.toga_winforms"]
+GroupBox = "cashd.widgets.custom.winforms.groupbox:GroupBox"
+
 [tool.briefcase]
 project_name = "Cashd"
 bundle = "br.com.vitorlins.cashd"
