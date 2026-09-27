@@ -28,7 +28,12 @@ class GroupBox(toga.Widget):
           to the GroupBox.
         :param kwargs: Initial style properties.
         """
-        self._checkbox = checkbox # needs to be set before toga.Widget.__init__
+        # ----
+        # needs to be set before toga.Widget.__init__, because this information is
+        # needed to build the widget
+        self._checkbox = checkbox
+        # ----
+
         super().__init__(
             id=id,
             style=style,

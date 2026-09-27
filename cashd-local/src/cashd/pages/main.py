@@ -378,9 +378,11 @@ class MainSection(BaseSection):
         selected customer.
         """
 
-        self.help_msg_block = Box(
-            style=Pack(align_items="center", direction="row"),
-            children=[self.help_msg],
+        self.help_msg_block = ScrollContainer(
+            content=Box(
+                style=Pack(align_items="center", direction="row"),
+                children=[self.help_msg]
+            ),
         )
 
         self.customer_options_button = Button(
@@ -450,10 +452,7 @@ class MainSection(BaseSection):
         # Assign modifers
         label_block_width = int(w * 0.85) - 80
         self.head.set_modifiers(
-            H,
-            CENTER_X,
-            CONTENT_WIDTHS(60, label_block_width),
-            GAP(10),
+            H, CENTER_X, CONTENT_WIDTHS(60, label_block_width), GAP(10)
         )
         self.body.set_modifiers(
             COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
