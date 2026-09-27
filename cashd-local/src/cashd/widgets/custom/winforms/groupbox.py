@@ -11,28 +11,36 @@ from toga_winforms.widgets.base import Widget
 class GroupBoxImpl(Widget):
     """GroupBox implementation on WinForms."""
 
-    _BORDER_CLEARANCE = 28
+    _BORDER_CLEARANCE = 30
     """Extra size added to the native GroupBox to keep its border clear of children."""
 
     def create(self):
         self.native = WinForms.GroupBox()
         self._content_container = Container(self.native)
-        self._title_container = Container(self.native)
-        self._title_widget = None
 
-    def set_title(self, title: str | toga.Switch | None):
-        # Cleanup switch if present
-        if self._title_widget is not None:
-            self._title_widget.container = None
-            self._title_widget = None
-
-        # Add switch if attributed, or set text normally otherwise
-        if isinstance(title, toga.Switch):
-            self.native.Text = "" # Use switch's text
-            self._title_widget = title
-            title.container = self._title_container
+        if self.interface.checkbox:
+            self._title_checkbox = WinForms.CheckBox()
+            self._title_checkbox.Text = self.title
+            self._title_checkbox.AutoSize = True
+            self.native.Controls.Add(self._title_checkbox)
         else:
-            self.native.Text = "" if title is None else title
+            self.native.Text = self.title
+
+    def set_title(self, title: str | None):
+        title = "" if title is None else title
+        if self._title_checkbox is not None:
+            self._title_checkbox.Text = title
+        else:
+            self.native.Text = title
+
+    def get_value(self) -> bool | None:
+        if self._title_checkbox is None:
+            return None
+        return self._title_checkbox.Checked
+
+    def set_value(self, value: bool):
+        if self._title_checkbox is not None:
+            self._title_checkbox.Checked = value
 
     def add_child(self, child):
         child.container = self._content_container
@@ -58,14 +66,15 @@ class GroupBoxImpl(Widget):
         bounds = self.native.DisplayRectangle
         self._content_container.native_content.Location = bounds.Location
         self._content_container.native_content.Size = bounds.Size
+        self._content_container.native_content.BackColor = Drawing.Color.Transparent
 
-        # Calculate bounds to the switch if present
-        if self._title_widget is not None:
-            switch_native = self._title_widget._impl.native
-            preferred = switch_native.PreferredSize
+        if self._title_checkbox is not None:
+            preferred = self._title_checkbox.PreferredSize
+            self._title_checkbox.Location = Drawing.Point(bounds.X, 0)
+            self._title_checkbox.Size = Drawing.Size(preferred.Width, preferred.Height)
+            self._title_checkbox.BringToFront()
 
-            self._title_container.native_content.Location = Drawing.Point(bounds.X, 0)
-            self._title_container.native_content.Size = preferred
-            self._title_container.native_content.BackColor = self.native.BackColor
-            switch_native.Location = Drawing.Point(0, 0)
-            switch_native.Size = preferred
+    @property
+    def title(self):
+        return "" if self.interface.title is None else self.interface.title
+

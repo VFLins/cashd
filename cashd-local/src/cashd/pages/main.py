@@ -13,6 +13,7 @@ from toga.widgets.box import Box, Column, Row
 from toga.widgets.label import Label
 from toga.widgets.table import Table
 from toga.widgets.button import Button
+from toga.widgets.switch import Switch
 from toga.widgets.divider import Divider
 from toga.widgets.dateinput import DateInput
 from toga.widgets.selection import Selection
@@ -425,7 +426,7 @@ class MainSection(BaseSection):
         customer's data.
         """
         self.head_border = widgets.custom.GroupBox(
-            title="teste", children=[self.head], style=Pack(margin=(20, 0, 30, 0))
+            title="testando", checkbox=True, children=[self.head], style=Pack(margin=(20, 0, 30, 0))
         )
         self.body = get_container()
         """Contents of most of the interactive part of this section, including
