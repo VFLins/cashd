@@ -386,7 +386,7 @@ class MainSection(BaseSection):
         )
 
         self.customer_options_button = Button(
-            style=Pack(margin_left=20),
+            style=Pack(width=50, height=40, margin_left=20),
             id="customer_options_button",
             icon=const.ICON_USER_OPTS,
             enabled=False,
@@ -395,7 +395,7 @@ class MainSection(BaseSection):
         """Button that changes context to interact with the selected user."""
 
         self.return_button = Button(
-            style=Pack(margin_left=20),
+            style=Pack(width=50, height=40, margin_left=20),
             id="return_button",
             icon=const.ICON_RETURN,
             on_press=self.set_context_screen,
@@ -428,7 +428,7 @@ class MainSection(BaseSection):
         customer's data.
         """
         self.head_border = widgets.custom.GroupBox(
-            title="testando", checkbox=True, children=[self.head], style=Pack(margin=(20, 0, 30, 0))
+            children=[self.head], style=Pack(margin=(20, 0, 30, 0))
         )
         self.body = get_container()
         """Contents of most of the interactive part of this section, including
