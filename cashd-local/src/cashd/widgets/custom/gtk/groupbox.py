@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from toga_gtk.container import TogaContainer
-from toga_gtk.libs import GTK_VERSION, Gtk
+from toga_gtk.libs import GTK_VERSION, Gtk, Gdk
 from toga_gtk.widgets.base import Widget
 
 
@@ -11,20 +11,11 @@ class GroupBoxImpl(Widget):
     def create(self):
         self.native = Gtk.Frame()
         self._checkbox = None
-
         if self.interface.checkbox:
             self._checkbox = Gtk.CheckButton(label=self.title)
             self.native.set_label_widget(self._checkbox)
         elif self.interface.title is not None:
             self.native.set_label(self.title)
-
-        self._content_container = TogaContainer()
-        self._content_container._content = self
-
-        if GTK_VERSION < (4, 0, 0):
-            self.native.add(self._content_container)
-        else:
-            self.native.set_child(self._content_container)
 
     def set_title(self, title: str | None):
         title = "" if title is None else title
@@ -42,17 +33,21 @@ class GroupBoxImpl(Widget):
         if self._checkbox is not None:
             self._checkbox.set_active(value)
 
-    def rehint(self):
-        if GTK_VERSION < (4, 0, 0):
-            width = self.native.get_preferred_width()
-            height = self.native.get_preferred_height()
-            self.interface.intrinsic.width = width[0]
-            self.interface.intrinsic.height = height[0]
+    def set_bounds(self, x, y, width, height):
+        top = self._label_height()
+        pad = 6
+        super().set_bounds(
+            x - pad,
+            y - top,
+            width + 2 * pad,
+            height + top + pad
+        )
 
-        else:
-            min_size, _ = self.native.get_preferred_size()
-            self.interface.intrinsic.width = min_size.width
-            self.interface.intrinsic.height = min_size.height
+    def _label_height(self):
+        label = self.native.get_label_widget()
+        if label is None:
+            return 0
+        return label.get_preferred_height()[0]
 
     @property
     def title(self):
