@@ -14,6 +14,7 @@ class GroupBox(toga.Widget):
         title: str | None = None,
         checkbox: bool = False,
         children: Iterable[toga.Widget] | None = None,
+        on_change: toga.widgets.base.OnChangeHandler | None = None,
         id: str | None = None,
         style: Pack | None = None,
         **kwargs,
@@ -23,6 +24,7 @@ class GroupBox(toga.Widget):
         :param title: Title of the container.
         :param checkbox: Tells if the title should include a checkbox.
         :param children: An optional list of children to add to the box.
+        :param on_change: The handler to invoke when the value of the checkbox changes.
         :param id: The ID for the widget.
         :param style: A style object, if no style is passed, a default style is passed
           to the GroupBox.
@@ -41,6 +43,7 @@ class GroupBox(toga.Widget):
         )
 
         self.title = title
+        self.on_change = on_change
 
         self._children = []
         if children is not None:
@@ -83,3 +86,12 @@ class GroupBox(toga.Widget):
     @property
     def checkbox(self) -> bool:
         return self._checkbox
+
+    @property
+    def on_change(self):
+        """Handler called when this GroupBox's checkbox changes it's value."""
+        return self._on_change
+
+    @on_change.setter
+    def on_change(self, handler):
+        self._on_change = toga.handlers.wrapped_handler(self, handler)

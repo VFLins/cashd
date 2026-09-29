@@ -13,6 +13,7 @@ class GroupBoxImpl(Widget):
         self._checkbox = None
         if self.interface.checkbox:
             self._checkbox = Gtk.CheckButton(label=self.title)
+            self._checkbox.connect("toggled", self.checked_changed)
             self.native.set_label_widget(self._checkbox)
         elif self.interface.title is not None:
             self.native.set_label(self.title)
@@ -31,7 +32,9 @@ class GroupBoxImpl(Widget):
 
     def set_value(self, value: bool):
         if self._checkbox is not None:
+            self._updating = True
             self._checkbox.set_active(value)
+            self._updating = False
 
     def set_bounds(self, x, y, width, height):
         top = self._label_height()
@@ -48,6 +51,9 @@ class GroupBoxImpl(Widget):
         if label is None:
             return 0
         return label.get_preferred_height()[0]
+
+    def checked_changed(self, widget):
+        self.interface.on_change()
 
     @property
     def title(self):
