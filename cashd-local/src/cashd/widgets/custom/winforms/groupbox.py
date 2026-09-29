@@ -11,42 +11,41 @@ from toga_winforms.widgets.base import Widget
 class GroupBoxImpl(Widget):
     """GroupBox implementation on WinForms."""
 
-    _BORDER_CLEARANCE = 30
-    """Extra size added to the native GroupBox to keep its border clear of children."""
-
     def create(self):
         self.native = WinForms.GroupBox()
         self._content_container = Container(self.native)
-        self._checkbox = None
 
-        if self.interface.checkbox:
-            self._checkbox = WinForms.CheckBox()
-            self._checkbox.Text = self.title
-            self._checkbox.AutoSize = True
-            self._checkbox.CheckedChanged += WeakrefCallable(self.checked_changed)
-            self.native.Controls.Add(self._checkbox)
-        else:
-            self.native.Text = self.title
+        # The checkbox always exists, only its visibility changes, so that it can be
+        # shown or hidden whenever ``on_change`` is set or cleared.
+        self._checkbox_visible = False
+        self._checkbox = WinForms.CheckBox()
+        self._checkbox.AutoSize = True
+        self._checkbox.Visible = False
+        self._checkbox.CheckedChanged += WeakrefCallable(self.checked_changed)
+        self.native.Controls.Add(self._checkbox)
 
+        self._update_title()
         self._insets = self._measure_insets()
 
     def set_title(self, title: str | None):
-        title = "" if title is None else title
-        if self._checkbox is not None:
-            self._checkbox.Text = title
-        else:
-            self.native.Text = title
+        self._update_title()
+
+    def set_checkbox_visible(self, visible: bool):
+        if visible == self._checkbox_visible:
+            return
+        self._checkbox_visible = visible
+        self._checkbox.Visible = visible
+        self._update_title()
+        self.interface.refresh()
 
     def get_value(self) -> bool | None:
-        if self._checkbox is None:
+        if not self._checkbox_visible:
             return None
         return self._checkbox.Checked
 
     def set_value(self, value: bool):
-        if self._checkbox is not None:
-            self._updating = True
+        if self._checkbox_visible:
             self._checkbox.Checked = value
-            self._updating = False
 
     def add_child(self, child):
         child.container = self._content_container
@@ -62,8 +61,6 @@ class GroupBoxImpl(Widget):
 
     def set_bounds(self, x, y, width, height):
         left, top, right, bottom = self._insets
-        grow = self._BORDER_CLEARANCE
-        shift = grow / 2
         super().set_bounds(
             x - left,
             y - top,
@@ -75,7 +72,7 @@ class GroupBoxImpl(Widget):
         native_content.Location = bounds.Location
         native_content.Size = bounds.Size
 
-        if self._checkbox is not None:
+        if self._checkbox_visible:
             preferred = self._checkbox.PreferredSize
             self._checkbox.Location = Drawing.Point(bounds.X, 0)
             self._checkbox.Size = Drawing.Size(preferred.Width, preferred.Height)
@@ -83,6 +80,13 @@ class GroupBoxImpl(Widget):
 
     def checked_changed(self, sender, event):
         self.interface.on_change()
+
+    def _update_title(self):
+        if self._checkbox_visible:
+            self.native.Text = ""
+            self._checkbox.Text = self.title
+        else:
+            self.native.Text = self.title
 
     def _measure_insets(self):
         self.native.Size = Drawing.Size(200, 200)
@@ -96,4 +100,3 @@ class GroupBoxImpl(Widget):
     @property
     def title(self):
         return "" if self.interface.title is None else self.interface.title
-

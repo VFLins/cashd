@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 from collections.abc import Iterable
 
 import toga
-from toga.style import Pack, TogaApplicator
+from toga.style import Pack
 
 
 class GroupBox(toga.Widget):
@@ -12,7 +13,6 @@ class GroupBox(toga.Widget):
     def __init__(
         self,
         title: str | None = None,
-        checkbox: bool = False,
         children: Iterable[toga.Widget] | None = None,
         on_change: toga.widgets.base.OnChangeHandler | None = None,
         id: str | None = None,
@@ -21,20 +21,19 @@ class GroupBox(toga.Widget):
     ):
         """Container with border and optional title and checkbox.
 
+        The checkbox is shown in the title if, and only if, an ``on_change`` handler
+        is set. Setting ``on_change`` to ``None`` hides it again.
+
         :param title: Title of the container.
-        :param checkbox: Tells if the title should include a checkbox.
         :param children: An optional list of children to add to the box.
         :param on_change: The handler to invoke when the value of the checkbox changes.
+          If provided, the title will include a checkbox.
         :param id: The ID for the widget.
         :param style: A style object, if no style is passed, a default style is passed
           to the GroupBox.
         :param kwargs: Initial style properties.
         """
-        # ----
-        # needs to be set before toga.Widget.__init__, because this information is
-        # needed to build the widget
-        self._checkbox = checkbox
-        # ----
+        self._has_checkbox = False
 
         super().__init__(
             id=id,
@@ -64,6 +63,7 @@ class GroupBox(toga.Widget):
 
     @property
     def title(self) -> str | None:
+        """Title of the GroupBox."""
         return getattr(self, "_title", None)
 
     @title.setter
@@ -72,26 +72,36 @@ class GroupBox(toga.Widget):
         self._impl.set_title(title)
 
     @property
+    def checkbox(self) -> bool:
+        """Whether the checkbox is currently shown (read-only).
+
+        It is shown when an ``on_change`` handler is set.
+        """
+        return self._has_checkbox
+
+    @property
     def value(self) -> bool | None:
-        if not self._checkbox:
+        """State of the checkbox, or ``None`` if the checkbox isn't shown."""
+        if not self._has_checkbox:
             return None
         return self._impl.get_value()
 
     @value.setter
     def value(self, value: bool | None):
-        if self.value is None or value is None:
+        if not self._has_checkbox or value is None:
             return
         self._impl.set_value(bool(value))
 
     @property
-    def checkbox(self) -> bool:
-        return self._checkbox
-
-    @property
     def on_change(self):
-        """Handler called when this GroupBox's checkbox changes it's value."""
+        """Handler called when this GroupBox's checkbox changes its value.
+
+        Setting a handler shows the checkbox, setting ``None`` hides it.
+        """
         return self._on_change
 
     @on_change.setter
     def on_change(self, handler):
         self._on_change = toga.handlers.wrapped_handler(self, handler)
+        self._has_checkbox = handler is not None
+        self._impl.set_checkbox_visible(self._has_checkbox)
