@@ -1,11 +1,8 @@
-from unittest.mock import Mock
-
-import pytest
-
 import toga
-
-
-# Ajuste este import para o nome real do seu pacote.
+import pytest
+from ..probes import get_probe
+from ..probes import GroupBoxProbe
+from unittest.mock import Mock
 from cashd.widgets.custom import GroupBox
 
 
