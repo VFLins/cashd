@@ -31,6 +31,7 @@ from cashd.style.vars import (
     PAGE_BODY,
 )
 from cashd.widgets.elems import ListOfItems
+from cashd.widgets.custom import GroupBox
 
 
 class ConfigSection(BaseSection):
@@ -128,48 +129,22 @@ class ConfigSection(BaseSection):
             ),
             id="transac_to_backup_input",
         )
-        self.transac_to_backup_amount.label.style.margin_top = 10
-        self.transac_to_backup_amount_blank = Box(id="transac_to_backup_blank")
-        self.backup_on_transac = Column(
+        self.transac_to_backup_amount.label.style.margin_top = 40
+        self.backup_on_transac = GroupBox(
+            title="Backup ao registrar transações",
+            on_change=self.upd_backup_on_transaction,
+            style=Pack(direction="column", width=const.FORM_WIDTH),
             children=[
-                Row(
-                    style=Pack(align_items="center", margin_top=25),
-                    children=[
-                        Switch(
-                            text="",
-                            value=prefs.BackupOnTransaction.get(),
-                            on_change=self.upd_backup_on_transaction,
-                            style=Pack(
-                                margin=(
-                                    (0, 0, 0, 10)
-                                    if platform == "win32"
-                                    else (0, 10, 0, 0)
-                                )
-                            ),
-                        ),
-                        Label(
-                            "Backup ao registrar transações",
-                            style=Pack(font_size=const.FONT_SIZE),
-                        ),
-                    ],
-                ),
-            ],
-        )
-        self.backup_on_transac_container = Column(
-            children=[
-                self.backup_on_transac,
-                (
-                    self.transac_to_backup_amount
-                    if prefs.BackupOnTransaction.get()
-                    else self.transac_to_backup_amount_blank
-                ),
+                self.transac_to_backup_amount,
                 Label(
                     "Realiza um backup silenciosamente depois que uma quantidade "
                     "de\ntransações é registrada.",
                     style=input_annotation("legend"),
                 ),
-            ],
+            ]
         )
+        self.transac_to_backup_amount.input.readonly = not prefs.BackupOnTransaction.get()
+        self.backup_on_transac.value = prefs.BackupOnTransaction.get()
 
         self.backup_on_close = Column(
             children=[
@@ -245,7 +220,7 @@ class ConfigSection(BaseSection):
                 Divider(style=SEPARATOR),
                 self.backup_places_list.widget,
                 self.backup_on_close,
-                self.backup_on_transac_container,
+                self.backup_on_transac,
                 self.backup_actions.widget,
             ],
         )
@@ -261,14 +236,10 @@ class ConfigSection(BaseSection):
         self.main_container = Box(style=PAGE_BODY, children=[self.sections])
         self.full_contents = Box(style=FULL_CONTENTS, children=[self.main_container])
 
-    def upd_backup_on_transaction(self, widget: Switch):
+    def upd_backup_on_transaction(self, widget: GroupBox):
         prefs.BackupOnTransaction.set(widget.value)
-        input = self.transac_to_backup_amount
-        blank = self.transac_to_backup_amount_blank
-        if widget.value:
-            self.backup_on_transac_container.replace(blank, input)
-        else:
-            self.backup_on_transac_container.replace(input, blank)
+        self.transac_to_backup_amount.input.readonly = not widget.value
+        widget.refresh()
 
     def upd_transactions_per_backup(self, widget: NumberInput):
         value = int(widget.value)
