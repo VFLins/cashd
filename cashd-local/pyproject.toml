@@ -3,6 +3,14 @@
 requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
+[dependency-groups]
+test = ["pytest", "pytest-asyncio"]
+formatting = ["black"]
+dev = [
+    {include-group = "test"},
+    {include-group = "formatting"},
+]
+
 [project]
 dynamic = ["version"]
 name = "cashd"
@@ -20,6 +28,10 @@ GroupBox = "cashd.widgets.custom.gtk.groupbox:GroupBox"
 
 [project.entry-points."togax_groupbox.backend.toga_winforms"]
 GroupBox = "cashd.widgets.custom.winforms.groupbox:GroupBox"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.briefcase]
 project_name = "Cashd"
@@ -46,7 +58,7 @@ primary_dark_color = "#478eff"
 sources = ["src/cashd"]
 test_sources = ["tests"]
 requires = []
-test_requires = ["pytest"]
+test_requires = ["pytest", "pytest-asyncio"]
 cleanup_paths = [
     "src/app/cashd/configs/*",
     "src/app/cashd/data/*",
