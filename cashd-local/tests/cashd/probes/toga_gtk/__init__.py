@@ -1,7 +1,7 @@
+from tests.cashd.probes.base import SimpleProbe
 
-from .base import SimpleProbe
 
-class GtkProbe(SimpleProble):
+class PlatformProbe(SimpleProbe):
 
     @property
     def width(self):

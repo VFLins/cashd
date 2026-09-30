@@ -14,7 +14,7 @@ class SimpleProbe:
 
     @property
     def width(self):
-        return self._width()   # implemente por backend
+        return self._width()  # implemente por backend
 
     @property
     def height(self):

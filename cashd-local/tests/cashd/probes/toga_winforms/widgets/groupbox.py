@@ -1,10 +1,14 @@
 import System.Windows.Forms as WinForms
 
-from .base import SimpleProbe
+from tests.cashd.probes.base import SimpleProbe
+from cashd.widgets.custom import GroupBox
 
 
 class GroupBoxProbe(SimpleProbe):
     native_class = WinForms.GroupBox
+
+    def __init__(self):
+        super().__init__(widget=GroupBox())
 
     @property
     def checkbox_visible(self):
