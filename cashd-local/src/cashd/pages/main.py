@@ -65,7 +65,6 @@ from cashd.style.vars import (
 )
 from cashd.pages.base import BaseSection
 from cashd.widgets.form import FormField
-from cashd.widgets.elems import FormattedDateInput
 from cashd.widgets.paginated import PaginatedDetailedList
 
 
@@ -81,7 +80,7 @@ class SubsectionAddTransac:
         # self.date_input_form = widgets.HorizontalDateForm()
         self.date = FormField(
             label="Data",
-            input_widget=FormattedDateInput(),
+            input_widget=widgets.custom.DateInput(),
         )
         """Custom date input form from 'Inserir transação' context."""
         self.date.style.width = 190

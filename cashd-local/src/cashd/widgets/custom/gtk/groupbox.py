@@ -4,7 +4,7 @@ from toga_gtk.libs import Gtk
 from toga_gtk.widgets.base import Widget
 
 
-class GroupBoxImpl(Widget):
+class GroupBox(Widget):
     """GroupBox implementation in GTK."""
 
     def create(self):

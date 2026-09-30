@@ -52,12 +52,12 @@ class GroupBox(toga.Widget):
         backend = toga.backend
 
         if backend == "toga_gtk":
-            from .gtk.groupbox import GroupBoxImpl
-            return GroupBoxImpl(interface=self)
+            from .gtk.groupbox import GroupBox as Impl
+            return Impl(interface=self)
 
         if backend == "toga_winforms":
-            from .winforms.groupbox import GroupBoxImpl
-            return GroupBoxImpl(interface=self)
+            from .winforms.groupbox import GroupBox as Impl
+            return Impl(interface=self)
 
         raise NotImplementedError(f"No GroupBox implementation for backend: {backend}")
 

@@ -8,7 +8,7 @@ from toga_winforms.container import Container
 from toga_winforms.widgets.base import Widget
 
 
-class GroupBoxImpl(Widget):
+class GroupBox(Widget):
     """GroupBox implementation on WinForms."""
 
     def create(self):
