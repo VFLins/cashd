@@ -25,7 +25,6 @@ class GroupBox(Widget):
         self.native.Controls.Add(self._checkbox)
 
         self._update_title()
-        self._insets = self._measure_insets()
 
     def set_title(self, title: str | None):
         self._update_title()
@@ -60,7 +59,7 @@ class GroupBox(Widget):
         return
 
     def set_bounds(self, x, y, width, height):
-        left, top, right, bottom = self._insets
+        top, right, bottom, left = self.insets
         super().set_bounds(
             x - left,
             y - top,
@@ -88,15 +87,20 @@ class GroupBox(Widget):
         else:
             self.native.Text = self.title
 
-    def _measure_insets(self):
-        self.native.Size = Drawing.Size(200, 200)
-        d = self.native.DisplayRectangle
-        left = d.X
-        top = d.Y
-        right = 200 - (d.X + d.Width)
-        bottom = 200 - (d.Y + d.Height)
-        return left, top, right, bottom
-
     @property
     def title(self):
         return "" if self.interface.title is None else self.interface.title
+
+    @property
+    def insets(self) -> tuple:
+        self.native.Size = Drawing.Size(200, 200)
+        d = self.native.DisplayRectangle
+        left = d.X
+        bottom = 200 - (d.Y + d.Height)
+        right = 200 - (d.X + d.Width)
+        if (self.title == "") or self._checkbox_visible:
+            top = d.Y
+        else:
+            top = int(bottom / 2)
+        return top, right, bottom, left
+

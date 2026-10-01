@@ -129,7 +129,6 @@ class ConfigSection(BaseSection):
             ),
             id="transac_to_backup_input",
         )
-        self.transac_to_backup_amount.label.style.margin_top = 40
         self.backup_on_transac = GroupBox(
             title="Backup ao registrar transações",
             on_change=self.upd_backup_on_transaction,
