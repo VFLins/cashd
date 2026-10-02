@@ -1,6 +1,7 @@
 from .base import BaseSection
 from sys import platform
 
+import toga
 from toga.app import App
 from toga.style import Pack
 from toga.widgets.box import Box, Row, Column
@@ -132,14 +133,24 @@ class ConfigSection(BaseSection):
         self.backup_on_transac = GroupBox(
             title="Backup ao registrar transações",
             on_change=self.upd_backup_on_transaction,
-            style=Pack(direction="column", width=const.FORM_WIDTH),
+            style=Pack(
+                direction="column",
+                width=const.FORM_WIDTH,
+                margin_top=40 if toga.backend == "toga_winforms" else 15,
+                margin_bottom=2,
+            ),
             children=[
-                self.transac_to_backup_amount,
-                Label(
-                    "Realiza um backup silenciosamente depois que uma quantidade "
-                    "de\ntransações é registrada.",
-                    style=input_annotation("legend"),
-                ),
+                Column(
+                    style=Pack(margin_top=25 if toga.backend == "toga_gtk" else 0),
+                    children=[
+                        self.transac_to_backup_amount,
+                        Label(
+                            "Realiza um backup silenciosamente depois que uma "
+                            "quantidade de\ntransações é registrada.",
+                            style=input_annotation("legend"),
+                        ),
+                    ],
+                )
             ]
         )
         self.transac_to_backup_amount.input.readonly = not prefs.BackupOnTransaction.get()

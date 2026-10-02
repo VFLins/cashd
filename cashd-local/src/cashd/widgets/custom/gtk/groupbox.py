@@ -38,14 +38,13 @@ class GroupBox(Widget):
             self._checkbox.set_active(value)
 
     def set_bounds(self, x, y, width, height):
-        top = self._label_height()
-        pad = 6
-        super().set_bounds(
-            x - pad,
-            y - top,
-            width + 2 * pad,
-            height + top + pad,
-        )
+        top, right, bottom, left = self.insets
+        x = x - left
+        y = y - top
+        width = width + left + right
+        height = height + top + bottom
+        super().set_bounds(x, y, width, height)
+        a = self.native.get_allocation()
 
     def checked_changed(self, widget):
         self.interface.on_change()
@@ -59,12 +58,14 @@ class GroupBox(Widget):
             # Replaces the checkbox (if it was the label widget) with a plain label.
             self.native.set_label(self.title or None)
 
-    def _label_height(self):
-        label = self.native.get_label_widget()
-        if label is None:
-            return 0
-        return label.get_preferred_height()[0]
-
     @property
     def title(self):
         return "" if self.interface.title is None else self.interface.title
+
+    @property
+    def insets(self) -> tuple:
+        left, bottom, right, = 6, 6, 6
+        label = self.native.get_label_widget()
+        top = label.get_preferred_height()[0] if label is not None else 0
+        return top, right, bottom, left
+
