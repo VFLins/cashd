@@ -3,6 +3,7 @@ Local-first application that helps you handle cash flow records quickly!
 """
 
 import asyncio
+import traceback
 import webbrowser
 from typing import Type
 from importlib.metadata import version
@@ -33,6 +34,7 @@ class Cashd(App):
         self.responsive_layout_task = self.loop.create_task(
             coro=self.main_section.responsive_layout_listener()
         )
+        self.responsive_layout_task.add_done_callback(self._listener_finished)
 
         self.main_box = ScrollContainer(
             style=Pack(direction=ROW, flex=1, font_size=const.BIG_FONT_SIZE),
@@ -95,6 +97,15 @@ class Cashd(App):
         self.main_window.show()
 
     # Methods
+    def _listener_finished(self, task):
+        if task.cancelled():
+            print("Layout listener cancelled")
+        elif task.exception() is not None:
+            print("Layout listener erroed, traceback:")
+            traceback.print_exception(task.exception())
+        else:
+            print("Layout listener ended without exceptions")
+
     async def set_context_content(self, command: Command):
         contents = {
             "Transações": self.main_section,

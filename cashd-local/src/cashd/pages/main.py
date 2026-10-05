@@ -415,7 +415,7 @@ class MainSection(BaseSection):
 
         # containers: 'options' context
         self.customer_options_section = OptionContainer(
-            style=Pack(flex=1),  # Ensure it spreads along the window height initially
+            style=Pack(flex=5),  # Ensure it spreads along the window height initially
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
                 ("Histórico", self.subsection_history.full_contents),
@@ -461,19 +461,9 @@ class MainSection(BaseSection):
         """
         # Assign content
         self.head._raw_children = [self.customer_options_button, self.help_msg_block]
-        self.body._raw_children = [self.customer_selector.widget]
-        # Assign modifers
         self.head.set_modifiers(H, CENTER_X, GAP(10), STRETCH, STRETCH_CONTENT)
-        self.body.set_modifiers(H, STRETCH, STRETCH_CONTENT)
         # Apply adjustments
-        self.customer_options_section.style.width = int(w * 0.85)
         self.subsection_customer_info.form.reshape(n_cols=1)
-        # A rebuild after changing customer_options_section's width is required
-        # to keep it's flex for some reason.
-        self.body.rebuild()
-        # The customer_selector width must be called after the last rebuild so it
-        # can keep centered.
-        self.customer_selector.width = int(w * 0.85)
 
     def set_layout_1(self, w: int):
         """Rearranges this section's widgets in a two-column layout.
@@ -482,27 +472,13 @@ class MainSection(BaseSection):
         """
         # Assign content
         self.head._raw_children = [self.help_msg_block]
-        self.body._raw_children = [
-            self.customer_selector.widget,
-            self.customer_options_section,
-        ]
-        # Assign modifiers
         self.head.rebuild()
-        self.body.set_modifiers(
-            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X),
-            H, STRETCH, STRETCH_CONTENT,
-        )
         # Apply adjustments
         if w > 800:
             if self.subsection_customer_info.form.n_cols != 2:
                 self.subsection_customer_info.form.reshape(n_cols=2)
         else:
             self.subsection_customer_info.form.reshape(n_cols=1)
-        """
-        self.head.children[0].style.width = int(w * 0.85) - 80
-        self.customer_selector.width = int(w * 0.45)
-        self.customer_options_section.style.width = int(w * 0.5)
-        """
 
     def select_customer(self, widget: Selection):
         if widget.selection is None:
@@ -599,8 +575,9 @@ class MainSection(BaseSection):
         # Get a distinct layout ID for every window width, from 0 to len(widths)
         widths = range(420, 4320, 300)
         expected_layout_id = sum(w >= t for t in widths)
+        current_layout_id = getattr(self, "layout_id", None)
 
-        if expected_layout_id == getattr(self, "layout_id", None):
+        if expected_layout_id == current_layout_id:
             return
         print(f"applying layout id={expected_layout_id}")
         # Use one of the predefined widths so the content widths are previsible

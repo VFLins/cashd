@@ -1,6 +1,7 @@
 from asyncio import sleep, CancelledError
 from toga.app import App
 from cashd import const
+import logging
 
 
 class BaseSection:
@@ -26,7 +27,6 @@ class BaseSection:
                 await self.rearrange_widgets()
             except CancelledError:
                 break
-                raise
 
     @property
     def window_size(self) -> tuple[int, int]:
