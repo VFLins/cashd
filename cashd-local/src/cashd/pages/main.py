@@ -27,10 +27,11 @@ from cashd.widgets.custom import GroupBox
 from cashd import const, widgets
 from cashd.style.compose import (
     get_container,
-    CENTER_CONTENT_Y,
-    CENTER_CONTENT_X,
-    CENTER_Y,
-    CENTER_X,
+    CENTER_CONTENT_ALONG,
+    CENTER_CONTENT_ACROSS,
+    CENTER_ALONG,
+    CENTER_ACROSS,
+    END_ALONG,
     STRETCH,
     STRETCH_CONTENT,
     V,
@@ -302,15 +303,18 @@ class SectionCustomerInfo:
         """Button to write any changes made by the user on `customer_data_form_widgets`
         to the database. Enabled only when any information is changed."""
 
-        self.options_container = widgets.elems.form_options(
-            width=self.form.widget.width,
-            buttons=[self.undo_button, self.confirm_button],
+        self.options_container = get_container(
+            H, END_ALONG,
+            children=[self.undo_button, self.confirm_button],
         )
-        self.body = Box(
-            style=Pack(direction=COLUMN, align_items="center"),
-            children=[self.form.widget, self.options_container],
+        self.body = ScrollContainer(
+            style=Pack(flex=1),
+            content=self.form.widget,
         )
-        self.full_contents = ScrollContainer(content=self.body)
+        self.full_contents = get_container(
+            V,
+            children=[self.body, self.options_container]
+        )
         if sys.platform == "win32":
             self.body.style.background_color = "#F9F9F9"
 
@@ -427,7 +431,7 @@ class MainSection(BaseSection):
 
         # main container
         self.head = get_container(
-            STRETCH, STRETCH_CONTENT, CENTER_X,
+            STRETCH, STRETCH_CONTENT, CENTER_ACROSS,
             children=[self.actions_button, self.help_msg_block]
         )
         """Contents on the topmost part of this section, displaying the selected

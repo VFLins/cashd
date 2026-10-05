@@ -3,7 +3,9 @@ from toga import Widget
 from toga.style.pack import (
     ROW,
     COLUMN,
+    START,
     CENTER,
+    END,
     LEFT,
     RIGHT,
     TOP,
@@ -173,10 +175,18 @@ V = Styler(parent_style={"direction": COLUMN})
 H = Styler(parent_style={"direction": ROW})
 V_CONTENT = Styler(child_style={"direction": COLUMN})
 H_CONTENT = Styler(child_style={"direction": ROW})
-CENTER_CONTENT_X = Styler(child_style={"align_items": CENTER})
-CENTER_CONTENT_Y = Styler(child_style={"justify_content": CENTER})
-CENTER_X = Styler(parent_style={"align_items": CENTER})
-CENTER_Y = Styler(parent_style={"justify_content": CENTER})
+START_CONTENT_ACROSS = Styler(child_style={"align_items": START})
+START_CONTENT_ALONG = Styler(child_style={"justify_content": START})
+START_ACROSS = Styler(parent_style={"align_items": START})
+START_ALONG = Styler(parent_style={"justify_content": START})
+CENTER_CONTENT_ACROSS = Styler(child_style={"align_items": CENTER})
+CENTER_CONTENT_ALONG = Styler(child_style={"justify_content": CENTER})
+CENTER_ACROSS = Styler(parent_style={"align_items": CENTER})
+CENTER_ALONG = Styler(parent_style={"justify_content": CENTER})
+END_CONTENT_ACROSS = Styler(child_style={"align_items": END})
+END_CONTENT_ALONG = Styler(child_style={"justify_content": END})
+END_ACROSS = Styler(parent_style={"align_items": END})
+END_ALONG = Styler(parent_style={"justify_content": END})
 
 
 # --- 2. Customizable ---
