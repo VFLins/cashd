@@ -1,4 +1,5 @@
 from typing import Type, Callable
+import warnings
 
 import toga
 from toga.style import Pack
@@ -69,7 +70,7 @@ class PaginatedDetailedList(_DataInteractor):
                 self.data_widget._impl._set_selection(-1)
             case _:
                 if current_backend is not None:
-                    raise NotImplementedError(
+                    warnings.warn(
                         "Unselecting all rows for DetailedList is not implemented "
                         f"on {current_backend=}"
                     )

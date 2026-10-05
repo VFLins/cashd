@@ -39,6 +39,7 @@ from cashd.style.compose import (
     H_CONTENT,
     CONTENT_WIDTH,
     CONTENT_WIDTHS,
+    HEIGHT,
     WIDTH,
     WIDTHS,
     COLUMNS,
@@ -47,6 +48,7 @@ from cashd.style.compose import (
     CONTENT_BG_COLOR,
     FLEX,
     FLEXES,
+    CONTENT_FLEXES,
     MARGIN,
     GAP,
 )
@@ -386,9 +388,9 @@ class MainSection(BaseSection):
             ),
         )
 
-        self.customer_options_button = Button(
+        self.actions_button = Button(
             style=Pack(width=50, height=40, margin_left=20),
-            id="customer_options_button",
+            id="actions_button",
             icon=const.ICON_USER_OPTS,
             enabled=False,
             on_press=self.set_context_screen,
@@ -414,7 +416,7 @@ class MainSection(BaseSection):
         """
 
         # containers: 'options' context
-        self.customer_options_section = OptionContainer(
+        self.actions_section = OptionContainer(
             style=Pack(flex=5),  # Ensure it spreads along the window height initially
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
@@ -424,26 +426,25 @@ class MainSection(BaseSection):
         )
 
         # main container
-        self.head = get_container()
+        self.head = get_container(
+            STRETCH, STRETCH_CONTENT, CENTER_X,
+            children=[self.actions_button, self.help_msg_block]
+        )
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
-        self.head_block = Box(children=[
-            Box(style=Pack(flex=1)),
-            GroupBox(
-                children=[self.head],
-                style=Pack(flex=5, margin=(20, 0, 30, 0))
-            ),
-            Box(style=Pack(flex=1))
-        ])
-
-        self.body = Box(
-            style=Pack(direction="row", flex=1),
+        self.head_block = get_container(
+            H, CONTENT_FLEXES(1, 5),
             children=[
-                Box(style=Pack(flex=1)),
-                self.customer_selector.widget,
-                Box(style=Pack(flex=1)),
+                Box(),
+                GroupBox(children=[self.head], style=Pack(margin=(20, 0, 30, 0))),
+                Box(),
             ]
+        )
+
+        self.body = get_container(
+            H, STRETCH, CONTENT_FLEXES(1, 5),
+            children=[Box(), self.customer_selector.widget, Box()]
         )
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.
@@ -459,11 +460,12 @@ class MainSection(BaseSection):
 
         :param w: window width where this layout handling should be based on.
         """
-        # Assign content
-        self.head._raw_children = [self.customer_options_button, self.help_msg_block]
-        self.head.set_modifiers(H, CENTER_X, GAP(10), STRETCH, STRETCH_CONTENT)
-        # Apply adjustments
-        self.subsection_customer_info.form.reshape(n_cols=1)
+        self.head.replace_children(self.actions_button, self.help_msg_block)
+        self.body.replace_children(
+            Box(style=Pack(flex=1)),
+            self.customer_selector.widget,
+            Box(style=Pack(flex=1)),
+        )
 
     def set_layout_1(self, w: int):
         """Rearranges this section's widgets in a two-column layout.
@@ -471,30 +473,30 @@ class MainSection(BaseSection):
         :param w: window width where this layout handling should be based on.
         """
         # Assign content
-        self.head._raw_children = [self.help_msg_block]
-        self.head.rebuild()
-        # Apply adjustments
-        if w > 800:
-            if self.subsection_customer_info.form.n_cols != 2:
-                self.subsection_customer_info.form.reshape(n_cols=2)
-        else:
-            self.subsection_customer_info.form.reshape(n_cols=1)
+        self.head.replace_children(self.help_msg_block)
+        self.body.replace_children(
+            Box(style=Pack(flex=1)),
+            self.customer_selector.widget,
+            Box(style=Pack(flex=1)),
+            self.actions_section,
+            Box(style=Pack(flex=1)),
+        )
 
     def select_customer(self, widget: Selection):
         if widget.selection is None:
             self.subsection_add_transac.amount_input.enabled = False
             self.subsection_history.export_button.enabled = False
-            self.customer_options_button.enabled = False
+            self.actions_button.enabled = False
             return
         print(f"selected: {widget.selection}")
         self.SELECTED_CUSTOMER.read(row_id=widget.selection.id)
         self._upd_selected_info()
         self.subsection_add_transac.amount_input.enabled = True
         self.subsection_history.export_button.enabled = True
-        self.customer_options_button.enabled = True
+        self.actions_button.enabled = True
 
     def _upd_selected_info(self):
-        self.customer_options_section.current_tab = 0
+        self.actions_section.current_tab = 0
         if self.SELECTED_CUSTOMER.Saldo == "N/D":
             self.help_msg.text = "Selecione um cliente, depois clique no botão ao lado"
         else:
@@ -518,28 +520,16 @@ class MainSection(BaseSection):
                 f"Valor: {sign} R$ {abs(value)/100:.2f}".replace(".", ",")
             )
 
-    def set_context_screen(self, widget: Button | None = None):
+    def set_context_screen(self, widget: Button = None):
         """Change between customer selection and customer data management, depending on
         the button clicked.
         """
-        if widget.id == "customer_options_button":
-            self.head.replace(
-                old_child=self.customer_options_button,
-                new_child=self.return_button,
-            )
-            self.body.replace(
-                old_child=self.customer_selector.widget,
-                new_child=self.customer_options_section,
-            )
+        if widget.id == "actions_button":
+            self.head.replace_children(self.return_button, self.help_msg_block)
+            self.body.replace_children(Box(), self.actions_section, Box())
         if widget.id == "return_button":
-            self.head.replace(
-                old_child=self.return_button,
-                new_child=self.customer_options_button,
-            )
-            self.body.replace(
-                old_child=self.customer_options_section,
-                new_child=self.customer_selector.widget,
-            )
+            self.head.replace_children(self.actions_button, self.help_msg_block)
+            self.body.replace_children(Box(), self.customer_selector.widget, Box())
             self._clear_customer_selection()
             self.update_data_widgets()
             self.customer_selector.clear_selection()
@@ -548,7 +538,7 @@ class MainSection(BaseSection):
     def _refresh_navigation_buttons(self, selection: str):
         buttons = {
             "return_button": self.return_button,
-            "customer_options_button": self.customer_options_button,
+            "actions_button": self.actions_button,
         }
         if selection == "return_button":
             for button in buttons.values():
@@ -567,23 +557,18 @@ class MainSection(BaseSection):
         self.help_msg.text = self.HELP_MSG
         self.customer_selector.search_field.value = ""
 
-    def update_data_widgets(self):
-        self.customer_selector.refresh(self.CUSTOMER_LIST)
-
     async def rearrange_widgets(self):
         w, _ = self.window_size
         # Get a distinct layout ID for every window width, from 0 to len(widths)
-        widths = range(420, 4320, 300)
-        expected_layout_id = sum(w >= t for t in widths)
-        current_layout_id = getattr(self, "layout_id", None)
+        expected_layout_id = 1 if w >= 840 else 0
+        current_layout_id = getattr(self, "layout_id", 0)
 
         if expected_layout_id == current_layout_id:
             return
         print(f"applying layout id={expected_layout_id}")
         # Use one of the predefined widths so the content widths are previsible
-        w = widths[expected_layout_id - 1]
-        if expected_layout_id == 1:
+        if expected_layout_id == 0:
             self.set_layout_0(w)
-        elif expected_layout_id >= 2:
+        else:
             self.set_layout_1(w)
         self.layout_id = expected_layout_id

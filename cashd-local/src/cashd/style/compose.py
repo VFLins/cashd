@@ -222,6 +222,11 @@ def WIDTH(value: int) -> Styler:
     return Styler(parent_style={"width": value})
 
 
+def HEIGHT(value: int) -> Styler:
+    """Set a height to the parent widget."""
+    return Styler(parent_style={"height": value})
+
+
 def GAP(value: int) -> Styler:
     """Set spacing around its children."""
     return Styler(parent_style={"gap": value})
@@ -325,7 +330,7 @@ class ComposedBox(Box):
         """
         if not children:
             return
-        for child in children:
+        for child in self._raw_children:
             self._raw_children.remove(child)
         self.rebuild()
 
