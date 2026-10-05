@@ -241,7 +241,7 @@ class _DataInteractor:
         appear on top of the data widget.
         """
         self.search_field = TextInput(
-            style=Pack(font_size=const.FONT_SIZE, width=const.CONTENT_WIDTH),
+            style=Pack(font_size=const.FONT_SIZE, flex=1),
             placeholder="Pesquisa",
             on_change=self.refresh,
         )

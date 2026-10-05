@@ -23,6 +23,7 @@ from toga.widgets.optioncontainer import OptionContainer
 
 from cashd_core import data, fmt, pdf
 
+from cashd.widgets.custom import GroupBox
 from cashd import const, widgets
 from cashd.style.compose import (
     get_container,
@@ -378,8 +379,9 @@ class MainSection(BaseSection):
         """
 
         self.help_msg_block = ScrollContainer(
+            vertical=False,
             content=Box(
-                style=Pack(align_items="center", direction="row"),
+                style=Pack(align_items="center", direction="row", flex=1),
                 children=[self.help_msg]
             ),
         )
@@ -405,7 +407,7 @@ class MainSection(BaseSection):
         self.customer_selector = PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.select_customer,
-            style=Pack(flex=1),
+            style=Pack(flex=5),
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
@@ -426,19 +428,31 @@ class MainSection(BaseSection):
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
-        self.head_border = widgets.custom.GroupBox(
-            children=[self.head], style=Pack(margin=(20, 0, 30, 0))
+        self.head_block = Box(children=[
+            Box(style=Pack(flex=1)),
+            GroupBox(
+                children=[self.head],
+                style=Pack(flex=5, margin=(20, 0, 30, 0))
+            ),
+            Box(style=Pack(flex=1))
+        ])
+
+        self.body = Box(
+            style=Pack(direction="row", flex=1),
+            children=[
+                Box(style=Pack(flex=1)),
+                self.customer_selector.widget,
+                Box(style=Pack(flex=1)),
+            ]
         )
-        self.body = get_container()
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.
         """
 
         self.full_contents = Box(
             style=FULL_CONTENTS,
-            children=[self.head_border, self.body],
+            children=[self.head_block, self.body],
         )
-        self.set_layout_0(w=const.MAIN_WINDOW_SIZE[0])
 
     def set_layout_0(self, w: int):
         """Rearranges this section's widgets in a single-column layout.
@@ -449,13 +463,8 @@ class MainSection(BaseSection):
         self.head._raw_children = [self.customer_options_button, self.help_msg_block]
         self.body._raw_children = [self.customer_selector.widget]
         # Assign modifers
-        label_block_width = int(w * 0.85) - 80
-        self.head.set_modifiers(
-            H, CENTER_X, CONTENT_WIDTHS(60, label_block_width), GAP(10)
-        )
-        self.body.set_modifiers(
-            COLUMNS(1, STRETCH, STRETCH_CONTENT, CENTER_X, V_CONTENT), H, STRETCH
-        )
+        self.head.set_modifiers(H, CENTER_X, GAP(10), STRETCH, STRETCH_CONTENT)
+        self.body.set_modifiers(H, STRETCH, STRETCH_CONTENT)
         # Apply adjustments
         self.customer_options_section.style.width = int(w * 0.85)
         self.subsection_customer_info.form.reshape(n_cols=1)
@@ -480,7 +489,8 @@ class MainSection(BaseSection):
         # Assign modifiers
         self.head.rebuild()
         self.body.set_modifiers(
-            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X), H, STRETCH
+            COLUMNS(2, STRETCH, STRETCH_CONTENT, CENTER_X),
+            H, STRETCH, STRETCH_CONTENT,
         )
         # Apply adjustments
         if w > 800:
@@ -488,11 +498,11 @@ class MainSection(BaseSection):
                 self.subsection_customer_info.form.reshape(n_cols=2)
         else:
             self.subsection_customer_info.form.reshape(n_cols=1)
-        col0, col1 = self.body.children[0], self.body.children[1]
-        col0.style.flex, col1.style.flex = 45, 50
+        """
         self.head.children[0].style.width = int(w * 0.85) - 80
         self.customer_selector.width = int(w * 0.45)
         self.customer_options_section.style.width = int(w * 0.5)
+        """
 
     def select_customer(self, widget: Selection):
         if widget.selection is None:
@@ -541,7 +551,7 @@ class MainSection(BaseSection):
                 old_child=self.customer_options_button,
                 new_child=self.return_button,
             )
-            self.body.children[0].replace(
+            self.body.replace(
                 old_child=self.customer_selector.widget,
                 new_child=self.customer_options_section,
             )
@@ -550,7 +560,7 @@ class MainSection(BaseSection):
                 old_child=self.return_button,
                 new_child=self.customer_options_button,
             )
-            self.body.children[0].replace(
+            self.body.replace(
                 old_child=self.customer_options_section,
                 new_child=self.customer_selector.widget,
             )
