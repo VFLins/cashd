@@ -344,7 +344,7 @@ class ComposedBox(Box):
         self._raw_children = list(children)
         self.rebuild()
 
-    def set_modifiers(self, *modifiers: Modifier):
+    def replace_modifiers(self, *modifiers: Modifier):
         """Replaces the modifiers of this box and rebuilds its layout.
 
         :param modifiers: New modifiers that define the layout.

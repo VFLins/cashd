@@ -461,6 +461,7 @@ class MainSection(BaseSection):
         :param w: window width where this layout handling should be based on.
         """
         self.head.replace_children(self.actions_button, self.help_msg_block)
+        self.body.replace_modifiers(H, STRETCH, CONTENT_FLEXES(1, 5))
         self.body.replace_children(
             Box(style=Pack(flex=1)),
             self.customer_selector.widget,
@@ -474,6 +475,7 @@ class MainSection(BaseSection):
         """
         # Assign content
         self.head.replace_children(self.help_msg_block)
+        self.body.replace_modifiers(H, STRETCH, CONTENT_FLEXES(1, 9))
         self.body.replace_children(
             Box(style=Pack(flex=1)),
             self.customer_selector.widget,
@@ -546,7 +548,7 @@ class MainSection(BaseSection):
     async def rearrange_widgets(self):
         w, _ = self.window_size
         # Get a distinct layout ID for every window width, from 0 to len(widths)
-        expected_layout_id = 1 if w >= 840 else 0
+        expected_layout_id = 1 if w >= 740 else 0
         current_layout_id = getattr(self, "layout_id", 0)
 
         if expected_layout_id == current_layout_id:
