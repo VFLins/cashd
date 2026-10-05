@@ -531,22 +531,6 @@ class MainSection(BaseSection):
             self.head.replace_children(self.actions_button, self.help_msg_block)
             self.body.replace_children(Box(), self.customer_selector.widget, Box())
             self._clear_customer_selection()
-            self.update_data_widgets()
-            self.customer_selector.clear_selection()
-        self._refresh_navigation_buttons(selection=widget.id)
-
-    def _refresh_navigation_buttons(self, selection: str):
-        buttons = {
-            "return_button": self.return_button,
-            "actions_button": self.actions_button,
-        }
-        if selection == "return_button":
-            for button in buttons.values():
-                button.enabled = False
-        else:
-            for button in buttons.values():
-                button.enabled = True
-            buttons[selection].enabled = False
 
     def _clear_customer_selection(self):
         self.SELECTED_CUSTOMER.clear()
@@ -556,6 +540,8 @@ class MainSection(BaseSection):
         self.subsection_customer_info.form.clear()
         self.help_msg.text = self.HELP_MSG
         self.customer_selector.search_field.value = ""
+        self.customer_selector.clear_selection()
+        self.actions_button.enabled = False
 
     async def rearrange_widgets(self):
         w, _ = self.window_size
