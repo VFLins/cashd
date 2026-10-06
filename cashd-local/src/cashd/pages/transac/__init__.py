@@ -1,7 +1,6 @@
 import re
 import sys
 import datetime as dt
-from sqlalchemy import exc
 from typing import Callable
 
 import toga
@@ -12,39 +11,7 @@ from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog
 
 from cashd_core import data, fmt, pdf
 
-from cashd.widgets.custom import GroupBox
 from cashd import const, widgets
-from cashd.style.compose import (
-    get_container,
-    CENTER_CONTENT_ALONG,
-    CENTER_CONTENT_ACROSS,
-    START_ALONG,
-    START_ACROSS,
-    CENTER_ALONG,
-    CENTER_ACROSS,
-    END_ALONG,
-    END_ACROSS,
-    STRETCH,
-    STRETCH_CONTENT,
-    V,
-    H,
-    V_CONTENT,
-    H_CONTENT,
-    CONTENT_WIDTH,
-    CONTENT_WIDTHS,
-    HEIGHT,
-    WIDTH,
-    WIDTHS,
-    COLUMNS,
-    ROWS,
-    BG_COLOR,
-    CONTENT_BG_COLOR,
-    FLEX,
-    FLEXES,
-    CONTENT_FLEXES,
-    MARGIN,
-    GAP,
-)
 from cashd.style.vars import (
     set_col_alignments,
     input_annotation,
@@ -61,11 +28,13 @@ from cashd.style.vars import (
 )
 from cashd.pages.base import BaseSection
 from cashd.widgets.form import FormField
+from cashd.style.compose import mod, ComposedBox
+from cashd.widgets.custom import GroupBox
 from cashd.widgets.paginated import PaginatedDetailedList
-from . import history, info, transac
+from . import history, info, insert
 
 
-class MainSection(BaseSection):
+class TransacSection(BaseSection):
     SELECTED_CUSTOMER = data.tbl_clientes()
     CUSTOMER_LIST = data.CustomerListSource()
     HELP_MSG = "Selecione um cliente para registrar\numa transação."
@@ -73,7 +42,7 @@ class MainSection(BaseSection):
     def __init__(self, app: App):
         super().__init__(app)
 
-        self.subsection_add_transac = transac.Subsection(
+        self.subsection_add_transac = insert.Subsection(
             selected_customer=self.SELECTED_CUSTOMER,
             on_insert=self._upd_selected_info,
         )
@@ -89,28 +58,27 @@ class MainSection(BaseSection):
         )
 
         # widgets: all contexts
-        self.help_msg = Label(
+        self.help_msg = toga.Label(
             (
                 'Cadastre um cliente em "Novo cliente" para\n'
                 "começar a registrar transações."
                 if data.tbl_clientes().table_is_empty()
                 else self.HELP_MSG
             ),
-            style=INLINE_LABEL,
         )
         """Text on top of the page displaying information about the currently
         selected customer.
         """
 
-        self.help_msg_block = ScrollContainer(
+        self.help_msg_block = toga.ScrollContainer(
             vertical=False,
-            content=Box(
+            content=toga.Box(
                 style=Pack(align_items="center", direction="row", flex=1),
                 children=[self.help_msg]
             ),
         )
 
-        self.actions_button = Button(
+        self.actions_button = toga.Button(
             style=Pack(width=50, height=40, margin_left=20),
             id="actions_button",
             icon=const.ICON_USER_OPTS,
@@ -119,7 +87,7 @@ class MainSection(BaseSection):
         )
         """Button that changes context to interact with the selected user."""
 
-        self.return_button = Button(
+        self.return_button = toga.Button(
             style=Pack(width=50, height=40, margin_left=20),
             id="return_button",
             icon=const.ICON_RETURN,
@@ -138,7 +106,7 @@ class MainSection(BaseSection):
         """
 
         # containers: 'options' context
-        self.actions_section = OptionContainer(
+        self.actions_section = toga.OptionContainer(
             style=Pack(flex=5),  # Ensure it spreads along the window height initially
             content=[
                 ("Nova transação", self.subsection_add_transac.full_contents),
@@ -148,31 +116,31 @@ class MainSection(BaseSection):
         )
 
         # main container
-        self.head = get_container(
-            STRETCH, STRETCH_CONTENT, CENTER_ACROSS,
+        self.head = ComposedBox(
+            mod.STRETCH, mod.STRETCH_CONTENT, mod.CENTER_ACROSS,
             children=[self.actions_button, self.help_msg_block]
         )
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
-        self.head_block = get_container(
-            H, CONTENT_FLEXES(1, 5),
+        self.head_block = ComposedBox(
+            mod.H, mod.CONTENT_FLEXES(1, 5),
             children=[
-                Box(),
+                toga.Box(),
                 GroupBox(children=[self.head], style=Pack(margin=(20, 0, 30, 0))),
-                Box(),
+                toga.Box(),
             ]
         )
 
-        self.body = get_container(
-            H, STRETCH, CONTENT_FLEXES(1, 5),
-            children=[Box(), self.customer_selector.widget, Box()]
+        self.body = ComposedBox(
+            mod.H, mod.STRETCH, mod.CONTENT_FLEXES(1, 5),
+            children=[toga.Box(), self.customer_selector.widget, toga.Box()]
         )
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.
         """
 
-        self.full_contents = Box(
+        self.full_contents = toga.Box(
             style=FULL_CONTENTS,
             children=[self.head_block, self.body],
         )
@@ -183,11 +151,11 @@ class MainSection(BaseSection):
         :param w: window width where this layout handling should be based on.
         """
         self.head.replace_children(self.actions_button, self.help_msg_block)
-        self.body.replace_modifiers(H, STRETCH, CONTENT_FLEXES(1, 5))
+        self.body.replace_modifiers(mod.H, mod.STRETCH, mod.CONTENT_FLEXES(1, 5))
         self.body.replace_children(
-            Box(style=Pack(flex=1)),
+            toga.Box(style=Pack(flex=1)),
             self.customer_selector.widget,
-            Box(style=Pack(flex=1)),
+            toga.Box(style=Pack(flex=1)),
         )
 
     def set_layout_1(self, w: int):
@@ -197,13 +165,13 @@ class MainSection(BaseSection):
         """
         # Assign content
         self.head.replace_children(self.help_msg_block)
-        self.body.replace_modifiers(H, STRETCH, CONTENT_FLEXES(1, 9))
+        self.body.replace_modifiers(mod.H, mod.STRETCH, mod.CONTENT_FLEXES(1, 9))
         self.body.replace_children(
-            Box(style=Pack(flex=1)),
+            toga.Box(style=Pack(flex=1)),
             self.customer_selector.widget,
-            Box(style=Pack(flex=1)),
+            toga.Box(style=Pack(flex=1)),
             self.actions_section,
-            Box(style=Pack(flex=1)),
+            toga.Box(style=Pack(flex=1)),
         )
 
     def select_customer(self, widget: Selection):
@@ -250,10 +218,12 @@ class MainSection(BaseSection):
         """
         if widget.id == "actions_button":
             self.head.replace_children(self.return_button, self.help_msg_block)
-            self.body.replace_children(Box(), self.actions_section, Box())
+            self.body.replace_children(toga.Box(), self.actions_section, toga.Box())
         if widget.id == "return_button":
             self.head.replace_children(self.actions_button, self.help_msg_block)
-            self.body.replace_children(Box(), self.customer_selector.widget, Box())
+            self.body.replace_children(
+                toga.Box(), self.customer_selector.widget, toga.Box()
+            )
             self._clear_customer_selection()
 
     def _clear_customer_selection(self):

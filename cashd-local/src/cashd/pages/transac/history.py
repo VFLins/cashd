@@ -1,3 +1,11 @@
+import sys
+import toga
+from toga.style import Pack
+
+from cashd_core import pdf
+from cashd.widgets.elems import form_options
+from cashd.style.vars import set_col_alignments
+
 
 class Subsection:
     def __init__(
@@ -8,8 +16,8 @@ class Subsection:
         self.SELECTED_CUSTOMER = selected_customer
         self.on_delete = on_delete
 
-        self.table = Table(
-            style=Pack(flex=1, font_size=const.FONT_SIZE, width=300),
+        self.table = toga.Table(
+            style=Pack(flex=1, width=300),
             data=self.SELECTED_CUSTOMER.Transacs,
             columns=["Data", "Valor (R$)"],
             accessors=("data", "valor"),
@@ -18,12 +26,12 @@ class Subsection:
         """Table containing all transactions of the currently selected customer."""
         set_col_alignments(self.table, ["l", "r"])
 
-        self.remove_button = Button(
+        self.remove_button = toga.Button(
             "Remover selecionado", enabled=False, on_press=self.remove_transac
         )
         """Button to remove the selected transaction on `transaction_history_table`."""
 
-        self.export_button = Button(
+        self.export_button = toga.Button(
             "Exportar",
             style=Pack(margin_left=10),
             enabled=False,
@@ -33,13 +41,13 @@ class Subsection:
         and current owed amount. This feature is aimed for thermal printers.
         """
 
-        self.options_container: Box = widgets.elems.form_options(
+        self.options_container: toga.Box = form_options(
             buttons=[self.remove_button, self.export_button],
         )
         self.options_container.style.margin = (10, 0, 5, 0)
         self.options_container.style.width = 300
 
-        self.full_contents = Column(
+        self.full_contents = toga.Column(
             style=Pack(align_items="center"),
             children=[self.options_container, self.table],
         )
@@ -67,7 +75,7 @@ class Subsection:
             )
             await widget.app.dialog(error)
         else:
-            info = InfoDialog(
+            info = toga.InfoDialog(
                 "Documento criado com sucesso",
                 "O documento será aberto em outro aplicativo.",
             )
@@ -87,7 +95,7 @@ class Subsection:
             transac = data.tbl_transacoes()
             transac.read(row_id=transac_id)
             transac_value = f"R$ {transac.Valor/100}".replace(".", ",")
-            confirm = ConfirmDialog(
+            confirm = toga.ConfirmDialog(
                 title="Remover transação?",
                 message=f"Data: {transac.DataTransac}\nValor: {transac_value}",
             )

@@ -26,7 +26,7 @@ class Cashd(App):
     def startup(self):
         """Construct and show the Toga application."""
 
-        self.main_section = pages.MainSection(app=self)
+        self.main_section = pages.TransacSection(app=self)
         self.stats_section = pages.StatisticsSection(app=self)
         self.new_customer_section = pages.CreateCustomerSection(app=self)
         self.conf_section = pages.ConfigSection(app=self)

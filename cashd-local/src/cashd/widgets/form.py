@@ -15,7 +15,7 @@ from toga.widgets.label import Label
 
 from cashd_core import data
 from cashd import const
-from cashd.style.compose import ComposedBox, COLUMNS, STRETCH
+from cashd.style.compose import ComposedBox, mod
 from cashd.style.vars import (
     input_annotation,
     user_input,
@@ -98,7 +98,7 @@ class FormHandler:
         """
         self.n_cols = n_cols
         self._on_change = on_change
-        self._widget = ComposedBox(COLUMNS(self.n_cols))
+        self._widget = ComposedBox(mod.COLUMNS(self.n_cols))
         self._fields: Dict[str, FormField] = {}
 
     @property
@@ -159,7 +159,7 @@ class FormHandler:
     def reshape(self, n_cols: int):
         """Rebuilds the form grid layout with the specified amount of columns."""
         self.n_cols = n_cols
-        self._widget.set_modifiers(COLUMNS(n_cols))
+        self._widget.set_modifiers(mod.COLUMNS(n_cols))
 
     @property
     def data(self) -> Dict[str, str]:

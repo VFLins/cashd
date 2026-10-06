@@ -1,3 +1,15 @@
+from typing import Callable
+from toga.style import Pack
+import toga
+import sys
+import re
+
+from cashd.style.vars import input_annotation
+from cashd.style.compose import ComposedBox, mod
+from cashd.widgets.form import FormField
+from cashd.widgets.custom import DateInput
+
+
 class Subsection:
     def __init__(
         self,
@@ -10,12 +22,12 @@ class Subsection:
         # self.date_input_form = widgets.HorizontalDateForm()
         self.date = FormField(
             label="Data",
-            input_widget=widgets.custom.DateInput(),
+            input_widget=DateInput(),
         )
         """Custom date input form from 'Inserir transação' context."""
         self.date.style.width = 190
 
-        self.amount_label = Label(
+        self.amount_label = toga.Label(
             "Valor: R$ 0,00",
             style=input_annotation(),
         )
@@ -23,7 +35,7 @@ class Subsection:
         inserted by the user.
         """
 
-        self.amount_input = TextInput(
+        self.amount_input = toga.TextInput(
             style=Pack(width=190),
             placeholder="0,00",
             on_change=self.update_amount_label,
@@ -36,18 +48,18 @@ class Subsection:
         # customers registered
         self.amount_input.enabled = False
 
-        self.confirm_button = Button(
+        self.confirm_button = toga.Button(
             "Inserir",
-            style=CONTEXT_BUTTON,
             enabled=False,
             on_press=self.insert_transaction,
+            style=Pack(margin_top=25),
         )
         """Button to write the transaction with date and currency amount inserted
         by the user to the database.
         """
 
-        self.full_contents = Box(
-            style=FILLING_VERTICAL_BOX,
+        self.full_contents = ComposedBox(
+            mod.V, mod.CENTER_ACROSS, mod.CONTENT_WIDTH(200),
             children=[
                 self.date,
                 self.amount_label,
@@ -58,7 +70,7 @@ class Subsection:
         if sys.platform == "win32":
             self.full_contents.style.background_color = "#F9F9F9"
 
-    def insert_transaction(self, widget: Button):
+    def insert_transaction(self, widget: toga.Button):
         """Register transaction data to the database."""
         amount_input = fmt.StringToCurrency(user_input=self.amount_input.value)
         if not amount_input.is_valid():

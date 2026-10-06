@@ -1,9 +1,12 @@
 import toga
-from .mod.base import Modifier
-from .mod.style import Styler
+from toga.style.pack import HIDDEN, VISIBLE
+
+from .mod.base import Modifier, StyleManager
+from .mod.styler import Styler
+from .mod.grid import GridHandler
 
 
-class ComposedBox(toga.Box):
+class ComposedBox(toga.Box, StyleManager):
     def __init__(self, *modifiers: Modifier, **kwargs):
         """Box whose layout is described declaratively through modifiers.
 
@@ -89,7 +92,7 @@ class ComposedBox(toga.Box):
             s.reset()
 
         # Reapply own styling
-        apply_styles(as_parent=True, widget=self, stylers=self.stylers)
+        self.apply_to_parent(widget=self, stylers=self.stylers)
 
         # Delete widgets keeping references
         self.style.visibility = HIDDEN
@@ -109,29 +112,13 @@ class ComposedBox(toga.Box):
                     super().add(c)
             else:
                 for child in self._raw_children:
-                    apply_styles(as_parent=False, widget=child, stylers=self.stylers)
+                    self.apply_to_child(widget=child, stylers=self.stylers)
                     super().add(child)
         finally:
             # Always restore visibility, even when empty or when an error occurs
             self.style.visibility = VISIBLE
 
 
-def apply_styles(as_parent: bool, widget: toga.Widget, stylers: list[Styler]):
-    """Apply multiple styles to a Widget without removing widget's non-conflicting
-    styles.
-
-    :param as_parent: Boolean indicating if this `widget` should use parent styles.
-    :param widget: A `toga.Widget` that will get the styles.
-    :param stylers: Stylers holding styles that will be passed on to the widget.
-    """
-    kw = dict()
-    for s in stylers:
-        if as_parent:
-            s.apply_parent(kw)
-        else:
-            s.apply_child(kw)
-    for k, v in kw.items():
-        setattr(widget.style, k, v)
 
 
 def get_container(*args, **kwargs) -> ComposedBox:
