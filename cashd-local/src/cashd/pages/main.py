@@ -29,9 +29,12 @@ from cashd.style.compose import (
     get_container,
     CENTER_CONTENT_ALONG,
     CENTER_CONTENT_ACROSS,
+    START_ALONG,
+    START_ACROSS,
     CENTER_ALONG,
     CENTER_ACROSS,
     END_ALONG,
+    END_ACROSS,
     STRETCH,
     STRETCH_CONTENT,
     V,
@@ -304,19 +307,20 @@ class SectionCustomerInfo:
         to the database. Enabled only when any information is changed."""
 
         self.options_container = get_container(
-            H, END_ALONG,
+            H, MARGIN(r=15),
             children=[self.undo_button, self.confirm_button],
         )
         self.body = ScrollContainer(
-            style=Pack(flex=1),
+            style=Pack(flex=5),
             content=self.form.widget,
         )
         self.full_contents = get_container(
-            V,
+            V, END_ACROSS,
             children=[self.body, self.options_container]
         )
         if sys.platform == "win32":
-            self.body.style.background_color = "#F9F9F9"
+            self.full_contents.style.background_color = "#F9F9F9"
+            self.form.widget.style.background_color = "#F9F9F9"
 
     def handle_confirm_permission(self, widget):
         """App behaviour when the user interacts with any of the fields of
