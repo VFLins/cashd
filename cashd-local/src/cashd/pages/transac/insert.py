@@ -1,9 +1,12 @@
 from typing import Callable
 from toga.style import Pack
+import datetime as dt
 import toga
 import sys
 import re
 
+from cashd_core import data, fmt
+from cashd import const
 from cashd.style.vars import input_annotation
 from cashd.style.compose import ComposedBox, mod
 from cashd.widgets.form import FormField
@@ -52,14 +55,15 @@ class Subsection:
             "Inserir",
             enabled=False,
             on_press=self.insert_transaction,
-            style=Pack(margin_top=25),
+            style=Pack(margin_top=25, width=100),
         )
         """Button to write the transaction with date and currency amount inserted
         by the user to the database.
         """
 
         self.full_contents = ComposedBox(
-            mod.V, mod.CENTER_ACROSS, mod.CONTENT_WIDTH(200),
+            mod.COLUMNS(1, mod.END_ACROSS, mod.WIDTH(220), mod.BG_COLOR("red")),
+            mod.V, mod.CENTER_ACROSS,
             children=[
                 self.date,
                 self.amount_label,

@@ -4,6 +4,7 @@ from typing import Callable
 import toga
 import sys
 
+from cashd_core import data
 from cashd.widgets.form import FormHandler
 from cashd.style.compose import ComposedBox, mod
 

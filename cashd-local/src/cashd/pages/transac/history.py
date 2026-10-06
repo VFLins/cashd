@@ -1,8 +1,9 @@
 import sys
 import toga
 from toga.style import Pack
+from typing import Callable
 
-from cashd_core import pdf
+from cashd_core import pdf, data
 from cashd.widgets.elems import form_options
 from cashd.style.vars import set_col_alignments
 
@@ -60,7 +61,7 @@ class Subsection:
         if widget.selection is None:
             self.remove_button.enabled = False
 
-    async def export_transac(self, widget: Button):
+    async def export_transac(self, widget: toga.Button):
         try:
             doc = pdf.model.invoice.CustomerTransactions(
                 customer_id=self.SELECTED_CUSTOMER.Id
@@ -82,7 +83,7 @@ class Subsection:
             await widget.app.dialog(info)
             doc.launch_file()
 
-    async def remove_transac(self, widget: Button):
+    async def remove_transac(self, widget: toga.Button):
         try:
             transac_id = self.table.selection.id
         except AttributeError:

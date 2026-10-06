@@ -1,8 +1,3 @@
-import re
-import sys
-import datetime as dt
-from typing import Callable
-
 import toga
 from toga.app import App
 from toga.style import Pack
@@ -174,7 +169,7 @@ class TransacSection(BaseSection):
             toga.Box(style=Pack(flex=1)),
         )
 
-    def select_customer(self, widget: Selection):
+    def select_customer(self, widget: toga.Selection):
         if widget.selection is None:
             self.subsection_add_transac.amount_input.enabled = False
             self.subsection_history.export_button.enabled = False
@@ -212,7 +207,7 @@ class TransacSection(BaseSection):
                 f"Valor: {sign} R$ {abs(value)/100:.2f}".replace(".", ",")
             )
 
-    def set_context_screen(self, widget: Button = None):
+    def set_context_screen(self, widget: toga.Button = None):
         """Change between customer selection and customer data management, depending on
         the button clicked.
         """
