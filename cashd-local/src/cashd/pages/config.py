@@ -32,7 +32,7 @@ from cashd.style.vars import (
     PAGE_BODY,
 )
 from cashd.widgets.elems import ListOfItems
-from cashd.widgets.custom import GroupBox
+from cashd.widgets.custom import GroupBox, Checkbox
 
 
 class ConfigSection(BaseSection):
@@ -162,8 +162,8 @@ class ConfigSection(BaseSection):
                 Row(
                     style=Pack(align_items="center", margin_top=25),
                     children=[
-                        Switch(
-                            text="",
+                        Checkbox(
+                            text="Forçar backup ao fechar",
                             value=prefs.ForceBackupOnClose.get(),
                             on_change=lambda w: prefs.ForceBackupOnClose.set(w.value),
                             style=Pack(
@@ -171,12 +171,9 @@ class ConfigSection(BaseSection):
                                     (0, 0, 0, 10)
                                     if platform == "win32"
                                     else (0, 10, 0, 0)
-                                )
+                                ),
+                                font_size=10,
                             ),
-                        ),
-                        Label(
-                            "Forçar backup ao fechar",
-                            style=Pack(font_size=const.FONT_SIZE),
                         ),
                     ],
                 ),
