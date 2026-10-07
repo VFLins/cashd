@@ -60,6 +60,7 @@ class TransacSection(BaseSection):
                 if data.tbl_clientes().table_is_empty()
                 else self.HELP_MSG
             ),
+            style=Pack(font_size=10),
         )
         """Text on top of the page displaying information about the currently
         selected customer.
@@ -112,14 +113,14 @@ class TransacSection(BaseSection):
 
         # main container
         self.head = ComposedBox(
-            mod.STRETCH, mod.STRETCH_CONTENT, mod.CENTER_ACROSS,
+            mod.STRETCH, mod.STRETCH_CONTENT, mod.CENTER_ACROSS, mod.GAP(10),
             children=[self.actions_button, self.help_msg_block]
         )
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
         self.head_block = ComposedBox(
-            mod.H, mod.CONTENT_FLEXES(1, 5),
+            mod.H, mod.CONTENT_FLEXES(1, 9),
             children=[
                 toga.Box(),
                 GroupBox(children=[self.head], style=Pack(margin=(20, 0, 30, 0))),
@@ -128,7 +129,7 @@ class TransacSection(BaseSection):
         )
 
         self.body = ComposedBox(
-            mod.H, mod.STRETCH, mod.CONTENT_FLEXES(1, 5),
+            mod.H, mod.STRETCH, mod.CONTENT_FLEXES(1, 9),
             children=[toga.Box(), self.customer_selector.widget, toga.Box()]
         )
         """Contents of most of the interactive part of this section, including
@@ -146,7 +147,6 @@ class TransacSection(BaseSection):
         :param w: window width where this layout handling should be based on.
         """
         self.head.replace_children(self.actions_button, self.help_msg_block)
-        self.body.replace_modifiers(mod.H, mod.STRETCH, mod.CONTENT_FLEXES(1, 5))
         self.body.replace_children(
             toga.Box(style=Pack(flex=1)),
             self.customer_selector.widget,
@@ -160,7 +160,6 @@ class TransacSection(BaseSection):
         """
         # Assign content
         self.head.replace_children(self.help_msg_block)
-        self.body.replace_modifiers(mod.H, mod.STRETCH, mod.CONTENT_FLEXES(1, 9))
         self.body.replace_children(
             toga.Box(style=Pack(flex=1)),
             self.customer_selector.widget,

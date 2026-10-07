@@ -134,6 +134,7 @@ class ConfigSection(BaseSection):
             title="Backup ao registrar transações",
             on_change=self.upd_backup_on_transaction,
             style=Pack(
+                font_size=10,
                 direction="column",
                 width=const.FORM_WIDTH,
                 margin_top=40 if toga.backend == "toga_winforms" else 15,

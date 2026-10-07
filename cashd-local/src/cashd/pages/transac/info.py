@@ -43,7 +43,7 @@ class Subsection:
         to the database. Enabled only when any information is changed."""
 
         self.options_container = ComposedBox(
-            mod.H, mod.MARGIN(r=15),
+            mod.H, mod.MARGIN(r=16, t=8, b=4), mod.GAP(8),
             children=[self.undo_button, self.confirm_button],
         )
         self.body = toga.ScrollContainer(

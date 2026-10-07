@@ -159,7 +159,7 @@ class FormHandler:
     def reshape(self, n_cols: int):
         """Rebuilds the form grid layout with the specified amount of columns."""
         self.n_cols = n_cols
-        self._widget.set_modifiers(mod.COLUMNS(n_cols))
+        self._widget.replace_modifiers(mod.COLUMNS(n_cols))
 
     @property
     def data(self) -> Dict[str, str]:

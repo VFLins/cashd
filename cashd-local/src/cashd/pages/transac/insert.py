@@ -14,6 +14,8 @@ from cashd.widgets.custom import DateInput
 
 
 class Subsection:
+    FIELD_WIDTH = 190
+
     def __init__(
         self,
         selected_customer: data.tbl_clientes,
@@ -28,7 +30,7 @@ class Subsection:
             input_widget=DateInput(),
         )
         """Custom date input form from 'Inserir transação' context."""
-        self.date.style.width = 190
+        self.date.style.width = self.FIELD_WIDTH
 
         self.amount_label = toga.Label(
             "Valor: R$ 0,00",
@@ -39,7 +41,7 @@ class Subsection:
         """
 
         self.amount_input = toga.TextInput(
-            style=Pack(width=190),
+            style=Pack(width=self.FIELD_WIDTH),
             placeholder="0,00",
             on_change=self.update_amount_label,
             on_confirm=self.insert_transaction,
@@ -62,7 +64,7 @@ class Subsection:
         """
 
         self.full_contents = ComposedBox(
-            mod.COLUMNS(1, mod.END_ACROSS, mod.WIDTH(220), mod.BG_COLOR("red")),
+            mod.COLUMNS(1, mod.END_ACROSS, mod.WIDTH(self.FIELD_WIDTH)),
             mod.V, mod.CENTER_ACROSS,
             children=[
                 self.date,
