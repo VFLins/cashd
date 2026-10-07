@@ -59,6 +59,14 @@ def MARGIN(t: int = 0, l: int = 0, b: int = 0, r: int = 0) -> Styler:
     return Styler(parent_style={"margin": (t, r, b, l)})
 
 
+def CONTENT_FLEX(value: int) -> Styler:
+    """Sets a custom flex factor to all of its children.
+
+    :param value: Flex factor.
+    """
+    return Styler(child_style={"flex": value})
+
+
 def FLEX(value: int) -> Styler:
     """Sets a custom flex factor to the parent widget.
 

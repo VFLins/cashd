@@ -1,11 +1,14 @@
+import toga
+from toga.style import Pack
 from toga.app import App
 from toga.widgets.base import Widget
-from toga.widgets.box import Box
+from toga.widgets.box import Box, Column
 from toga.widgets.button import Button
 
 from cashd_core import data
 from .base import BaseSection
 from cashd import style, widgets
+from cashd.style.compose import ComposedBox, mod
 from cashd.style.vars import (
     CONTEXT_BUTTON,
     FULL_CONTENTS,
@@ -23,6 +26,7 @@ class CreateCustomerSection(BaseSection):
             on_change=self.change_fields,
         )
         self.customer_form.add_table_fields(table=data.get_default_customer())
+
         self.undo_button = Button(
             "Desfazer",
             enabled=False,
@@ -35,13 +39,13 @@ class CreateCustomerSection(BaseSection):
             on_press=self.confirm_changes,
             style=CONTEXT_BUTTON,
         )
-        self.controls = widgets.elems.form_options(
-            width=self.customer_form.widget.style.width,
-            buttons=[self.undo_button, self.confirm_button],
+        self.controls = ComposedBox(
+            mod.H, mod.END_ALONG, mod.WIDTH(340),
+            children=[self.undo_button, self.confirm_button],
         )
-        self.full_contents = Box(
-            style=FULL_CONTENTS,
-            children=[self.customer_form.widget, self.controls],
+        self.full_contents = ComposedBox(
+            mod.V, mod.CENTER_ACROSS,
+            children=[self.customer_form.widget, self.controls]
         )
 
     def disable_buttons(self, widget: Widget):
@@ -82,5 +86,6 @@ class CreateCustomerSection(BaseSection):
         expected_n_cols = 3 if width > 630 else 2
         if self.customer_form.n_cols == expected_n_cols:
             return
+        controls_width = 330 if expected_n_cols == 2 else 530
+        self.controls.replace_modifiers(mod.H, mod.END_ALONG, mod.WIDTH(controls_width))
         self.customer_form.reshape(n_cols=expected_n_cols)
-        self.controls.style.width = self.customer_form.widget.style.width

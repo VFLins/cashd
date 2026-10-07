@@ -75,7 +75,7 @@ class TransacSection(BaseSection):
         )
 
         self.actions_button = toga.Button(
-            style=Pack(width=50, height=40, margin_left=20),
+            style=Pack(width=50, height=40),
             id="actions_button",
             icon=const.ICON_USER_OPTS,
             enabled=False,
@@ -84,7 +84,7 @@ class TransacSection(BaseSection):
         """Button that changes context to interact with the selected user."""
 
         self.return_button = toga.Button(
-            style=Pack(width=50, height=40, margin_left=20),
+            style=Pack(width=50, height=40),
             id="return_button",
             icon=const.ICON_RETURN,
             on_press=self.set_context_screen,
@@ -114,6 +114,7 @@ class TransacSection(BaseSection):
         # main container
         self.head = ComposedBox(
             mod.STRETCH, mod.STRETCH_CONTENT, mod.CENTER_ACROSS, mod.GAP(10),
+            mod.MARGIN(l=20, r=20),
             children=[self.actions_button, self.help_msg_block]
         )
         """Contents on the topmost part of this section, displaying the selected
