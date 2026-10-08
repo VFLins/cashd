@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from toga_gtk.libs import Gtk
+from toga_gtk.libs import Gtk, GTK_VERSION
+from toga_gtk.libs.styles import get_font_css
 from toga_gtk.widgets.base import Widget
 
 
