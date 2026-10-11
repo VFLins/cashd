@@ -7,9 +7,6 @@ from cashd.widget import GroupBox as Impl
 class GroupBox(SimpleProbe):
     native_class = Gtk.Frame
 
-    def __init__(self):
-        super().__init__(widget=Impl())
-
     @property
     def checkbox_visible(self):
         return self.native.get_label_widget() is self.impl._checkbox
@@ -18,7 +15,8 @@ class GroupBox(SimpleProbe):
     def title(self):
         if self.checkbox_visible:
             return self.impl._checkbox.get_label()
-        return self.native.get_label() or ""
+        label = self.native.get_label()
+        return label if label is not None else ""
 
     @property
     def value(self):

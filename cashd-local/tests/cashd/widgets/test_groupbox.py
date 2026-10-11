@@ -5,22 +5,26 @@ from unittest.mock import Mock
 from cashd.widget import GroupBox
 
 
-@pytest.fixture
-async def widget():
-    return GroupBox("Hello")
+DEFAULT_LABEL = "Hello"
 
 
 @pytest.fixture(scope="function")
-def probe():
-    probe = get_probe("widget", "GroupBox")
-    return probe()
+async def widget():
+    return GroupBox(title=DEFAULT_LABEL)
+
+
+@pytest.fixture(scope="function")
+def probe(widget):
+    probe_class = get_probe("widget", "GroupBox")
+    probe = probe_class(widget)
+    return probe
 
 
 async def test_title(widget, probe):
     "The title can be changed while no checkbox is shown"
-    widget.title = "Hello"
-    assert widget.title == "Hello"
-    assert probe.title == "Hello"
+    await probe.redraw("Draw widget with default test values")
+    assert widget.title == DEFAULT_LABEL
+    assert probe.title == DEFAULT_LABEL
 
     widget.title = "A different title"
     await probe.redraw("GroupBox title should be changed")
@@ -67,7 +71,7 @@ async def test_checkbox_shown_with_handler(widget, probe):
 async def test_checkbox_shown_at_creation(mainwindow, probe):
     "Passing on_change to the constructor shows the checkbox"
     group = GroupBox("Created", on_change=Mock())
-    main_window.content = toga.Box(children=[group])
+    mainwindow.content = toga.Box(children=[group])
     await probe.redraw("GroupBox with checkbox should be displayed")
 
     assert group.checkbox

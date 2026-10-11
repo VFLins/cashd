@@ -7,7 +7,7 @@ class SimpleProbe:
         self.impl = widget._impl
         self.native = widget._impl.native
 
-    async def redraw(self, message=None, delay=0.05):
+    async def redraw(self, message=None, delay=0.1):
         if message:
             print(message)
         await asyncio.sleep(delay)
