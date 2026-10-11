@@ -60,7 +60,7 @@ class Subsection:
         """
 
         self.full_contents = ComposedBox(
-            mod.COLUMNS(1, mod.END_ACROSS, mod.WIDTH(self.FIELD_WIDTH)),
+            mod.COLUMNS(1, mod.START_ACROSS, mod.WIDTH(self.FIELD_WIDTH)),
             mod.V, mod.CENTER_ACROSS,
             children=[
                 self.date,
