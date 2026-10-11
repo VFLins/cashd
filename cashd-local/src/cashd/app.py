@@ -7,13 +7,7 @@ import traceback
 import webbrowser
 from typing import Type
 from importlib.metadata import version
-from toga import App, Group, backend
-from toga.window import MainWindow, Window
-from toga.widgets.scrollcontainer import ScrollContainer
-from toga.widgets.imageview import ImageView
-from toga.widgets.button import Button
-from toga.widgets.label import Label
-from toga.widgets.box import Column, Row
+import toga
 from toga.command import Command
 from toga.style import Pack
 from toga.style.pack import ROW
@@ -22,7 +16,7 @@ from cashd_core import prefs, backup
 from cashd import pages, const, style
 
 
-class Cashd(App):
+class Cashd(toga.App):
     def startup(self):
         """Construct and show the Toga application."""
 
@@ -36,7 +30,7 @@ class Cashd(App):
         )
         self.responsive_layout_task.add_done_callback(self._listener_finished)
 
-        self.main_box = ScrollContainer(
+        self.main_box = toga.ScrollContainer(
             style=Pack(direction=ROW, flex=1, font_size=const.BIG_FONT_SIZE),
             content=self.main_section.full_contents,
         )
@@ -45,7 +39,7 @@ class Cashd(App):
         # MAIN WINDOW #
         ###############
 
-        self.main_window = MainWindow(
+        self.main_window = toga.MainWindow(
             title=self.formal_name,
             size=const.MAIN_WINDOW_SIZE,
             resizable=True,
@@ -53,9 +47,9 @@ class Cashd(App):
         )
         self.main_window.min_size = (420, 490)
         self.main_window.content = self.main_box
-        group_main = Group("Cashd", order=10)
-        group_navigate = Group("Navegar", order=20)
-        group_help = Group("Ajuda", order=30)
+        group_main = toga.command.Group("Cashd", order=10)
+        group_navigate = toga.command.Group("Navegar", order=20)
+        group_help = toga.command.Group("Ajuda", order=30)
         self.main_window.toolbar.add(
             Command(
                 order=3,
@@ -91,7 +85,7 @@ class Cashd(App):
         self.commands[Command.EXIT].group = group_main
         self.commands[Command.ABOUT].text = "Sobre"
         self.commands[Command.ABOUT].group = group_help
-        if backend != "toga_qt":
+        if toga.backend != "toga_qt":
             self.commands[Command.VISIT_HOMEPAGE].text = "Documentação"
             self.commands[Command.VISIT_HOMEPAGE].group = group_help
         self.main_window.show()
@@ -161,43 +155,43 @@ class Cashd(App):
             size=(360, 190),
         )
 
-        desc_title = Label("Descrição", style=style.vars.HEADING)
-        desc_label = Label(
+        desc_title = toga.Label("Descrição", style=style.vars.HEADING)
+        desc_label = toga.Label(
             "Um aplicativo local-first, que te ajuda a controlar \nsuas vendas no "
             "fiado sem deixar de respeitar a\nprivacidade dos seus dados.",
         )
-        desc_block = Column(
+        desc_block = toga.Column(
             style=Pack(width=content_width), children=[desc_title, desc_label]
         )
 
-        version_title = Label("Versão", style=style.vars.HEADING)
-        version_label = Label(f"Cashd v{version('cashd')} | Toga v{version('toga')}")
-        version_block = Column(
+        version_title = toga.Label("Versão", style=style.vars.HEADING)
+        version_label = toga.Label(f"Cashd v{version('cashd')} | Toga v{version('toga')}")
+        version_block = toga.Column(
             style=Pack(width=content_width), children=[version_title, version_label]
         )
 
-        madeby_title = Label("Desenvolvido por", style=style.vars.HEADING)
-        madeby_label = ImageView(const.VITORLINS_LOGO, style=Pack(margin=(20, 0)))
-        madeby_block = Column(
+        madeby_title = toga.Label("Desenvolvido por", style=style.vars.HEADING)
+        madeby_label = toga.ImageView(const.VITORLINS_LOGO, style=Pack(margin=(20, 0)))
+        madeby_block = toga.Column(
             style=Pack(width=content_width), children=[madeby_title, madeby_label]
         )
 
-        close_button = Button(
+        close_button = toga.Button(
             "OK",
             style=Pack(width=80, margin=(20, 0)),
             on_press=lambda w: self.about_window.close(),
         )
-        contact_button = Button(
+        contact_button = toga.Button(
             "Entre em contato",
             style=Pack(width=140, margin=(20, 5, 0)),
             on_press=lambda w: webbrowser.open("https://vitorlins.com.br/contato/"),
         )
-        actions_block = Column(
+        actions_block = toga.Column(
             style=Pack(width=content_width, align_items="end"),
-            children=[Row(children=[contact_button, close_button])],
+            children=[toga.Row(children=[contact_button, close_button])],
         )
 
-        full_contents = Column(
+        full_contents = toga.Column(
             style=Pack(align_items="center"),
             children=[desc_block, version_block, madeby_block, actions_block],
         )

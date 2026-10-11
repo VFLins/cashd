@@ -4,29 +4,19 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Type, Iterable, Callable
 
+import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
-from toga.widgets.base import Widget
-from toga.widgets.numberinput import NumberInput
-from toga.widgets.textinput import TextInput
-from toga.widgets.selection import Selection
-from toga.widgets.box import Box, Row, StyleT
-from toga.widgets.label import Label
 
 from cashd_core import data
 from cashd import const
 from cashd.style.compose import ComposedBox, mod
 from cashd.style.vars import (
-    input_annotation,
     user_input,
 )
-from cashd.widgets.elems import (
-    LabeledSelection,
-    LabeledNumberInput,
-)
 
 
-class FormField(Box):
+class FormField(toga.Box):
 
     def __new__(
         self,
@@ -35,7 +25,6 @@ class FormField(Box):
         description: str | None = None,
         id: str | None = None,
         is_required: bool = False,
-        default_width: bool = True,
     ):
         """Crete a form field with label, input and description (optional). Saves
         references for all widgets added to this field.
@@ -58,23 +47,23 @@ class FormField(Box):
 
         :returns: A modified `toga.Box` that includes custom children and properties.
         """
-        label_widget = Label(
+        label_widget = toga.Label(
             text=label,
             id=f"{id}_label" if id else f"{label}_label",
-            style=input_annotation("label", default_width),
+            style=Pack(margin=(20, 5, 9, 5)),
         )
-        input_widget.style = user_input(type(input_widget), default_width)
+        input_widget.style = user_input(type(input_widget))
 
-        self.contents = Box(
+        self.contents = toga.Box(
             id=id if id else label,
             style=Pack(direction="column"),
             children=[label_widget, input_widget],
         )
         if description:
-            description_widget = Label(
+            description_widget = toga.Label(
                 text=description,
                 id=f"{id}_desc" if id else f"{label}_desc",
-                style=input_annotation("legend"),
+                style=Pack(font_size=9, margin=(6, 0, 10, 5), color="gray")
             )
             self.contents.add(description_widget)
             self.contents.description = description_widget
@@ -195,84 +184,6 @@ class FormHandler:
             field.input.on_change = func
 
 
-class HorizontalDateForm:
-    MONTHS = (
-        "Janeiro",
-        "Fevereiro",
-        "Março",
-        "Abril",
-        "Maio",
-        "Junho",
-        "Julho",
-        "Agosto",
-        "Setembro",
-        "Outubro",
-        "Novembro",
-        "Dezembro",
-    )
-
-    def __init__(self, value: date = date.today()):
-
-        self.year_input = LabeledNumberInput(
-            label_text="Ano",
-            style=user_input(NumberInput),
-            min=1,
-            max=9999,
-            value=value.year,
-        )
-
-        self.month_input = LabeledSelection(
-            label_text="Mês",
-            style=user_input(Selection),
-            items=self.MONTHS,
-            value=self.MONTHS[value.month - 1],
-            on_change=self._update_allowed_day_values,
-        )
-
-        self.day_input = LabeledNumberInput(
-            label_text="Dia",
-            style=user_input(NumberInput),
-            min=1,
-            max=self._last_day_of_month(),
-            value=value.day,
-        )
-
-        self.widget = Row(
-            children=[
-                self.day_input.widget,
-                self.month_input.widget,
-                self.year_input.widget,
-            ],
-        )
-
-    @property
-    def value(self):
-        return date(
-            int(self.year_input.value), self._month_number(), int(self.day_input.value)
-        )
-
-    @value.setter
-    def value(self, value: date):
-        self.day_input.value = value.day
-        self.month_input.value = self.MONTHS[value.month - 1]
-        self.year_input.value = value.year
-
-    def _last_day_of_month(self) -> int:
-        year, month = int(self.year_input.value), self._month_number()
-        return int((date(year, month, 1) + relativedelta(day=31)).day)
-
-    def _update_allowed_day_values(self, widget):
-        max_day = self._last_day_of_month()
-        if self.day_input.value > max_day:
-            self.day_input.value = max_day
-        self.day_input.max = max_day
-
-    def _month_number(self) -> int:
-        """Returns the month number 1-12 of the currently selected month."""
-        month_name = self.month_input.value
-        return int(self.MONTHS.index(month_name) + 1)
-
-
 def unique_strings(lst: List[str]) -> List[str]:
     """Make every item in `lst` unique by appending a suffix."""
     seen = {}
@@ -298,14 +209,14 @@ def build_form_field(
     """Builds a `FormField` for a table's field."""
     if table.types[fieldname] is data.RequiredStateAcronym:
         val = getattr(table, fieldname, "")
-        widget = Selection(
+        widget = toga.Selection(
             value=(val if val in const.ESTADOS else const.ESTADOS[0]),
             items=const.ESTADOS,
             on_change=on_change,
         )
     else:
         val = getattr(table, fieldname, "")
-        widget = TextInput(value=val if val else "", on_change=on_change)
+        widget = toga.TextInput(value=val if val else "", on_change=on_change)
 
     return FormField(
         label=table.display_names[fieldname],

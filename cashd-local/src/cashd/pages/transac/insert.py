@@ -6,11 +6,8 @@ import sys
 import re
 
 from cashd_core import data, fmt
-from cashd import const
-from cashd.style.vars import input_annotation
+from cashd import const, widget
 from cashd.style.compose import ComposedBox, mod
-from cashd.widgets.form import FormField
-from cashd.widgets.custom import DateInput
 
 
 class Subsection:
@@ -24,17 +21,16 @@ class Subsection:
         self.SELECTED_CUSTOMER = selected_customer
         self.on_insert = on_insert
 
-        # self.date_input_form = widgets.HorizontalDateForm()
-        self.date = FormField(
+        self.date = widget.form.FormField(
             label="Data",
-            input_widget=DateInput(),
+            input_widget=widget.DateInput(),
         )
         """Custom date input form from 'Inserir transação' context."""
         self.date.style.width = self.FIELD_WIDTH
 
         self.amount_label = toga.Label(
             "Valor: R$ 0,00",
-            style=input_annotation(),
+            style=Pack(margin=(20, 5, 9, 5)),
         )
         """Label that dynamically displays the currency amount that will be
         inserted by the user.

@@ -6,10 +6,9 @@ from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog
 
 from cashd_core import data, fmt, pdf
 
-from cashd import const, widgets
+from cashd import const, widget
 from cashd.style.vars import (
     set_col_alignments,
-    input_annotation,
     user_input,
     INLINE_LABEL,
     GENERIC_LABEL,
@@ -22,10 +21,7 @@ from cashd.style.vars import (
     HORIZONTAL_BOX,
 )
 from cashd.pages.base import BaseSection
-from cashd.widgets.form import FormField
 from cashd.style.compose import mod, ComposedBox
-from cashd.widgets.custom import GroupBox
-from cashd.widgets.paginated import PaginatedDetailedList
 from . import history, info, insert
 
 
@@ -92,7 +88,7 @@ class TransacSection(BaseSection):
         """Button that returns the user to the context of customer selection."""
 
         # widgets: 'select' context
-        self.customer_selector = PaginatedDetailedList(
+        self.customer_selector = widget.paginated.PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             on_select=self.select_customer,
             style=Pack(flex=5),
@@ -124,7 +120,7 @@ class TransacSection(BaseSection):
             mod.H, mod.CONTENT_FLEXES(1, 9),
             children=[
                 toga.Box(),
-                GroupBox(children=[self.head], style=Pack(margin=(20, 0, 30, 0))),
+                widget.GroupBox(children=[self.head], style=Pack(margin=(20, 0, 30, 0))),
                 toga.Box(),
             ]
         )

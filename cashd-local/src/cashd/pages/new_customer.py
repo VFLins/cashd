@@ -1,19 +1,16 @@
 import toga
 from toga.style import Pack
 from toga.app import App
-from toga.widgets.base import Widget
-from toga.widgets.box import Box, Column
-from toga.widgets.button import Button
 
 from cashd_core import data
 from .base import BaseSection
-from cashd import style, widgets
+from cashd import style, widget
 from cashd.style.compose import ComposedBox, mod
 from cashd.style.vars import (
     CONTEXT_BUTTON,
     FULL_CONTENTS,
 )
-from cashd.widgets.form import FormHandler
+from cashd.widget.form import FormHandler
 
 
 class CreateCustomerSection(BaseSection):
@@ -21,19 +18,16 @@ class CreateCustomerSection(BaseSection):
     def __init__(self, app: App):
         super().__init__(app)
         # Winforms erroes if this class is instantiated outside a class function
-        self.customer_form = FormHandler(
-            n_cols=2,
-            on_change=self.change_fields,
-        )
+        self.customer_form = FormHandler(n_cols=2, on_change=self.change_fields)
         self.customer_form.add_table_fields(table=data.get_default_customer())
 
-        self.undo_button = Button(
+        self.undo_button = toga.Button(
             "Desfazer",
             enabled=False,
             on_press=self.undo_changes,
             style=CONTEXT_BUTTON,
         )
-        self.confirm_button = Button(
+        self.confirm_button = toga.Button(
             "Confirmar",
             enabled=False,
             on_press=self.confirm_changes,
@@ -48,16 +42,16 @@ class CreateCustomerSection(BaseSection):
             children=[self.customer_form.widget, self.controls]
         )
 
-    def disable_buttons(self, widget: Widget):
+    def disable_buttons(self, widget: toga.Widget):
         self.undo_button.enabled = True
         self.confirm_button.enabled = True
 
-    def undo_changes(self, widget: Button):
+    def undo_changes(self, widget: toga.Button):
         self.undo_button.enabled = False
         self.confirm_button.enabled = False
         self.update_data_widgets()
 
-    def confirm_changes(self, widget: Widget):
+    def confirm_changes(self, widget: toga.Widget):
         new_data = self.customer_form.data
         customer = data.tbl_clientes(**new_data)
         try:
@@ -68,7 +62,7 @@ class CreateCustomerSection(BaseSection):
         self.update_data_widgets()
         self.disable_buttons(widget=widget)
 
-    def change_fields(self, widget: Widget):
+    def change_fields(self, widget: toga.Widget):
         """App's begaviour when any field of this form recieves user interaction."""
         if self.customer_form.required_fields_are_filled():
             self.confirm_button.enabled = True
@@ -82,10 +76,10 @@ class CreateCustomerSection(BaseSection):
         self.customer_form.add_table_fields(table=data.get_default_customer())
 
     async def rearrange_widgets(self):
-        width, height = self.window_size
-        expected_n_cols = 3 if width > 630 else 2
+        width, _ = self.window_size
+        expected_n_cols = 3 if width > 530 else 2
         if self.customer_form.n_cols == expected_n_cols:
             return
-        controls_width = 330 if expected_n_cols == 2 else 530
+        controls_width = 330 if expected_n_cols == 2 else 500
         self.controls.replace_modifiers(mod.H, mod.END_ALONG, mod.WIDTH(controls_width))
         self.customer_form.reshape(n_cols=expected_n_cols)

@@ -2,7 +2,7 @@ import toga
 import pytest
 from ..probes import get_probe
 from unittest.mock import Mock
-from cashd.widgets.custom.groupbox import GroupBox
+from cashd.widget import GroupBox
 
 
 @pytest.fixture

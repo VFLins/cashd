@@ -1,7 +1,7 @@
 from toga_gtk.libs import Gtk
 
 from tests.cashd.probes.base import SimpleProbe
-from cashd.widgets.custom import GroupBox
+from cashd.widget import GroupBox
 
 
 class GroupBoxProbe(SimpleProbe):

@@ -11,42 +11,39 @@ from toga.dialogs import (
 )
 
 from cashd_core import prefs, const
-from cashd import backup, widgets
+from cashd import backup, widget
 from cashd.style.vars import (
     user_input,
-    input_annotation,
     HEADING,
     FULL_CONTENTS,
     PAGE_BODY,
 )
 from cashd.pages.base import BaseSection
 from cashd.style.compose import ComposedBox, mod
-from cashd.widgets.elems import ListOfItems
-from cashd.widgets.custom import GroupBox, Checkbox
 
 
 class ConfigSection(BaseSection):
     def __init__(self, app: App):
         super().__init__(app)
 
-        self.company_info = widgets.form.FormHandler(n_cols=1)
+        self.company_info = widget.form.FormHandler(n_cols=1)
         self.company_info.add_fields(
             fields=[
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="Nome da empresa",
                     input_widget=toga.TextInput(
                         value=prefs.CompanyName.get(),
                         on_change=lambda w: prefs.CompanyName.set(w.value),
                     ),
                 ),
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="Local",
                     input_widget=toga.TextInput(
                         value=prefs.CompanyAddress.get(),
                         on_change=lambda w: prefs.CompanyAddress.set(w.value),
                     ),
                 ),
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="Informação de contato",
                     input_widget=toga.TextInput(
                         value=prefs.CompanyContact.get(),
@@ -58,10 +55,10 @@ class ConfigSection(BaseSection):
         for field in self.company_info.fields.values():
             field.input.width = const.FORM_WIDTH - 5
 
-        self.default_values = widgets.form.FormHandler(n_cols=2)
+        self.default_values = widget.form.FormHandler(n_cols=2)
         self.default_values.add_fields(
             fields=[
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="Estado",
                     input_widget=toga.Selection(
                         items=const.ESTADOS,
@@ -69,16 +66,15 @@ class ConfigSection(BaseSection):
                         on_change=self.set_default_state,
                     ),
                 ),
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="Cidade",
                     input_widget=toga.TextInput(
                         value=prefs.settings.default_city,
-                        style=user_input(toga.TextInput),
                         on_change=self.set_default_city,
                         on_lose_focus=self.set_title_case,
                     ),
                 ),
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="Número de DDD",
                     input_widget=toga.Selection(
                         items=const.DDD,
@@ -86,11 +82,10 @@ class ConfigSection(BaseSection):
                         on_change=lambda w: prefs.AreaCodeNumber.set(w.value),
                     ),
                 ),
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="Linhas por página",
                     input_widget=toga.NumberInput(
                         value=prefs.settings.data_tables_rows_per_page,
-                        style=user_input(toga.NumberInput),
                         on_change=self.set_rows_per_page,
                         max=500,
                         min=50,
@@ -100,7 +95,7 @@ class ConfigSection(BaseSection):
             ]
         )
 
-        self.backup_places_list = ListOfItems(
+        self.backup_places_list = widget.elems.ListOfItems(
             datasource=backup.BackupPlacesSource(),
             columns=["value"],
             show_headings=False,
@@ -110,7 +105,7 @@ class ConfigSection(BaseSection):
             style=Pack(width=const.FORM_WIDTH),
         )
 
-        self.transac_to_backup_amount = widgets.form.FormField(
+        self.transac_to_backup_amount = widget.form.FormField(
             label="Qtd. de transações",
             input_widget=toga.NumberInput(
                 min=5,
@@ -120,7 +115,7 @@ class ConfigSection(BaseSection):
             ),
             id="transac_to_backup_input",
         )
-        self.backup_on_transac = GroupBox(
+        self.backup_on_transac = widget.GroupBox(
             title="Backup ao registrar transações",
             on_change=self.upd_backup_on_transaction,
             style=Pack(
@@ -138,7 +133,7 @@ class ConfigSection(BaseSection):
                         toga.Label(
                             "Realiza um backup silenciosamente depois que uma "
                             "quantidade de\ntransações é registrada.",
-                            style=input_annotation("legend"),
+                            style=Pack(margin=(6, 0, 10, 5), font_size=9, color="gray"),
                         ),
                     ],
                 )
@@ -152,7 +147,7 @@ class ConfigSection(BaseSection):
                 toga.Row(
                     style=Pack(align_items="center", margin_top=25),
                     children=[
-                        Checkbox(
+                        widget.Checkbox(
                             text="Forçar backup ao fechar",
                             value=prefs.ForceBackupOnClose.get(),
                             on_change=lambda w: prefs.ForceBackupOnClose.set(w.value),
@@ -170,21 +165,21 @@ class ConfigSection(BaseSection):
                 toga.Label(
                     "Se desativado, isto só acontecerá se o banco de dados tiver "
                     "aumentado de\ntamanho desde o último backup.",
-                    style=input_annotation("legend"),
+                    style=Pack(font_size=9, margin=(6, 0, 10, 5), color="gray")
                 ),
             ],
         )
 
-        self.backup_actions = widgets.form.FormHandler(n_cols=2)
+        self.backup_actions = widget.form.FormHandler(n_cols=2)
         self.backup_actions.add_fields(
             fields=[
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="Ações",
                     input_widget=toga.Button("Carregar backup", on_press=self.load_backup),
                     description="Esta operação é reversível, consulte\na documentação.",
                     id="load_backup_button",
                 ),
-                widgets.form.FormField(
+                widget.form.FormField(
                     label="",
                     input_widget=toga.Button("Fazer backup", on_press=self.run_backup),
                     description="Backups serão salvos nos\n'Locais de backup'.",
@@ -233,7 +228,7 @@ class ConfigSection(BaseSection):
         )
         self.full_contents = toga.ScrollContainer(content=self.sections)
 
-    def upd_backup_on_transaction(self, widget: GroupBox):
+    def upd_backup_on_transaction(self, widget: widget.GroupBox):
         prefs.BackupOnTransaction.set(widget.value)
         self.transac_to_backup_amount.input.readonly = not widget.value
         widget.refresh()

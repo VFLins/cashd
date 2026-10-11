@@ -4,7 +4,7 @@ from toga.style import Pack
 from typing import Callable
 
 from cashd_core import pdf, data
-from cashd.widgets.elems import form_options
+from cashd.widget.elems import form_options
 from cashd.style.vars import set_col_alignments
 
 

@@ -3,14 +3,10 @@ from decimal import Decimal
 import math
 from random import randint
 
+import toga
 from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
-from toga.widgets.box import Box
-from toga.widgets.scrollcontainer import ScrollContainer
-from toga.widgets.selection import Selection
-from toga.widgets.table import Table
-from toga.widgets.base import Widget
 
 from cashd_core import data
 from cashd import const
@@ -23,7 +19,7 @@ from cashd.style.vars import (
     HORIZONTAL_BOX,
     VERTICAL_BOX,
 )
-from cashd.widgets.paginated import PaginatedTable
+from cashd.widget.paginated import PaginatedTable
 from .base import BaseSection
 
 
@@ -51,15 +47,15 @@ class StatisticsSection(BaseSection):
         super().__init__(app)
 
         ### widgets ###
-        self.visualization_selection = Selection(
+        self.visualization_selection = toga.Selection(
             style=WIDE_SELECTION,
             items=VISUALIZATION_OPTIONS,
             on_change=self.select_visualization,
         )
         """Dropdown visualization selector. Updates the displayed table on selection."""
 
-        self.time_grouping_selection = Selection(
-            style=user_input(Selection),
+        self.time_grouping_selection = toga.Selection(
+            style=user_input(toga.Selection),
             items=TIME_GROUP_OPTIONS,
             on_change=self.update_data,
             enabled=False,
@@ -116,18 +112,18 @@ class StatisticsSection(BaseSection):
         )
 
         ### containers ###
-        self.controls_first_row = Box(
-            style=Pack(direction="row", align_items="center"),
+        self.controls_first_row = toga.Row(
+            style=Pack(align_items="center"),
             children=[
                 self.visualization_selection,
                 self.time_grouping_selection,
             ],
         )
-        self.header = Box(style=VERTICAL_BOX, children=[self.controls_first_row])
-        self.body = ScrollContainer(
+        self.header = toga.Box(style=VERTICAL_BOX, children=[self.controls_first_row])
+        self.body = toga.ScrollContainer(
             style=HORIZONTAL_BOX, content=self.transaction_history_table.widget
         )
-        self.full_contents = Box(
+        self.full_contents = toga.Box(
             style=FULL_CONTENTS,
             children=[
                 self.header,
@@ -135,7 +131,7 @@ class StatisticsSection(BaseSection):
             ],
         )
 
-    def select_visualization(self, widget: Widget | None = None):
+    def select_visualization(self, widget: toga.Widget | None = None):
         selected_visualization = self.visualization_selection.value
         if selected_visualization in ["Balanço", "Saldo acumulado total"]:
             self.time_grouping_selection.enabled = True
@@ -159,7 +155,7 @@ class StatisticsSection(BaseSection):
             case _:
                 pass
 
-    def update_data(self, widget: Widget | None = None):
+    def update_data(self, widget: toga.Widget | None = None):
         tables = {
             "Histórico de transações": self.transaction_history_table,
             "Maiores saldos": self.highest_amounts_table,
