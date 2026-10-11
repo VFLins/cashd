@@ -1,11 +1,8 @@
 from typing import Type, Callable
+import warnings
 
 import toga
 from toga.style import Pack
-from toga.widgets.base import Widget
-from toga.widgets.table import Table
-from toga.widgets.textinput import TextInput
-from toga.widgets.detailedlist import DetailedList
 
 from cashd_core import data
 from cashd import style, const
@@ -40,11 +37,11 @@ class PaginatedDetailedList(_DataInteractor):
         super().__init__(datasource=datasource, id=id, style=style, on_select=on_select)
 
     def _set_data_widget(self, id=None, style=None, on_select=None):
-        self.data_widget = DetailedList(id=id, style=style, on_select=on_select)
-        if getattr(toga, "backend", None) == "toga_winforms":
+        self.data_widget = toga.DetailedList(id=id, style=style, on_select=on_select)
+        if toga.backend == "toga_winforms":
             self.data_widget.style.font_size = 9
 
-    def refresh(self, widget: TextInput | None = None):
+    def refresh(self, widget: toga.TextInput | None = None):
         """Fetches data and updates `self.data_widget`. Requires a data source with at
         least three columns in order, where:
 
@@ -69,7 +66,7 @@ class PaginatedDetailedList(_DataInteractor):
                 self.data_widget._impl._set_selection(-1)
             case _:
                 if current_backend is not None:
-                    raise NotImplementedError(
+                    warnings.warn(
                         "Unselecting all rows for DetailedList is not implemented "
                         f"on {current_backend=}"
                     )
@@ -82,6 +79,7 @@ class PaginatedDetailedList(_DataInteractor):
     def width(self, val):
         self.widget.style.width = val
         self.top_controls.style.width = val
+        self.search_field.style.width = val
         self.bottom_controls.style.width = val
         self.data_widget.style.width = val - 5
         self.search_field.style.width = val - 5
@@ -102,7 +100,7 @@ class PaginatedTable(_DataInteractor):
     def _set_data_widget(
         self, id=None, style=None, accessors=None, on_select=None, **kwargs
     ):
-        self.data_widget = Table(
+        self.data_widget = toga.Table(
             id=id + "_data_widget" if id else None,
             style=style,
             accessors=accessors,
