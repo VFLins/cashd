@@ -5,7 +5,7 @@ import toga
 import sys
 
 from cashd_core import data
-from cashd.widgets.form import FormHandler
+from cashd import widget
 from cashd.style.compose import ComposedBox, mod
 
 
@@ -18,13 +18,14 @@ class Subsection:
         self.SELECTED_CUSTOMER = selected_customer
         self.on_update = on_update
 
-        self.form = FormHandler(
-            n_cols=1,
+        self.form = widget.form.FormHandler(
+            n_cols=2,
             on_change=self.handle_confirm_permission,
         )
         """Multiple text input fields containing the current information of the
         selected customer.
         """
+        self.form.widget.style.justify_content = "center"
 
         self.undo_button = toga.Button(
             "Desfazer",
@@ -46,10 +47,7 @@ class Subsection:
             mod.H, mod.MARGIN(r=16, t=8, b=4), mod.GAP(8),
             children=[self.undo_button, self.confirm_button],
         )
-        self.body = toga.ScrollContainer(
-            style=Pack(flex=5),
-            content=self.form.widget,
-        )
+        self.body = toga.ScrollContainer(style=Pack(flex=1), content=self.form.widget)
         self.full_contents = ComposedBox(
             mod.V, mod.END_ACROSS,
             children=[self.body, self.options_container]
