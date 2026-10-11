@@ -1,14 +1,14 @@
 from toga_gtk.libs import Gtk
 
 from tests.cashd.probes.base import SimpleProbe
-from cashd.widget import GroupBox
+from cashd.widget import GroupBox as Impl
 
 
-class GroupBoxProbe(SimpleProbe):
+class GroupBox(SimpleProbe):
     native_class = Gtk.Frame
 
     def __init__(self):
-        super().__init__(widget=GroupBox())
+        super().__init__(widget=Impl())
 
     @property
     def checkbox_visible(self):

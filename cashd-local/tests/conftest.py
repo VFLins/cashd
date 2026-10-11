@@ -9,10 +9,5 @@ def app():
 
 
 @pytest.fixture
-def main_window(app):
+def mainwindow(app):
     return app.main_window
-
-
-@pytest.fixture(scope="session")
-def probe():
-    return get_probe("PlatformProbe")
