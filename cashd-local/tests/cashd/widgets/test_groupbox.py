@@ -9,7 +9,7 @@ DEFAULT_LABEL = "Hello"
 
 
 def make_probe(widget):
-    probe_class = get_probe("widget", "Checkbox")
+    probe_class = get_probe("widget", "GroupBox")
     return probe_class(widget)
 
 

@@ -9,6 +9,11 @@ from cashd.widget import DateInput
 
 from ..probes import get_probe
 
+
+if toga.backend != "toga_gtk":
+    pytest.skip(reason=f"Skipping GTK-only tests", allow_module_level=True)
+
+
 INITIAL = date(2024, 5, 17)
 MIN = date(2024, 1, 10)
 MAX = date(2024, 12, 20)

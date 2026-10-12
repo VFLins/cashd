@@ -1,12 +1,14 @@
-from unittest.mock import Mock
-
 import pytest
 import pytest_asyncio
 import toga
 
+from unittest.mock import Mock
 from cashd.widget import Checkbox
 
 from ..probes import get_probe
+
+if toga.backend != "toga_gtk":
+    pytest.skip(reason=f"Skipping GTK-only tests", allow_module_level=True)
 
 
 def make_probe(widget):
