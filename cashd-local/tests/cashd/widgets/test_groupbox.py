@@ -68,15 +68,17 @@ async def test_checkbox_shown_with_handler(widget, probe):
     on_change.assert_not_called()
 
 
-async def test_checkbox_shown_at_creation(mainwindow, probe):
+async def test_checkbox_shown_at_creation(mainwindow):
     "Passing on_change to the constructor shows the checkbox"
-    group = GroupBox("Created", on_change=Mock())
-    mainwindow.content = toga.Box(children=[group])
+    widget = GroupBox("Created", on_change=Mock())
+    mainwindow.content = toga.Box(children=[widget])
+    probe_class = get_probe("widget", "GroupBox")
+    probe = probe_class(widget)
     await probe.redraw("GroupBox with checkbox should be displayed")
 
-    assert group.checkbox
+    assert widget.checkbox
     assert probe.checkbox_visible
-    assert group.value is False
+    assert widget.value is False
     assert probe.title == "Created"
 
 
@@ -138,6 +140,7 @@ async def test_handler_replaced(widget, probe):
     "Replacing the handler keeps the checkbox and calls only the new handler"
     first = Mock()
     second = Mock()
+    assert not probe.checkbox_visible
 
     widget.on_change = first
     widget.on_change = second
