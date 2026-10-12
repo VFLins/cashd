@@ -1,14 +1,9 @@
 import System.Windows.Forms as WinForms
-
 from tests.cashd.probes.base import SimpleProbe
-from cashd.widget import GroupBox as Impl
 
 
 class GroupBox(SimpleProbe):
     native_class = WinForms.GroupBox
-
-    def __init__(self):
-        super().__init__(widget=Impl())
 
     @property
     def checkbox_visible(self):
@@ -25,4 +20,4 @@ class GroupBox(SimpleProbe):
         return bool(self.impl._checkbox.Checked)
 
     def toggle(self):
-        self.impl._checkbox.PerformClick()
+        self.impl._checkbox.Checked = not self.impl._checkbox.Checked
