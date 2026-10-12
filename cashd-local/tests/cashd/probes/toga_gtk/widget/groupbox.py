@@ -23,4 +23,4 @@ class GroupBox(SimpleProbe):
         return self.impl._checkbox.get_active()
 
     def toggle(self):
-        self.impl._checkbox.emit("activate")
+        self.impl._checkbox.clicked()
