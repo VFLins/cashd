@@ -40,7 +40,7 @@ def main():
     app.returncode = 1
     thread = Thread(target=run_tests, args=(app, sys.argv[1:]))
     # Start pytest loop in the toga app's event loop
-    app.add_background_task(lambda app, **kwargs: thread.start())
+    app.loop.call_soon_threadsafe(thread.start)
     app.main_loop()
     return app.returncode
 
