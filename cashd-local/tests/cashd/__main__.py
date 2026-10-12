@@ -21,7 +21,12 @@ class TestApp(toga.App):
 def run_tests(app, args):
     os.chdir(PROJECT_ROOT)
     try:
-        app.returncode = int(pytest.main([str(TESTS_DIR), *args]))
+        app.returncode = int(pytest.main([
+            str(TESTS_DIR),
+            "--asyncio-mode=auto",
+            "--override-ini", "asyncio_default_fixture_loop_scope=session",
+            *args,
+        ]))
     except BaseException:
         traceback.print_exc()
         app.returncode = 1
