@@ -126,7 +126,7 @@ class ConfigSection(BaseSection):
                 direction="column",
                 width=const.FORM_WIDTH,
                 margin_top=40 if toga.backend == "toga_winforms" else 15,
-                margin_bottom=2,
+                margin_bottom=4,
             ),
             children=[
                 toga.Column(
@@ -154,14 +154,7 @@ class ConfigSection(BaseSection):
                             text="Forçar backup ao fechar",
                             value=prefs.ForceBackupOnClose.get(),
                             on_change=lambda w: prefs.ForceBackupOnClose.set(w.value),
-                            style=Pack(
-                                margin=(
-                                    (0, 0, 0, 10)
-                                    if platform == "win32"
-                                    else (0, 10, 0, 0)
-                                ),
-                                font_size=10,
-                            ),
+                            style=Pack(margin=(0, 0, 0, 10), font_size=10),
                         ),
                     ],
                 ),

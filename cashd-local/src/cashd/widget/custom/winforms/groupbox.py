@@ -55,9 +55,6 @@ class GroupBox(Widget):
     def remove_child(self, child):
         child.container = None
 
-    def rehint(self):
-        return
-
     def set_bounds(self, x, y, width, height):
         top, right, bottom, left = self.insets
         super().set_bounds(
@@ -93,14 +90,22 @@ class GroupBox(Widget):
 
     @property
     def insets(self) -> tuple:
-        self.native.Size = Drawing.Size(200, 200)
+        current_size = self.native.Size
+        height = current_size.Height if current_size.Height > 0 else 200
         d = self.native.DisplayRectangle
+        # d.X is the horizontal space betwee left border of GroupBox and its content
+        # d.Y is the vertical space betwee top border of GroupBox and its content
         left = d.X
-        bottom = 200 - (d.Y + d.Height)
-        right = 200 - (d.X + d.Width)
-        if (self.title == "") or self._checkbox_visible:
-            top = d.Y
+        right = left
+        if (self.title == "") or not self._checkbox_visible:
+            # the default value of d.Y is higher then necessary when there's no title
+            top = d.Y / 2
+            bottom = top
         else:
-            top = int(bottom / 2)
+            top = d.Y
+            # Use GroupBox height, content height and top inset to measure bottom inset
+            bottom = height - (top + d.Height)
+        print(f"{top=} {right=} {bottom=} {left=}")
+
         return top, right, bottom, left
 
