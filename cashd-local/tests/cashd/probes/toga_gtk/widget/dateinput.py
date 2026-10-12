@@ -11,13 +11,12 @@ class DateInput(SimpleProbe):
     def __init__(self, widget):
         super().__init__(widget=widget)
 
-    # --- leitura
     @property
     def text(self):
         return self.impl.entry.get_text()
 
     def expected_text(self, value):
-        """Texto que o widget deve mostrar para `value` (usa o formato do locale)."""
+        """Text displayed by `widget.value` (uses locale)."""
         return value.strftime(self.impl._fmt)
 
     @property
@@ -37,14 +36,12 @@ class DateInput(SimpleProbe):
     def popover_visible(self):
         return self.impl.popover.get_visible()
 
-    # --- interação
     def type_text(self, text):
-        # "activate" em Gtk.Entry é síncrono (diferente do Gtk.Button)
+        # Gtk.Entry has synchronous "activate" (unlike Gtk.Button)
         self.impl.entry.set_text(text)
         self.impl.entry.emit("activate")
 
     def press_key(self, keyval):
-        # o handler só lê event.keyval
         event = SimpleNamespace(keyval=keyval)
         return self.impl.gtk_entry_key_press(self.impl.entry, event)
 
@@ -64,7 +61,7 @@ class DateInput(SimpleProbe):
         self.impl.popover.popup()
 
     def click_day(self, day):
-        """Simula um clique do usuário no dia (o `day` deve ser diferente do atual)."""
+        """Simulates the user clicking on a calendar date."""
         self.impl._clicking = True
         try:
             self.impl.calendar.select_day(day)

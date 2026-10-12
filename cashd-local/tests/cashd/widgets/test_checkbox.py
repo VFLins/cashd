@@ -4,7 +4,7 @@ import pytest
 import pytest_asyncio
 import toga
 
-from cashd.widget import Checkbox  # ajuste o caminho do import ao seu projeto
+from cashd.widget import Checkbox
 
 from ..probes import get_probe
 
@@ -24,7 +24,6 @@ async def widget(mainwindow, on_change):
     old_content = mainwindow.content
     widget = Checkbox("Option", on_change=on_change)
     mainwindow.content = toga.Box(children=[widget])
-    on_change.reset_mock()  # ignora eventos disparados na criação
     yield widget
     mainwindow.content = old_content
 

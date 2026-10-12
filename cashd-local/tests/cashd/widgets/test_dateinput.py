@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 import toga
 
-from cashd.widget import DateInput  # ajuste o caminho do import ao seu projeto
+from cashd.widget import DateInput
 
 from ..probes import get_probe
 
@@ -29,7 +29,6 @@ async def widget(mainwindow, on_change):
     old_content = mainwindow.content
     widget = DateInput(value=INITIAL, min=MIN, max=MAX, on_change=on_change)
     mainwindow.content = toga.Box(children=[widget])
-    on_change.reset_mock()
     yield widget
     mainwindow.content = old_content
 
@@ -182,12 +181,12 @@ async def test_calendar_navigation_keeps_value(widget, probe, on_change):
 
 async def test_navigation_buttons_respect_limits(widget, probe):
     "The month buttons are disabled in the min and max months"
-    widget.value = date(2024, 1, 15)   # mesmo mês de MIN
+    widget.value = date(2024, 1, 15) # MIN
     await probe.redraw("Calendar on the first allowed month")
     assert not probe.prev_enabled
     assert probe.next_enabled
 
-    widget.value = date(2024, 12, 15)  # mesmo mês de MAX
+    widget.value = date(2024, 12, 15) # MAX
     await probe.redraw("Calendar on the last allowed month")
     assert probe.prev_enabled
     assert not probe.next_enabled

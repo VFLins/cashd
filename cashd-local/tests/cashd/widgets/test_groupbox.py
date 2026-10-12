@@ -8,6 +8,11 @@ from cashd.widget import GroupBox
 DEFAULT_LABEL = "Hello"
 
 
+def make_probe(widget):
+    probe_class = get_probe("widget", "Checkbox")
+    return probe_class(widget)
+
+
 @pytest.fixture(scope="function")
 async def widget():
     return GroupBox(title=DEFAULT_LABEL)
@@ -15,9 +20,7 @@ async def widget():
 
 @pytest.fixture(scope="function")
 def probe(widget):
-    probe_class = get_probe("widget", "GroupBox")
-    probe = probe_class(widget)
-    return probe
+    return make_probe(widget)
 
 
 async def test_title(widget, probe):
@@ -72,8 +75,7 @@ async def test_checkbox_shown_at_creation(mainwindow):
     "Passing on_change to the constructor shows the checkbox"
     widget = GroupBox("Created", on_change=Mock())
     mainwindow.content = toga.Box(children=[widget])
-    probe_class = get_probe("widget", "GroupBox")
-    probe = probe_class(widget)
+    probe = make_probe(widget)
     await probe.redraw("GroupBox with checkbox should be displayed")
 
     assert widget.checkbox
