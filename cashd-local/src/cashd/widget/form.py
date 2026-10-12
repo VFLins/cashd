@@ -25,25 +25,18 @@ class FormField(toga.Box):
         description: str | None = None,
         id: str | None = None,
         is_required: bool = False,
+        stretch: bool = False,
     ):
         """Crete a form field with label, input and description (optional). Saves
         references for all widgets added to this field.
 
-        - :label: A `toga.Label` positioned above the input that holds the input title;
-        - :input: The `input_widget` provided, should be a Toga widget that accepts
-          user input;
-        - :description: An extra `toga.Label` positioned below the input with extra
-          information about it, will only be present if `description` is provided.
-
         :param label: Text displayed as the input's label.
         :param input_widget: A `Widget` that can recieve user input.
-        :param description: (Optional) Text displayed belou the input widget explaining
+        :param description: (Optional) Text displayed below the input widget explaining
           it's usage.
         :param id: (Optional) A text used as ID
         :param is_required: A boolean indicator if this input needs to be filled. Used
           mainly by `FormHandler`.
-        :param default_width: Boolean indicating if should use default width of the
-          input field or to all available width.
 
         :returns: A modified `toga.Box` that includes custom children and properties.
         """

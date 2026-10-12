@@ -114,7 +114,10 @@ class ConfigSection(BaseSection):
                 on_change=self.upd_transactions_per_backup,
             ),
             id="transac_to_backup_input",
+            stretch=False,
         )
+        self.transac_to_backup_amount.input.style.width = 120
+
         self.backup_on_transac = widget.GroupBox(
             title="Backup ao registrar transações",
             on_change=self.upd_backup_on_transaction,
