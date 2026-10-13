@@ -36,10 +36,8 @@ class PaginatedDetailedList(_DataInteractor):
         """
         super().__init__(datasource=datasource, id=id, style=style, on_select=on_select)
 
-    def _set_data_widget(self, id=None, style=None, on_select=None):
+    def _set_data_widget(self, id=None, style=None, on_select=None, **kwargs):
         self.data_widget = toga.DetailedList(id=id, style=style, on_select=on_select)
-        if toga.backend == "toga_winforms":
-            self.data_widget.style.font_size = 9
 
     def refresh(self, widget: toga.TextInput | None = None):
         """Fetches data and updates `self.data_widget`. Requires a data source with at

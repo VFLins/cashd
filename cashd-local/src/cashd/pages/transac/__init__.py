@@ -59,10 +59,7 @@ class TransacSection(BaseSection):
             on_delete=self._upd_selected_info,
         )
 
-        self.subsection_customer_info = info.Subsection(
-            selected_customer=self.SELECTED_CUSTOMER,
-            on_update=self._upd_selected_info,
-        )
+        self.subsection_customer_info = info.Subsection(parent=self)
 
         # widgets: all contexts
         self.help_msg = toga.Label(self.HELP_MSG, style=Pack(font_size=10))
@@ -98,8 +95,8 @@ class TransacSection(BaseSection):
         # widgets: 'select' context
         self.customer_selector = widget.paginated.PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
-            on_select=self.select_customer,
             style=Pack(flex=5),
+            on_select=self.select_customer,
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
@@ -205,7 +202,6 @@ class TransacSection(BaseSection):
             f"Saldo devedor: R$ {customer.Saldo}"
         )
         self.actions_section.current_tab = 0
-        self.customer_selector.refresh()
         self.subsection_history.table.data = customer.Transacs
         self.subsection_customer_info.form.clear()
         self.subsection_customer_info.form.add_table_fields(customer)

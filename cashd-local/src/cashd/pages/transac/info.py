@@ -6,17 +6,13 @@ import sys
 
 from cashd_core import data
 from cashd import widget
+from cashd.pages.base import BaseSection
 from cashd.style.compose import ComposedBox, mod
 
 
 class Subsection:
-    def __init__(
-        self,
-        selected_customer: data.tbl_clientes,
-        on_update: Callable[[], None] | None = None,
-    ):
-        self.SELECTED_CUSTOMER = selected_customer
-        self.on_update = on_update
+    def __init__(self, parent: BaseSection):
+        self.parent = parent
 
         self.form = widget.form.FormHandler(
             n_cols=2,
@@ -26,7 +22,6 @@ class Subsection:
         selected customer.
         """
         self.form.widget.style.justify_content = "center"
-        self.form.widget.style.background_color = "red"
 
         self.undo_button = toga.Button(
             "Desfazer",
@@ -71,16 +66,17 @@ class Subsection:
         self.undo_button.enabled = False
         self.confirm_button.enabled = False
         self.form.clear()
-        self.form.add_table_fields(self.SELECTED_CUSTOMER)
+        self.form.add_table_fields(self.parent.SELECTED_CUSTOMER)
 
     def confirm_changes(self, widget: toga.Button):
-        new_data = data.tbl_clientes(Id=self.SELECTED_CUSTOMER.Id, **self.form.data)
-        self.SELECTED_CUSTOMER.fill(new_data)
+        customer = self.parent.SELECTED_CUSTOMER
+        new_data = data.tbl_clientes(Id=customer.Id, **self.form.data)
+        customer.fill(new_data)
         try:
-            self.SELECTED_CUSTOMER.update()
+            customer.update()
             print(f"customer data updated to: {new_data}")
-            if self.on_update is not None:
-                self.on_update()
+            self.parent.customer_selector.refresh()
+            self.parent._upd_selected_info()
         except exc.StatementError as err:
             self.undo_changes(widget)
             print(f"Alteração proibida: {str(err.args[0])}")
