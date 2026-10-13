@@ -165,7 +165,9 @@ class Cashd(toga.App):
         )
 
         version_title = toga.Label("Versão", style=style.vars.HEADING)
-        version_label = toga.Label(f"Cashd v{version('cashd')} | Toga v{version('toga')}")
+        version_label = toga.Label(
+            f"Cashd v{version('cashd')} | Toga v{version('toga')}"
+        )
         version_block = toga.Column(
             style=Pack(width=content_width), children=[version_title, version_label]
         )

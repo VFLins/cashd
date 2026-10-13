@@ -67,4 +67,3 @@ class IterableStyler(Styler):
                 for k, v in self.child_style.items()
             }
             index = index + 1
-

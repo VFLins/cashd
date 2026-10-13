@@ -22,7 +22,7 @@ class PaginatedDetailedList(_DataInteractor):
         datasource: data._DataSource,
         id: str | None = None,
         style: Pack | None = None,
-        on_select: Callable[[Widget], None] = None,
+        on_select: Callable[[toga.Widget], None] = None,
     ):
         """Create a `toga.DetailedList` with pagination and search.
 

@@ -65,8 +65,15 @@ class GroupBox(Widget):
 
     @property
     def insets(self) -> tuple:
-        left, bottom, right, = 6, 6, 6
+        (
+            left,
+            bottom,
+            right,
+        ) = (
+            6,
+            6,
+            6,
+        )
         label = self.native.get_label_widget()
         top = label.get_preferred_height()[0] if label is not None else 0
         return top, right, bottom, left
-

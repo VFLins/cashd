@@ -61,7 +61,8 @@ class Subsection:
 
         self.full_contents = ComposedBox(
             mod.COLUMNS(1, mod.START_ACROSS, mod.WIDTH(self.FIELD_WIDTH)),
-            mod.V, mod.CENTER_ACROSS,
+            mod.V,
+            mod.CENTER_ACROSS,
             children=[
                 self.date,
                 self.amount_label,
@@ -102,4 +103,3 @@ class Subsection:
                 self.confirm_button.enabled = True
         else:
             self.confirm_button.enabled = False
-

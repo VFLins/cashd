@@ -12,10 +12,12 @@ class DateInput(toga.DateInput):
         backend = get_platform_factory().__name__.split(".")[0]
         if backend == "toga_winforms":
             from .winforms.dateinput import DateInput as Impl
+
             return Impl(self)
 
         if backend == "toga_gtk":
             from .gtk.dateinput import DateInput as Impl
+
             return Impl(self)
 
         return super()._create()

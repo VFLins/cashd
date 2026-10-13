@@ -34,12 +34,15 @@ class CreateCustomerSection(BaseSection):
             style=CONTEXT_BUTTON,
         )
         self.controls = ComposedBox(
-            mod.H, mod.END_ALONG, mod.WIDTH(340),
+            mod.H,
+            mod.END_ALONG,
+            mod.WIDTH(340),
             children=[self.undo_button, self.confirm_button],
         )
         self.full_contents = ComposedBox(
-            mod.V, mod.CENTER_ACROSS,
-            children=[self.customer_form.widget, self.controls]
+            mod.V,
+            mod.CENTER_ACROSS,
+            children=[self.customer_form.widget, self.controls],
         )
 
     def disable_buttons(self, widget: toga.Widget):

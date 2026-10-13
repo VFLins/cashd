@@ -8,10 +8,7 @@ from .styler import Styler
 
 class GridHandler(Modifier, StyleManager):
     def __init__(
-        self,
-        n: int = 1,
-        direction: Literal[COLUMN, ROW] = COLUMN,
-        *stylers: Styler
+        self, n: int = 1, direction: Literal[COLUMN, ROW] = COLUMN, *stylers: Styler
     ):
         """Modifier that distributes the children of a container across N blocks.
 
@@ -24,7 +21,9 @@ class GridHandler(Modifier, StyleManager):
         self.stylers = stylers
         self.parent_stylers: Iterable[Styler] = []
 
-    def arrange(self, children: list[toga.Widget], *parent_stylers: Styler) -> list[toga.Box]:
+    def arrange(
+        self, children: list[toga.Widget], *parent_stylers: Styler
+    ) -> list[toga.Box]:
         """Entry point that builds the blocks and distributes the children across them.
 
         :param children: Widgets to be distributed, in order, across the blocks.
@@ -45,7 +44,9 @@ class GridHandler(Modifier, StyleManager):
             blocks.append(block)
         return blocks
 
-    def _get_children_at(self, index: int, children: list[toga.Widget]) -> list[toga.Widget]:
+    def _get_children_at(
+        self, index: int, children: list[toga.Widget]
+    ) -> list[toga.Widget]:
         """Selects the children of block `index` (every N-th widget) and styles each one.
 
         :param index: Index of the block that will receive the children.

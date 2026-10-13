@@ -20,7 +20,7 @@ class _DataInteractor:
         label_text: str | None = None,
         id: str | None = None,
         style: Pack | None = None,
-        on_select: Callable[[Widget], None] | None = None,
+        on_select: Callable[[toga.Widget], None] | None = None,
         **kwargs,
     ):
         """Base class for creating data widgets with other control widgets that interact
@@ -75,7 +75,7 @@ class _DataInteractor:
         self,
         id: str | None = None,
         style: Pack | None = None,
-        on_select: Callable[[Widget], None] | None = None,
+        on_select: Callable[[toga.Widget], None] | None = None,
         **kwargs,
     ):
         """Used by `_DataInteractor`'s children to define `self.data_widget`."""
@@ -175,8 +175,8 @@ class ListOfItems(_DataInteractor):
     def __init__(
         self,
         datasource: Callable[[], Iterable[dict]] | None = None,
-        on_add: Callable[[Widget], None] | None = None,
-        on_rm: Callable[[Widget], None] | None = None,
+        on_add: Callable[[toga.Widget], None] | None = None,
+        on_rm: Callable[[toga.Widget], None] | None = None,
         label_text: str | None = None,
         id: str | None = None,
         style: Pack | None = None,
@@ -192,7 +192,9 @@ class ListOfItems(_DataInteractor):
         self.top_controls = None
 
     def _set_bottom_controls(self):
-        self.add_button = toga.Button("Adicionar", on_press=self.on_add, style=SMALL_BUTTON)
+        self.add_button = toga.Button(
+            "Adicionar", on_press=self.on_add, style=SMALL_BUTTON
+        )
         self.rm_button = toga.Button("Remover", on_press=self.on_rm, style=SMALL_BUTTON)
         self.bottom_controls = toga.Box(
             style=Pack(margin=(0, 5)), children=[self.rm_button, self.add_button]
@@ -213,7 +215,7 @@ class ListOfItems(_DataInteractor):
         self.refresh()
 
 
-def form_options(buttons: list, alignment="end", width=const.FORM_WIDTH) -> Box:
+def form_options(buttons: list, alignment="end", width=const.FORM_WIDTH) -> toga.Box:
     """
     Return a `toga.Box` containing elements that shoud be displayed under a form.
 

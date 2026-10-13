@@ -66,7 +66,7 @@ class TransacSection(BaseSection):
             vertical=False,
             content=toga.Box(
                 style=Pack(align_items="center", direction="row", flex=1),
-                children=[self.help_msg]
+                children=[self.help_msg],
             ),
         )
 
@@ -109,25 +109,33 @@ class TransacSection(BaseSection):
 
         # main container
         self.head = ComposedBox(
-            mod.STRETCH, mod.STRETCH_CONTENT, mod.CENTER_ACROSS, mod.GAP(10),
+            mod.STRETCH,
+            mod.STRETCH_CONTENT,
+            mod.CENTER_ACROSS,
+            mod.GAP(10),
             mod.MARGIN(l=20, r=20),
-            children=[self.actions_button, self.help_msg_block]
+            children=[self.actions_button, self.help_msg_block],
         )
         """Contents on the topmost part of this section, displaying the selected
         customer's data.
         """
         self.head_block = ComposedBox(
-            mod.H, mod.CONTENT_FLEXES(1, 9),
+            mod.H,
+            mod.CONTENT_FLEXES(1, 9),
             children=[
                 toga.Box(),
-                widget.GroupBox(children=[self.head], style=Pack(margin=(20, 0, 30, 0))),
+                widget.GroupBox(
+                    children=[self.head], style=Pack(margin=(20, 0, 30, 0))
+                ),
                 toga.Box(),
-            ]
+            ],
         )
 
         self.body = ComposedBox(
-            mod.H, mod.STRETCH, mod.CONTENT_FLEXES(1, 9),
-            children=[toga.Box(), self.customer_selector.widget, toga.Box()]
+            mod.H,
+            mod.STRETCH,
+            mod.CONTENT_FLEXES(1, 9),
+            children=[toga.Box(), self.customer_selector.widget, toga.Box()],
         )
         """Contents of most of the interactive part of this section, including
         all controls that interact with user data.

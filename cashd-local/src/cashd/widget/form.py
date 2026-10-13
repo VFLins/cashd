@@ -21,7 +21,7 @@ class FormField(toga.Box):
     def __new__(
         self,
         label: str,
-        input_widget: Widget,
+        input_widget: toga.Widget,
         description: str | None = None,
         id: str | None = None,
         is_required: bool = False,
@@ -31,7 +31,7 @@ class FormField(toga.Box):
         references for all widgets added to this field.
 
         :param label: Text displayed as the input's label.
-        :param input_widget: A `Widget` that can recieve user input.
+        :param input_widget: A `toga.Widget` that can recieve user input.
         :param description: (Optional) Text displayed below the input widget explaining
           it's usage.
         :param id: (Optional) A text used as ID
@@ -56,7 +56,7 @@ class FormField(toga.Box):
             description_widget = toga.Label(
                 text=description,
                 id=f"{id}_desc" if id else f"{label}_desc",
-                style=Pack(font_size=9, margin=(6, 0, 10, 5), color="gray")
+                style=Pack(font_size=9, margin=(6, 0, 10, 5), color="gray"),
             )
             self.contents.add(description_widget)
             self.contents.description = description_widget
@@ -71,7 +71,7 @@ class FormHandler:
     def __init__(
         self,
         n_cols: int = 1,
-        on_change: Callable[[Widget], None] | None = None,
+        on_change: Callable[[toga.Widget], None] | None = None,
     ):
         """
         :param n_cols: Initial number of columns for the grid layout.
@@ -171,7 +171,7 @@ class FormHandler:
         return None
 
     @on_change.setter
-    def on_change(self, func: Callable[[Widget], None]):
+    def on_change(self, func: Callable[[toga.Widget], None]):
         self._on_change = func
         for field in self._fields.values():
             field.input.on_change = func

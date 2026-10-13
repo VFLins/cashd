@@ -119,8 +119,6 @@ class ComposedBox(toga.Box, StyleManager):
             self.style.visibility = VISIBLE
 
 
-
-
 def get_container(*args, **kwargs) -> ComposedBox:
     """Shortcut that creates a `ComposedBox`.
 

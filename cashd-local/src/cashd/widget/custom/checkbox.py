@@ -11,6 +11,7 @@ class Checkbox(toga.Switch):
 
         if backend == "toga_gtk":
             from .gtk.checkbox import Checkbox as Impl
+
             return Impl(self)
 
         return super()._create()

@@ -110,4 +110,3 @@ class Subsection:
                 print(
                     f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}"
                 )
-

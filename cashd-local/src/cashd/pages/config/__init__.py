@@ -140,9 +140,11 @@ class ConfigSection(BaseSection):
                         ),
                     ],
                 )
-            ]
+            ],
         )
-        self.transac_to_backup_amount.input.readonly = not prefs.BackupOnTransaction.get()
+        self.transac_to_backup_amount.input.readonly = (
+            not prefs.BackupOnTransaction.get()
+        )
         self.backup_on_transac.value = prefs.BackupOnTransaction.get()
 
         self.backup_on_close = toga.Column(
@@ -161,7 +163,7 @@ class ConfigSection(BaseSection):
                 toga.Label(
                     "Se desativado, isto só acontecerá se o banco de dados tiver "
                     "aumentado de\ntamanho desde o último backup.",
-                    style=Pack(font_size=9, margin=(6, 0, 10, 5), color="gray")
+                    style=Pack(font_size=9, margin=(6, 0, 10, 5), color="gray"),
                 ),
             ],
         )
@@ -171,7 +173,9 @@ class ConfigSection(BaseSection):
             fields=[
                 widget.form.FormField(
                     label="Ações",
-                    input_widget=toga.Button("Carregar backup", on_press=self.load_backup),
+                    input_widget=toga.Button(
+                        "Carregar backup", on_press=self.load_backup
+                    ),
                     description="Esta operação é reversível, consulte\na documentação.",
                     id="load_backup_button",
                 ),
@@ -215,7 +219,9 @@ class ConfigSection(BaseSection):
         )
 
         self.sections = ComposedBox(
-            mod.STRETCH, mod.V, mod.CENTER_ACROSS,
+            mod.STRETCH,
+            mod.V,
+            mod.CENTER_ACROSS,
             children=[
                 self.company_info_section,
                 self.default_values_section,

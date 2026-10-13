@@ -44,13 +44,14 @@ class Subsection:
         to the database. Enabled only when any information is changed."""
 
         self.options_container = ComposedBox(
-            mod.H, mod.MARGIN(r=16, t=8, b=4), mod.GAP(8),
+            mod.H,
+            mod.MARGIN(r=16, t=8, b=4),
+            mod.GAP(8),
             children=[self.undo_button, self.confirm_button],
         )
         self.body = toga.ScrollContainer(style=Pack(flex=1), content=self.form.widget)
         self.full_contents = ComposedBox(
-            mod.V, mod.END_ACROSS,
-            children=[self.body, self.options_container]
+            mod.V, mod.END_ACROSS, children=[self.body, self.options_container]
         )
         if sys.platform == "win32":
             self.full_contents.style.background_color = "#F9F9F9"
@@ -83,4 +84,3 @@ class Subsection:
         except exc.StatementError as err:
             self.undo_changes(widget)
             print(f"Alteração proibida: {str(err.args[0])}")
-

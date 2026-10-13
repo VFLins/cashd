@@ -105,7 +105,5 @@ class GroupBox(Widget):
             top = d.Y
             # Use GroupBox height, content height and top inset to measure bottom inset
             bottom = height - (top + d.Height)
-        print(f"{top=} {right=} {bottom=} {left=}")
 
         return top, right, bottom, left
-
