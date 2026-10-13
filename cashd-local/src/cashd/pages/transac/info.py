@@ -78,9 +78,9 @@ class Subsection:
         self.SELECTED_CUSTOMER.fill(new_data)
         try:
             self.SELECTED_CUSTOMER.update()
-            self.form.clear()
-            self.form.add_table_fields(self.SELECTED_CUSTOMER)
             print(f"customer data updated to: {new_data}")
+            if self.on_update is not None:
+                self.on_update()
         except exc.StatementError as err:
             self.undo_changes(widget)
             print(f"Alteração proibida: {str(err.args[0])}")

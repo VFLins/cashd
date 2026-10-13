@@ -5,6 +5,7 @@ from toga.style.pack import COLUMN, ROW
 from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog
 
 from cashd_core import data, fmt, pdf
+from cashd_core.const import NA_VALUE
 
 from cashd import const, widget
 from cashd.style.vars import (
@@ -28,7 +29,22 @@ from . import history, info, insert
 class TransacSection(BaseSection):
     SELECTED_CUSTOMER = data.tbl_clientes()
     CUSTOMER_LIST = data.CustomerListSource()
-    HELP_MSG = "Selecione um cliente para registrar\numa transação."
+
+    @property
+    def HELP_MSG(self) -> str:
+        if data.tbl_clientes().table_is_empty():
+            return  (
+                'Cadastre um cliente em "Novo cliente" para\n'
+                "começar a registrar transações."
+            )
+        layout_id = getattr(self, "layout_id", 0)
+        if layout_id == 0:
+            return (
+                "Selecione um cliente e clique no botão\n"
+                "ao lado para registrar uma transação."
+            )
+        else:
+            return "Selecione um cliente para registrar uma transação."
 
     def __init__(self, app: App):
         super().__init__(app)
@@ -49,15 +65,7 @@ class TransacSection(BaseSection):
         )
 
         # widgets: all contexts
-        self.help_msg = toga.Label(
-            (
-                'Cadastre um cliente em "Novo cliente" para\n'
-                "começar a registrar transações."
-                if data.tbl_clientes().table_is_empty()
-                else self.HELP_MSG
-            ),
-            style=Pack(font_size=10),
-        )
+        self.help_msg = toga.Label(self.HELP_MSG, style=Pack(font_size=10))
         """Text on top of the page displaying information about the currently
         selected customer.
         """
@@ -187,18 +195,20 @@ class TransacSection(BaseSection):
         self.actions_button.enabled = True
 
     def _upd_selected_info(self):
+        """Refresh widgets state assuming a customer is selected."""
+        customer = self.SELECTED_CUSTOMER
+        if (type(customer.Id) is int) and (customer.Id > 0):
+            customer.read(customer.Id)
+        self.help_msg.text = (
+            f"Nome: {customer.NomeCompleto}\n"
+            f"Local: {customer.Local}\n"
+            f"Saldo devedor: R$ {customer.Saldo}"
+        )
         self.actions_section.current_tab = 0
-        if self.SELECTED_CUSTOMER.Saldo == "N/D":
-            self.help_msg.text = "Selecione um cliente, depois clique no botão ao lado"
-        else:
-            self.help_msg.text = (
-                f"Nome: {self.SELECTED_CUSTOMER.NomeCompleto}\n"
-                f"Local: {self.SELECTED_CUSTOMER.Local}\n"
-                f"Saldo devedor: R$ {self.SELECTED_CUSTOMER.Saldo}"
-            )
-        self.subsection_history.table.data = self.SELECTED_CUSTOMER.Transacs
+        self.customer_selector.refresh()
+        self.subsection_history.table.data = customer.Transacs
         self.subsection_customer_info.form.clear()
-        self.subsection_customer_info.form.add_table_fields(self.SELECTED_CUSTOMER)
+        self.subsection_customer_info.form.add_table_fields(customer)
 
     def upd_value_label(self, widget):
         value = widget.value
@@ -251,3 +261,4 @@ class TransacSection(BaseSection):
         else:
             self.set_layout_1(w)
         self.layout_id = expected_layout_id
+        self.help_msg.text = self.HELP_MSG
