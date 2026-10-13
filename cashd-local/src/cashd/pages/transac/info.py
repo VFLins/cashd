@@ -26,6 +26,7 @@ class Subsection:
         selected customer.
         """
         self.form.widget.style.justify_content = "center"
+        self.form.widget.style.background_color = "red"
 
         self.undo_button = toga.Button(
             "Desfazer",
@@ -54,7 +55,6 @@ class Subsection:
             mod.V, mod.END_ACROSS, children=[self.body, self.options_container]
         )
         if sys.platform == "win32":
-            self.full_contents.style.background_color = "#F9F9F9"
             self.form.widget.style.background_color = "#F9F9F9"
 
     def handle_confirm_permission(self, widget: toga.Widget):

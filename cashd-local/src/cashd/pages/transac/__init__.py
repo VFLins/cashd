@@ -33,7 +33,7 @@ class TransacSection(BaseSection):
     @property
     def HELP_MSG(self) -> str:
         if data.tbl_clientes().table_is_empty():
-            return  (
+            return (
                 'Cadastre um cliente em "Novo cliente" para\n'
                 "começar a registrar transações."
             )

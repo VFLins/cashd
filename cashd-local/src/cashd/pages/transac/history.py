@@ -4,6 +4,7 @@ from toga.style import Pack
 from typing import Callable
 
 from cashd_core import pdf, data
+from cashd.style.compose import mod, ComposedBox
 from cashd.widget.elems import form_options
 from cashd.style.vars import set_col_alignments
 
@@ -18,7 +19,7 @@ class Subsection:
         self.on_delete = on_delete
 
         self.table = toga.Table(
-            style=Pack(flex=1, width=300),
+            style=Pack(flex=1, width=300, margin=(8, 0)),
             data=self.SELECTED_CUSTOMER.Transacs,
             columns=["Data", "Valor (R$)"],
             accessors=("data", "valor"),
@@ -42,19 +43,25 @@ class Subsection:
         and current owed amount. This feature is aimed for thermal printers.
         """
 
-        self.options_container: toga.Box = form_options(
-            buttons=[self.remove_button, self.export_button],
+        self.options_container = ComposedBox(
+            mod.H,
+            mod.MARGIN(r=16, t=8, b=4),
+            mod.GAP(8),
+            children=[self.export_button, self.remove_button],
         )
-        self.options_container.style.margin = (10, 0, 5, 0)
-        self.options_container.style.width = 300
+        self.table_container = ComposedBox(
+            mod.COLUMNS(1, mod.STRETCH, mod.CENTER_ACROSS),
+            mod.STRETCH,
+            children=[self.table],
+        )
 
-        self.full_contents = toga.Column(
-            style=Pack(align_items="center"),
-            children=[self.options_container, self.table],
+        self.full_contents = ComposedBox(
+            mod.V,
+            mod.END_ACROSS,
+            children=[self.table_container, self.options_container],
         )
-        if sys.platform == "win32":
-            self.options_container.style.background_color = "#F9F9F9"
-            self.full_contents.style.background_color = "#F9F9F9"
+        if toga.backend == "toga_winforms":
+            self.table_container.style.background_color = "#F9F9F9"
 
     def select_transac(self, widget):
         self.remove_button.enabled = True
