@@ -49,19 +49,10 @@ class TransacSection(BaseSection):
     def __init__(self, app: App):
         super().__init__(app)
 
-        self.subsection_add_transac = insert.Subsection(
-            selected_customer=self.SELECTED_CUSTOMER,
-            on_insert=self._upd_selected_info,
-        )
-
-        self.subsection_history = history.Subsection(
-            selected_customer=self.SELECTED_CUSTOMER,
-            on_delete=self._upd_selected_info,
-        )
-
+        self.subsection_add_transac = insert.Subsection(parent=self)
+        self.subsection_history = history.Subsection(parent=self)
         self.subsection_customer_info = info.Subsection(parent=self)
 
-        # widgets: all contexts
         self.help_msg = toga.Label(self.HELP_MSG, style=Pack(font_size=10))
         """Text on top of the page displaying information about the currently
         selected customer.
@@ -257,4 +248,6 @@ class TransacSection(BaseSection):
         else:
             self.set_layout_1(w)
         self.layout_id = expected_layout_id
-        self.help_msg.text = self.HELP_MSG
+        if self.SELECTED_CUSTOMER.Saldo == NA_VALUE:
+            # update help message if no customer is selected
+            self.help_msg.text = self.HELP_MSG
