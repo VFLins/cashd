@@ -1,5 +1,6 @@
 import sys
 import toga
+from typing import TYPE_CHECKING
 from toga.style import Pack
 from typing import Callable
 
@@ -9,18 +10,17 @@ from cashd.widget.elems import form_options
 from cashd.style.vars import set_col_alignments
 
 
+if TYPE_CHECKING:
+    from . import TransacSection
+
+
 class Subsection:
-    def __init__(
-        self,
-        selected_customer: data.tbl_clientes,
-        on_delete: Callable[[], None] | None = None,
-    ):
-        self.SELECTED_CUSTOMER = selected_customer
-        self.on_delete = on_delete
+    def __init__(self, parent: "TransacSection"):
+        self.parent = parent
 
         self.table = toga.Table(
             style=Pack(flex=1, width=300, margin=(8, 0)),
-            data=self.SELECTED_CUSTOMER.Transacs,
+            data=parent.SELECTED_CUSTOMER.Transacs,
             columns=["Data", "Valor (R$)"],
             accessors=("data", "valor"),
             on_select=self.select_transac,
@@ -69,10 +69,9 @@ class Subsection:
             self.remove_button.enabled = False
 
     async def export_transac(self, widget: toga.Button):
+        customer = self.parent.SELECTED_CUSTOMER
         try:
-            doc = pdf.model.invoice.CustomerTransactions(
-                customer_id=self.SELECTED_CUSTOMER.Id
-            )
+            doc = pdf.model.invoice.CustomerTransactions(customer_id=customer.Id)
             doc.render()
         except ValueError:
             error = ErrorDialog(
@@ -109,11 +108,9 @@ class Subsection:
             )
             if await widget.app.dialog(confirm):
                 transac.delete()
-                if self.on_delete is not None:
-                    self.on_delete()
+                self.parent._upd_selected_info()
                 # clear table before filling to avoid glitches from winforms
                 self.table.data = []
-                self.table.data = self.SELECTED_CUSTOMER.Transacs
-                print(
-                    f"Removed {transac_id=} from {self.SELECTED_CUSTOMER.NomeCompleto}"
-                )
+                customer = self.parent.SELECTED_CUSTOMER
+                self.table.data = customer.Transacs
+                print(f"Removed {transac_id=} from {customer.NomeCompleto}")

@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import TYPE_CHECKING
 from toga.style import Pack
 import datetime as dt
 import toga
@@ -10,23 +10,21 @@ from cashd import const, widget
 from cashd.style.compose import ComposedBox, mod
 
 
+if TYPE_CHECKING:
+    from . import TransacSection
+
+
 class Subsection:
     FIELD_WIDTH = 190
 
-    def __init__(
-        self,
-        selected_customer: data.tbl_clientes,
-        on_insert: Callable[[], None] | None = None,
-    ):
-        self.SELECTED_CUSTOMER = selected_customer
-        self.on_insert = on_insert
+    def __init__(self, parent: "TransacSection"):
+        self.parent = parent
 
         self.date = widget.form.FormField(
             label="Data",
-            input_widget=widget.DateInput(),
+            input_widget=widget.DateInput(style=Pack(width=self.FIELD_WIDTH)),
         )
         """Custom date input form from 'Inserir transação' context."""
-        self.date.style.width = self.FIELD_WIDTH
 
         self.amount_label = toga.Label(
             "Valor: R$ 0,00",
@@ -75,11 +73,12 @@ class Subsection:
 
     def insert_transaction(self, widget: toga.Button):
         """Register transaction data to the database."""
+        customer = self.parent.SELECTED_CUSTOMER
         amount_input = fmt.StringToCurrency(user_input=self.amount_input.value)
         if not amount_input.is_valid():
             return
         transac_data = data.tbl_transacoes(
-            IdCliente=self.SELECTED_CUSTOMER.Id,
+            IdCliente=customer.Id,
             CarimboTempo=dt.datetime.now(),
             DataTransac=self.date.input.value,
             Valor=amount_input.value,
@@ -87,19 +86,19 @@ class Subsection:
         transac_data.write()
         self.confirm_button.enabled = False
         self.amount_input.value = ""
-        if self.on_insert is not None:
-            self.on_insert()
+        self.parent._upd_selected_info()
 
     def update_amount_label(self, widget):
         """Updates the `SubsectionAddTransac.amount_label` to reflect the amount
         typed by the user.
         """
+        customer = self.parent.SELECTED_CUSTOMER
         setattr(widget, "value", re.sub(r"[^\d,-]", "", widget.value))
         amount_input = fmt.StringToCurrency(user_input=widget.value)
         self.amount_label.text = f"Valor: R$ {amount_input.display_value}"
         if amount_input.is_valid():
             # Enables button if a valid customer is selected
-            if self.SELECTED_CUSTOMER.required_fields_are_filled():
+            if customer.required_fields_are_filled():
                 self.confirm_button.enabled = True
         else:
             self.confirm_button.enabled = False

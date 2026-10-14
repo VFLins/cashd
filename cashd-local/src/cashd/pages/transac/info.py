@@ -1,6 +1,6 @@
 from sqlalchemy import exc
 from toga.style import Pack
-from typing import Callable
+from typing import TYPE_CHECKING
 import toga
 import sys
 
@@ -10,8 +10,12 @@ from cashd.pages.base import BaseSection
 from cashd.style.compose import ComposedBox, mod
 
 
+if TYPE_CHECKING:
+    from . import TransacSection
+
+
 class Subsection:
-    def __init__(self, parent: BaseSection):
+    def __init__(self, parent: "TransacSection"):
         self.parent = parent
 
         self.form = widget.form.FormHandler(
