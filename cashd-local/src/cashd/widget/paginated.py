@@ -62,6 +62,8 @@ class PaginatedDetailedList(_DataInteractor):
         match current_backend:
             case "toga_winforms":
                 self.data_widget._impl._set_selection(-1)
+            case "toga_gtk":
+                self.data_widget._impl.native_detailedlist.unselect_all()
             case _:
                 if current_backend is not None:
                     warnings.warn(
