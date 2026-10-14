@@ -3,18 +3,23 @@ from decimal import Decimal
 import math
 from random import randint
 
+import toga
 from toga.app import App
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
-from toga.widgets.box import Box
-from toga.widgets.scrollcontainer import ScrollContainer
-from toga.widgets.selection import Selection
-from toga.widgets.table import Table
-from toga.widgets.base import Widget
 
 from cashd_core import data
-from cashd import const, style
-from cashd.widgets.paginated import PaginatedTable
+from cashd import const
+from cashd.style.vars import (
+    set_col_alignments,
+    user_input,
+    TABLE_OF_DATA,
+    FULL_CONTENTS,
+    WIDE_SELECTION,
+    HORIZONTAL_BOX,
+    VERTICAL_BOX,
+)
+from cashd.widget.paginated import PaginatedTable
 from .base import BaseSection
 
 
@@ -42,15 +47,15 @@ class StatisticsSection(BaseSection):
         super().__init__(app)
 
         ### widgets ###
-        self.visualization_selection = Selection(
-            style=style.WIDE_SELECTION,
+        self.visualization_selection = toga.Selection(
+            style=WIDE_SELECTION,
             items=VISUALIZATION_OPTIONS,
             on_change=self.select_visualization,
         )
         """Dropdown visualization selector. Updates the displayed table on selection."""
 
-        self.time_grouping_selection = Selection(
-            style=style.user_input(Selection),
+        self.time_grouping_selection = toga.Selection(
+            style=user_input(toga.Selection),
             items=TIME_GROUP_OPTIONS,
             on_change=self.update_data,
             enabled=False,
@@ -66,9 +71,7 @@ class StatisticsSection(BaseSection):
             columns=["Data", "Cliente", "Valor"],
         )
         """Table containing data of every transaction registered recently, most recent first."""
-        style.set_col_alignments(
-            self.transaction_history_table.data_widget, ["l", "l", "r"]
-        )
+        set_col_alignments(self.transaction_history_table.data_widget, ["l", "l", "r"])
 
         self.highest_amounts_table = PaginatedTable(
             style=Pack(flex=1, font_size=const.FONT_SIZE, width=const.CONTENT_WIDTH),
@@ -76,17 +79,15 @@ class StatisticsSection(BaseSection):
             datasource=data.HighestAmountsSource(),
         )
         """Table displaying customers and their respective owed amount, highest first."""
-        style.set_col_alignments(self.highest_amounts_table.data_widget, ["l", "r"])
+        set_col_alignments(self.highest_amounts_table.data_widget, ["l", "r"])
 
         self.inactive_customers_table = PaginatedTable(
-            style=style.TABLE_OF_DATA,
+            style=TABLE_OF_DATA,
             columns=["Cliente", "Última transação", "Saldo atual"],
             datasource=data.InactiveCustomersSource(),
         )
         """Table displaying customers and their last transaction date, oldest first."""
-        style.set_col_alignments(
-            self.inactive_customers_table.data_widget, ["l", "l", "r"]
-        )
+        set_col_alignments(self.inactive_customers_table.data_widget, ["l", "l", "r"])
 
         self.transac_balance_table = PaginatedTable(
             style=Pack(flex=1, font_size=const.FONT_SIZE),
@@ -96,9 +97,7 @@ class StatisticsSection(BaseSection):
         """Table displaying income vs outcome result by date (may be grouped),
         most recent first.
         """
-        style.set_col_alignments(
-            self.transac_balance_table.data_widget, ["l", "r", "r", "r"]
-        )
+        set_col_alignments(self.transac_balance_table.data_widget, ["l", "r", "r", "r"])
 
         self.aggregated_amount_table = PaginatedTable(
             style=Pack(flex=1, font_size=const.FONT_SIZE),
@@ -108,31 +107,31 @@ class StatisticsSection(BaseSection):
         """Table displaying the accumulated income vs outcome result by date
         (may be grouped), most recent first.
         """
-        style.set_col_alignments(
+        set_col_alignments(
             self.aggregated_amount_table.data_widget, ["l", "r", "r", "r"]
         )
 
         ### containers ###
-        self.controls_first_row = Box(
-            style=Pack(direction="row", align_items="center"),
+        self.controls_first_row = toga.Row(
+            style=Pack(align_items="center"),
             children=[
                 self.visualization_selection,
                 self.time_grouping_selection,
             ],
         )
-        self.header = Box(style=style.VERTICAL_BOX, children=[self.controls_first_row])
-        self.body = ScrollContainer(
-            style=style.HORIZONTAL_BOX, content=self.transaction_history_table.widget
+        self.header = toga.Box(style=VERTICAL_BOX, children=[self.controls_first_row])
+        self.body = toga.ScrollContainer(
+            style=HORIZONTAL_BOX, content=self.transaction_history_table.widget
         )
-        self.full_contents = Box(
-            style=style.FULL_CONTENTS,
+        self.full_contents = toga.Box(
+            style=FULL_CONTENTS,
             children=[
                 self.header,
                 self.body,
             ],
         )
 
-    def select_visualization(self, widget: Widget | None = None):
+    def select_visualization(self, widget: toga.Widget | None = None):
         selected_visualization = self.visualization_selection.value
         if selected_visualization in ["Balanço", "Saldo acumulado total"]:
             self.time_grouping_selection.enabled = True
@@ -156,7 +155,7 @@ class StatisticsSection(BaseSection):
             case _:
                 pass
 
-    def update_data(self, widget: Widget | None = None):
+    def update_data(self, widget: toga.Widget | None = None):
         tables = {
             "Histórico de transações": self.transaction_history_table,
             "Maiores saldos": self.highest_amounts_table,
