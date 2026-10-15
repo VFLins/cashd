@@ -2,13 +2,13 @@ from datetime import date, datetime
 from typing import Any
 
 from cashd_core.fmt import StringToCurrency
-from cashd_core.const import ESTADOS, NA_VALUE
+from cashd_core.const import ESTADOS
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
 from cashd_core.pdf.model import invoice
 from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd.widgets.custom import DetailedList
 from cashd.widgets.dialogs import DeleteTransactionDialog, MessageDialog
-from cashd.const import writelog, is_host, safe_download
+from cashd.const import now, is_host, safe_download
 
 
 class subpage_transac:
@@ -211,7 +211,7 @@ class page:
     def __init__(self, ui, app):
         self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Transações")
-        writelog(f"Drawing '/' page for {app.storage.browser['id']}")
+        print(f"{now()} Drawing '/' page for {app.storage.browser['id']}")
         with ui.column().classes("w-full gap-0"):
             self.top_section()
             with ui.grid().classes("w-full h-full md:grid-cols-2"):
@@ -233,36 +233,16 @@ class page:
             )
             with ui.scroll_area().classes("no-margin-scroll w-full h-[4rem]"):
                 self.section_switcher.classes("!flex md:!hidden")
-                with ui.column() as self.help_msg_block:
-                    self.help_msg_block.classes("flex-grow justify-center")
-                    with ui.column() as self.instructions:
-                        self.instructions.classes("w-full justify-center")
-                        if tbl_clientes().table_is_empty():
-                            ui.label(
-                                'Cadastre um cliente em "Novo cliente" no menu acima '
-                                'para começar a registrar transações.'
-                            )
-                        else:
-                            wide = ui.label(
-                                "Selecione um cliente para registrar uma transação."
-                            )
-                            wide.classes("!hidden md:!flex")
-                            narrow = ui.label(
-                                "Selecione um cliente e clique no botão ao lado para "
-                                "registrar uma transação."
-                            )
-                            narrow.classes("!flex md:!hidden")
-                    with ui.column().classes("w-full gap-0") as self.selected_info:
-                        self.selected_customer_name = CustomerInfo(
-                            ui, field="Cliente", value=NA_VALUE
-                        )
-                        self.selected_customer_place = CustomerInfo(
-                            ui, field="Local", value=NA_VALUE
-                        )
-                        self.selected_customer_debt = CustomerInfo(
-                            ui, field="Saldo devedor", value=NA_VALUE
-                        )
-                        self.selected_info.set_visibility(False)
+                with ui.column().classes("gap-0"):
+                    self.selected_customer_name = CustomerInfo(
+                        ui, field="Cliente", value="N/S"
+                    )
+                    self.selected_customer_place = CustomerInfo(
+                        ui, field="Local", value="N/S"
+                    )
+                    self.selected_customer_debt = CustomerInfo(
+                        ui, field="Saldo devedor", value="R$ 0,00"
+                    )
         return top_section
 
     def left_section(self):
@@ -351,9 +331,6 @@ class page:
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)
         self.selected_customer_debt.set_value(f"R$ {customer.Saldo}")
-        if self.selected_customer.Saldo != NA_VALUE:
-            self.instructions.set_visibility(False)
-            self.selected_info.set_visibility(True)
         # Update transaction history
         if getattr(self, "history", None) is not None:
             self.history.change_customer(self.selected_customer)
@@ -414,7 +391,7 @@ class page:
             notify_success(self.ui, f"Transação adicionada com sucesso.")
             self.transac.value_input.set_value("")
             self.transac.date = date.today()
-            writelog(f"{self.app.storage.browser['id']} added a {transaction=}")
+            print(f"{now()} {self.app.storage.browser['id']} added a {transaction=}")
         finally:
             self.load_selected_customer(data=self.customer_list.selected_data)
 
