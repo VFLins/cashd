@@ -72,11 +72,6 @@ def is_host(ui) -> bool:
     return ip in HOST_IPS
 
 
-def writelog(message: str, level: str = "INFO"):
-    """Writes a simple log message to stdout."""
-    print(f"{now()} {level.upper()}: {message}")
-
-
 def safe_download(ui, filepath: str):
     """Sends a file to be downloaded by the client using base-64 encoding, this
     prevents the browser from blocking the transaction when it's not run over https.
