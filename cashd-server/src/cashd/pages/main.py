@@ -233,16 +233,36 @@ class page:
             )
             with ui.scroll_area().classes("no-margin-scroll w-full h-[4rem]"):
                 self.section_switcher.classes("!flex md:!hidden")
-                with ui.column().classes("gap-0"):
-                    self.selected_customer_name = CustomerInfo(
-                        ui, field="Cliente", value="N/S"
-                    )
-                    self.selected_customer_place = CustomerInfo(
-                        ui, field="Local", value="N/S"
-                    )
-                    self.selected_customer_debt = CustomerInfo(
-                        ui, field="Saldo devedor", value="R$ 0,00"
-                    )
+                with ui.column() as self.help_msg_block:
+                    self.help_msg_block.classes("flex-grow justify-center")
+                    with ui.column() as self.instructions:
+                        self.instructions.classes("w-full justify-center")
+                        if tbl_clientes().table_is_empty():
+                            ui.label(
+                                'Cadastre um cliente em "Novo cliente" no menu acima '
+                                "para começar a registrar transações."
+                            )
+                        else:
+                            wide = ui.label(
+                                "Selecione um cliente para registrar uma transação."
+                            )
+                            wide.classes("!hidden md:!flex")
+                            narrow = ui.label(
+                                "Selecione um cliente e clique no botão ao lado para "
+                                "registrar uma transação."
+                            )
+                            narrow.classes("!flex md:!hidden")
+                    with ui.column().classes("w-full gap-0") as self.selected_info:
+                        self.selected_customer_name = CustomerInfo(
+                            ui, field="Cliente", value=NA_VALUE
+                        )
+                        self.selected_customer_place = CustomerInfo(
+                            ui, field="Local", value=NA_VALUE
+                        )
+                        self.selected_customer_debt = CustomerInfo(
+                            ui, field="Saldo devedor", value=NA_VALUE
+                        )
+                        self.selected_info.set_visibility(False)
         return top_section
 
     def left_section(self):
@@ -268,16 +288,10 @@ class page:
                 )
                 self.tabs.style("font-family: 'Saira Semibold';")
                 self.tabs.on_value_change(lambda p: self.handle_tab_change(payload=p))
-                transac = ui.tab("Nova transação").classes("bg-gray-200 text-gray-800")
-                history = ui.tab("Histórico").classes("bg-gray-200 text-gray-800")
-                info = ui.tab("Informações").classes("bg-gray-200 text-gray-800")
-                transac.style(
-                    "border-top-left-radius: 4px; border-bottom-left-radius: 4px;"
-                )
-                info.style(
-                    "border-top-right-radius: 4px; border-bottom-right-radius: 4px;"
-                )
-            with ui.tab_panels(self.tabs, value=transac):
+                transac = ui.tab("Nova transação").classes("rounded")
+                history = ui.tab("Histórico").classes("rounded mx-1")
+                info = ui.tab("Informações").classes("rounded")
+            with ui.tab_panels(self.tabs, value=transac).classes("gap-1"):
                 with ui.tab_panel(transac):
                     self.transac = subpage_transac(ui, on_add=self.add_transaction)
                     self.transac.value_input.on("keydown.enter", self.add_transaction)
@@ -309,6 +323,11 @@ class page:
                 # hide right and restore left
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
+                # remove customer selection
+                self.customer_list.unselect()
+                self.selected_customer = tbl_clientes()
+                self.selected_info.set_visibility(False)
+                self.instructions.set_visibility(True)
 
     def load_selected_customer(
         self, data: dict[str, Any] | None, update_list: bool = False
