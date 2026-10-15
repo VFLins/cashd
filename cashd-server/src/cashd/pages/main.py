@@ -288,16 +288,10 @@ class page:
                 )
                 self.tabs.style("font-family: 'Saira Semibold';")
                 self.tabs.on_value_change(lambda p: self.handle_tab_change(payload=p))
-                transac = ui.tab("Nova transação").classes("bg-gray-200 text-gray-800")
-                history = ui.tab("Histórico").classes("bg-gray-200 text-gray-800")
-                info = ui.tab("Informações").classes("bg-gray-200 text-gray-800")
-                transac.style(
-                    "border-top-left-radius: 4px; border-bottom-left-radius: 4px;"
-                )
-                info.style(
-                    "border-top-right-radius: 4px; border-bottom-right-radius: 4px;"
-                )
-            with ui.tab_panels(self.tabs, value=transac):
+                transac = ui.tab("Nova transação").classes("rounded")
+                history = ui.tab("Histórico").classes("rounded mx-1")
+                info = ui.tab("Informações").classes("rounded")
+            with ui.tab_panels(self.tabs, value=transac).classes("gap-1"):
                 with ui.tab_panel(transac):
                     self.transac = subpage_transac(ui, on_add=self.add_transaction)
                     self.transac.value_input.on("keydown.enter", self.add_transaction)
