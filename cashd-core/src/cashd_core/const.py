@@ -17,7 +17,7 @@ DOCUMENTS_DIR = Path(CASHD_FILES_DIR, "documents")
 
 # ensure dirs
 for dir in [CASHD_FILES_DIR, CONFIG_DIR, LOG_DIR, DATA_DIR, DOCUMENTS_DIR]:
-    dir.mkdir(exist_ok=True, parent=True)
+    dir.mkdir(exist_ok=True)
 
 
 def sys_dark_mode() -> bool:
@@ -30,6 +30,7 @@ def sys_dark_mode() -> bool:
             return _linux_dark_mode()
         case "win32":
             return False  # ignore while dark theme is not implemented for winforms
+            # return _windows_dark_mode()
         case _:
             Warning(f"Not capable of detecting {platform=} dark mode.")
             return False
