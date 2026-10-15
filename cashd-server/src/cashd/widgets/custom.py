@@ -29,6 +29,11 @@ class DetailedList:
             return "0 itens"
         return f"{self.SOURCE.nrows} itens, mostrando {min_idx} até {max_idx}"
 
+    def unselect(self):
+        """Remove the selection of this widget, returning it to 'unselected' state."""
+        self._select_item(data=None, no_callback=True)
+        self.selected_item = None
+
     def _selection(self, ui):
         with ui.scroll_area() as scroll:
             scroll.classes(
@@ -81,7 +86,7 @@ class DetailedList:
                         )
         self._select_item(self.selected_data, no_callback)
 
-    def _select_item(self, data: dict[str, Any], no_callback: bool = False):
+    def _select_item(self, data: dict[str, Any] | None, no_callback: bool = False):
         """Updates the highlighted item and updates DetailedList.selected and
         DetailedList.selected_index' values accordingly.
         """

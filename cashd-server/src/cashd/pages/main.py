@@ -323,6 +323,10 @@ class page:
                 # hide right and restore left
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
+                self.customer_list.unselect()
+                self.selected_customer = tbl_clientes()
+                self.selected_info.set_visibility(False)
+                self.instructions.set_visibility(True)
 
     def load_selected_customer(
         self, data: dict[str, Any] | None, update_list: bool = False
