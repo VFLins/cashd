@@ -26,7 +26,7 @@ class DefaultHeader:
         "config": {
             "white": "/assets/SVG_ConfiguracaoBranco.svg",
             "blue": "/assets/SVG_ConfiguracaoAzul.svg",
-        }
+        },
     }
     HEADER_ENTRIES = [
         (ICONS["transaction"], "Transações", "/"),
@@ -87,7 +87,9 @@ class DefaultHeader:
                             if entry[1] == selected_entry:
                                 continue
                             with ui.menu_item(on_click=self.navigate_to(ui, entry[2])):
-                                with ui.row().classes("items-center gap-2 my-2 no-wrap"):
+                                with ui.row().classes(
+                                    "items-center gap-2 my-2 no-wrap"
+                                ):
                                     ui.image(entry[0]["blue"]).classes(
                                         "rounded-full size-7 mr-2"
                                     )

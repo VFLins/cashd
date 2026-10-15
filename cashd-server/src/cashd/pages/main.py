@@ -240,7 +240,7 @@ class page:
                         if tbl_clientes().table_is_empty():
                             ui.label(
                                 'Cadastre um cliente em "Novo cliente" no menu acima '
-                                'para começar a registrar transações.'
+                                "para começar a registrar transações."
                             )
                         else:
                             wide = ui.label(
@@ -323,6 +323,7 @@ class page:
                 # hide right and restore left
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
+                # remove customer selection
                 self.customer_list.unselect()
                 self.selected_customer = tbl_clientes()
                 self.selected_info.set_visibility(False)
