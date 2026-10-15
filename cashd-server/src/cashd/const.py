@@ -43,6 +43,11 @@ def now() -> str:
     return datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
 
 
+def writelog(message: str, level: str = "INFO"):
+    """Writes a simple log message to stdout."""
+    print(f"{now()} {level.upper()}: {message}")
+
+
 def get_client_ip(ui) -> str | None:
     """Retrieves the real client IP address, handling reverse proxies securely.
 

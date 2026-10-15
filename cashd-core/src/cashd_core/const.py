@@ -17,7 +17,7 @@ DOCUMENTS_DIR = Path(CASHD_FILES_DIR, "documents")
 
 # ensure dirs
 for dir in [CASHD_FILES_DIR, CONFIG_DIR, LOG_DIR, DATA_DIR, DOCUMENTS_DIR]:
-    dir.mkdir(exist_ok=True)
+    dir.mkdir(exist_ok=True, parents=True)
 
 
 def sys_dark_mode() -> bool:

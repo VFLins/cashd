@@ -2,13 +2,13 @@ from datetime import date, datetime
 from typing import Any
 
 from cashd_core.fmt import StringToCurrency
-from cashd_core.const import ESTADOS
+from cashd_core.const import ESTADOS, NA_VALUE
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
 from cashd_core.pdf.model import invoice
 from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 from cashd.widgets.custom import DetailedList
 from cashd.widgets.dialogs import DeleteTransactionDialog, MessageDialog
-from cashd.const import now, is_host, safe_download
+from cashd.const import writelog, is_host, safe_download
 
 
 class subpage_transac:
@@ -211,7 +211,7 @@ class page:
     def __init__(self, ui, app):
         self.ui, self.app = ui, app
         DefaultHeader(ui, app, selected_entry="Transações")
-        print(f"{now()} Drawing '/' page for {app.storage.browser['id']}")
+        writelog(f"Drawing '/' page for {app.storage.browser['id']}")
         with ui.column().classes("w-full gap-0"):
             self.top_section()
             with ui.grid().classes("w-full h-full md:grid-cols-2"):
@@ -350,6 +350,9 @@ class page:
         self.selected_customer_name.set_value(customer.NomeCompleto)
         self.selected_customer_place.set_value(customer.Local)
         self.selected_customer_debt.set_value(f"R$ {customer.Saldo}")
+        if self.selected_customer.Saldo != NA_VALUE:
+            self.instructions.set_visibility(False)
+            self.selected_info.set_visibility(True)
         # Update transaction history
         if getattr(self, "history", None) is not None:
             self.history.change_customer(self.selected_customer)
@@ -410,7 +413,7 @@ class page:
             notify_success(self.ui, f"Transação adicionada com sucesso.")
             self.transac.value_input.set_value("")
             self.transac.date = date.today()
-            print(f"{now()} {self.app.storage.browser['id']} added a {transaction=}")
+            writelog(f"{self.app.storage.browser['id']} added a {transaction=}")
         finally:
             self.load_selected_customer(data=self.customer_list.selected_data)
 
