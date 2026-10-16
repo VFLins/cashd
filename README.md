@@ -19,11 +19,11 @@ O cashd vem em duas distribuições, que possuem a mesma funcionalidade, mas que
 para atender casos de uso diferentes:
 
 | <a href="https://github.com/VFLins/cashd/tree/main/cashd-local"><img height="50" alt="Cashd Local" src="https://github.com/user-attachments/assets/2ed8ef35-cff2-42af-9cc6-6e649d2534aa" /></a> | <a href="https://github.com/VFLins/cashd/tree/main/cashd-server"><img height="50" alt="Cashd Server" src="https://github.com/user-attachments/assets/2d6e5fd4-c219-4c59-a51f-fea4b9bf3ac9" /></a> |
-| :---                                                   | :---                                                                                                   |
+| :---                                            | :---                                                                                |
 | <img height="900" alt="Captura de tela: Cashd local" src="https://github.com/user-attachments/assets/69980780-c370-491f-ace6-9e45fb185cc6" /> | <img height="900" alt="Captura de tela: Cashd Server" src="https://github.com/user-attachments/assets/31d7af85-dc95-4a32-b24a-72f037c28517" /> |
-| Instalação simples e convencional.                     | Instalação mais complexa e com mais dependências.                                                      |
-| Aparência nativa no sistema em que é instalado.        | Aparência de aplicativo Web, independente do dispositivo onde está sendo executado.                    |
-| Só pode ser usado onde foi instalado.                  | Instalado em um dispositivo e acessado no próprio e em outros na mesma rede.                           |
+| Instalação simples e convencional.              | Instalação não convencional e com mais etapas.                                      |
+| Aparência nativa no sistema em que é instalado. | Aparência de aplicativo Web, independente do dispositivo onde está sendo executado. |
+| Só pode ser usado onde foi instalado.           | Instalado em um dispositivo e acessado no próprio e em outros na mesma rede.        |
 
 
 
