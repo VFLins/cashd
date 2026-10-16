@@ -15,7 +15,7 @@ dev = [
 dynamic = ["version"]
 name = "cashd"
 dependencies = [
-    "cashd-core==0.5.0",
+    "cashd-core==0.5.1",
     "briefcase",
     "toga==0.5.7",
     "sqlalchemy==2.*",
@@ -36,7 +36,7 @@ asyncio_default_fixture_loop_scope = "function"
 [tool.briefcase]
 project_name = "Cashd"
 bundle = "br.com.vitorlins.cashd"
-version = "0.5.0"
+version = "0.5.1"
 url = "https://vitorlins.com.br/software/cashd"
 license = "MIT"
 license-files = ["LICENSE"]
