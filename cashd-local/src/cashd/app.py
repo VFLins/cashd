@@ -204,6 +204,7 @@ class Cashd(toga.App):
     def on_close(self, window):
         force_backup = prefs.ForceBackupOnClose.get()
         backup.run(force=force_backup)
+        print(f"Backup on close routine finished with {force_backup=}")
         return True
 
 
