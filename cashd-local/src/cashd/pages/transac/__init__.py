@@ -18,7 +18,8 @@ class TransacSection(BaseSection):
 
     @property
     def HELP_MSG(self) -> str:
-        if data.tbl_clientes().table_is_empty():
+        """Help message for the user based on the current state of this section."""
+        if tbl_clientes().table_is_empty():
             return (
                 'Cadastre um cliente em "Novo cliente" para\n'
                 "começar a registrar transações."
@@ -51,6 +52,7 @@ class TransacSection(BaseSection):
                 children=[self.help_msg],
             ),
         )
+        """Container wher the help message is displayed."""
 
         self.actions_button = toga.Button(
             style=Pack(width=50, height=40),
@@ -67,7 +69,7 @@ class TransacSection(BaseSection):
             icon=const.ICON_RETURN,
             on_press=self.set_context_screen,
         )
-        """Button that returns the user to the context of customer selection."""
+        """Button that returns the user to the context to customer selection."""
 
         # widgets: 'select' context
         self.customer_selector = widget.paginated.PaginatedDetailedList(

@@ -26,19 +26,13 @@ class _DataInteractor:
         """Base class for creating data widgets with other control widgets that interact
         with it's data. Get the generated Box by accessing :ref::`_LabeledInput.widget`.
 
-        :type datasource: ``Type[cashd.db._DataSource]``
-        :param datasource: A subclass of `cashd.db._DataSource`, that handles the data
-          for the widget.
-        :type label_text: ``str`` | ``None``
-        :param label_text: Text displayed on the `toga.Label` widget. This widget
-          can be accessed from `_LabeledInput.label`.
-        :type id: ``str`` | ``None``
+        :param datasource: A handler for its data widget.
+        :param label_text: Text displayed in a toga.Label on top. Accessible as `.label`.
         :param id: The ID for the widget.
-        :type style: ``Pack`` | ``None``
-        :param style: A style object. If no style is provided, a default style
-          will be applied to the widget.
-        :type kwargs: ``Any``
-        :param kwargs: Keyword arguments passed to the equivalent `_LabeledInput.data_widget` widget.
+        :param style: A style object.
+        :param on_select: Behavior when the user selects an entry.
+        :param on_search: Behavor when the user interacts with the search bar.
+        :param kwargs: Keyword arguments passed to the data widget.
         """
         self._datasource = datasource
 
