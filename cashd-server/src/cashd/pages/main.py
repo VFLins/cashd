@@ -1,14 +1,16 @@
-from datetime import date, datetime
+import datetime as dt
 from typing import Any
 
 from cashd_core.fmt import StringToCurrency
 from cashd_core.const import ESTADOS, NA_VALUE
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
+from cashd_core.fmt import StringToCurrency
 from cashd_core.pdf.model import invoice
-from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
+
+from cashd.const import is_host, safe_download, writelog
 from cashd.widgets.custom import DetailedList
 from cashd.widgets.dialogs import DeleteTransactionDialog, MessageDialog
-from cashd.const import writelog, is_host, safe_download
+from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 
 
 class subpage_transac:
@@ -27,13 +29,13 @@ class subpage_transac:
             self.buton = ui.button("Inserir", on_click=on_add)
 
     @property
-    def date(self) -> date:
+    def date(self) -> dt.date:
         value = self.date_input.value
-        dt = datetime.strptime(value, "%d/%m/%Y")
-        return date(dt.year, dt.month, dt.day)
+        date = dt.datetime.strptime(value, "%d/%m/%Y")
+        return dt.date(date.year, date.month, date.day)
 
     @date.setter
-    def date(self, value: date):
+    def date(self, value: dt.date):
         self.date_input.value = value.strftime("%d/%m/%Y")
 
     def upd_value_input_label(self, value: str):
@@ -124,7 +126,7 @@ class subpage_history:
                     msg_type="info",
                 )
                 await info_dialog.show()
-                safe_download(self.ui, doc.meta.document_path)
+                safe_download(self.ui, str(doc.meta.document_path))
 
 
 class subpage_info:
@@ -137,30 +139,30 @@ class subpage_info:
             scroll.style("height: calc(100svh - 410px);")
             with ui.grid().classes("w-full h-full md:grid-cols-2"):
                 self.firstname = (
-                    ui.input("Nome*").props("outlined dense").classes(f"w-full")
+                    ui.input("Nome*").props("outlined dense").classes("w-full")
                 )
                 self.lastname = (
-                    ui.input("Sobrenome*").props("outlined dense").classes(f"w-full")
+                    ui.input("Sobrenome*").props("outlined dense").classes("w-full")
                 )
                 self.nickname = (
-                    ui.input("Apelido").props("outlined dense").classes(f"w-full")
+                    ui.input("Apelido").props("outlined dense").classes("w-full")
                 )
                 self.phonenumber = (
-                    ui.input("Telefone").props("outlined dense").classes(f"w-full")
+                    ui.input("Telefone").props("outlined dense").classes("w-full")
                 )
                 self.address = (
-                    ui.input("Endereço").props("outlined dense").classes(f"w-full")
+                    ui.input("Endereço").props("outlined dense").classes("w-full")
                 )
                 self.district = (
-                    ui.input("Bairro").props("outlined dense").classes(f"w-full")
+                    ui.input("Bairro").props("outlined dense").classes("w-full")
                 )
                 self.city = (
-                    ui.input("Cidade*").props("outlined dense").classes(f"w-full")
+                    ui.input("Cidade*").props("outlined dense").classes("w-full")
                 )
                 self.state = (
                     ui.select(ESTADOS, value=ESTADOS[0], label="Estado*")
                     .props("outlined dense")
-                    .classes(f"w-full")
+                    .classes("w-full")
                 )
         if customer is not None:
             self.customer = customer
@@ -341,6 +343,7 @@ class page:
                 customer.read(row_id=customer_id)
             self.selected_customer = customer
             browserid = self.app.storage.browser["id"]
+            writelog(f"{customer=} selected by {browserid=}")
             if update_list:
                 customer_list.items_list.refresh(no_callback=True)
 
@@ -375,11 +378,11 @@ class page:
             customer.Cidade = self.info.city.value
             customer.Estado = self.info.state.value
             customer.update()
-        except Exception as err:
+        except Exception:
             notify_error(
                 self.ui, "Erro ao alterar dados do cliente, verifique os logs."
             )
-            raise err
+            raise
         else:
             notify_success(
                 self.ui, f"Dados de {customer.NomeCompleto} alterados com sucesso"
@@ -401,16 +404,16 @@ class page:
         try:
             transaction = tbl_transacoes(
                 IdCliente=self.selected_customer.Id,
-                CarimboTempo=datetime.now(),
+                CarimboTempo=dt.datetime.now(),
                 DataTransac=date,
                 Valor=value.value,
             )
             transaction.write()
-        except Exception as err:
+        except Exception:
             notify_error(self.ui, "Erro inesperado, verifique o arquivo de log.")
-            raise err
+            raise
         else:
-            notify_success(self.ui, f"Transação adicionada com sucesso.")
+            notify_success(self.ui, "Transação adicionada com sucesso.")
             self.transac.value_input.set_value("")
             self.transac.date = date.today()
             writelog(f"{self.app.storage.browser['id']} added a {transaction=}")
