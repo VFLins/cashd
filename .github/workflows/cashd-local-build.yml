@@ -1,8 +1,8 @@
 name: Build cashd-local
 
+
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
     build-windows:
