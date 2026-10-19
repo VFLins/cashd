@@ -53,7 +53,7 @@ jobs:
                           doc['project']['dependencies'][i] = f'cashd-core=={NEW_VERSION}'
                           break
               f.close()
-              with open(path, 'w'):
+              with open(path, 'w') as f:
                   f.write(tomlkit.dumps(doc))
           " "$VERSION"
 
