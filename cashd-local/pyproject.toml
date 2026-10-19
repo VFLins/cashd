@@ -220,3 +220,225 @@ requires = [
 ]
 style_framework = "Shoelace v2.3"
 
+# This project was generated with 0.3.22 using template: https://github.com/beeware/briefcase-template@v0.3.22
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+test = ["pytest", "pytest-asyncio"]
+formatting = ["black"]
+dev = [
+    {include-group = "test"},
+    {include-group = "formatting"},
+]
+
+[project]
+dynamic = ["version"]
+name = "cashd"
+dependencies = [
+    "cashd-core==0.5.2rc2",
+    "briefcase",
+    "toga==0.5.7",
+    "sqlalchemy==2.*",
+    "phonenumbers",
+    "pillow",
+]
+
+[project.entry-points."togax_groupbox.backend.toga_gtk"]
+GroupBox = "cashd.widget.custom.gtk.groupbox:GroupBox"
+
+[project.entry-points."togax_groupbox.backend.toga_winforms"]
+GroupBox = "cashd.widget.custom.winforms.groupbox:GroupBox"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.briefcase]
+project_name = "Cashd"
+bundle = "br.com.vitorlins.cashd"
+version = "0.5.2rc2"
+url = "https://vitorlins.com.br/software/cashd"
+license = "MIT"
+license-files = ["LICENSE"]
+author = "Vitor Lins"
+author_email = "vitorlins.consultor@gmail.com"
+
+[tool.briefcase.app.cashd]
+formal_name = "Cashd"
+description = "Aplicativo local-first que ajuda você a lidar com registros de caixa."
+long_description = """Cashd te permite acompanhar todas as transações de seus clientes
+leais, permitindo também que você acesso a informações relevantes sobre eles e a saúde
+financeira de sua empresa.
+"""
+icon = "src/cashd/resources/cashd"
+installer_icon = "src/cashd/resources/cashd"
+accent_color = "#478eff"
+primary_color = "#478eff"
+primary_dark_color = "#478eff"
+sources = ["src/cashd"]
+test_sources = ["tests"]
+requires = []
+test_requires = ["pytest", "pytest-asyncio"]
+cleanup_paths = [
+    "src/app/cashd/configs/*",
+    "src/app/cashd/data/*",
+]
+
+[tool.briefcase.app.cashd.macOS]
+universal_build = true
+requires = [
+    "toga-cocoa~=0.5.0",
+    "std-nslog~=1.0.3",
+]
+
+[tool.briefcase.app.cashd.linux]
+requires = [
+    "toga-gtk~=0.5.0",
+]
+
+[tool.briefcase.app.cashd.linux.system.debian]
+system_requires = [
+    # Needed to compile pycairo wheel
+    "libcairo2-dev",
+    # Needed to compile PyGObject wheel
+    "libgirepository1.0-dev",
+]
+
+system_runtime_requires = [
+    # Needed to provide GTK and its GI bindings
+    "gir1.2-gtk-3.0",
+    "libgirepository-1.0-1",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra-gtk3-module",
+    # Needed to provide WebKit2 at runtime
+    # Note: Debian 11 and Ubuntu 20.04 require gir1.2-webkit2-4.0 instead
+    # "gir1.2-webkit2-4.1",
+]
+
+[tool.briefcase.app.cashd.linux.system.rhel]
+system_requires = [
+    # Needed to compile pycairo wheel
+    "cairo-gobject-devel",
+    # Needed to compile PyGObject wheel
+    "gobject-introspection-devel",
+]
+
+system_runtime_requires = [
+    # Needed to support Python bindings to GTK
+    "gobject-introspection",
+    # Needed to provide GTK
+    "gtk3",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra-gtk3",
+    # Needed to provide WebKit2 at runtime
+    # "webkit2gtk3",
+]
+
+[tool.briefcase.app.cashd.linux.system.suse]
+system_requires = [
+    # Needed to compile pycairo wheel
+    "cairo-devel",
+    # Needed to compile PyGObject wheel
+    "gobject-introspection-devel",
+]
+
+system_runtime_requires = [
+    # Needed to provide GTK
+    "gtk3",
+    # Needed to support Python bindings to GTK
+    "gobject-introspection", "typelib(Gtk) = 3.0",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra-gtk3-module",
+    # Needed to provide WebKit2 at runtime
+    # "libwebkit2gtk3", "typelib(WebKit2)",
+]
+
+[tool.briefcase.app.cashd.linux.system.arch]
+system_requires = [
+    # Needed to compile pycairo wheel
+    "cairo",
+    # Needed to compile PyGObject wheel
+    "gobject-introspection",
+    # Runtime dependencies that need to exist so that the
+    # Arch package passes final validation.
+    # Needed to provide GTK
+    "gtk3",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra",
+    # Needed to provide WebKit2
+    # "webkit2gtk",
+]
+
+system_runtime_requires = [
+    # Needed to provide GTK
+    "gtk3",
+    # Needed to provide PyGObject bindings
+    "gobject-introspection-runtime",
+    # Dependencies that GTK looks for at runtime
+    "libcanberra",
+    # Needed to provide WebKit2 at runtime
+    # "webkit2gtk",
+]
+
+[tool.briefcase.app.cashd.linux.appimage]
+manylinux = "manylinux_2_28"
+
+system_requires = [
+    # Needed to compile pycairo wheel
+    "cairo-gobject-devel",
+    # Needed to compile PyGObject wheel
+    "gobject-introspection-devel",
+    # Needed to provide GTK
+    "gtk3-devel",
+    # Dependencies that GTK looks for at runtime, that need to be
+    # in the build environment to be picked up by linuxdeploy
+    "libcanberra-gtk3",
+    "PackageKit-gtk3-module",
+    "gvfs-client",
+]
+
+linuxdeploy_plugins = [
+    "DEPLOY_GTK_VERSION=3 gtk",
+]
+
+[tool.briefcase.app.cashd.linux.flatpak]
+flatpak_runtime = "org.gnome.Platform"
+flatpak_runtime_version = "47"
+flatpak_sdk = "org.gnome.Sdk"
+
+[tool.briefcase.app.cashd.windows]
+requires = [
+    "toga-winforms~=0.5.0",
+]
+
+# Mobile deployments
+[tool.briefcase.app.cashd.iOS]
+requires = [
+    "toga-iOS~=0.5.0",
+    "std-nslog~=1.0.3",
+]
+
+[tool.briefcase.app.cashd.android]
+requires = [
+    "toga-android~=0.5.0",
+]
+
+base_theme = "Theme.MaterialComponents.Light.DarkActionBar"
+
+build_gradle_dependencies = [
+    "com.google.android.material:material:1.12.0",
+    # Needed for DetailedList
+    # "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0",
+    # Needed for MapView
+    # "org.osmdroid:osmdroid-android:6.1.20",
+]
+
+# Web deployments
+[tool.briefcase.app.cashd.web]
+requires = [
+    "toga-web~=0.5.0",
+]
+style_framework = "Shoelace v2.3"
+
