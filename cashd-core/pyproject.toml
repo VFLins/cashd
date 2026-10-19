@@ -20,7 +20,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "License :: OSI Approved :: MIT License"
 ]
-version = "0.5.2rc7"
+version = "0.5.2rc8"
 dependencies = [
     "SQLAlchemy==2.*",
     "phonenumbers>=8.13.31",
