@@ -1,0 +1,68 @@
+name: Bump Version on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # Check out the target branch (e.g., main) instead of the isolated tag reference
+          ref: ${{ github.event.release.target_commitish }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Update pyproject.toml version
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          VERSION="${TAG_NAME#v}"
+          echo "Updating PEP 621 version to $VERSION in pyproject.toml"
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install tomlkit
+          
+          python -c "
+          import tomlkit
+          import sys
+          VERSION = sys.argv[1]
+          paths = ['cashd-core/pyproject.toml', 'cashd-server/pyproject.toml', 'cashd-local/pyproject.toml']
+          for path in paths:
+              with open(path, 'r') as f:
+                  doc = tomlkit.parse(f.read())
+                  doc['project']['version'] = VERSION
+              with open(path, 'w') as f:
+                  f.write(tomlkit.dumps(doc))
+          " "$VERSION"
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@://github.com"
+          
+          git add cashd-core/pyproject.toml cashd-server/pyproject.toml cashd-local/pyproject.toml
+          
+          # Check for actual changes before committing to prevent empty commit errors
+          if git diff --staged --quiet; then
+            echo "No version changes detected."
+          else
+            git commit -m "chore: bump version to ${{ github.event.release.tag_name }} [skip ci]"
+            git push origin HEAD:${{ github.event.release.target_commitish }}
+          fi
+
+      - name: Trigger Package Uploads
+        # Actively triggers the next step in the sequence via API
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: "Upload cashd-core package"
+          token: ${{ secrets.GH_TOKEN }}
