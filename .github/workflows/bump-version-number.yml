@@ -70,10 +70,3 @@ jobs:
             git commit -m "chore: bump version to ${{ github.event.release.tag_name }} [skip ci]"
             git push origin HEAD:${{ github.event.release.target_commitish }}
           fi
-
-      - name: Trigger Package Uploads
-        # Actively triggers the next step in the sequence via API
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: "Upload cashd-core package"
-          token: ${{ secrets.GH_TOKEN }}
