@@ -9,8 +9,7 @@
 name: Upload cashd-core package
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -38,3 +37,13 @@ jobs:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
         packages_dir: cashd-core/dist
+    - name: Upload Cashd Server
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: "Upload cashd-server package"
+        token: ${{ secrets.GH_TOKEN }}
+    - name: Build Cashd Local
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: "Build cashd-local"
+        token: ${{ secrets.GH_TOKEN }}
