@@ -1,7 +1,6 @@
 import datetime as dt
 from typing import Any
 
-from cashd_core.fmt import StringToCurrency
 from cashd_core.const import ESTADOS, NA_VALUE
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
 from cashd_core.fmt import StringToCurrency
@@ -17,7 +16,7 @@ class subpage_transac:
     def __init__(self, ui, on_add=None):
         with ui.column(align_items="start"):
             self.date_input = ui.date_input(
-                "Data", value=date.today().strftime("%d/%m/%Y")
+                "Data", value=dt.date.today().strftime("%d/%m/%Y")
             )
             self.date_input.picker.props("mask='DD/MM/YYYY' minimal")
             self.date_input.props("outlined dense").classes("w-full")
@@ -93,6 +92,7 @@ class subpage_history:
 
     async def export_history(self):
         try:
+            assert type(self.customer.Id) is int
             doc = invoice.CustomerTransactions(customer_id=self.customer.Id)
             doc.render()
         except ValueError:
@@ -106,6 +106,15 @@ class subpage_history:
                 msg_type="error",
             )
             await error_dialog.show()
+        except AssertionError:
+            error_dialog = MessageDialog(
+                ui=self.ui,
+                app=self.app,
+                title="Selecione um cliente",
+                message="Um cliente precisa ser selecionado para exportar seu histórico"
+                "de transações.",
+                msg_type="error",
+            )
         else:
             if is_host(self.ui):
                 info_dialog = MessageDialog(
@@ -276,6 +285,7 @@ class page:
                 datasource=self.CUSTOMERS_SOURCE,
                 keys=["Name", "Place"],
                 on_select=self.load_selected_customer,
+                on_search=self.unselect_customer,
             )
         return left_section
 
@@ -325,11 +335,16 @@ class page:
                 # hide right and restore left
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
-                # remove customer selection
-                self.customer_list.unselect()
-                self.selected_customer = tbl_clientes()
-                self.selected_info.set_visibility(False)
-                self.instructions.set_visibility(True)
+                self.unselect_customer()
+
+    def unselect_customer(self):
+        """Removes all references of customer selection, this will force the user to
+        select a customer again to perform any further action.
+        """
+        self.customer_list.unselect()
+        self.selected_customer = tbl_clientes()
+        self.selected_info.set_visibility(False)
+        self.instructions.set_visibility(True)
 
     def load_selected_customer(
         self, data: dict[str, Any] | None, update_list: bool = False
