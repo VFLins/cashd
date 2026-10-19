@@ -35,14 +35,25 @@ jobs:
           python -c "
           import tomlkit
           import sys
-          VERSION = sys.argv[1]
-          paths = ['cashd-core/pyproject.toml', 'cashd-server/pyproject.toml', 'cashd-local/pyproject.toml']
+          NEW_VERSION = sys.argv[1]
+          pkg_paths = ['cashd-core/pyproject.toml', 'cashd-server/pyproject.toml']  # sent to PyPI
+          app_paths = ['cashd-local/pyproject.toml']                                # built with briefcase
+          gui_paths = ['cashd-server/pyproject.toml', 'cashd-local/pyproject.toml'] # depends on Cashd Core
+          paths = set(pkg_paths + app_paths + gui_paths)
           for path in paths:
-              with open(path, 'r') as f:
-                  doc = tomlkit.parse(f.read())
-                  doc['project']['version'] = VERSION
-              with open(path, 'w') as f:
-                  f.write(tomlkit.dumps(doc))
+              f = open(path, 'r+')
+              doc = tomlkit.parse(f.read())
+              if path in pkg_paths:
+                  doc['project']['version'] = NEW_VERSION
+              if path in app_paths:
+                  doc['tool']['briefcase']['version'] = NEW_VERSION
+              if path in gui_paths:
+                  for i, dep in enumerate(doc['project']['dependencies']):
+                      if dep.startswith('cashd-core'):
+                          doc['project']['dependencies'][i] = f'cashd-core=={NEW_VERSION}'
+                          break
+              f.write(tomlkit.dumps(doc))
+              f.close()
           " "$VERSION"
 
       - name: Commit and Push Changes
