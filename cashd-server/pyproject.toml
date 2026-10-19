@@ -22,9 +22,9 @@ classifiers = [
     "Operating System :: Microsoft :: Windows :: Windows 11",
     "License :: OSI Approved :: MIT License"
 ]
-version = "0.5.2rc1"
+version = "0.5.2rc6"
 dependencies = [
-    "cashd-core==0.5.1",
+    "cashd-core==0.5.2rc6",
     "nicegui>=3.13,<4.0",
     "pywebview~=6.2",
     "SQLAlchemy~=2.0",
