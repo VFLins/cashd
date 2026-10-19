@@ -22,7 +22,6 @@ dependencies = [
     "phonenumbers",
     "pillow",
 ]
-version = "0.5.2rc1"
 
 [project.entry-points."togax_groupbox.backend.toga_gtk"]
 GroupBox = "cashd.widget.custom.gtk.groupbox:GroupBox"
