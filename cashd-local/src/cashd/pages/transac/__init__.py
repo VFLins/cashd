@@ -1,34 +1,20 @@
 import toga
+from cashd_core.data import tbl_clientes, CustomerListSource
+from cashd_core.const import NA_VALUE
 from toga.app import App
 from toga.style import Pack
-from toga.style.pack import COLUMN, ROW
-from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog
-
-from cashd_core import data, fmt, pdf
-from cashd_core.const import NA_VALUE
 
 from cashd import const, widget
-from cashd.style.vars import (
-    set_col_alignments,
-    user_input,
-    INLINE_LABEL,
-    GENERIC_LABEL,
-    FULL_CONTENTS,
-    CONTEXT_BUTTON,
-    TABLE_OF_DATA,
-    PAGE_BODY,
-    VERTICAL_BOX,
-    FILLING_VERTICAL_BOX,
-    HORIZONTAL_BOX,
-)
 from cashd.pages.base import BaseSection
-from cashd.style.compose import mod, ComposedBox
+from cashd.style.compose import ComposedBox, mod
+from cashd.style.vars import FULL_CONTENTS
+
 from . import history, info, insert
 
 
 class TransacSection(BaseSection):
-    SELECTED_CUSTOMER = data.tbl_clientes()
-    CUSTOMER_LIST = data.CustomerListSource()
+    SELECTED_CUSTOMER = tbl_clientes()
+    CUSTOMER_LIST = CustomerListSource()
 
     @property
     def HELP_MSG(self) -> str:
