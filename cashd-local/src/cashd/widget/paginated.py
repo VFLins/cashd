@@ -22,7 +22,8 @@ class PaginatedDetailedList(_DataInteractor):
         datasource: data._DataSource,
         id: str | None = None,
         style: Pack | None = None,
-        on_select: Callable[[toga.Widget], None] = None,
+        on_select: Callable[[toga.DetailedList], None] = None,
+        on_search: Callable[None, None] = None,
     ):
         """Create a `toga.DetailedList` with pagination and search.
 
@@ -32,7 +33,13 @@ class PaginatedDetailedList(_DataInteractor):
         :param on_search: Behavor when the user interacts with the search bar.
         :param kwargs: Keyword arguments passed to the data widget.
         """
-        super().__init__(datasource=datasource, id=id, style=style, on_select=on_select)
+        super().__init__(
+            datasource=datasource,
+            id=id,
+            style=style,
+            on_select=on_select,
+            on_search=on_search,
+        )
 
     def _set_data_widget(self, id=None, style=None, on_select=None, **kwargs):
         self.data_widget = toga.DetailedList(id=id, style=style, on_select=on_select)

@@ -20,7 +20,8 @@ class _DataInteractor:
         label_text: str | None = None,
         id: str | None = None,
         style: Pack | None = None,
-        on_select: Callable[[toga.Widget], None] | None = None,
+        on_select: Callable[[toga.Table], None] | None = None,
+        on_search: Callable[None, None] | None = None,
         **kwargs,
     ):
         """Base class for creating data widgets with other control widgets that interact
@@ -48,7 +49,7 @@ class _DataInteractor:
         self._set_data_widget(
             id=id + "_input" if id else None, style=style, on_select=on_select, **kwargs
         )
-        self._set_top_controls()
+        self._set_top_controls(on_search=on_search)
         self._set_bottom_controls()
 
         widgets = [
@@ -76,14 +77,22 @@ class _DataInteractor:
         self.data_widget = toga.Table(id=id, style=style, on_select=on_select, **kwargs)
         self.data_widget.data = self._datasource.current_data
 
-    def _set_top_controls(self):
+    def _set_top_controls(
+        self, on_search: Callable[[toga.TextInput], None] | None = None
+    ):
         """Used by `_DataInteractor`'s children to define the controls that should
         appear on top of the data widget.
         """
+
+        def run_search(widget: toga.TextInput):
+            if on_search is not None:
+                on_search()
+            self.refresh()
+
         self.search_field = toga.TextInput(
             style=Pack(font_size=const.FONT_SIZE, flex=1),
             placeholder="Pesquisa",
-            on_change=self.refresh,
+            on_change=run_search,
         )
         if self._datasource.is_searchable():
             self.top_controls = toga.Box(children=[self.search_field])
@@ -182,7 +191,7 @@ class ListOfItems(_DataInteractor):
         self._on_add = on_add
         self._on_rm = on_rm
 
-    def _set_top_controls(self):
+    def _set_top_controls(self, on_search):
         self.top_controls = None
 
     def _set_bottom_controls(self):

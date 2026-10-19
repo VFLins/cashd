@@ -76,6 +76,7 @@ class TransacSection(BaseSection):
             datasource=self.CUSTOMER_LIST,
             style=Pack(flex=5),
             on_select=self.select_customer,
+            on_search=self._clear_customer_selection,
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
@@ -196,7 +197,7 @@ class TransacSection(BaseSection):
                 f"Valor: {sign} R$ {abs(value)/100:.2f}".replace(".", ",")
             )
 
-    def set_context_screen(self, widget: toga.Button = None):
+    def set_context_screen(self, widget: toga.Button | None = None):
         """Change between customer selection and customer data management, depending on
         the button clicked.
         """
@@ -209,6 +210,7 @@ class TransacSection(BaseSection):
                 toga.Box(), self.customer_selector.widget, toga.Box()
             )
             self._clear_customer_selection()
+            self.customer_selector.search_field.value = ""
 
     def _clear_customer_selection(self):
         self.SELECTED_CUSTOMER.clear()
@@ -217,7 +219,6 @@ class TransacSection(BaseSection):
         self.subsection_history.table.data = None
         self.subsection_customer_info.form.clear()
         self.help_msg.text = self.HELP_MSG
-        self.customer_selector.search_field.value = ""
         self.customer_selector.clear_selection()
         self.actions_button.enabled = False
 
