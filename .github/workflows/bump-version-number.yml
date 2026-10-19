@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Update pyproject.toml version
         run: |
@@ -31,7 +31,7 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install tomlkit
-          
+
           python -c "
           import tomlkit
           import sys
@@ -61,9 +61,9 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@://github.com"
-          
+
           git add cashd-core/pyproject.toml cashd-server/pyproject.toml cashd-local/pyproject.toml
-          
+
           # Check for actual changes before committing to prevent empty commit errors
           if git diff --staged --quiet; then
             echo "No version changes detected."
@@ -71,3 +71,9 @@ jobs:
             git commit -m "chore: bump version to ${{ github.event.release.tag_name }}"
             git push origin HEAD:${{ github.event.release.target_commitish }}
           fi
+
+      - name: Trigger Package Uploads
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: "Upload cashd-core package"
+          token: ${{ secrets.GH_TOKEN }}
