@@ -68,7 +68,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No version changes detected."
           else
-            git commit -m "chore: bump version to ${{ github.event.release.tag_name }}"
+            git commit -m "chore: bump version to ${{ github.event.release.tag_name }} [skip ci]"
             git push origin HEAD:${{ github.event.release.target_commitish }}
           fi
 
