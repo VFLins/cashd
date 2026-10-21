@@ -174,7 +174,6 @@ class subpage_info:
                     .classes("w-full")
                 )
         if customer is not None:
-            self.customer = customer
             self.load(customer)
 
     def load(self, customer: tbl_clientes):
@@ -382,7 +381,6 @@ class page:
 
     def update_selected_customer(self):
         customer = self.selected_customer
-        print(customer)
         try:
             customer.PrimeiroNome = self.info.firstname.value
             customer.Sobrenome = self.info.lastname.value
@@ -392,13 +390,17 @@ class page:
             customer.Bairro = self.info.district.value
             customer.Cidade = self.info.city.value
             customer.Estado = self.info.state.value
-            customer.update()
+            customer.update() # may raise AttributeError if Id is not defined.
+        except AttributeError:
+            notify_error(self.ui, "Nenhum cliente selecionado.")
         except Exception:
             notify_error(
                 self.ui, "Erro ao alterar dados do cliente, verifique os logs."
             )
             raise
         else:
+            browserid = self.app.storage.browser["id"]
+            writelog(f"{browserid} updated {customer=}")
             notify_success(
                 self.ui, f"Dados de {customer.NomeCompleto} alterados com sucesso"
             )
