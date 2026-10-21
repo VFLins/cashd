@@ -241,6 +241,12 @@ class page:
             self.section_switcher = ui.button(
                 icon="point_of_sale", on_click=self.switch_section_mobile
             )
+            self.section_switcher.enabled = False
+            self.section_switcher.bind_enabled_from(
+                self.app.storage.client,
+                "selected_customer",
+                backward=lambda i: i is not None,
+            )
             with ui.scroll_area().classes("no-margin-scroll w-full h-[4rem]"):
                 self.section_switcher.classes("!flex md:!hidden")
                 with ui.column() as self.help_msg_block:
