@@ -46,7 +46,7 @@ class PaginatedDetailedList(_DataInteractor):
 
     def refresh(self, widget: toga.TextInput | None = None):
         """Fetches data and updates `self.data_widget`. Requires a data source with at
-        least three columns in order, where:
+        least three columns, in order:
 
         1. :id: identifier of each row's piece of data
         2. :title: main information of each row in the widget

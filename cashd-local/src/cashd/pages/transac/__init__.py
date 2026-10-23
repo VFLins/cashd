@@ -186,18 +186,10 @@ class TransacSection(BaseSection):
         self.subsection_customer_info.form.clear()
         self.subsection_customer_info.form.add_table_fields(customer)
 
-    def upd_value_label(self, widget):
-        value = widget.value
-        if (value is None) or (value > const.MAX_ALLOWED_VALUE):
-            self.insert_amount_label.text = "Valor: R$ 0,00"
-            return
-        sign = "-" if value < 0 else ""
-        if value != 0:
-            self.insert_amount_label.text = (
-                f"Valor: {sign} R$ {abs(value)/100:.2f}".replace(".", ",")
-            )
+    def update_data_widgets(self):
+        self.customer_selector.refresh()
 
-    def set_context_screen(self, widget: toga.Button | None = None):
+    def set_context_screen(self, widget: toga.Button):
         """Change between customer selection and customer data management, depending on
         the button clicked.
         """
