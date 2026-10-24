@@ -1,21 +1,22 @@
-from datetime import date, datetime
+import datetime as dt
 from typing import Any
 
-from cashd_core.fmt import StringToCurrency
 from cashd_core.const import ESTADOS, NA_VALUE
 from cashd_core.data import CustomerListSource, tbl_clientes, tbl_transacoes
+from cashd_core.fmt import StringToCurrency
 from cashd_core.pdf.model import invoice
-from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
+
+from cashd.const import is_host, safe_download, writelog
 from cashd.widgets.custom import DetailedList
 from cashd.widgets.dialogs import DeleteTransactionDialog, MessageDialog
-from cashd.const import writelog, is_host, safe_download
+from cashd.widgets.parts import DefaultHeader, notify_error, notify_success
 
 
 class subpage_transac:
     def __init__(self, ui, on_add=None):
         with ui.column(align_items="start"):
             self.date_input = ui.date_input(
-                "Data", value=date.today().strftime("%d/%m/%Y")
+                "Data", value=dt.date.today().strftime("%d/%m/%Y")
             )
             self.date_input.picker.props("mask='DD/MM/YYYY' minimal")
             self.date_input.props("outlined dense").classes("w-full")
@@ -27,13 +28,13 @@ class subpage_transac:
             self.buton = ui.button("Inserir", on_click=on_add)
 
     @property
-    def date(self) -> date:
+    def date(self) -> dt.date:
         value = self.date_input.value
-        dt = datetime.strptime(value, "%d/%m/%Y")
-        return date(dt.year, dt.month, dt.day)
+        date = dt.datetime.strptime(value, "%d/%m/%Y")
+        return dt.date(date.year, date.month, date.day)
 
     @date.setter
-    def date(self, value: date):
+    def date(self, value: dt.date):
         self.date_input.value = value.strftime("%d/%m/%Y")
 
     def upd_value_input_label(self, value: str):
@@ -91,6 +92,7 @@ class subpage_history:
 
     async def export_history(self):
         try:
+            assert type(self.customer.Id) is int
             doc = invoice.CustomerTransactions(customer_id=self.customer.Id)
             doc.render()
         except ValueError:
@@ -104,6 +106,15 @@ class subpage_history:
                 msg_type="error",
             )
             await error_dialog.show()
+        except AssertionError:
+            error_dialog = MessageDialog(
+                ui=self.ui,
+                app=self.app,
+                title="Selecione um cliente",
+                message="Um cliente precisa ser selecionado para exportar seu histórico"
+                "de transações.",
+                msg_type="error",
+            )
         else:
             if is_host(self.ui):
                 info_dialog = MessageDialog(
@@ -124,7 +135,7 @@ class subpage_history:
                     msg_type="info",
                 )
                 await info_dialog.show()
-                safe_download(self.ui, doc.meta.document_path)
+                safe_download(self.ui, str(doc.meta.document_path))
 
 
 class subpage_info:
@@ -137,33 +148,32 @@ class subpage_info:
             scroll.style("height: calc(100svh - 410px);")
             with ui.grid().classes("w-full h-full md:grid-cols-2"):
                 self.firstname = (
-                    ui.input("Nome*").props("outlined dense").classes(f"w-full")
+                    ui.input("Nome*").props("outlined dense").classes("w-full")
                 )
                 self.lastname = (
-                    ui.input("Sobrenome*").props("outlined dense").classes(f"w-full")
+                    ui.input("Sobrenome*").props("outlined dense").classes("w-full")
                 )
                 self.nickname = (
-                    ui.input("Apelido").props("outlined dense").classes(f"w-full")
+                    ui.input("Apelido").props("outlined dense").classes("w-full")
                 )
                 self.phonenumber = (
-                    ui.input("Telefone").props("outlined dense").classes(f"w-full")
+                    ui.input("Telefone").props("outlined dense").classes("w-full")
                 )
                 self.address = (
-                    ui.input("Endereço").props("outlined dense").classes(f"w-full")
+                    ui.input("Endereço").props("outlined dense").classes("w-full")
                 )
                 self.district = (
-                    ui.input("Bairro").props("outlined dense").classes(f"w-full")
+                    ui.input("Bairro").props("outlined dense").classes("w-full")
                 )
                 self.city = (
-                    ui.input("Cidade*").props("outlined dense").classes(f"w-full")
+                    ui.input("Cidade*").props("outlined dense").classes("w-full")
                 )
                 self.state = (
                     ui.select(ESTADOS, value=ESTADOS[0], label="Estado*")
                     .props("outlined dense")
-                    .classes(f"w-full")
+                    .classes("w-full")
                 )
         if customer is not None:
-            self.customer = customer
             self.load(customer)
 
     def load(self, customer: tbl_clientes):
@@ -231,6 +241,12 @@ class page:
             self.section_switcher = ui.button(
                 icon="point_of_sale", on_click=self.switch_section_mobile
             )
+            self.section_switcher.enabled = False
+            self.section_switcher.bind_enabled_from(
+                self.app.storage.client,
+                "selected_customer",
+                backward=lambda i: i is not None,
+            )
             with ui.scroll_area().classes("no-margin-scroll w-full h-[4rem]"):
                 self.section_switcher.classes("!flex md:!hidden")
                 with ui.column() as self.help_msg_block:
@@ -274,6 +290,7 @@ class page:
                 datasource=self.CUSTOMERS_SOURCE,
                 keys=["Name", "Place"],
                 on_select=self.load_selected_customer,
+                on_search=self.unselect_customer,
             )
         return left_section
 
@@ -323,11 +340,16 @@ class page:
                 # hide right and restore left
                 self.r_section.classes("!hidden md:!flex")
                 self.l_section.classes(remove="!hidden md:!flex")
-                # remove customer selection
-                self.customer_list.unselect()
-                self.selected_customer = tbl_clientes()
-                self.selected_info.set_visibility(False)
-                self.instructions.set_visibility(True)
+                self.unselect_customer()
+
+    def unselect_customer(self):
+        """Removes all references of customer selection, this will force the user to
+        select a customer again to perform any further action.
+        """
+        self.customer_list.unselect()
+        self.selected_customer = tbl_clientes()
+        self.selected_info.set_visibility(False)
+        self.instructions.set_visibility(True)
 
     def load_selected_customer(
         self, data: dict[str, Any] | None, update_list: bool = False
@@ -341,6 +363,7 @@ class page:
                 customer.read(row_id=customer_id)
             self.selected_customer = customer
             browserid = self.app.storage.browser["id"]
+            writelog(f"{customer=} selected by {browserid=}")
             if update_list:
                 customer_list.items_list.refresh(no_callback=True)
 
@@ -364,7 +387,6 @@ class page:
 
     def update_selected_customer(self):
         customer = self.selected_customer
-        print(customer)
         try:
             customer.PrimeiroNome = self.info.firstname.value
             customer.Sobrenome = self.info.lastname.value
@@ -374,13 +396,17 @@ class page:
             customer.Bairro = self.info.district.value
             customer.Cidade = self.info.city.value
             customer.Estado = self.info.state.value
-            customer.update()
-        except Exception as err:
+            customer.update() # may raise AttributeError if Id is not defined.
+        except AttributeError:
+            notify_error(self.ui, "Nenhum cliente selecionado.")
+        except Exception:
             notify_error(
                 self.ui, "Erro ao alterar dados do cliente, verifique os logs."
             )
-            raise err
+            raise
         else:
+            browserid = self.app.storage.browser["id"]
+            writelog(f"{browserid} updated {customer=}")
             notify_success(
                 self.ui, f"Dados de {customer.NomeCompleto} alterados com sucesso"
             )
@@ -401,16 +427,16 @@ class page:
         try:
             transaction = tbl_transacoes(
                 IdCliente=self.selected_customer.Id,
-                CarimboTempo=datetime.now(),
+                CarimboTempo=dt.datetime.now(),
                 DataTransac=date,
                 Valor=value.value,
             )
             transaction.write()
-        except Exception as err:
+        except Exception:
             notify_error(self.ui, "Erro inesperado, verifique o arquivo de log.")
-            raise err
+            raise
         else:
-            notify_success(self.ui, f"Transação adicionada com sucesso.")
+            notify_success(self.ui, "Transação adicionada com sucesso.")
             self.transac.value_input.set_value("")
             self.transac.date = date.today()
             writelog(f"{self.app.storage.browser['id']} added a {transaction=}")

@@ -20,25 +20,20 @@ class _DataInteractor:
         label_text: str | None = None,
         id: str | None = None,
         style: Pack | None = None,
-        on_select: Callable[[toga.Widget], None] | None = None,
+        on_select: Callable[[toga.Table], None] | None = None,
+        on_search: Callable[None, None] | None = None,
         **kwargs,
     ):
         """Base class for creating data widgets with other control widgets that interact
         with it's data. Get the generated Box by accessing :ref::`_LabeledInput.widget`.
 
-        :type datasource: ``Type[cashd.db._DataSource]``
-        :param datasource: A subclass of `cashd.db._DataSource`, that handles the data
-          for the widget.
-        :type label_text: ``str`` | ``None``
-        :param label_text: Text displayed on the `toga.Label` widget. This widget
-          can be accessed from `_LabeledInput.label`.
-        :type id: ``str`` | ``None``
+        :param datasource: A handler for its data widget.
+        :param label_text: Text displayed in a toga.Label on top. Accessible as `.label`.
         :param id: The ID for the widget.
-        :type style: ``Pack`` | ``None``
-        :param style: A style object. If no style is provided, a default style
-          will be applied to the widget.
-        :type kwargs: ``Any``
-        :param kwargs: Keyword arguments passed to the equivalent `_LabeledInput.data_widget` widget.
+        :param style: A style object.
+        :param on_select: Behavior when the user selects an entry.
+        :param on_search: Behavor when the user interacts with the search bar.
+        :param kwargs: Keyword arguments passed to the data widget.
         """
         self._datasource = datasource
 
@@ -54,7 +49,7 @@ class _DataInteractor:
         self._set_data_widget(
             id=id + "_input" if id else None, style=style, on_select=on_select, **kwargs
         )
-        self._set_top_controls()
+        self._set_top_controls(on_search=on_search)
         self._set_bottom_controls()
 
         widgets = [
@@ -82,14 +77,22 @@ class _DataInteractor:
         self.data_widget = toga.Table(id=id, style=style, on_select=on_select, **kwargs)
         self.data_widget.data = self._datasource.current_data
 
-    def _set_top_controls(self):
+    def _set_top_controls(
+        self, on_search: Callable[[toga.TextInput], None] | None = None
+    ):
         """Used by `_DataInteractor`'s children to define the controls that should
         appear on top of the data widget.
         """
+
+        def run_search(widget: toga.TextInput):
+            if on_search is not None:
+                on_search()
+            self.refresh()
+
         self.search_field = toga.TextInput(
             style=Pack(font_size=const.FONT_SIZE, flex=1),
             placeholder="Pesquisa",
-            on_change=self.refresh,
+            on_change=run_search,
         )
         if self._datasource.is_searchable():
             self.top_controls = toga.Box(children=[self.search_field])
@@ -188,7 +191,7 @@ class ListOfItems(_DataInteractor):
         self._on_add = on_add
         self._on_rm = on_rm
 
-    def _set_top_controls(self):
+    def _set_top_controls(self, on_search):
         self.top_controls = None
 
     def _set_bottom_controls(self):

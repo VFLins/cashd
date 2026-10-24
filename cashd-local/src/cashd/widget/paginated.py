@@ -22,26 +22,31 @@ class PaginatedDetailedList(_DataInteractor):
         datasource: data._DataSource,
         id: str | None = None,
         style: Pack | None = None,
-        on_select: Callable[[toga.Widget], None] = None,
+        on_select: Callable[[toga.DetailedList], None] = None,
+        on_search: Callable[None, None] = None,
     ):
         """Create a `toga.DetailedList` with pagination and search.
 
-        :type id: ``str`` | ``None``
         :param id: The ID for the widget.
-        :type style: ``Pack`` | ``None``
-        :param style: A style object. If no style is provided, a default style
-            will be applied to the widget.
-        :type kwargs: ``Any``
-        :param kwargs: Keyword arguments passed to the equivalent `_LabeledInput.data_widget` widget.
+        :param style: A style object.
+        :param on_select: Behavior when the user selects an entry.
+        :param on_search: Behavor when the user interacts with the search bar.
+        :param kwargs: Keyword arguments passed to the data widget.
         """
-        super().__init__(datasource=datasource, id=id, style=style, on_select=on_select)
+        super().__init__(
+            datasource=datasource,
+            id=id,
+            style=style,
+            on_select=on_select,
+            on_search=on_search,
+        )
 
     def _set_data_widget(self, id=None, style=None, on_select=None, **kwargs):
         self.data_widget = toga.DetailedList(id=id, style=style, on_select=on_select)
 
     def refresh(self, widget: toga.TextInput | None = None):
         """Fetches data and updates `self.data_widget`. Requires a data source with at
-        least three columns in order, where:
+        least three columns, in order:
 
         1. :id: identifier of each row's piece of data
         2. :title: main information of each row in the widget

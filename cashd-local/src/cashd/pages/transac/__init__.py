@@ -1,38 +1,25 @@
 import toga
+from cashd_core.data import tbl_clientes, CustomerListSource
+from cashd_core.const import NA_VALUE
 from toga.app import App
 from toga.style import Pack
-from toga.style.pack import COLUMN, ROW
-from toga.dialogs import ConfirmDialog, ErrorDialog, InfoDialog
-
-from cashd_core import data, fmt, pdf
-from cashd_core.const import NA_VALUE
 
 from cashd import const, widget
-from cashd.style.vars import (
-    set_col_alignments,
-    user_input,
-    INLINE_LABEL,
-    GENERIC_LABEL,
-    FULL_CONTENTS,
-    CONTEXT_BUTTON,
-    TABLE_OF_DATA,
-    PAGE_BODY,
-    VERTICAL_BOX,
-    FILLING_VERTICAL_BOX,
-    HORIZONTAL_BOX,
-)
 from cashd.pages.base import BaseSection
-from cashd.style.compose import mod, ComposedBox
+from cashd.style.compose import ComposedBox, mod
+from cashd.style.vars import FULL_CONTENTS
+
 from . import history, info, insert
 
 
 class TransacSection(BaseSection):
-    SELECTED_CUSTOMER = data.tbl_clientes()
-    CUSTOMER_LIST = data.CustomerListSource()
+    SELECTED_CUSTOMER = tbl_clientes()
+    CUSTOMER_LIST = CustomerListSource()
 
     @property
     def HELP_MSG(self) -> str:
-        if data.tbl_clientes().table_is_empty():
+        """Help message for the user based on the current state of this section."""
+        if tbl_clientes().table_is_empty():
             return (
                 'Cadastre um cliente em "Novo cliente" para\n'
                 "começar a registrar transações."
@@ -65,6 +52,7 @@ class TransacSection(BaseSection):
                 children=[self.help_msg],
             ),
         )
+        """Container wher the help message is displayed."""
 
         self.actions_button = toga.Button(
             style=Pack(width=50, height=40),
@@ -81,13 +69,14 @@ class TransacSection(BaseSection):
             icon=const.ICON_RETURN,
             on_press=self.set_context_screen,
         )
-        """Button that returns the user to the context of customer selection."""
+        """Button that returns the user to the context to customer selection."""
 
         # widgets: 'select' context
         self.customer_selector = widget.paginated.PaginatedDetailedList(
             datasource=self.CUSTOMER_LIST,
             style=Pack(flex=5),
             on_select=self.select_customer,
+            on_search=self._clear_customer_selection,
         )
         """Custom Detailed List with a search bar, and page navigation. Displays
         all registered customers.
@@ -197,18 +186,10 @@ class TransacSection(BaseSection):
         self.subsection_customer_info.form.clear()
         self.subsection_customer_info.form.add_table_fields(customer)
 
-    def upd_value_label(self, widget):
-        value = widget.value
-        if (value is None) or (value > const.MAX_ALLOWED_VALUE):
-            self.insert_amount_label.text = "Valor: R$ 0,00"
-            return
-        sign = "-" if value < 0 else ""
-        if value != 0:
-            self.insert_amount_label.text = (
-                f"Valor: {sign} R$ {abs(value)/100:.2f}".replace(".", ",")
-            )
+    def update_data_widgets(self):
+        self.customer_selector.refresh()
 
-    def set_context_screen(self, widget: toga.Button = None):
+    def set_context_screen(self, widget: toga.Button):
         """Change between customer selection and customer data management, depending on
         the button clicked.
         """
@@ -221,6 +202,7 @@ class TransacSection(BaseSection):
                 toga.Box(), self.customer_selector.widget, toga.Box()
             )
             self._clear_customer_selection()
+            self.customer_selector.search_field.value = ""
 
     def _clear_customer_selection(self):
         self.SELECTED_CUSTOMER.clear()
@@ -229,7 +211,6 @@ class TransacSection(BaseSection):
         self.subsection_history.table.data = None
         self.subsection_customer_info.form.clear()
         self.help_msg.text = self.HELP_MSG
-        self.customer_selector.search_field.value = ""
         self.customer_selector.clear_selection()
         self.actions_button.enabled = False
 

@@ -1,14 +1,22 @@
-from typing import Any
+from typing import Any, Callable
 from nicegui import ui
 from cashd_core.data import _DataSource
 
 
 class DetailedList:
-    def __init__(self, ui, datasource: _DataSource, keys: list[str], on_select=None):
+    def __init__(
+        self,
+        ui,
+        datasource: _DataSource,
+        keys: list[str],
+        on_select: Callable | None=None,
+        on_search: Callable | None=None
+    ):
         self.title_key, self.subtitle_key = keys[:2]
         self.SOURCE = datasource
         self.ui = ui
         self.on_select = on_select
+        self.on_search = on_search
         self.selected_item = None
         self.selected_data = None
         self.displayed_items = []
@@ -116,3 +124,5 @@ class DetailedList:
         self.SOURCE.search_text = self.search_bar.value
         self.items_list.refresh()
         self.pagination_label.text = self.pagination_text
+        if self.on_search is not None:
+            self.on_search()
