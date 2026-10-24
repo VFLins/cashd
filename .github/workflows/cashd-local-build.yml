@@ -3,6 +3,10 @@ name: Build cashd-local
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag that will receive this artifact'
+        required: true
 
 jobs:
     build-windows:
@@ -35,7 +39,7 @@ jobs:
               run: |
                 cd D:\a\cashd\cashd\cashd-local\dist\
                 Compress-Archive -Path *.msi -DestinationPath cashd-windows-installer-x86_64.zip -Force
-                gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
+                gh release upload ${{ github.event.inputs.tag_name }} *.zip --clobber
 
     build-ubuntu:
         runs-on: ubuntu-latest
@@ -67,7 +71,7 @@ jobs:
               run: |
                 cd $GITHUB_WORKSPACE/cashd-local/dist/
                 zip -X cashd-deb-installer-x86_64.zip *.deb
-                gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
+                gh release upload ${{ github.event.inputs.tag_name }} *.zip --clobber
 
     build-fedora:
         runs-on: ubuntu-latest
@@ -99,4 +103,4 @@ jobs:
                 cd $GITHUB_WORKSPACE/cashd-local/dist/
                 git config --global --add safe.directory $GITHUB_WORKSPACE
                 zip -X cashd-rpm-installer-x86_64.zip *.rpm
-                gh release upload ${{ github.event.release.tag_name }} *.zip --clobber
+                gh release upload ${{ github.event.inputs.tag_name }} *.zip --clobber
