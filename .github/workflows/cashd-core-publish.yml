@@ -2,6 +2,10 @@ name: Upload cashd-core package
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag that will receive Cashd Local installers'
+        required: true
 
 permissions:
   contents: read

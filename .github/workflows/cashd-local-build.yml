@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release tag that will receive this artifact'
+        description: 'Release tag that will receive the installers'
         required: true
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
 
             - name: Upload Windows installer to release
               shell: pwsh
-              env: 
+              env:
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
               run: |
                 cd D:\a\cashd\cashd\cashd-local\dist\
