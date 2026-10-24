@@ -38,3 +38,4 @@ jobs:
         with:
           workflow: "Build cashd-local"
           token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "tag_name": ${{ github.event.inputs.tag_name }} }'
