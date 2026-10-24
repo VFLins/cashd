@@ -77,3 +77,4 @@ jobs:
         with:
           workflow: "Upload cashd-core package"
           token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "tag_name": ${{ github.event.inputs.tag_name }} }'
